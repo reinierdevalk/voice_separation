@@ -87,7 +87,7 @@ public class UI {
 			
 			m = Model.N;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd 
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 			storedExpName = "thesis/exp_1";
 			storedM = Model.N;
 			storedPm = ProcessingMode.FWD;
@@ -390,7 +390,7 @@ public class UI {
 		System.out.println("path         = " + path);
 		System.out.println("pathStoredNN = " + pathStoredNN);
 		System.out.println("pathStoredMM = " + pathStoredMM);
-		System.exit(0);
+//		System.exit(0);
 		Runner.runExperiment(modelParams, new String[]{path, pathStoredNN, pathStoredMM}, ds, dsTrain, datasetVersion, verbose);
 	}
 

@@ -58,7 +58,7 @@ public class TrainingManager {
 	int piecesTotal = 0;
 	static boolean augment = true;
 	static int augmentFactor = 2;
-	boolean deduplicate = true;
+	boolean deduplicate = false;
 	Rational ornThresh = new Rational(1, 8);
 	public void prepareTraining(String start) {		
 		Map<String, Double> modelParameters = Runner.getModelParams();
