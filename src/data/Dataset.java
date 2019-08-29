@@ -118,7 +118,6 @@ public class Dataset implements Serializable {
 		"an_aged_dame-II",
 		"as_caesar_wept-II",
 		"blame_i_confess-II",
-//		"delight_is_dead-II", // only 3vv
 		"in_angels_weed-II",
 		"o_lord_bow_down-II",
 		"o_that_we_woeful_wretches-NEW",
@@ -127,7 +126,21 @@ public class Dataset implements Serializable {
 		"sith_death-NEW",
 		"the_lord_is_only_my_support-NEW",
 		"the_man_is_blest-NEW",
-		"while_phoebus-II"	
+		"while_phoebus-II"
+		
+//		"ah_golden_hairs-manual",
+//		"an_aged_dame-manual",
+//		"as_caesar_wept-manual",
+//		"blame_i_confess-manual",
+//		"in_angels_weed-manual",
+//		"o_lord_bow_down-manual",
+//		"o_that_we_woeful_wretches-manual",
+//		"quis_me_statim-manual",
+//		"rejoyce_unto_the_lord-manual",
+//		"sith_death-manual",
+//		"the_lord_is_only_my_support-manual",
+//		"the_man_is_blest-manual",
+//		"while_phoebus-manual"
 	});
 	
 			
