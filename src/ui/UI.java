@@ -68,7 +68,7 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = true;
+			repeatExp = false;
 			useCV = true;
 			trainUserModel = false;
 			estimateEntries = false;
