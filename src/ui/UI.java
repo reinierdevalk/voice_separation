@@ -75,7 +75,7 @@ public class UI {
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;
-			datasetID = DatasetID.BYRD_4vv;
+			datasetID = DatasetID.tBYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
 //			datasetID = DatasetID.INT_4vv;
 
@@ -109,7 +109,7 @@ public class UI {
 
 			// Tuned hyperparameters
 			// Shallow network
-			lambda = 0.0001; // 0.0001 with 60-80 iterations works best
+			lambda = 0.00001; // 0.0001 with 60-80 iterations works best
 			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
@@ -201,7 +201,7 @@ public class UI {
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
 		int validationPercentage = (mt == ModelType.DNN) ? 20 : 20; // TODO or 20 : 0; 
-		double maxMetaCycles = (m == Model.C) ? 60 : 80; // TODO or 60 : 40;
+		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 		double cycles = 10.0;
 		int epochs = 600;
 		double learningRate = (mt == ModelType.DNN) ? 0.01 : 1.0;

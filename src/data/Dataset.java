@@ -344,8 +344,8 @@ public class Dataset implements Serializable {
 		
 		JOSQ_4vv("josq-4vv", 26, true, false, 4, "josq-int", JOSQ_4VV_NAMES),
 		
-		BYRD_4vv("byrd-int-4vv", 27, true, false, 4, "byrd-int", BYRD_4VV_NAMES);
-		
+		BYRD_4vv("byrd-int-4vv", 27, true, false, 4, "byrd-int", BYRD_4VV_NAMES),
+		tBYRD_4vv("byrd-int_t-4vv", 28, false, true, 4, "byrd-int", BYRD_4VV_NAMES);
 		
 		
 		private int intRep;
