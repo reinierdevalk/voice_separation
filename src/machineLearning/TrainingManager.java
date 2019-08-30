@@ -56,7 +56,7 @@ public class TrainingManager {
 	
 	int numNotesTotal = 0;
 	int piecesTotal = 0;
-	static boolean augment = true;
+	static boolean augment = false;
 	static int augmentFactor = 2;
 	boolean deduplicate = false;
 	Rational ornThresh = new Rational(1, 8);
