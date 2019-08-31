@@ -68,10 +68,10 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = false;
+			repeatExp = true;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = false;
+			estimateEntries = true;
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;

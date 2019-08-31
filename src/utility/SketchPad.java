@@ -318,9 +318,17 @@ public class SketchPad {
 		});	
 		return l;
 	}
-	
+
 
 	public static void main(String[] args) throws IllegalArgumentException, IllegalStateException, InterruptedException, RejectedExecutionException, ExecutionException { 
+		String pre = "C:/Users/Reinier/Desktop/tab_reconstr-hector/MIDI/"; 
+		pre = "F:/research/data/MIDI/bach-WTC/thesis/4vv/";
+		for (String s : Dataset.FUGUES_4VV_NAMES) {
+			Transcription tt = new Transcription(new File(pre + s + ".mid"), null);
+			System.out.println(tt.getVoiceCrossingInformation(null));
+		}
+		System.exit(0);
+		
 		List<Integer[]> mi = new ArrayList<>();
 		mi.add(new Integer[]{2, 2, 1, 3});
 		mi.add(new Integer[]{3, 4, 4, 5});
