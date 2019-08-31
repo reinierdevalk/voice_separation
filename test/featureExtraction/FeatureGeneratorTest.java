@@ -2809,84 +2809,84 @@ public class FeatureGeneratorTest extends TestCase {
 	}
   
   
-	public void testGetPitchesInChord() {    
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
-		 
-		List<List<Integer>> expected = new ArrayList<List<Integer>>();
-		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69})); 
-		expected.add(Arrays.asList(new Integer[]{45, 57, 72, 69})); 
-		expected.add(Arrays.asList(new Integer[]{48})); 
-		expected.add(Arrays.asList(new Integer[]{47, 50, 59, 65}));
-		expected.add(Arrays.asList(new Integer[]{45}));
-		expected.add(Arrays.asList(new Integer[]{45, 57, 57, 60, 69})); 
-		expected.add(Arrays.asList(new Integer[]{45, 60, 64, 69})); 
-		expected.add(Arrays.asList(new Integer[]{59, 68})); 
-		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
-		expected.add(Arrays.asList(new Integer[]{68}));
-		expected.add(Arrays.asList(new Integer[]{69}));
-		expected.add(Arrays.asList(new Integer[]{68}));
-		expected.add(Arrays.asList(new Integer[]{66}));
-		expected.add(Arrays.asList(new Integer[]{68}));
-		expected.add(Arrays.asList(new Integer[]{69}));
-		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69})); 
+//	public void testGetPitchesInChord() {    
+//		Tablature tablature = new Tablature(encodingTestpiece1, false);
+//		 
+//		List<List<Integer>> expected = new ArrayList<List<Integer>>();
+//		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 72, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{48})); 
+//		expected.add(Arrays.asList(new Integer[]{47, 50, 59, 65}));
+//		expected.add(Arrays.asList(new Integer[]{45}));
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 57, 60, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{45, 60, 64, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{59, 68})); 
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
+//		expected.add(Arrays.asList(new Integer[]{68}));
+//		expected.add(Arrays.asList(new Integer[]{69}));
+//		expected.add(Arrays.asList(new Integer[]{68}));
+//		expected.add(Arrays.asList(new Integer[]{66}));
+//		expected.add(Arrays.asList(new Integer[]{68}));
+//		expected.add(Arrays.asList(new Integer[]{69}));
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69})); 
+//
+//		List<List<Integer>> actual = new ArrayList<List<Integer>>();
+//		List<List<TabSymbol>> tablatureChords = tablature.getTablatureChords();
+//		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
+//		int lowestNoteIndex = 0;
+//		for (int i = 0; i < tablatureChords.size(); i++) {
+//			actual.add(FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, null, lowestNoteIndex));
+//			lowestNoteIndex += tablatureChords.get(i).size();
+//		}
+//
+//		assertEquals(expected.size(), actual.size());
+//		for (int i = 0; i < expected.size(); i++) {
+//			assertEquals(expected.get(i).size(), actual.get(i).size());
+//			for (int j = 0; j < expected.get(i).size(); j++) {
+//				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
+//			}
+//		}
+//	}
 
-		List<List<Integer>> actual = new ArrayList<List<Integer>>();
-		List<List<TabSymbol>> tablatureChords = tablature.getTablatureChords();
-		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-		int lowestNoteIndex = 0;
-		for (int i = 0; i < tablatureChords.size(); i++) {
-			actual.add(FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, null, lowestNoteIndex));
-			lowestNoteIndex += tablatureChords.get(i).size();
-		}
 
-		assertEquals(expected.size(), actual.size());
-		for (int i = 0; i < expected.size(); i++) {
-			assertEquals(expected.get(i).size(), actual.get(i).size());
-			for (int j = 0; j < expected.get(i).size(); j++) {
-				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
-			}
-		}
-	}
-
-
-	public void testGetPitchesInChordNonTab() {	  	  
-		Transcription transcription = new Transcription(midiTestpiece1, null);
-
-		List<List<Integer>> expected = new ArrayList<List<Integer>>();
-		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69})); 
-		expected.add(Arrays.asList(new Integer[]{45, 57, 69, 72})); 
-		expected.add(Arrays.asList(new Integer[]{48})); 
-		expected.add(Arrays.asList(new Integer[]{47, 50, 59, 65, 65}));
-		expected.add(Arrays.asList(new Integer[]{45}));
-		expected.add(Arrays.asList(new Integer[]{45, 57, 57, 60, 69})); 
-		expected.add(Arrays.asList(new Integer[]{45, 60, 64, 69})); 
-		expected.add(Arrays.asList(new Integer[]{59, 68})); 
-		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
-		expected.add(Arrays.asList(new Integer[]{68}));
-		expected.add(Arrays.asList(new Integer[]{69}));
-		expected.add(Arrays.asList(new Integer[]{68}));
-		expected.add(Arrays.asList(new Integer[]{66}));
-		expected.add(Arrays.asList(new Integer[]{68}));
-		expected.add(Arrays.asList(new Integer[]{69}));
-		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69})); 
-
-		List<List<Integer>> actual = new ArrayList<List<Integer>>();
-		List<List<Note>> transcriptionChords = transcription.getTranscriptionChords();
-		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
-		int lowestNoteIndex = 0;
-		for (int i = 0; i < transcriptionChords.size(); i++) {
-			actual.add(FeatureGenerator.getPitchesInChord(null, basicNoteProperties, lowestNoteIndex));
-			lowestNoteIndex += transcriptionChords.get(i).size();
-		}
-
-		assertEquals(expected.size(), actual.size());
-		for (int i = 0; i < expected.size(); i++) {
-			assertEquals(expected.get(i).size(), actual.get(i).size());
-			for (int j = 0; j < expected.get(i).size(); j++) {
-				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
-			}
-		}
-	}
+//	public void testGetPitchesInChordNonTab() {	  	  
+//		Transcription transcription = new Transcription(midiTestpiece1, null);
+//
+//		List<List<Integer>> expected = new ArrayList<List<Integer>>();
+//		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 69, 72})); 
+//		expected.add(Arrays.asList(new Integer[]{48})); 
+//		expected.add(Arrays.asList(new Integer[]{47, 50, 59, 65, 65}));
+//		expected.add(Arrays.asList(new Integer[]{45}));
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 57, 60, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{45, 60, 64, 69})); 
+//		expected.add(Arrays.asList(new Integer[]{59, 68})); 
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
+//		expected.add(Arrays.asList(new Integer[]{68}));
+//		expected.add(Arrays.asList(new Integer[]{69}));
+//		expected.add(Arrays.asList(new Integer[]{68}));
+//		expected.add(Arrays.asList(new Integer[]{66}));
+//		expected.add(Arrays.asList(new Integer[]{68}));
+//		expected.add(Arrays.asList(new Integer[]{69}));
+//		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69})); 
+//
+//		List<List<Integer>> actual = new ArrayList<List<Integer>>();
+//		List<List<Note>> transcriptionChords = transcription.getTranscriptionChords();
+//		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
+//		int lowestNoteIndex = 0;
+//		for (int i = 0; i < transcriptionChords.size(); i++) {
+//			actual.add(FeatureGenerator.getPitchesInChord(null, basicNoteProperties, lowestNoteIndex));
+//			lowestNoteIndex += transcriptionChords.get(i).size();
+//		}
+//
+//		assertEquals(expected.size(), actual.size());
+//		for (int i = 0; i < expected.size(); i++) {
+//			assertEquals(expected.get(i).size(), actual.get(i).size());
+//			for (int j = 0; j < expected.get(i).size(); j++) {
+//				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
+//			}
+//		}
+//	}
 
 
 	public void testGetIntervalsInChord() {

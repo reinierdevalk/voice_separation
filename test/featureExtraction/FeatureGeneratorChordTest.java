@@ -22,7 +22,6 @@ public class FeatureGeneratorChordTest extends TestCase {
 	private File encodingTestpiece1;
 	private File midiTestpiece1;
 	private FeatureGeneratorChord featureGeneratorChord = new FeatureGeneratorChord();
-	private FeatureGenerator featureGenerator = new FeatureGenerator();
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -3172,111 +3171,109 @@ public class FeatureGeneratorChordTest extends TestCase {
 		
 				
 	public void testGenerateVariableChordFeatureVector() {
-	  Tablature tablature = new Tablature(encodingTestpiece1, true);
-	  Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
-  	   	  
-    // Determine expected
-    List<List<Double>> expected = new ArrayList<List<Double>>();
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
- 	  	expected.add(new ArrayList<Double>());
- 	  }
-	  Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-	  int highestNumberOfVoices = transcription.getNumberOfVoices();
-	  List<List<Integer>> voiceAssignments = transcription.getVoiceAssignments(/*tablature,*/ highestNumberOfVoices);
-	  List<List<Double>> voiceLabels = transcription.getVoiceLabels();
-  	int lowestNoteIndex = 0;
-  	for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
-  		List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
-  		List<Integer> currentPitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, null, 
-   	 		lowestNoteIndex); 
- 	  	List<List<Double>> currentVoiceLabelsChord = 
- 	  		DataConverter.getChordVoiceLabels(currentVoiceAssignment); 	  			
-	    List<List<Integer>> currentVoicesInChord = 
-	    	DataConverter.getVoicesInChord(currentVoiceLabelsChord);
-  	  
-	    List<Double> currentExpected = new ArrayList<Double>();
-	    // 1. Add proximities and movements
-  		double[] currentAverageProximitiesAndMovements = 
-	   		featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(basicTabSymbolProperties, null, transcription,
-	   		/*highestNumberOfVoices,*/ lowestNoteIndex, currentVoiceAssignment);
-	   	for (double d : currentAverageProximitiesAndMovements) {
-	   		currentExpected.add(d);
-	   	}
-	   	// 2. Add pitch-voice relation
-	   	double currentPitchVoiceRelation = FeatureGeneratorChord.getPitchVoiceRelationInChord(basicTabSymbolProperties,
-	   		null, voiceLabels, lowestNoteIndex, currentVoiceAssignment);
-	   	currentExpected.add(currentPitchVoiceRelation);
-	   	// 3. Add voice crossing information
-	   	List<List<Integer>> currentVoiceCrossingInformation = 
-		  	Transcription.getVoiceCrossingInformationInChord(currentPitchesInChord, currentVoicesInChord);
-	    // a. Number of voice crossing pairs
-	   	currentExpected.add((currentVoiceCrossingInformation.get(1).size() / 2.0));
-      // b. The sum of the pitch distances between the voice crossing pairs
-	   	currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)));
-	    // c. The average distance between the voice crossing pairs
-	   	if (currentVoiceCrossingInformation.get(2).size() == 0) {
-	   	  currentExpected.add(0.0);
-	   	}
-	   	else {
-	   	  currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)) /
-	   	  	currentVoiceCrossingInformation.get(2).size());
-	   	}	
-	   	// 4. Add voice assignment
-	   	for (int v : currentVoiceAssignment) {
-	   		currentExpected.add((double) v);
-	   	}
-	   	expected.set(i, currentExpected);
-	   	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
-  	}
-   		   	  
-    // For each chord: calculate the actual variable chord feature vector and add it to actual
-    List<List<Double>> actual = new ArrayList<List<Double>>();
-    lowestNoteIndex = 0;
-	  for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
-	   	List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
-	   	actual.add(featureGeneratorChord.generateVariableChordFeatureVector(basicTabSymbolProperties, null, 
-	   		transcription, lowestNoteIndex, highestNumberOfVoices, currentVoiceAssignment));
-	   	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
-	  }
-	    
-	  // Assert equality
-	  assertEquals(expected.size(), actual.size());
-	  for (int i = 0; i < expected.size(); i++) {
-	   	assertEquals(expected.get(i).size(), actual.get(i).size());
-	   	for (int j = 0; j < expected.get(i).size(); j++) {
-	   		assertEquals(expected.get(i).get(j), actual.get(i).get(j));
-	   	}
-	  }
-	  assertEquals(expected, actual);
-	}
-	
-	
-	public void testGenerateVariableChordFeatureVectorNonTab() {
-    Transcription transcription = new Transcription(midiTestpiece1, null);
+		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
-    List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
-        	   	  
-    // For each chord: determine expected
-    List<List<Double>> expected = new ArrayList<List<Double>>(); 
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
- 	  	expected.add(new ArrayList<Double>());
- 	  }
-	  Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
-	  List<List<Double>> voiceLabels = transcription.getVoiceLabels();
- 	  int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
-  	int lowestNoteIndex = 0;
-  	for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
-  		List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
-  		List<Integer> currentNewPitchesInChord = FeatureGenerator.getPitchesInChord(null, basicNoteProperties, 
-	   	 	lowestNoteIndex); 
-  		List<List<Double>> currentVoiceLabelsChord = 
-  			DataConverter.getChordVoiceLabels(currentVoiceAssignment); 	  			
-      List<List<Integer>> currentNewVoicesInChord = 
-    		 DataConverter.getVoicesInChord(currentVoiceLabelsChord);
-      List<List<Integer>> currentAllPitchesAndVoicesInChord = 
-  			Transcription.getAllPitchesAndVoicesInChord(basicNoteProperties, currentNewPitchesInChord,
-  			currentNewVoicesInChord, voiceLabels, lowestNoteIndex);
-  	  // voicesInChord must be a List<List>>
+		List<List<Double>> expected = new ArrayList<List<Double>>();
+		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+			expected.add(new ArrayList<Double>());
+		}
+		Integer[][] btp = tablature.getBasicTabSymbolProperties();
+		int highestNumberOfVoices = transcription.getNumberOfVoices();
+		List<List<Integer>> voiceAssignments = transcription.getVoiceAssignments(/*tablature,*/ highestNumberOfVoices);
+		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
+		int lowestNoteIndex = 0;
+		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
+			List<Integer> currentPitchesInChord = 
+				Tablature.getPitchesInChord(btp, lowestNoteIndex); 
+			List<List<Double>> currentVoiceLabelsChord = 
+				DataConverter.getChordVoiceLabels(currentVoiceAssignment); 	  			
+			List<List<Integer>> currentVoicesInChord = 
+				DataConverter.getVoicesInChord(currentVoiceLabelsChord);
+
+			List<Double> currentExpected = new ArrayList<Double>();
+			// 1. Add proximities and movements
+			double[] currentAverageProximitiesAndMovements = 
+				featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(btp, null, transcription,
+				/*highestNumberOfVoices,*/ lowestNoteIndex, currentVoiceAssignment);
+			for (double d : currentAverageProximitiesAndMovements) {
+				currentExpected.add(d);
+			}
+			// 2. Add pitch-voice relation
+			double currentPitchVoiceRelation = FeatureGeneratorChord.getPitchVoiceRelationInChord(btp,
+				null, voiceLabels, lowestNoteIndex, currentVoiceAssignment);
+			currentExpected.add(currentPitchVoiceRelation);
+			// 3. Add voice crossing information
+			List<List<Integer>> currentVoiceCrossingInformation = 
+				Transcription.getVoiceCrossingInformationInChord(currentPitchesInChord, currentVoicesInChord);
+			// a. Number of voice crossing pairs
+			currentExpected.add((currentVoiceCrossingInformation.get(1).size() / 2.0));
+			// b. The sum of the pitch distances between the voice crossing pairs
+			currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)));
+			// c. The average distance between the voice crossing pairs
+			if (currentVoiceCrossingInformation.get(2).size() == 0) {
+				currentExpected.add(0.0);
+			}
+			else {
+				currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)) /
+					currentVoiceCrossingInformation.get(2).size());
+			}	
+			// 4. Add voice assignment
+			for (int v : currentVoiceAssignment) {
+				currentExpected.add((double) v);
+			}
+			expected.set(i, currentExpected);
+			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+		}
+
+		// For each chord: calculate the actual variable chord feature vector and add it to actual
+		List<List<Double>> actual = new ArrayList<List<Double>>();
+		lowestNoteIndex = 0;
+		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
+			actual.add(featureGeneratorChord.generateVariableChordFeatureVector(btp, null, 
+				transcription, lowestNoteIndex, highestNumberOfVoices, currentVoiceAssignment));
+			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+		}
+
+		assertEquals(expected.size(), actual.size());
+		for (int i = 0; i < expected.size(); i++) {
+			assertEquals(expected.get(i).size(), actual.get(i).size());
+			for (int j = 0; j < expected.get(i).size(); j++) {
+				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
+			}
+		}
+		assertEquals(expected, actual);
+	}
+
+
+	public void testGenerateVariableChordFeatureVectorNonTab() {
+		Transcription transcription = new Transcription(midiTestpiece1, null);
+
+		List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
+
+		// For each chord: determine expected
+		List<List<Double>> expected = new ArrayList<List<Double>>(); 
+		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+			expected.add(new ArrayList<Double>());
+		}
+		Integer[][] bnp = transcription.getBasicNoteProperties();
+		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
+		int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
+		int lowestNoteIndex = 0;
+		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
+			List<Integer> currentNewPitchesInChord = Transcription.getPitchesInChord(bnp, 
+				lowestNoteIndex); 
+			List<List<Double>> currentVoiceLabelsChord = 
+				DataConverter.getChordVoiceLabels(currentVoiceAssignment); 	  			
+			List<List<Integer>> currentNewVoicesInChord = 
+				DataConverter.getVoicesInChord(currentVoiceLabelsChord);
+			List<List<Integer>> currentAllPitchesAndVoicesInChord = 
+				Transcription.getAllPitchesAndVoicesInChord(bnp, currentNewPitchesInChord,
+				currentNewVoicesInChord, voiceLabels, lowestNoteIndex);
+			// voicesInChord must be a List<List>>
 			List<Integer> currentPitchesInChord = currentAllPitchesAndVoicesInChord.get(0);
 			List<List<Integer>> currentVoicesInChord = new ArrayList<List<Integer>>();
 			for (int j : currentAllPitchesAndVoicesInChord.get(1)) {
@@ -3284,64 +3281,63 @@ public class FeatureGeneratorChordTest extends TestCase {
 				List<Integer> voiceWrapped = Arrays.asList(new Integer[]{currentVoice});
 				currentVoicesInChord.add(voiceWrapped);
 			}
-  		
-	    List<Double> currentExpected = new ArrayList<Double>();
-	    // 1. Add proximities and movements
-  		double[] currentAverageProximitiesAndMovements = 
-  			featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(null, basicNoteProperties, transcription, 
-  			/*highestNumberOfVoicesTraining,*/ lowestNoteIndex, currentVoiceAssignment);
-	   	for (double d : currentAverageProximitiesAndMovements) {
-	   		currentExpected.add(d);
-	   	}
-	   	// 2. Add pitch-voice relation
-	   	double currentPitchVoiceRelation = FeatureGeneratorChord.getPitchVoiceRelationInChord(null, basicNoteProperties,
-	   		voiceLabels, lowestNoteIndex, currentVoiceAssignment);
-	   	currentExpected.add(currentPitchVoiceRelation);
-	   	// 3. Add voice crossing information
-	   	List<List<Integer>> currentVoiceCrossingInformation = 
-		  	Transcription.getVoiceCrossingInformationInChord(currentPitchesInChord, currentVoicesInChord);
-	    // a. Number of voice crossing pairs
-	   	currentExpected.add((currentVoiceCrossingInformation.get(1).size() / 2.0));
-      // b. The sum of the pitch distances between the voice crossing pairs
-	   	currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)));
-	    // c. The average distance between the voice crossing pairs
-	   	if (currentVoiceCrossingInformation.get(2).size() == 0) {
-	   	  currentExpected.add(0.0);
-	   	}
-	   	else {
-	   	  currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)) /
-	   	  	currentVoiceCrossingInformation.get(2).size());
-	   	}	
-	   	// 4. Add voice assignment
-	   	for (int v : currentVoiceAssignment) {
-	   		currentExpected.add((double) v);
-	   	}
-	   	expected.set(i, currentExpected);
-	   	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
-  	}
-   		   	  
-    // For each chord: calculate the actual variable chord feature vector and add it to actual
-    List<List<Double>> actual = new ArrayList<List<Double>>();
-    lowestNoteIndex = 0;
-	  for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
-	   	List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
-	   	actual.add(featureGeneratorChord.generateVariableChordFeatureVector(null, basicNoteProperties, transcription,
-	   		lowestNoteIndex, highestNumberOfVoicesTraining,	currentVoiceAssignment));
-	   	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
-	  }
-	    
-	  // Assert equality
-	  assertEquals(expected.size(), actual.size());
-	  for (int i = 0; i < expected.size(); i++) {
-	   	assertEquals(expected.get(i).size(), actual.get(i).size());
-	   	for (int j = 0; j < expected.get(i).size(); j++) {
-	   		assertEquals(expected.get(i).get(j), actual.get(i).get(j));
-	   	}
-	  }
-	  assertEquals(expected, actual);
+
+			List<Double> currentExpected = new ArrayList<Double>();
+			// 1. Add proximities and movements
+			double[] currentAverageProximitiesAndMovements = 
+				featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(null, bnp, transcription, 
+				/*highestNumberOfVoicesTraining,*/ lowestNoteIndex, currentVoiceAssignment);
+			for (double d : currentAverageProximitiesAndMovements) {
+				currentExpected.add(d);
+			}
+			// 2. Add pitch-voice relation
+			double currentPitchVoiceRelation = FeatureGeneratorChord.getPitchVoiceRelationInChord(null, bnp,
+				voiceLabels, lowestNoteIndex, currentVoiceAssignment);
+			currentExpected.add(currentPitchVoiceRelation);
+			// 3. Add voice crossing information
+			List<List<Integer>> currentVoiceCrossingInformation = 
+				Transcription.getVoiceCrossingInformationInChord(currentPitchesInChord, currentVoicesInChord);
+			// a. Number of voice crossing pairs
+			currentExpected.add((currentVoiceCrossingInformation.get(1).size() / 2.0));
+			// b. The sum of the pitch distances between the voice crossing pairs
+			currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)));
+			// c. The average distance between the voice crossing pairs
+			if (currentVoiceCrossingInformation.get(2).size() == 0) {
+				currentExpected.add(0.0);
+			}
+			else {
+				currentExpected.add((double)ToolBox.sumListInteger(currentVoiceCrossingInformation.get(2)) /
+					currentVoiceCrossingInformation.get(2).size());
+			}	
+			// 4. Add voice assignment
+			for (int v : currentVoiceAssignment) {
+				currentExpected.add((double) v);
+			}
+			expected.set(i, currentExpected);
+			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+		}
+
+		// For each chord: calculate the actual variable chord feature vector and add it to actual
+		List<List<Double>> actual = new ArrayList<List<Double>>();
+		lowestNoteIndex = 0;
+		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
+			actual.add(featureGeneratorChord.generateVariableChordFeatureVector(null, bnp, transcription,
+				lowestNoteIndex, highestNumberOfVoicesTraining,	currentVoiceAssignment));
+			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+		}
+
+		assertEquals(expected.size(), actual.size());
+		for (int i = 0; i < expected.size(); i++) {
+			assertEquals(expected.get(i).size(), actual.get(i).size());
+			for (int j = 0; j < expected.get(i).size(); j++) {
+				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
+			}
+		}
+		assertEquals(expected, actual);
 	}
-	
-	
+
+
 	public void testGenerateAllCompleteChordFeatureVectors() {
     Tablature tablature = new Tablature(encodingTestpiece1, true);
     Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);

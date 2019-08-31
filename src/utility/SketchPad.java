@@ -3400,7 +3400,7 @@ public class SketchPad {
 			int sizeLastChord = bnp[bnp.length - 1][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
 			int lowestNoteIndexLastChord = bnp.length - sizeLastChord;
 //			FeatureGenerator fg = new FeatureGenerator();
-			List<Integer> pitchesInChord = fg.getPitchesInChord(null, bnp, lowestNoteIndexLastChord);
+			List<Integer> pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndexLastChord);
 				
 			List<List<List<Double>>> chordVoiceLabels = tr.getChordVoiceLabels();
 			int indexLastChord = bnp[bnp.length - 1][Transcription.CHORD_SEQ_NUM];
