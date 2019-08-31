@@ -1,4 +1,4 @@
-package dataset;
+package data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
