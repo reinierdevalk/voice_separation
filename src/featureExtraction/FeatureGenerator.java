@@ -501,7 +501,7 @@ public class FeatureGenerator {
 		int	pitchOfCurrentNote = -1;
 		int seqNumInChordOfCurrentNote = -1;
 		int lowestNoteIndex;
-		int numNewOnsets = -1;
+		int numNewOnsets = -1;		
 		// a. In the tablature case
 		if (btp != null) {  
 		 	pitchOfCurrentNote = btp[noteIndex][Tablature.PITCH];
@@ -538,7 +538,13 @@ public class FeatureGenerator {
 
 		// 3. Determine the pitch distances to the notes below and above
 		// Determine the new pitches in the chord
-		List<Integer> newPitchesInChord = getPitchesInChord(btp, bnp, lowestNoteIndex);
+		List<Integer> newPitchesInChord; // = getPitchesInChord(btp, bnp, lowestNoteIndex);
+		if (btp != null) {
+			newPitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+		}
+		else {
+			newPitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+		}
 		// a. Excluding any sustained previous notes
 		int minPitchDistanceToLowerExcl = Integer.MAX_VALUE;
 		int minPitchDistanceToHigherExcl = Integer.MAX_VALUE;
@@ -669,22 +675,25 @@ public class FeatureGenerator {
 		// 0. Determine the pitch of the note at noteIndex as well as the index of the lowest note in the chord
 		int	pitchOfCurrentNote = -1;
 		int lowestNoteIndex = -1;
+		List<Integer> pitchesInChord;
 		// a. In the tablature case
 		if (btp != null) {  
 			pitchOfCurrentNote = btp[noteIndex][Tablature.PITCH];
 			lowestNoteIndex = noteIndex - btp[noteIndex][Tablature.NOTE_SEQ_NUM];
+			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
 		}    
 		// b. In the non-tablature case
-		if (bnp != null) {  
+		else {
+//		if (bnp != null) {  
 			pitchOfCurrentNote = bnp[noteIndex][Transcription.PITCH];
-			lowestNoteIndex = noteIndex - bnp[noteIndex][Transcription.NOTE_SEQ_NUM];; 
+			lowestNoteIndex = noteIndex - bnp[noteIndex][Transcription.NOTE_SEQ_NUM];
+			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
 		}
+		// Sort in order to take into account any course crossings
+		Collections.sort(pitchesInChord);
 
 		// 1. Determine indexExclusive
 		int indexExclusive = -1;
-		// Get the pitches in the chord; sort in order to take into account any course crossings
-		List<Integer> pitchesInChord = getPitchesInChord(btp, bnp, lowestNoteIndex);
-		Collections.sort(pitchesInChord);
 		// Remove any duplicate pitches (unisons)
 		List<Integer> pitchesInChordNoUnisons = new ArrayList<Integer>();
 		for (int i : pitchesInChord) {
@@ -766,39 +775,38 @@ public class FeatureGenerator {
 	 * @return
 	 */
 	// TESTED (for both tablature- and non-tablature case)
-	public static List<Integer> getPitchesInChord(Integer[][] btp, Integer[][] bnp, int lowestNoteIndex) {
+//	public static List<Integer> getPitchesInChord(Integer[][] btp, Integer[][] bnp, int lowestNoteIndex) {
+//
+//		Transcription.verifyCase(btp, bnp);
+//
+//		List<Integer> pitchesInChord = new ArrayList<Integer>();	
+//		// a. In the tablature case
+//		if (btp != null) {
+//			int chordSize = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
+//			for (int i = lowestNoteIndex; i < lowestNoteIndex + chordSize; i++) {
+//				Integer[] currentBasicTabSymbolProperties = btp[i];
+//				int currentPitch = currentBasicTabSymbolProperties[Tablature.PITCH];
+//				pitchesInChord.add(currentPitch);
+//			}
+//		}
+//		// b. In the non-tablature case
+//		else if (bnp != null) {	     
+//			int chordSize = bnp[lowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
+//			for (int i = lowestNoteIndex; i < lowestNoteIndex + chordSize; i++) {
+//				Integer[] currentBasicNoteProperties = bnp[i];
+//				int currentPitch = currentBasicNoteProperties[Transcription.PITCH];
+//				pitchesInChord.add(currentPitch);
+//			}
+//			// Get the pitches for any sustained previous notes
+////			List<Integer> sustainedPitches = 
+////				getPitchesOfSustainedPreviousNotesInChord(basicNoteProperties, lowestNoteIndex);
+////			// Combine and sort
+////			pitchesInChord.addAll(sustainedPitches);
+////			Collections.sort(pitchesInChord);
+//		}
+//		return pitchesInChord;
+//	}
 
-		Transcription.verifyCase(btp, bnp);
-
-		List<Integer> pitchesInChord = new ArrayList<Integer>();	
-		// a. In the tablature case
-		if (btp != null) {
-			int chordSize = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
-			for (int i = lowestNoteIndex; i < lowestNoteIndex + chordSize; i++) {
-				Integer[] currentBasicTabSymbolProperties = btp[i];
-				int currentPitch = currentBasicTabSymbolProperties[Tablature.PITCH];
-				pitchesInChord.add(currentPitch);
-			}
-		}
-		// b. In the non-tablature case
-		else if (bnp != null) {	     
-			int chordSize = bnp[lowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
-			for (int i = lowestNoteIndex; i < lowestNoteIndex + chordSize; i++) {
-				Integer[] currentBasicNoteProperties = bnp[i];
-				int currentPitch = currentBasicNoteProperties[Transcription.PITCH];
-				pitchesInChord.add(currentPitch);
-			}
-			// Get the pitches for any sustained previous notes
-//			List<Integer> sustainedPitches = 
-//				getPitchesOfSustainedPreviousNotesInChord(basicNoteProperties, lowestNoteIndex);
-//			// Combine and sort
-//			pitchesInChord.addAll(sustainedPitches);
-//			Collections.sort(pitchesInChord);
-		}
-		return pitchesInChord;
-	}
-
-	// TODO knip
 
 	/**
 	 * Gets the intervals in the chord, also taking into consideration any sustained previous notes in the 
@@ -821,13 +829,18 @@ public class FeatureGenerator {
 		Transcription.verifyCase(btp, bnp);
 
 		// 0. Initialise intervalsInChord with all -1.0s
-//		double[] intervalsInChord = new double[largestChordSize - 1];
 		double[] intervalsInChord = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES - 1];
 		Arrays.fill(intervalsInChord, -1.0);
 
 		// 1. List the pitches in the chord
 		// a. Get the pitches of the new onsets in the chord
-		List<Integer> pitchesInChord = getPitchesInChord(btp, bnp, lowestNoteIndex);		
+		List<Integer> pitchesInChord; // = getPitchesInChord(btp, bnp, lowestNoteIndex);
+		if (btp != null) {
+			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+		}
+		else {
+			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+		}
 		// b. Add the pitches of any sustained previous notes and add them to pitchesInChord
 		if ((btp != null && durationLabels != null) || bnp != null) { // TODO Hack for CIM paper 28-10-2014
 			pitchesInChord.addAll(Transcription.getPitchesOfSustainedPreviousNotesInChord(btp, durationLabels, bnp, lowestNoteIndex));

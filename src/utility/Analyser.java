@@ -13,11 +13,10 @@ import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.data.structure.container.NoteSequence;
 import de.uos.fmt.musitech.utility.math.Rational;
-import featureExtraction.FeatureGenerator;
+import exports.MEIExport;
 import representations.Tablature;
 import representations.Transcription;
 import tbp.TabSymbol;
-import ui.Runner;
 
 public class Analyser {
 	
@@ -152,7 +151,8 @@ public class Analyser {
 //    pieceName = "Bach - WTC2, Fuga 24 in b minor (BWV 893)/musedata.org/Unedited";
 //    pieceName = "Bach - WTC2, Fuga 24 in b minor (BWV 893)";
 
-		folderName = Runner.midiPath + "bach-WTC/thesis/4vv/";
+	folderName = MEIExport.rootDir + "data/MIDI/bach-WTC/thesis/4vv/";
+		
 //    pieceName = "Bach - WTC2, Fuga 2 in c minor (BWV 871)/musedata.org/Unedited/";
 //    pieceName = "Bach - WTC2, Fuga 2 in c minor (BWV 871)";
 //    pieceName = "Bach - WTC2, Fuga 5 in D major (BWV 874)/musedata.org/Unedited/";
@@ -220,7 +220,8 @@ public class Analyser {
  	  List<String> bla = new ArrayList<String>();
  	  bla.add("Abondante 1548 - mais mamignone");
  	  
- 	  folderName = Runner.midiPath + "intabulations/4vv/";
+ 	  folderName = MEIExport.rootDir + "data/MIDI/tab-int/4vv/";
+ 	 
  	  
  	  for (String s : threeVoiceFuguesPieceNames) {
  	  	getNumberOfVoiceCrossingPairs(folderName, s, 0);
@@ -636,7 +637,7 @@ public class Analyser {
   	List<List<List<Double>>> chordVoiceLabels = transcription.getChordVoiceLabels();
   	int lowestNoteIndex = 0;
   	for (int i = 0; i < transChords.size(); i++) {
-  		List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(null, basicNoteProperties, lowestNoteIndex);
+  		List<Integer> pitchesInChord = Transcription.getPitchesInChord(basicNoteProperties, lowestNoteIndex);
   		List<List<Double>> currentChordVoiceLabels = chordVoiceLabels.get(i);
 			List<List<Integer>> voicesInChord = DataConverter.getVoicesInChord(currentChordVoiceLabels);
   	  List<List<Integer>> pAndV = Transcription.getAllPitchesAndVoicesInChord(basicNoteProperties, pitchesInChord, 
@@ -687,7 +688,8 @@ public class Analyser {
   	
   	for (int i = 0; i < pieceNames.size(); i++) {
     	String pieceName = pieceNames.get(i);
-    	File tablatureEncoding = new File(Runner.encodingsPath + pieceName + ".tbp");
+    	File tablatureEncoding = new File(MEIExport.rootDir + "data/encodings/" + pieceName + ".tbp");
+    	
 	    Tablature tablature = new Tablature(tablatureEncoding, false);
 //      preprocessor.prepareInitialInformation(tablature, null, true);
       Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();

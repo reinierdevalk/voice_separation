@@ -463,13 +463,15 @@ public class FeatureGeneratorChord {
 			// NB: For the alignment of the voice assigment and the pitches, the exact pitch sequence as in the chord
 			// (including any possible course crossings) is needed--so no numerical sorting of pitchesInChord is necessary
 			if (btp != null) {
-			  pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
-//			  voicesInChord = dataConverter.getVoicesInChord(voiceLabels);
+				pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+//				pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+//				voicesInChord = dataConverter.getVoicesInChord(voiceLabels);
 			}
 			// b. In the non-tablature case
 			if (bnp != null) {
 				// Get the pitches and voices of the new onsets in the chord
-				pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+				pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+//				pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
 //				voicesInChord = dataConverter.getVoicesInChord(voiceLabels);
 				// Get all the pitches and voices in the chord
 				List<List<Integer>> allPitchesAndVoices = Transcription.getAllPitchesAndVoicesInChord(bnp, pitchesInChord,
@@ -782,7 +784,14 @@ public class FeatureGeneratorChord {
 		indicesToRemove.clear();
 		for (int i = 0; i < voiceAssignments.size(); i++) {
 			// Get the pitches in the chord
-			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+			List<Integer> pitchesInChord; // = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+			if (btp != null) {
+				pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+			}
+			else {
+				pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+			}
+			
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			// Get the voices in the chord under the current voice assignment
 			List<List<Double>> currentVoiceLabels = 
@@ -1021,7 +1030,13 @@ public class FeatureGeneratorChord {
 		chordFeatureVector.addAll(pitchVoiceRelation);
 		// 5-7. Voice crossing information TODO Enable sustained notes for tablature case
 		List<Double> voiceCrossingInfo = new ArrayList<Double>();
-		List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+		List<Integer> pitchesInChord; // = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+		if (btp != null) {
+			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+		}
+		else {
+			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+		}
 		List<List<Double>> voiceLabels = 
 			DataConverter.getChordVoiceLabels(voiceAssignment);
 		List<List<Integer>> voicesInChord = 
@@ -1137,7 +1152,8 @@ public class FeatureGeneratorChord {
 			chordFeatureVector.addAll(pitchVoiceRelation);
 			// 5-7. Voice crossing information TODO Enable sustained notes for tablature case
 			List<Double> voiceCrossingInfo = new ArrayList<Double>();
-			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+			List<Integer> pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+//			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
 			List<List<Double>> voiceLabels = 
 				DataConverter.getChordVoiceLabels(voiceAssignment);
 			List<List<Integer>> voicesInChord = 
@@ -1224,7 +1240,8 @@ public class FeatureGeneratorChord {
 			chordFeatureVector.addAll(pitchVoiceRelation);
 			// 4-6. Voice crossing information
 			List<Double> voiceCrossingInfo = new ArrayList<Double>();
-			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
+			List<Integer> pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+//			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
 			List<List<Double>> voiceLabels = 
 				DataConverter.getChordVoiceLabels(voiceAssignment);
 			List<List<Integer>> voicesInChord = 
@@ -1666,50 +1683,52 @@ public class FeatureGeneratorChord {
 	 * Returns the range (in semitones) of the chord. 
 	 * NB: in the non-tablature case, sustained previous notes are taken in consideration as well.
 	 * 
-	 * @param basicTabSymbolProperties 
+	 * @param btp 
 	 * @return
 	 */
 	// TESTED (for both tablature- and non-tablature case)
-	double getRangeOfChord(Integer[][] basicTabSymbolProperties, Integer[][] basicNoteProperties, int lowestNoteIndex) { 
-		
-		Transcription.verifyCase(basicTabSymbolProperties, basicNoteProperties);
-		
-	  // 0. Set range to default value 0.0 for a single-note chord
+	double getRangeOfChord(Integer[][] btp, Integer[][] bnp, int lowestNoteIndex) { 
+
+		Transcription.verifyCase(btp, bnp);
+
+		// 0. Set range to default value 0.0 for a single-note chord
 		double range = 0.0;
-		
+
 		// 1. Determine the size of the chord
 		int chordSize = 0;
-	  // a. In the tablature case
-		if (basicTabSymbolProperties != null) {
-			chordSize = basicTabSymbolProperties[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
+		// a. In the tablature case
+		if (btp != null) {
+			chordSize = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
 		}
 		// b. In the non-tablature case
-		else if (basicNoteProperties != null) {
-			chordSize = basicNoteProperties[lowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
-			chordSize += getPitchesOfSustainedPreviousNotesInChordMUSCI(basicNoteProperties, lowestNoteIndex).size();
+		else if (bnp != null) {
+			chordSize = bnp[lowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
+			chordSize += getPitchesOfSustainedPreviousNotesInChordMUSCI(bnp, lowestNoteIndex).size();
 		}
-		
-	  // 2. If the the chord consists of multiple onsets: calculate range
+
+		// 2. If the the chord consists of multiple onsets: calculate range
 		if (chordSize > 1) {
 			List<Integer> pitchesInChord = null;
 			// a. In the tablature case
-	  	if (basicTabSymbolProperties != null) {
-	 		  pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
-	  	}
-	  	// b. In the non-tablature case
-	  	else if (basicNoteProperties != null) {
-	  		// List the new pitches in the chord
-	  		pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
-	  		// Add any previous sustained pitches and to pitchesInChord 
-	  		pitchesInChord.addAll(getPitchesOfSustainedPreviousNotesInChordMUSCI(basicNoteProperties, lowestNoteIndex));		
-		  }
-	    // Calculate the range
-		  range = Collections.max(pitchesInChord) - Collections.min(pitchesInChord);
+			if (btp != null) {
+				pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
+//				pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
+			}
+			// b. In the non-tablature case
+			else if (bnp != null) {
+				// List the new pitches in the chord
+				pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+//				pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
+				// Add any previous sustained pitches and to pitchesInChord 
+				pitchesInChord.addAll(getPitchesOfSustainedPreviousNotesInChordMUSCI(bnp, lowestNoteIndex));		
+			}
+			// Calculate the range
+			range = Collections.max(pitchesInChord) - Collections.min(pitchesInChord);
 		}
 		return range;
 	}
-	
-			
+
+
 	/**
 	 * Gets the intervals in the chord. Returns a double[] the size of the maximum number of intervals in a chord,
 	 * i.e., largestChordSizeTraining - 1. When the chord contains fewer onsets than largestChordSizeTraining, 
@@ -1719,49 +1738,49 @@ public class FeatureGeneratorChord {
 	 * 
 	 * NB: In the non-tablature case, sustained previous notes are taken into consideration as well. 
 	 * 
-	 * @param basicTabSymbolProperties
+	 * @param btp
 	 * @return
 	 */
 	// TESTED (for both tablature- and non-tablature case)
-	double[] getIntervalsInChordMUSCI(Integer[][] basicTabSymbolProperties, Integer[][] basicNoteProperties,
+	double[] getIntervalsInChordMUSCI(Integer[][] btp, Integer[][] bnp,
 		int largestChordSizeTraining, int lowestNoteIndex) { 
-	  
-		Transcription.verifyCase(basicTabSymbolProperties, basicNoteProperties);
-		
+
+		Transcription.verifyCase(btp, bnp);
+
 		double[] intervalsInChord = new double[largestChordSizeTraining - 1];
-		
-	  // 0. Initialise intervalsInChord with all -1.0s
+
+		// 0. Initialise intervalsInChord with all -1.0s
 		Arrays.fill(intervalsInChord, -1.0);
-		
-	  // 1. List the pitches in the chord
+
+		// 1. List the pitches in the chord
 		List<Integer> pitchesInChord = null;
 		// a. In the tablature case
-	  // NB: For the determination of the intervals between the onsets in the chord, the exact pitch sequence 
+		// NB: For the determination of the intervals between the onsets in the chord, the exact pitch sequence 
 		// as in the chord (including any possible course crossings) is needed--so no numerical sorting of 
 		// pitchesInChord is necessary
-		if (basicTabSymbolProperties != null) {
-		  pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
+		if (btp != null) {
+			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
 		}
 		// b. In the non-tablature case
-		if (basicNoteProperties != null) {
-		  pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
-		  // Get any pitches of sustained previous notes and add them to pitchesInChord, then sort numerically
-		  pitchesInChord.addAll(getPitchesOfSustainedPreviousNotesInChordMUSCI(basicNoteProperties, lowestNoteIndex));
-		  Collections.sort(pitchesInChord);
+		if (bnp != null) {
+			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
+			// Get any pitches of sustained previous notes and add them to pitchesInChord, then sort numerically
+			pitchesInChord.addAll(getPitchesOfSustainedPreviousNotesInChordMUSCI(bnp, lowestNoteIndex));
+			Collections.sort(pitchesInChord);
 		}
-		
+
 		// 2. Get the intervals in the chord
-	  // For every pitch: get the intervallic distances
-	  for (int i = 0; i < pitchesInChord.size() - 1; i++) {
-	 	  double currentPitch = pitchesInChord.get(i);
-	 	  double nextPitch = pitchesInChord.get(i + 1);
-	 	  intervalsInChord[i] = Math.abs(nextPitch - currentPitch); 
-	  }
-		
+		// For every pitch: get the intervallic distances
+		for (int i = 0; i < pitchesInChord.size() - 1; i++) {
+			double currentPitch = pitchesInChord.get(i);
+			double nextPitch = pitchesInChord.get(i + 1);
+			intervalsInChord[i] = Math.abs(nextPitch - currentPitch); 
+		}
+
 		return intervalsInChord;
 	}
-	
-		
+
+
 	/**
 	 * Compares each note in the chord to the previous Note in the voice that note is assigned to under the given
 	 * voiceAssigment, and calculates their average pitch proximity, their average inter-onset time proximity, 
@@ -1974,8 +1993,8 @@ public class FeatureGeneratorChord {
 	 	
 		return constantChordFeatureVector;		
 	}
-	
-			
+
+
 	/**
 	 * Generates a feature vector for the chord represented by the given chordOnsetProperties under the given voice
 	 * assignment, containing the chord's variable features (i.e., those features that are different for each voice
@@ -1997,47 +2016,47 @@ public class FeatureGeneratorChord {
 	 * @return
 	 */
 	// TESTED
-	List<Double> generateVariableChordFeatureVector(Integer[][] basicTabSymbolProperties, Integer[][] basicNoteProperties,
+	List<Double> generateVariableChordFeatureVector(Integer[][] btp, Integer[][] bnp,
 		Transcription transcription, int lowestNoteIndex, int highestNumberOfVoicesTraining, 
 		List<Integer> voiceAssignment) {
 		List<Double> variableChordFeatureVector = new ArrayList<Double>();
-				
-		Transcription.verifyCase(basicTabSymbolProperties, basicNoteProperties);
-		
-	  // Add average pitch and time proximities information and pitch movements
-		double [] averagePitchAndTimeProxOfChord = getAverageProximitiesAndMovementsOfChord(basicTabSymbolProperties, 
-			basicNoteProperties, transcription, /*highestNumberOfVoicesTraining,*/ lowestNoteIndex, voiceAssignment);
+
+		Transcription.verifyCase(btp, bnp);
+
+		// Add average pitch and time proximities information and pitch movements
+		double [] averagePitchAndTimeProxOfChord = 
+			getAverageProximitiesAndMovementsOfChord(btp, 
+			bnp, transcription, /*highestNumberOfVoicesTraining,*/ lowestNoteIndex, voiceAssignment);
 		variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[0]);
 		variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[1]);
 		variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[2]);
 		for (int i = 0; i < averagePitchAndTimeProxOfChord.length - 3; i++) {
 			variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[3 + i]);
 		}
-	 					
+
 		// Add pitch-voice relation information
 //		List<List<Double>> allVoiceLabels = transcription.getMostRecentVoiceLabels();
 		List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
-		variableChordFeatureVector.add(getPitchVoiceRelationInChord(basicTabSymbolProperties, basicNoteProperties, 
+		variableChordFeatureVector.add(getPitchVoiceRelationInChord(btp, bnp, 
 			allVoiceLabels, lowestNoteIndex, voiceAssignment));
-	  
+
 		// Add voice crossing information
 		// 1. Get pitchesInChord and voicesInChord
 		List<Integer> pitchesInChord = null;
 		List<List<Integer>> voicesInChord = null;
-		List<List<Double>> voiceLabels = 
-			DataConverter.getChordVoiceLabels(voiceAssignment);
-	  // a. In the tablature case
-		if (basicTabSymbolProperties != null) {
-			pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
+		List<List<Double>> voiceLabels = DataConverter.getChordVoiceLabels(voiceAssignment);
+		// a. In the tablature case
+		if (btp != null) {
+			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
 			voicesInChord = DataConverter.getVoicesInChord(voiceLabels);
 		}
 		// b. In the non-tablature case
-		if (basicNoteProperties != null) {			  
-		  // Get the pitches and the voices in the chord, including those of sustained previous notes
-			pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex);
+		if (bnp != null) {			  
+			// Get the pitches and the voices in the chord, including those of sustained previous notes
+			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
 			voicesInChord = DataConverter.getVoicesInChord(voiceLabels);
 			List<List<Integer>> allPitchesAndVoices = 
-				Transcription.getAllPitchesAndVoicesInChord(basicNoteProperties, 
+				Transcription.getAllPitchesAndVoicesInChord(bnp, 
 				pitchesInChord, voicesInChord, allVoiceLabels, lowestNoteIndex);
 			// voicesInChord must be a List<List>>
 			pitchesInChord = allPitchesAndVoices.get(0);
@@ -2059,20 +2078,20 @@ public class FeatureGeneratorChord {
 		variableChordFeatureVector.add(sumOfPitchDistancesOfVoiceCrossingPairs);
 		// c. The average distance between the voice crossing pairs
 		double averagePitchDistancesOfVoiceCrossingPairs = 0.0;
-	  if (voiceCrossingInformation.get(2).size() > 0) {
-  		averagePitchDistancesOfVoiceCrossingPairs = 
-  			sumOfPitchDistancesOfVoiceCrossingPairs / voiceCrossingInformation.get(2).size();
+		if (voiceCrossingInformation.get(2).size() > 0) {
+			averagePitchDistancesOfVoiceCrossingPairs = 
+				sumOfPitchDistancesOfVoiceCrossingPairs / voiceCrossingInformation.get(2).size();
 		}
 		variableChordFeatureVector.add(averagePitchDistancesOfVoiceCrossingPairs);
-	  
-	  // 3. Add voice assignment
-	  List<Double> voiceAssignmentAsDoubles = ToolBox.convertToListDouble(voiceAssignment);
-	  variableChordFeatureVector.addAll(voiceAssignmentAsDoubles);
-	  
+
+		// 3. Add voice assignment
+		List<Double> voiceAssignmentAsDoubles = ToolBox.convertToListDouble(voiceAssignment);
+		variableChordFeatureVector.addAll(voiceAssignmentAsDoubles);
+
 		return variableChordFeatureVector;
 	}
-	
-	
+
+
 	/**
 	 * Returns, for the chord represented by the given onsetProperties, the feature vector that goes with the given
 	 * voice assignment.
@@ -2291,7 +2310,7 @@ public class FeatureGeneratorChord {
 			// NB: For the calculation of the skewness, the exact pitch sequence as in the chord (including any possible
 			// course crossings) will give errors when a course crossing involves one of the outer onsets--so a numerical 
 			// sorting of pitchesInChord is necessary.
-			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(basicTabSymbolProperties, null, lowestNoteIndex);
+			List<Integer> pitchesInChord = Tablature.getPitchesInChord(basicTabSymbolProperties, lowestNoteIndex);
 
 		  // 2. Determine the distribution of the inner pitches
 			// The chord may contain course crossings; therefore, pitchesInChord must be sorted numerically first
