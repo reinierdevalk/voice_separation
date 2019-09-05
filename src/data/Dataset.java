@@ -26,16 +26,16 @@ public class Dataset implements Serializable {
 	});
 			
 	public static final List<String> INTAB_4VV_NAMES = Arrays.asList(new String[]{
-//		"ochsenkun-1558_5-absolon_fili",
-//		"ochsenkun-1558_5-in_exitu",
-//		"ochsenkun-1558_5-qui_habitat",
+		"ochsenkun-1558_5-absolon_fili",
+		"ochsenkun-1558_5-in_exitu",
+		"ochsenkun-1558_5-qui_habitat",
 		"rotta-1546_15-bramo_morir",
 		"phalese-1547_7-tant_que-4vv",
 		"ochsenkun-1558_5-herr_gott",
 		"abondante-1548_1-mais_mamignone",
 		"phalese-1563_12-las_on",
-		"barbetta-1582-il_nest",
-//		"barbetta-1582-il_nest-thesis"
+//		"barbetta-1582-il_nest",
+		"barbetta-1582-il_nest-thesis"
 	});
 	
 	public static final List<String> JOSQ_4VV_NAMES = Arrays.asList(new String[]{

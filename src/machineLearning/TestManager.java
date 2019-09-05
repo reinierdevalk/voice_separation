@@ -636,7 +636,7 @@ public class TestManager {
 				if (!applToNewData) {
 					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
 				}
-				Piece p = predictedTranscr.getPiece();
+//				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
 				System.out.println("######## " + "export fold " + fold);
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});

@@ -1497,11 +1497,19 @@ public class TrainingManager {
 	 *                  (element 1), and output neurons (element 2). Bias neurons are always
 	 *                   excluded. 
 	 * @param path
-	 * @param trainingData N2N case: contains two elements: features (index 0) and labels (index 1)
+	 * @param trainingData N2N case: contains two elements: 
+	 *                               at index 0: features 
+                                     at index 1: full labels (i.e., including duration, if applicable)
 	 *                     C2C case: contains the n chordFeatures, where n is the number of chords 
-	 * @param argGroundTruths
-	 * @param validationData N2N case: contains two elements: features (index 0) and labels (index 1)
-	 * @param argGroundTruthsVal
+	 * @param argGroundTruths N2N case: contains two elements: 
+	 *                                  at index 0: voice labels 
+                                        at index 1: duration labels (if applicable) 
+	 * @param validationData N2N case: contains two elements: 
+	 *                                 at idex 0: features  
+	 *                                 at index 1: full labels (i.e., including duration, if applicable)
+	 * @param argGroundTruthsVal N2N case: contains two elements: 
+	 *                                     at index 0: voice labels 
+                                           at index 1: duration labels (if applicable)
 	 * @param argEDUInfo
 	 * @param argEDUInfoVal
 	 * @param argPossibleVoiceAssignmentsAllChords
@@ -1515,6 +1523,8 @@ public class TrainingManager {
 		List<List<List<Integer>>> trainingResults = new ArrayList<List<List<Integer>>>();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
+		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
+		boolean modelDuration = m.getModelDuration();
 		ActivationFunction af = 
 			NNManager.ALL_ACT_FUNCT[modelParameters.get(NNManager.ACT_FUNCTION).intValue()];
 		ModellingApproach ma = 
@@ -1541,17 +1551,22 @@ public class TrainingManager {
 		List<List<Double>> argGTVoiceLabelsVal = null;
 		// In the N2N case, trainingData.get(1) and argGroundTruths.get(0) both contain the 
 		// GT voice labels for the training data. Sanity check that they are indeed the same.
-		// The same applies to the validation data
+		// The same applies to the validation data.
+		// NB Is only true when not modelling duration TODO remove?
 		if (ma == ModellingApproach.N2N) {
-			if (!trainingData.get(1).equals(argGroundTruths.get(0))) {
-				throw new RuntimeException("ERROR: the lists of voice labels are not the same.");
+			if (!modelDuration) {
+				if (!trainingData.get(1).equals(argGroundTruths.get(0))) {
+					throw new RuntimeException("ERROR: the lists of voice labels are not the same.");
+				}
+				if (valPerc != 0 && !validationData.get(1).equals(argGroundTruthsVal.get(0))) {
+					throw new RuntimeException("ERROR: the lists of voice labels are not the same.");
+				}
 			}
-			if (valPerc != 0 && !validationData.get(1).equals(argGroundTruthsVal.get(0))) {
-				throw new RuntimeException("ERROR: the lists of voice labels are not the same.");
-			}
-			argGTVoiceLabels = trainingData.get(1);
+//			argGTVoiceLabels = trainingData.get(1);
+			argGTVoiceLabels = argGroundTruths.get(0);
 			if (valPerc != 0) {
-				argGTVoiceLabelsVal = validationData.get(1);
+//				argGTVoiceLabelsVal = validationData.get(1);
+				argGTVoiceLabelsVal = argGroundTruthsVal.get(0);
 			}
 		}
 		else if (ma == ModellingApproach.C2C) {

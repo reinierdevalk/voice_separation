@@ -71,21 +71,21 @@ public class UI {
 			repeatExp = true;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = true;
+			estimateEntries = false;
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;
-			datasetID = DatasetID.tBYRD_4vv;
+//			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
-//			datasetID = DatasetID.INT_4vv;
+			datasetID = DatasetID.INT_3vv;
 
 			datasetVersion = "thesis"; // only for this if
 
-			expName = "thesis/exp_1"; // publication + experiment (if applicable)
-			expName = "ISMIR-2019/";
-			expName = "hector/";
-			
-			m = Model.N;
+			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
+//			expName = "ISMIR-2019/";
+//			expName = "hector/";
+
+			m = Model.N_PRIME;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 			storedExpName = "thesis/exp_1";
@@ -109,8 +109,8 @@ public class UI {
 
 			// Tuned hyperparameters
 			// Shallow network
-			lambda = 0.00001; // 0.0001 with 60-80 iterations works best
-			hiddenLayerFactor = 1.0;
+			lambda = 0.00003; // 0.0001 with 60-80 iterations works best
+			hiddenLayerFactor = 0.5;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 1.0; //0.875;
@@ -200,7 +200,8 @@ public class UI {
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
-		int validationPercentage = (mt == ModelType.DNN) ? 20 : 20; // TODO or 20 : 0; 
+		int validationPercentage = (mt == ModelType.DNN) ? 20 : 0; // TODO or 20 : 20; 
+		int decisionContextSize = 1; 
 		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 		double cycles = 10.0;
 		int epochs = 600;
@@ -322,6 +323,7 @@ public class UI {
 			modelParams.put(Runner.DECODING_ALG, (m == Model.H) ? (double) decAlg.getIntRep() : null);
 			// c. Non-tuned hyperparameters 
 			modelParams.put(Runner.VALIDATION_PERC, (double) validationPercentage);
+			modelParams.put(Runner.DECISION_CONTEXT_SIZE, (double) decisionContextSize);
 			modelParams.put(Runner.META_CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) maxMetaCycles : null);
 			modelParams.put(NNManager.CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) cycles : null);
 			modelParams.put(Runner.EPOCHS, (mt == ModelType.DNN) ? (double) epochs : null);
