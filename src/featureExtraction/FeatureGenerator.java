@@ -1039,9 +1039,12 @@ public class FeatureGenerator {
 		
 		
 	/**
-	 * Compares the note given as argument to the adjacent Note (previous or next, depepending
+	 * Compares the note given as argument to the adjacent Note (previous or next, depending
 	 * on the value of direction) in each voice, and calculates their pitch proximity, 
 	 * inter-onset time proximity, and offset-onset time proximity. 
+	 * If decisionContextSize > 1, does the same for each next adjacent note within the 
+	 * given decision context, and also calculates the pitch movement (1.0 if up; 0.0 if same
+	 * or down).  
 	 *  
 	 * Returns a double[][] containing
 	 *   as element 0: a double[] containing the pitch proximities of the current Note to the 
@@ -1064,6 +1067,9 @@ public class FeatureGenerator {
 	 *                  and for the non-tablature case, where there are no minimum durations:
 	 *                    if direction = Direction.LEFT:  onset currentNote minus offset previous Note
 	 *                    if direction = Direction.RIGHT: offset currentNote minus onset next Note 
+	 *   and, if decisionContextSize > 1
+	 *   as element 3	a double[] containing the pitch movement of the current Note to the 
+	 *                  adjacent Note in each voice (1.0 if up and 0.0 if same or down).
 	 *              
 	 * @param btp
 	 * @param transcription
@@ -1077,27 +1083,32 @@ public class FeatureGenerator {
 	 // TESTED for both tablature- (non-dur and dur) and non-tablature case; for both fwd and bwd model
 	public static List<double[][]> getPitchAndTimeProximitiesToAllVoices(Integer[][] btp, Transcription transcription, 
 		Note currentNote, Direction direction, boolean modelDuration, boolean isBidirectional,
-		int decisionContextSize) {			
+		int decisionContextSize) {
+		
+		int arrElements = (decisionContextSize == 1) ? 3 : 4;
+		int arrSize = (btp != null) ? 4 : 3;
 
 		List<double[][]> res = new ArrayList<>();
-		List<double[]> resMvmts = new ArrayList<>();
 		for (int i = 0; i < decisionContextSize; i++) {
 			// Initialise with the default values also used when a note is the first
 			// one in a voice (see getProximitiesAndMovementToVoice()). The elements that 
 			// correspond with voices not in the transcription retain these values  
-			double[][] r = new double[3][Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			double[][] r = new double[arrElements][Transcription.MAXIMUM_NUMBER_OF_VOICES];
 			for (double[] d : r) {
 				Arrays.fill(d, -1.0);
 			}
 			res.add(r);
-			// Pitch movement: each voice has two bits representing up and down; the position
-			// of the 1.0 indicates which it is. No 1.0 in a bit pair indicates no change (same)
-			double[] mvmts = new double[2*Transcription.MAXIMUM_NUMBER_OF_VOICES];
-			Arrays.fill(mvmts, -1.0);
-			resMvmts.add(mvmts);
+//			// Pitch movement: each voice has two bits representing up and down; the position
+//			// of the 1.0 indicates which it is. No 1.0 in a bit pair indicates no change (same)
+//			double[] mvmts = new double[2*Transcription.MAXIMUM_NUMBER_OF_VOICES];
+//			// Pitch movement: 1.0 indicates up, 0.0 indicates same or down (pitchProx disambiguates:
+//			// if it is 1.0 (i.e. 1 / (0+1)) it is same; else down 
+//			double[] mvmts = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+//			Arrays.fill(mvmts, -1.0);
+//			resMvmts.add(mvmts);
 		}
 
-		// 1. Traverse all the theoretically possible voices 
+		// Traverse all the theoretically possible voices 
 		for (int voiceNumber = 0; voiceNumber < Transcription.MAXIMUM_NUMBER_OF_VOICES; voiceNumber++) {
 			// a. If transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
@@ -1110,19 +1121,6 @@ public class FeatureGenerator {
 					double[] pAndTProxCurrNote = allPAndTProxCurrNote.get(i);
 					// a. In the tablature case
 					if (btp != null) {
-						if (decisionContextSize > 1) {
-							// Set both bits of currentVoice to 0
-							resMvmts.get(i)[voiceNumber*2] = 0.0;
-							resMvmts.get(i)[(voiceNumber*2) + 1] = 0.0;
-							// Pitch movement positive: set first bit to 1.0
-							if (pAndTProxCurrNote[4] > 0.0) {
-								resMvmts.get(i)[voiceNumber*2] = 1.0;
-							}
-							// Pitch movement negative: set second bit to 1.0
-							else if (pAndTProxCurrNote[4] < 0.0) {
-								resMvmts.get(i)[(voiceNumber*2) + 1] = 1.0;
-							}
-						}
 						res.get(i)[0][voiceNumber] = pAndTProxCurrNote[0];
 						res.get(i)[1][voiceNumber] = pAndTProxCurrNote[1];
 						if (direction == Direction.LEFT) {
@@ -1151,18 +1149,63 @@ public class FeatureGenerator {
 								}
 							}
 						}
+						if (decisionContextSize > 1) {
+//							// Set both bits of currentVoice to 0
+//							resMvmts.get(i)[voiceNumber*2] = 0.0;
+//							resMvmts.get(i)[(voiceNumber*2) + 1] = 0.0;
+//							// Pitch movement positive: set first bit to 1.0
+//							if (pAndTProxCurrNote[4] > 0.0) {
+//								resMvmts.get(i)[voiceNumber*2] = 1.0;
+//							}
+//							// Pitch movement negative: set second bit to 1.0
+//							else if (pAndTProxCurrNote[4] < 0.0) {
+//								resMvmts.get(i)[(voiceNumber*2) + 1] = 1.0;
+//							}
+							
+//							if (pAndTProxCurrNote[4] > 0.0) {
+//								res.get(i)[3][voiceNumber] = 1.0;
+//							}
+//							else {
+//								// Only if there is an adjacent note
+//								if (pAndTProxCurrNote[0] != -1) {
+//									res.get(i)[3][voiceNumber] = 0.0;
+//								}
+//							}
+
+						}
 					}
 					// b. In the non-tablature case
 					else {
 						res.get(i)[0][voiceNumber] = pAndTProxCurrNote[0];
 						res.get(i)[1][voiceNumber] = pAndTProxCurrNote[1];
 						res.get(i)[2][voiceNumber] = pAndTProxCurrNote[2];
+//						if (decisionContextSize > 1) {
+//							if (pAndTProxCurrNote[4] > 0.0) {
+//								res.get(i)[3][voiceNumber] = 1.0;
+//							}
+//							else {
+//								// Only if there is an adjacent note
+//								if (pAndTProxCurrNote[0] != -1) {
+//									res.get(i)[3][voiceNumber] = 0.0;
+//								}
+//							}
+//						}
+					}
+					if (decisionContextSize > 1) {
+						if (pAndTProxCurrNote[arrSize] > 0.0) {
+							res.get(i)[3][voiceNumber] = 1.0;
+						}
+						else {
+							// Only if there is an adjacent note
+							if (pAndTProxCurrNote[0] != -1) {
+								res.get(i)[3][voiceNumber] = 0.0;
+							}
+						}
 					}
 				}
 			}
 		}
 
-		// 2. All voices traversed? Set and return pitchAndTimeProximities
 		return res;
 	}
 
@@ -1209,16 +1252,6 @@ public class FeatureGenerator {
 		NotationVoice voiceToCompareTo, Note currentNote, Direction direction, 
 		int decisionContextSize) {
 
-//		double[] proximitiesAndMovementToVoice = null;
-//		// a. In the tablature case
-//		if (btp != null) {
-//			proximitiesAndMovementToVoice = new double[5];
-//		}
-//		// b. In the non-tablature case
-//		else {
-//			proximitiesAndMovementToVoice = new double[4];
-//		}
-
 		// 1. Determine the previous Note
 //		Note previousNote = 
 //			Transcription.getAdjacentNoteInVoice(voiceToCompareTo, currentNote, direction==Direction.LEFT);
@@ -1240,23 +1273,14 @@ public class FeatureGenerator {
 
 		List<double[]> res = new ArrayList<>();
 		for (Note previousNote : previousNotes) {
-			double[] proximitiesAndMovementToVoice = null;
-			// a. In the tablature case
-			if (btp != null) {
-				proximitiesAndMovementToVoice = new double[5];
-			}
-			// b. In the non-tablature case
-			else {
-				proximitiesAndMovementToVoice = new double[4];
-			}
-			
+			double[] proximitiesAndMovementToVoice = (btp != null) ? new double[5] : new double[4];
+
 			// 2. Determine the pitch difference, inter-onset time, offset-onset time, and 
 			// pitch movement between currentNote and the previous Note in voiceToCompareTo
 			// a. If voiceToCompareTo contains Notes before currentNote
 			if (previousNote != null) {
 				// 1. Determine the pitch difference and the pitch movement
-				int pitchDif = 
-					Math.abs(previousNote.getMidiPitch() - currentNote.getMidiPitch());
+				int pitchDif = Math.abs(previousNote.getMidiPitch() - currentNote.getMidiPitch());
 				int pitchMovement = currentNote.getMidiPitch() - previousNote.getMidiPitch();
 
 				// 2. Determine the inter-onset time
@@ -1365,7 +1389,6 @@ public class FeatureGenerator {
 
 		// 3. Return proximitiesAndMovementToVoice
 		return res;
-//		return proximitiesAndMovementToVoice;
 	}
 
 
