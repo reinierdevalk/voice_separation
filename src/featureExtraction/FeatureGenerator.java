@@ -1046,7 +1046,7 @@ public class FeatureGenerator {
 	 * given decision context, and also calculates the pitch movement (1.0 if up; 0.0 if same
 	 * or down).  
 	 *  
-	 * Returns a double[][] containing
+	 * For each adjacent note within the decision context, returns a double[][] containing
 	 *   as element 0: a double[] containing the pitch proximities of the current Note to the 
 	 *                 adjacent Note in each voice, where element 0 is the proximity to voice 0
 	 *                 (the top voice), element 1 that to voice 1 (the second from the top), etc.;
@@ -1823,7 +1823,7 @@ public class FeatureGenerator {
 					fv.add(posInChord[i]);
 				}
 			}
-			
+
 			// 3. Chord-level features
 			if (featVec.getIntRep() > Runner.FeatureVector.PHD_B.getIntRep()) {
 				// chordSize
