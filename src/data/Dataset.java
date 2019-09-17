@@ -34,8 +34,8 @@ public class Dataset implements Serializable {
 		"ochsenkun-1558_5-herr_gott",
 		"abondante-1548_1-mais_mamignone",
 		"phalese-1563_12-las_on",
-//		"barbetta-1582-il_nest",
-		"barbetta-1582-il_nest-thesis"
+		"barbetta-1582-il_nest",
+//		"barbetta-1582-il_nest-corrected"
 	});
 	
 	public static final List<String> JOSQ_4VV_NAMES = Arrays.asList(new String[]{

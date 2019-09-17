@@ -1094,7 +1094,8 @@ public class TestManager {
 //		List<Integer> ns = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 		ModelType mt = m.getModelType();
-		DecisionContext dc = m.getDecisionContext(); 
+		DecisionContext dc = m.getDecisionContext();
+		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
 		boolean modelDuration = m.getModelDuration();
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
@@ -1157,7 +1158,8 @@ public class TestManager {
 					noteFeatures = 
 						FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
 						basicTabSymbolProperties, predictedVoicesCoDNotes, basicNoteProperties, 
-						predictedTranscription, predictedLabels, meterInfo, chordSizes, modelDuration);	
+						predictedTranscription, predictedLabels, meterInfo, chordSizes, 
+						modelDuration, decisionContextSize);
 				}
 //				}
 				boolean isMuSci = false; // TODO
@@ -2128,7 +2130,8 @@ public class TestManager {
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 
 		ModelType mt = m.getModelType();
-		DecisionContext dc = m.getDecisionContext(); 
+		DecisionContext dc = m.getDecisionContext();
+		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
 		boolean modelDuration = m.getModelDuration();		
 //		DatasetID di = 
 //			Dataset.ALL_DATASET_IDS[modelParameters.get(Dataset.DATASET_ID).intValue()];
@@ -2204,14 +2207,16 @@ public class TestManager {
 			currentNoteFeatureVector = 
 				FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
-				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, pm, featVec);
+				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, pm, featVec,
+				decisionContextSize);
 		}
 		else {
 			// NB: allDurationLabels, allVoicesCoDNotes, and allVoiceLabels are predicted (see testInApplicationMode())
 			currentNoteFeatureVector = 
 				FeatureGenerator.generateBidirectionalNoteFeatureVector(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
-				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration);
+				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration,
+				decisionContextSize);
 		}
 		if (mt == ModelType.ENS) {
 //			currentNoteFeatureVector = featureGenerator.generateNoteFeatureVectorPlus(basicTabSymbolProperties,

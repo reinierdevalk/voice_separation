@@ -339,7 +339,8 @@ public class TrainingManager {
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		ModelType mt = m.getModelType();
 		boolean modelDuration = m.getModelDuration();
-		DecisionContext dc = m.getDecisionContext(); 
+		DecisionContext dc = m.getDecisionContext();
+		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
 		boolean verbose = Runner.getVerbose();
 		List<Integer> sliceIndices = null;
 		if (mt == ModelType.MM || mt == ModelType.ENS) {
@@ -575,7 +576,7 @@ public class TrainingManager {
 								currNoteFeatures = 
 									FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
 									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels, 
-									currMeterInfo, currChordSizes, modelDuration);
+									currMeterInfo, currChordSizes, modelDuration, decisionContextSize);
 							}
 							noteFeaturesPerPiece.set(indexInAll, currNoteFeatures);
 						}
