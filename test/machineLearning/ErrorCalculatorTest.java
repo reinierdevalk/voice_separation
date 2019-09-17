@@ -10,18 +10,24 @@ import java.util.List;
 import machineLearning.ErrorCalculator;
 import representations.Transcription;
 import ui.Runner;
+import ui.UI;
 import junit.framework.TestCase;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
+import exports.MEIExport;
 
 public class ErrorCalculatorTest extends TestCase {
 
-	private File midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
-	private File encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
+	private File midiTestpiece1;
+	private File encodingTestpiece1;
 
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
+		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
+		encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
 	}
 
 

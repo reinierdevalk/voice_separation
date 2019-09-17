@@ -13,6 +13,8 @@ import de.uos.fmt.musitech.utility.math.Rational;
 import representations.Transcription;
 
 public class OutputEvaluator {
+	
+	static boolean ignoreExceptionForTest = false;
 
 
 	public static List<Double> createAllHighestNetworkOutputs(List<List<Double>> 
@@ -114,7 +116,7 @@ public class OutputEvaluator {
 			if (Runner.getDataset().isTablatureSet()) {
 				deviationThreshold = modelParameters.get(Runner.DEV_THRESHOLD);
 			}
-			
+
 //			for (int i = 0; i < noteFeatures.size(); i++) {
 			for (int i = 0; i < argAllNetworkOutputs.size(); i++) {
 //				// Evaluate the network for the current onset
@@ -692,7 +694,10 @@ public class OutputEvaluator {
 							}
 						} 
 						predictedVoices.add(closestPosition);
-						throw new RuntimeException("Irregularity in OutputEvaluatorTab.interpretNetworkOutput.");
+						// In non-unit test case, throw RuntimeException
+						if (ignoreExceptionForTest == false) {
+							throw new RuntimeException("Irregularity in OutputEvaluatorTab.interpretNetworkOutput().");
+						}
 					}
 				}
 			} 

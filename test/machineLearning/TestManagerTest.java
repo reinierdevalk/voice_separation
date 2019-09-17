@@ -39,7 +39,7 @@ public class TestManagerTest extends TestCase {
 		super.setUp();
 		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
 		testPaths = new String[]{Runner.encodingsPathTest, Runner.midiPathTest, Runner.midiPathTest};
-		encodingTestpiece1 = new File(Runner.encodingsPathTest+ "testpiece.tbp");
+		encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
 		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");	
 	}
 
