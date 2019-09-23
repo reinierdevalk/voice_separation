@@ -1036,41 +1036,55 @@ public class FeatureGenerator {
 //			return adjacentNote;
 //		}
 //	}
-		
-		
+
+
 	/**
 	 * Compares the note given as argument to the adjacent Note (previous or next, depending
 	 * on the value of direction) in each voice, and calculates their pitch proximity, 
-	 * inter-onset time proximity, and offset-onset time proximity. 
-	 * If decisionContextSize > 1, does the same for each next adjacent note within the 
-	 * given decision context, and also calculates the pitch movement (1.0 if up; 0.0 if same
-	 * or down).  
+	 * inter-onset time proximity, and offset-onset time proximity.<br><br>
 	 *  
-	 * For each adjacent note within the decision context, returns a double[][] containing
-	 *   as element 0: a double[] containing the pitch proximities of the current Note to the 
-	 *                 adjacent Note in each voice, where element 0 is the proximity to voice 0
-	 *                 (the top voice), element 1 that to voice 1 (the second from the top), etc.;
-	 *   as element 1: a double[] containing the inter-onset time proximities of the current 
-	 *                 Note to the adjacent Note in each voice;
-	 *   as element 2: a double[] containing the offset-onset time proximities of the current 
-	 *                 Note to the adjacent Note in each voice, i.e, for the tablature case:
-	 *                   if direction = Direction.LEFT:
-	 *                     not modelling duration: onset currentNote minus offset previous Note,
-	 *                                             using the minimum duration of the previous note;
-	 *                     modelling duration:     onset currentNote minus offset previous Note,
-	 *                                             using the full duration of the previous note;
-	 *                   if direction = Direction.RIGHT:
-	 *                     bwd model:              offset currentNote minus onset next Note, 
-	 *                                             using the minimum duration of the current note;
-	 *                     bi-directional model:   offset currentNote minus onset next Note, 
-	 *                                             using the full duration of the current note;
-	 *                  and for the non-tablature case, where there are no minimum durations:
-	 *                    if direction = Direction.LEFT:  onset currentNote minus offset previous Note
-	 *                    if direction = Direction.RIGHT: offset currentNote minus onset next Note 
-	 *   and, if decisionContextSize > 1
-	 *   as element 3	a double[] containing the pitch movement of the current Note to the 
-	 *                  adjacent Note in each voice (1.0 if up and 0.0 if same or down).
-	 *              
+	 * If <code>averageProxAndMvmts == false</code>, returns a double[][] of size <code>decisionContextSize</code>, 
+	 * containing, for each adjacent note within the decision context
+	 * <ul>
+	 * <li> as element 0: a double[] containing the pitch proximities of the current Note to the 
+	 *                    adjacent Note in each voice, where element 0 is the proximity to voice 0
+	 *                    (the top voice), element 1 that to voice 1 (the second from the top), etc.;</li>
+	 * <li> as element 1: a double[] containing the inter-onset time proximities of the current 
+	 *                    Note to the adjacent Note in each voice;</li>
+	 * <li> as element 2: a double[] containing the offset-onset time proximities of the current 
+	 *                    Note to the adjacent Note in each voice, i.e, for the tablature case:
+	 *                    <ul>
+	 *                    <li> if direction = Direction.LEFT:</li>
+	 *                         <ul>
+	 *                         <li> not modelling duration: onset currentNote minus offset previous
+								    Note, using the minimum duration of the previous note;</li>
+	 *                         <li> modelling duration: onset currentNote minus offset previous Note,
+	 *                              using the full duration of the previous note;</li>
+	 *                         </ul>
+	 *                    <li> if direction = Direction.RIGHT:</li>
+	 *                         <ul>
+	 *                         <li> bwd model: offset currentNote minus onset next Note, using the 
+	 *                              minimum duration of the current note;</li>
+	 *                         <li> bi-directional model: offset currentNote minus onset next Note, 
+	 *                              using the full duration of the current note;</li>
+	 *                         </ul>
+	 *                    </ul>
+	 *                    and for the non-tablature case, where there are no minimum durations:
+	 *                    <ul>
+	 *                    <li> if direction = Direction.LEFT: onset currentNote minus offset previous Note</li>
+	 *                    <li> if direction = Direction.RIGHT: offset currentNote minus onset next Note</li> 
+	 *                    </ul></li>
+	 *   </ul>
+	 *   and, if <code>decisionContextSize</code> > 1 
+	 *   <ul>
+	 *   <li> as element 3:	a double[] containing the pitch movement of the current Note to the 
+	 *                      adjacent Note in each voice (1.0 if up and 0.0 if same or down).</li>
+	 *   </ul>
+	 *
+	 *   If <code>averageProxAndMvmts == true</code>, returns a double[][] of size 1, containing 
+	 *   the averaged values over all adjacent notes within the decision context. The pitch 
+	 *   movements (in this case, positive or negative semitone distances) are also averaged.<br>
+	 * 
 	 * @param btp
 	 * @param transcription
 	 * @param currentNote
@@ -1078,22 +1092,32 @@ public class FeatureGenerator {
 	 * @param modelDuration
 	 * @param isBidirectional
 	 * @param decisionContextSize
+	 * @param averageProxAndMvmts
 	 * @return
 	 */
 	 // TESTED for both tablature- (non-dur and dur) and non-tablature case; for both fwd and bwd model
-	public static List<double[][]> getPitchAndTimeProximitiesToAllVoices(Integer[][] btp, Transcription transcription, 
-		Note currentNote, Direction direction, boolean modelDuration, boolean isBidirectional,
-		int decisionContextSize) {
-		
-		int arrElements = (decisionContextSize == 1) ? 3 : 4;
-		int arrSize = (btp != null) ? 4 : 3;
+	public static List<double[][]> getPitchAndTimeProximitiesToAllVoices(Integer[][] btp, 
+		Transcription transcription, Note currentNote, Direction direction, boolean modelDuration, 
+		boolean isBidirectional, int decisionContextSize, boolean averageProxAndMvmts) {
+
+		// decisionContextSize == 1 && averageProxAndMvmts == false : thesis case
+		// decisionContextSize == 1 && averageProxAndMvmts == true  : short new case
+		// decisionContextSize >  1 && averageProxAndMvmts == false : long new case 
+		// decisionContextSize >  1 && averageProxAndMvmts == true  : short new case
+		//
+		// Mvmts are included if
+		// decisionContextSize > 1
+		// averageProxAndMvmts == true (in this case, decisionContextSize may be 1)
+		boolean includeMvmts = (decisionContextSize > 1 || averageProxAndMvmts) ? true : false;
+//		boolean includeMvmts = (decisionContextSize == 1 && !averageProxAndMvmts) ? false : true;
+		int numProxAndMvmts = averageProxAndMvmts ? 1 : decisionContextSize;
 
 		List<double[][]> res = new ArrayList<>();
-		for (int i = 0; i < decisionContextSize; i++) {
+		for (int i = 0; i < numProxAndMvmts; i++) {
 			// Initialise with the default values also used when a note is the first
 			// one in a voice (see getProximitiesAndMovementToVoice()). The elements that 
 			// correspond with voices not in the transcription retain these values  
-			double[][] r = new double[arrElements][Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			double[][] r = new double[includeMvmts ? 4 : 3][Transcription.MAXIMUM_NUMBER_OF_VOICES];
 			for (double[] d : r) {
 				Arrays.fill(d, -1.0);
 			}
@@ -1115,10 +1139,13 @@ public class FeatureGenerator {
 			if (voiceNumber < transcription.getPiece().getScore().size()) {
 				NotationVoice currentVoice = transcription.getPiece().getScore().get(voiceNumber).get(0);
 				List<double[]> allPAndTProxCurrNote = 
-					getProximitiesAndMovementToVoice(btp, currentVoice, currentNote, 
-					direction, decisionContextSize);
-				for (int i = 0; i < decisionContextSize; i++) {
+					getProximitiesAndMovementToVoiceAll(btp, currentVoice, currentNote, 
+					direction, decisionContextSize, averageProxAndMvmts);
+//				System.out.println("voiceNumber " + voiceNumber);
+				for (int i = 0; i < numProxAndMvmts; i++) {
+					// pAndTProxCurrNote contains pitchProx, ioProx, ooProx(es), and mvmt 
 					double[] pAndTProxCurrNote = allPAndTProxCurrNote.get(i);
+//					System.out.println(Arrays.toString(pAndTProxCurrNote));
 					// a. In the tablature case
 					if (btp != null) {
 						res.get(i)[0][voiceNumber] = pAndTProxCurrNote[0];
@@ -1149,7 +1176,7 @@ public class FeatureGenerator {
 								}
 							}
 						}
-						if (decisionContextSize > 1) {
+//						if (decisionContextSize > 1) {
 //							// Set both bits of currentVoice to 0
 //							resMvmts.get(i)[voiceNumber*2] = 0.0;
 //							resMvmts.get(i)[(voiceNumber*2) + 1] = 0.0;
@@ -1161,38 +1188,18 @@ public class FeatureGenerator {
 //							else if (pAndTProxCurrNote[4] < 0.0) {
 //								resMvmts.get(i)[(voiceNumber*2) + 1] = 1.0;
 //							}
-							
-//							if (pAndTProxCurrNote[4] > 0.0) {
-//								res.get(i)[3][voiceNumber] = 1.0;
-//							}
-//							else {
-//								// Only if there is an adjacent note
-//								if (pAndTProxCurrNote[0] != -1) {
-//									res.get(i)[3][voiceNumber] = 0.0;
-//								}
-//							}
-
-						}
+//						}
 					}
 					// b. In the non-tablature case
 					else {
 						res.get(i)[0][voiceNumber] = pAndTProxCurrNote[0];
 						res.get(i)[1][voiceNumber] = pAndTProxCurrNote[1];
 						res.get(i)[2][voiceNumber] = pAndTProxCurrNote[2];
-//						if (decisionContextSize > 1) {
-//							if (pAndTProxCurrNote[4] > 0.0) {
-//								res.get(i)[3][voiceNumber] = 1.0;
-//							}
-//							else {
-//								// Only if there is an adjacent note
-//								if (pAndTProxCurrNote[0] != -1) {
-//									res.get(i)[3][voiceNumber] = 0.0;
-//								}
-//							}
-//						}
 					}
-					if (decisionContextSize > 1) {
-						if (pAndTProxCurrNote[arrSize] > 0.0) {
+					
+					// Add movements
+					if (!averageProxAndMvmts && decisionContextSize > 1) {
+						if (pAndTProxCurrNote[pAndTProxCurrNote.length-1] > 0.0) { // 0.0 is default value (no adjacent note); if value > 0.0, there is an adjacent note
 							res.get(i)[3][voiceNumber] = 1.0;
 						}
 						else {
@@ -1202,18 +1209,31 @@ public class FeatureGenerator {
 							}
 						}
 					}
+					if (averageProxAndMvmts) {
+						// Only if there is an adjacent note
+						if (pAndTProxCurrNote[0] != -1) {
+							// If pitch movement is -1, adapt to prevent it not being scaled
+							double mvmt = pAndTProxCurrNote[pAndTProxCurrNote.length-1];
+							if (mvmt == -1) {
+								mvmt = -0.99999;
+							}
+							res.get(i)[3][voiceNumber] = mvmt;
+						}
+						else {
+							res.get(i)[3][voiceNumber] = 0.0;
+						}
+					}
 				}
 			}
 		}
-
 		return res;
 	}
-
-
+	
+	
 	/**
-	 * Compares the Note given as argument to the adjacent Note (previous or next, depending on the value of direction)
-	 * in the voice given as argument, and calculates their pitch proximity, their inter-onset time proximity, their 
-	 * offset-onset time proximity, and the pitch movement. 
+	 * Compares the Note given as argument to the adjacent Note (previous or next, depending on the
+	 * value of direction) in the voice given as argument, and calculates their pitch proximity, 
+	 * their inter-onset time proximity, their offset-onset time proximity, and the pitch movement. 
 	 * (1) Proximities are defined as inverted distances: 
 	 *     -pitch proximity is > 0 and <= 1 (where a pitch proximity of 1.0 means no distance)
 	 *     -inter-onset proximity is > 0 and < 1
@@ -1224,8 +1244,189 @@ public class FeatureGenerator {
 	 * NB: Proximities to non-existing voices are indicated with -1.0. 
 	 * (2) Pitch movements are defined in semitones, and can be positive (ascending) and negative (descending). 
 	 * 
-	 * Returns a List<double[]>, containing, for each previous note within the given 
-	 * decisionContextSize, a double[] containing:
+	 * Returns a double[], containing, for the averaged previous notes within the given 
+	 * decisionContextSize, 
+	 *   as element 0: the pitch proximity of currentNote to the avg adjacent Note in voiceToCompareTo;
+	 *   as element 1: the inter-onset time proximity of currentNote to avg the adjacent Note in voiceToCompareTo;  
+	 *   as element 2: the offset-onset time proximity of currentNote to the avg adjacent Note in voiceToCompareTo using
+	 *                 minimum durations, i.e.,
+	 *                   if direction = Direction.LEFT:
+	 *                     onset currentNote minus offset previous Note, using the minimum duration of the previous note;
+	 *                   if direction = Direction.RIGHT:
+	 *                     offset currentNote minus onset next Note, using the minimum duration of the current note; 
+	 *   as element 3: the offset-onset time proximity of currentNote to the avg adjacent Note in voiceToCompareTo using
+	 *                 full durations of the previous (Direction.LEFT) and current (Direction.RIGHT) note; 
+	 *   as element 4: the pitch movement (in semitones) of currentNote with regard to the avg adjacent Note in
+	 *                 voiceToCompareTo.                
+	 * NB: In the non-tablature case, element 2 above is not included and a double[] of size 4 is returned.
+	 *
+	 * @param btp 
+	 * @param voiceToCompareTo
+	 * @param currentNote
+	 * @param direction
+	 * @param decisionContextSize
+	 * @return
+	 */
+	// TESTED for both tablature- and non-tablature case; for both fwd and bwd model
+	private static double[] getProximitiesAndMovementToVoiceAvg(Integer[][] btp, NotationVoice 
+		voiceToCompareTo, Note currentNote, Direction direction, int decisionContextSize) {
+		
+		System.out.println("currentNote");
+		System.out.println(currentNote);
+		
+		// 1. Determine the previous Notes
+		List<Note> previousNotes = new ArrayList<>();
+		Note origCurrentNote = currentNote;
+		for (int i = 0; i < decisionContextSize; i++) {
+			// If currentNote is null, the previous currentNote is the first in the voice
+			if (currentNote != null) {
+				Note prevNote = 
+					Transcription.getAdjacentNoteInVoice(voiceToCompareTo, currentNote, direction==Direction.LEFT);
+				if (prevNote != null) {
+					previousNotes.add(prevNote);
+					currentNote = prevNote;
+				}
+				else {
+					break;
+				}
+			}
+		}
+		currentNote = origCurrentNote;
+		// NB Example for notes [0, 1, 2, 3, 4, 5, 6]; let 3 be currentNote 
+		// fwd case: previousNotes = [3] + [2, 1, 0], proximities calculated R-L (3->2; 2->1; 1->0)
+		// bwd case: previousNotes = [3] + [4, 5, 6], proximities calculated L-R (3->4; 4->5; 5->6) 
+		// Prepend currentNote
+		previousNotes.add(0, currentNote);
+		
+		System.out.println("previousNotes");
+		System.out.println(previousNotes);
+
+		double[] proxAndMvmtToVoice = (btp != null) ? new double[5] : new double[4];
+		Arrays.fill(proxAndMvmtToVoice, 0.0);
+
+		// If there are no previous notes: set "does-not-apply" values of -1.0 (proximities) and 
+		// 0.0 (movement) 
+		if (previousNotes.size() == 1) {
+			Arrays.fill(proxAndMvmtToVoice, -1.0);
+			proxAndMvmtToVoice[proxAndMvmtToVoice.length-1] = 0.0;
+		}		
+		// If there are: calculate the pitch difference, inter-onset time, offset-onset time, and 
+		// pitch movement between the current-previous note pairs and average them
+		else {
+			double[] avgDistances = (btp != null) ? new double[5] : new double[4];
+			Arrays.fill(avgDistances, 0.0);
+			for (int i = 0; i < previousNotes.size()-1; i++) {
+				Note currNote = previousNotes.get(i);
+				Note prevNote = previousNotes.get(i+1);
+				List<Double> distances = 
+					getPitchAndTimeDistances(btp, currNote, prevNote, direction);
+
+//				// In the non-tablature case, remove offsetOnsetTimeExcl value (always -1)
+//				if (btp == null) {
+//					distances.remove(2);
+//				}
+//				for (int j = 0; j < distances.size(); j++) {					
+//					avgDistances[j] += distances.get(j);
+//				}
+				
+				double pitchDif = distances.get(0);
+				double interOnsetTime = distances.get(1);
+				double offsetOnsetTimeExcl = (btp != null) ? distances.get(2) : -1.0;
+				double offsetOnsetTimeIncl = (btp != null) ? distances.get(3) : distances.get(2);
+				double pitchMovement = (btp != null) ? distances.get(4) : distances.get(3);
+				
+				// Add current proximities and pitch movements
+				// pitchDif (values >= 0)
+				proxAndMvmtToVoice[0] += calculateProximity(/*(double)*/ pitchDif);
+				// interOnsetTime (values > 0) 
+				proxAndMvmtToVoice[1] += calculateProximity(interOnsetTime);
+				// a. In the tablature case
+				if (btp != null) {
+					// offsetOnsetTimeExcl (values >= 0)
+					proxAndMvmtToVoice[2] += calculateProximity(offsetOnsetTimeExcl);
+					// offsetOnsetTimeIncl (values between -inf and +inf (in theory))
+					proxAndMvmtToVoice[3] += calculateProximity(offsetOnsetTimeIncl); 
+					// pitchMovement (values between -inf and +inf (in theory))
+					proxAndMvmtToVoice[4] += /*(double)*/ pitchMovement;
+				}
+				// b. In the non-tablature case
+				else {
+					// offsetOnsetTime (values between -inf and +inf (in theory))
+					proxAndMvmtToVoice[2] += calculateProximity(offsetOnsetTimeIncl); 
+					// pitchMovement (values between -inf and +inf (in theory))
+					proxAndMvmtToVoice[3] += (double) pitchMovement;
+				}
+			}
+//			// Calculate average distances
+//			for (int i = 0; i < avgDistances.length; i++) {
+//				avgDistances[i] = avgDistances[i] / (previousNotes.size()-1);
+//			}
+			
+			// Calculate average proximities and distances
+			for (int i = 0; i < proxAndMvmtToVoice.length; i++) {
+				proxAndMvmtToVoice[i] = proxAndMvmtToVoice[i] / (previousNotes.size()-1);
+			}
+
+//			double pitchDif = avgDistances[0];
+//			double interOnsetTime = avgDistances[1];
+//			double offsetOnsetTimeExcl = (btp != null) ? avgDistances[2] : -1.0;
+//			double offsetOnsetTimeIncl = (btp != null) ? avgDistances[3] : avgDistances[2];
+//			double pitchMovement = (btp != null) ? avgDistances[4] : avgDistances[3];
+//
+//			// 4. Create and set proximitiesAndMovementToVoice
+//			// pitchDif (values >= 0)
+//			proximitiesAndMovementToVoice[0] = calculateProximity(/*(double)*/ pitchDif);
+//			// interOnsetTime (values > 0) 
+//			proximitiesAndMovementToVoice[1] = calculateProximity(interOnsetTime);
+//			// a. In the tablature case
+//			if (btp != null) {
+//				// offsetOnsetTimeExcl (values >= 0)
+//				proximitiesAndMovementToVoice[2] = calculateProximity(offsetOnsetTimeExcl);
+//				// offsetOnsetTimeIncl (values between -inf and +inf (in theory))
+//				proximitiesAndMovementToVoice[3] = calculateProximity(offsetOnsetTimeIncl); 
+//				// pitchMovement (values between -inf and +inf (in theory))
+//				proximitiesAndMovementToVoice[4] = /*(double)*/ pitchMovement;
+//			}
+//			// b. In the non-tablature case
+//			else {
+//				// offsetOnsetTime (values between -inf and +inf (in theory))
+//				proximitiesAndMovementToVoice[2] = calculateProximity(offsetOnsetTimeIncl); 
+//				// pitchMovement (values between -inf and +inf (in theory))
+//				proximitiesAndMovementToVoice[3] = (double) pitchMovement;
+//			}
+		}
+		
+//			// b. If voiceToCompareTo contains no Notes before currentNote (i.e., if currentNote is the first Note in 
+//			// voiceToCompareTo): set "does-not-apply" values of -1.0 (proximities) and 0.0 (movement)
+//			else {
+//				Arrays.fill(proximitiesAndMovementToVoice, -1.0);
+//				proximitiesAndMovementToVoice[proximitiesAndMovementToVoice.length - 1] = 0.0;
+//			}
+//			res.add(proximitiesAndMovementToVoice);
+//		}
+
+		// 3. Return proximitiesAndMovementToVoice
+		return proxAndMvmtToVoice;
+	}
+
+
+	/**
+	 * Compares the Note given as argument to the adjacent Note (previous or next, depending on the
+	 * value of direction) in the voice given as argument, and calculates their pitch proximity, 
+	 * their inter-onset time proximity, their offset-onset time proximity, and the pitch movement. 
+	 * (1) Proximities are defined as inverted distances: 
+	 *     -pitch proximity is > 0 and <= 1 (where a pitch proximity of 1.0 means no distance)
+	 *     -inter-onset proximity is > 0 and < 1
+	 *     -offset-onset proximity is
+	 *      a. > 0 and < 1 if the offset time is before the onset time (i.e., if the offset-onset time is positive)
+	 *      b. 1 if the offset time equals the onset time (i.e., if the offset-onset time is 0)
+	 *      c. < 0 and > -1 if the offset time is after the onset time (i.e., if the offset-onset time is negative)
+	 * NB: Proximities to non-existing voices are indicated with -1.0. 
+	 * (2) Pitch movements are defined in semitones, and can be positive (ascending) and negative (descending). 
+	 * 
+	 * Returns 
+	 * (a) if <code>average == false</code>, a List<double[]> of size <code>decisionContext</code>,
+	 * containing for each previous note within the given decisionContextSize, a double[] containing:
 	 *   as element 0: the pitch proximity of currentNote to the adjacent Note in voiceToCompareTo;
 	 *   as element 1: the inter-onset time proximity of currentNote to the adjacent Note in voiceToCompareTo;  
 	 *   as element 2: the offset-onset time proximity of currentNote to the adjacent Note in voiceToCompareTo using
@@ -1240,17 +1441,22 @@ public class FeatureGenerator {
 	 *                 voiceToCompareTo.                
 	 * NB: In the non-tablature case, element 2 above is not included and a double[] of size 4 is returned.
 	 *
+	 * (b) if <code>average == true</code>, a List<double[]> of size 1, containing a double[] 
+	 * containing the proximities and movements (as under (a)), averaged over all previous notes 
+	 * within the given decisionContext.
+	 *    
 	 * @param btp 
 	 * @param voiceToCompareTo
 	 * @param currentNote
 	 * @param direction
 	 * @param decisionContextSize
+	 * @param average
 	 * @return
 	 */
 	// TESTED for both tablature- and non-tablature case; for both fwd and bwd model
-	public static List<double[]> getProximitiesAndMovementToVoice(Integer[][] btp, 
+	public static List<double[]> getProximitiesAndMovementToVoiceAll(Integer[][] btp, 
 		NotationVoice voiceToCompareTo, Note currentNote, Direction direction, 
-		int decisionContextSize) {
+		int decisionContextSize, boolean average) {
 
 		// 1. Determine the previous Note
 //		Note previousNote = 
@@ -1279,86 +1485,17 @@ public class FeatureGenerator {
 			// pitch movement between currentNote and the previous Note in voiceToCompareTo
 			// a. If voiceToCompareTo contains Notes before currentNote
 			if (previousNote != null) {
-				// 1. Determine the pitch difference and the pitch movement
-				int pitchDif = Math.abs(previousNote.getMidiPitch() - currentNote.getMidiPitch());
-				int pitchMovement = currentNote.getMidiPitch() - previousNote.getMidiPitch();
-
-				// 2. Determine the inter-onset time
-				Rational onsetTimeCurrentNote = currentNote.getMetricTime();
-				Rational onsetTimePreviousNote = previousNote.getMetricTime();
-				double interOnsetTime = onsetTimeCurrentNote.sub(onsetTimePreviousNote).toDouble();
-
-				// 3. Determine the offset-onset time
-				double offsetOnsetTimeExcl = -1.0;
-				double offsetOnsetTimeIncl = -1.0;
-				// a. In the tablature case
-				if (btp != null) {
-					// a. Fwd model
-					if (direction == Direction.LEFT) {
-						// 1. Determine offsetOnsetTimeExcl
-						int gridXPreviousNote = 
-							onsetTimePreviousNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
-						Rational minDurPreviousNote = null;
-						for (Integer[] b : btp) {
-							if (b[Tablature.ONSET_TIME] == gridXPreviousNote) {
-								minDurPreviousNote = new Rational(b[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
-								break;
-							}
-						}
-						Rational offsetTimePreviousNoteExcl = 
-							onsetTimePreviousNote.add(minDurPreviousNote);
-						offsetOnsetTimeExcl = 
-							onsetTimeCurrentNote.sub(offsetTimePreviousNoteExcl).toDouble();
-						// 2. Determine offsetOnsetTimeIncl
-						Rational offsetTimePreviousNoteIncl = 
-							onsetTimePreviousNote.add(previousNote.getMetricDuration());
-						offsetOnsetTimeIncl = 
-							onsetTimeCurrentNote.sub(offsetTimePreviousNoteIncl).toDouble();
-					}
-					// b. Bwd model
-					else {
-						// 1. Determine offsetOnsetTimeExcl
-						int gridXCurrentNote = 
-							onsetTimeCurrentNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
-						Rational minDurCurrentNote = null;
-						for (Integer[] b : btp) {
-							if (b[Tablature.ONSET_TIME] == gridXCurrentNote) {
-								minDurCurrentNote = 
-									new Rational(b[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
-								break;
-							}
-						}
-						Rational offsetTimeCurrentNoteExcl = 
-							onsetTimeCurrentNote.add(minDurCurrentNote);
-						offsetOnsetTimeExcl = 
-							offsetTimeCurrentNoteExcl.sub(onsetTimePreviousNote).toDouble();
-						// 2. Determine offsetOnsetTimeIncl
-						Rational offsetTimeCurrentNoteIncl = 
-							onsetTimeCurrentNote.add(currentNote.getMetricDuration());
-						offsetOnsetTimeIncl = 
-							offsetTimeCurrentNoteIncl.sub(onsetTimePreviousNote).toDouble();
-					}
-				}
-				// b. In the non-tablature case
-				else {
-					// a. Fwd model
-					if (direction == Direction.LEFT) {
-						Rational offsetTimePreviousNote = 
-							onsetTimePreviousNote.add(previousNote.getMetricDuration());
-						offsetOnsetTimeIncl = onsetTimeCurrentNote.sub(offsetTimePreviousNote).toDouble();
-					}
-					// b. Bwd model
-					else {
-						Rational offsetTimeCurrentNote = 
-							onsetTimeCurrentNote.add(currentNote.getMetricDuration());
-						offsetOnsetTimeIncl = 
-							offsetTimeCurrentNote.sub(onsetTimePreviousNote).toDouble();
-					}
-				}
+				List<Double> distances = 
+					getPitchAndTimeDistances(btp, currentNote, previousNote, direction);
+				double pitchDif = distances.get(0);
+				double interOnsetTime = distances.get(1);
+				double offsetOnsetTimeExcl = distances.get(2);
+				double offsetOnsetTimeIncl = distances.get(3);
+				double pitchMovement = distances.get(4);
 
 				// 4. Create and set proximitiesAndMovementToVoice
 				// pitchDif (values >= 0)
-				proximitiesAndMovementToVoice[0] = calculateProximity((double)pitchDif);
+				proximitiesAndMovementToVoice[0] = calculateProximity(/*(double)*/ pitchDif);
 				// interOnsetTime (values > 0) 
 				proximitiesAndMovementToVoice[1] = calculateProximity(interOnsetTime);
 				// a. In the tablature case
@@ -1368,7 +1505,7 @@ public class FeatureGenerator {
 					// offsetOnsetTimeIncl (values between -inf and +inf (in theory))
 					proximitiesAndMovementToVoice[3] = calculateProximity(offsetOnsetTimeIncl); 
 					// pitchMovement (values between -inf and +inf (in theory))
-					proximitiesAndMovementToVoice[4] = (double) pitchMovement;
+					proximitiesAndMovementToVoice[4] = /*(double)*/ pitchMovement;
 				}
 				// b. In the non-tablature case
 				else {
@@ -1379,16 +1516,157 @@ public class FeatureGenerator {
 				}
 			}
 			// b. If voiceToCompareTo contains no Notes before currentNote (i.e., if currentNote is the first Note in 
-			// voiceToCompareTo): set "does-not-apply" values of -1.0 (proximities) and 0.0 (movement)
+			// voiceToCompareTo): set 'does-not-apply' values of -1.0 (proximities) and 0.0 (movement)
 			else {
 				Arrays.fill(proximitiesAndMovementToVoice, -1.0);
 				proximitiesAndMovementToVoice[proximitiesAndMovementToVoice.length - 1] = 0.0;
 			}
 			res.add(proximitiesAndMovementToVoice);
 		}
+		
+//		for (double[] d : res) {
+//			System.out.println(Arrays.toString(d));
+//		}
 
 		// 3. Return proximitiesAndMovementToVoice
-		return res;
+		if (average) { 
+			// Sum
+			int divisor = 0;
+			double[] avgs = new double[res.get(0).length];
+			Arrays.fill(avgs, 0.0);
+			for (int i = 0; i < res.size(); i++) {
+				double[] d = res.get(i);
+				if (d[0] != -1) {
+					for (int j = 0; j < d.length; j++) {
+						avgs[j] += d[j];
+					}
+					divisor++;
+				}
+			}
+//			System.out.println("summed");
+//			System.out.println(Arrays.toString(avgs));
+//			System.out.println("divisor");
+//			System.out.println(divisor);
+			
+			// If there are no previous notes: return default values (first element of res)
+			if (divisor == 0) {
+				return Arrays.asList(new double[][]{res.get(0)});
+			}
+			// If there are previous notes: return averaged values
+			else {
+				// Average
+				for (int i = 0; i < avgs.length; i++) {
+					avgs[i] = avgs[i]/divisor;
+				}
+//				System.out.println("averaged");
+//				System.out.println(Arrays.toString(avgs));
+				return Arrays.asList(new double[][]{avgs});
+			}
+		}
+		else {
+			return res;
+		}
+	}
+
+
+	/**
+	 * Returns, for the given note pair, a List<Double> containing
+	 * <ul>
+	 * <li>the pitch difference</li>
+	 * <li>the inter-onset time</li>
+	 * <li>the offset-onset time, using minimum durations (or -1 in the non-tablature case)</li>
+	 * <li>the offset-onset time, using full durations</li>
+	 * <li>the pitch movement</li>
+	 * </ul>
+	 * 
+	 * @param btp
+	 * @param currentNote
+	 * @param previousNote
+	 * @param direction
+	 * @return
+	 */
+	static List<Double> getPitchAndTimeDistances(Integer[][] btp, Note currentNote, Note previousNote,
+		Direction direction) {
+		// 1. Determine the pitch difference and the pitch movement
+		int pitchDif = Math.abs(previousNote.getMidiPitch() - currentNote.getMidiPitch());
+		int pitchMovement = currentNote.getMidiPitch() - previousNote.getMidiPitch();
+
+		// 2. Determine the inter-onset time
+		Rational onsetTimeCurrentNote = currentNote.getMetricTime();
+		Rational onsetTimePreviousNote = previousNote.getMetricTime();
+		double interOnsetTime = onsetTimeCurrentNote.sub(onsetTimePreviousNote).toDouble();
+
+		// 3. Determine the offset-onset time
+		double offsetOnsetTimeExcl = -1.0;
+		double offsetOnsetTimeIncl = -1.0;
+		// a. In the tablature case
+		if (btp != null) {
+			// a. Fwd model
+			if (direction == Direction.LEFT) {
+				// 1. Determine offsetOnsetTimeExcl
+				int gridXPreviousNote = 
+					onsetTimePreviousNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
+				Rational minDurPreviousNote = null;
+				for (Integer[] b : btp) {
+					if (b[Tablature.ONSET_TIME] == gridXPreviousNote) {
+						minDurPreviousNote = new Rational(b[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+						break;
+					}
+				}
+				Rational offsetTimePreviousNoteExcl = 
+					onsetTimePreviousNote.add(minDurPreviousNote);
+				offsetOnsetTimeExcl = 
+					onsetTimeCurrentNote.sub(offsetTimePreviousNoteExcl).toDouble();
+				// 2. Determine offsetOnsetTimeIncl
+				Rational offsetTimePreviousNoteIncl = 
+					onsetTimePreviousNote.add(previousNote.getMetricDuration());
+				offsetOnsetTimeIncl = 
+					onsetTimeCurrentNote.sub(offsetTimePreviousNoteIncl).toDouble();
+			}
+			// b. Bwd model
+			else {
+				// 1. Determine offsetOnsetTimeExcl
+				int gridXCurrentNote = 
+					onsetTimeCurrentNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
+				Rational minDurCurrentNote = null;
+				for (Integer[] b : btp) {
+					if (b[Tablature.ONSET_TIME] == gridXCurrentNote) {
+						minDurCurrentNote = 
+							new Rational(b[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+						break;
+					}
+				}
+				Rational offsetTimeCurrentNoteExcl = 
+					onsetTimeCurrentNote.add(minDurCurrentNote);
+				offsetOnsetTimeExcl = 
+					offsetTimeCurrentNoteExcl.sub(onsetTimePreviousNote).toDouble();
+				// 2. Determine offsetOnsetTimeIncl
+				Rational offsetTimeCurrentNoteIncl = 
+					onsetTimeCurrentNote.add(currentNote.getMetricDuration());
+				offsetOnsetTimeIncl = 
+					offsetTimeCurrentNoteIncl.sub(onsetTimePreviousNote).toDouble();
+			}
+		}
+		// b. In the non-tablature case
+		else {
+			// a. Fwd model
+			if (direction == Direction.LEFT) {
+				Rational offsetTimePreviousNote = 
+					onsetTimePreviousNote.add(previousNote.getMetricDuration());
+				offsetOnsetTimeIncl = onsetTimeCurrentNote.sub(offsetTimePreviousNote).toDouble();
+			}
+			// b. Bwd model
+			else {
+				Rational offsetTimeCurrentNote = 
+					onsetTimeCurrentNote.add(currentNote.getMetricDuration());
+				offsetOnsetTimeIncl = 
+					offsetTimeCurrentNote.sub(onsetTimePreviousNote).toDouble();
+			}
+		}
+
+		return Arrays.asList(new Double[]{
+			(double) pitchDif, interOnsetTime, offsetOnsetTimeExcl, offsetOnsetTimeIncl, 
+			(double) pitchMovement});
 	}
 
 
@@ -1602,7 +1880,7 @@ public class FeatureGenerator {
 		// Pitch- and time proximities
 		List<double[][]> pitchAndTimeProximities = 
 			getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-			direction, argModelDuration, argIsBidir, decisionContextSize);
+			direction, argModelDuration, argIsBidir, decisionContextSize, false);
 		for (double[][] pAndTProx : pitchAndTimeProximities) {
 			for (double[] d : pAndTProx) {
 				allAsList.add(d);
@@ -1682,8 +1960,8 @@ public class FeatureGenerator {
 			}
 			// proximities
 			List<double[][]> prox = 
-				getPitchAndTimeProximitiesToAllVoices(btp, transcription, 
-				currentNote, direction, argModelDuration, argIsBidir, decisionContextSize);
+				getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
+				direction, argModelDuration, argIsBidir, decisionContextSize, false);
 			for (double[][] pAndTProx : prox) {
 				for (double[] p : pAndTProx) {
 					for (double d : p) {
@@ -1737,7 +2015,7 @@ public class FeatureGenerator {
 			// proximities
 			List<double[][]> prox = 
 				getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-				direction, argModelDuration, argIsBidir, decisionContextSize);
+				direction, argModelDuration, argIsBidir, decisionContextSize, false);
 			for (double[][] pAndTProx : prox) {
 				for (double[] p : pAndTProx) {
 					for (double d : p) {
@@ -1776,6 +2054,9 @@ public class FeatureGenerator {
 	 * @param noteIndex
 	 * @param argModelDuration
 	 * @param procMode
+	 * @param featVec
+	 * @param decisionContextSize
+	 * @param avgProc
 	 * @return
 	 */
 	// TESTED
@@ -1783,7 +2064,8 @@ public class FeatureGenerator {
 		List<List<Double>> durationLabels, List<Integer[]> voicesCoDNotes, Integer[][] bnp,
 		Transcription transcription, Note currentNote, List<List<Double>> voiceLabels,
 		List<Integer[]> meterInfo, int noteIndex, boolean argModelDuration,
-		ProcessingMode procMode, FeatureVector featVec, int decisionContextSize) {
+		ProcessingMode procMode, FeatureVector featVec, int decisionContextSize,
+		boolean avgProc) {
 
 		Transcription.verifyCase(btp, bnp);
 		
@@ -1852,19 +2134,40 @@ public class FeatureGenerator {
 				// proximities
 				List<double[][]> prox = 
 					getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-					direction, argModelDuration, isBidirectional, decisionContextSize);
+					direction, argModelDuration, isBidirectional, decisionContextSize, avgProc);
+
+				boolean includeMvmts = true;
 				for (double[][] pAndTProx : prox) {
-					for (double[] p : pAndTProx) {
-						for (double d : p) {
-							fv.add(d);
+//					for (double[] p : pAndTProx) {
+					for (int i = 0; i < pAndTProx.length; i++) {
+						double[] p = pAndTProx[i];
+						if (i < pAndTProx.length-1 || i == pAndTProx.length-1 && includeMvmts) { 
+							for (double d : p) {
+								fv.add(d);
+							}
 						}
-					}
+					}	
 				}
+
+				// To add avg proximities
+//				List<double[]> proxAvg = getAveragedProximities(prox);
+//				for (double d : proxAvg.get(0)) {
+//					fv.add(d);
+//				}
+//				for (double d : proxAvg.get(1)) {
+//					fv.add(d);
+//				}
+//				for (double d : proxAvg.get(2)) {
+//					fv.add(d);
+//				}
+
+				// Original version
 //				for (double[] p : prox) {
 //					for (double d : p) {
 //						fv.add(d);
 //					}
 //				}
+				
 				// alreadyOcc
 				double[] alrOcc = 
 					getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, 
@@ -1935,19 +2238,27 @@ public class FeatureGenerator {
 				// proximities
 				List<double[][]> prox = 
 					getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-					direction, argModelDuration, isBidirectional, decisionContextSize);
+					direction, argModelDuration, isBidirectional, decisionContextSize, avgProc);
+
+				boolean includeMvmts = true;
 				for (double[][] pAndTProx : prox) {
-					for (double[] p : pAndTProx) {
-						for (double d : p) {
-							fv.add(d);
+					for (int i = 0; i < pAndTProx.length; i++) {
+						double[] p = pAndTProx[i];
+						if (i < pAndTProx.length-1 || i == pAndTProx.length-1 && includeMvmts) { 
+							for (double d : p) {
+								fv.add(d);
+							}
 						}
-					}
+					}	
 				}
+
+				// Original version
 //				for (double[] p : prox) {
 //					for (double d : p) {
 //						fv.add(d);
 //					}
 //				}
+
 				// alreadyOcc
 				double[] alrOcc = 
 					getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, 
@@ -1960,8 +2271,65 @@ public class FeatureGenerator {
 //		return fv.subList(21, 41);
 		return fv;		
 	}
-
 	
+	
+	private static List<double[]> getAveragedProximities(List<double[][]> prox) {
+
+		int numVoices = prox.get(0)[0].length;
+		double[] pitchProxAvgd = new double[numVoices];
+		double[] ioProxAvgd = new double[numVoices];
+		double[] ooProxAvgd = new double[numVoices];
+		Integer[] dividersPitchProx = new Integer[numVoices];
+		Arrays.fill(dividersPitchProx, 0);
+		Integer[] dividersIoProx = new Integer[numVoices];
+		Arrays.fill(dividersIoProx, 0);
+		Integer[] dividersOoProx = new Integer[numVoices];
+		Arrays.fill(dividersOoProx, 0);
+		// For each note within the decisionContext: sum all values that are not -1
+		for (int i = 0; i < prox.size(); i++) {
+			double[] pitchProx = prox.get(i)[0];
+			double[] ioProx = prox.get(i)[1];
+			double[] ooProx = prox.get(i)[2];
+			for (int j = 0; j < numVoices; j++) {
+				if (pitchProx[j] != -1) {
+					pitchProxAvgd[j] += pitchProx[j];
+					dividersPitchProx[j]++;
+				}
+				if (ioProx[j] != -1) {
+					ioProxAvgd[j] += ioProx[j];
+					dividersIoProx[j]++;
+				}						
+				if (ooProx[j] != -1) {
+					ooProxAvgd[j] += ooProx[j];
+					dividersOoProx[j]++;
+				}
+			}	
+		}
+		// Average
+		for (int i = 0; i < numVoices; i++) {
+			if (dividersPitchProx[i] != 0) {
+				pitchProxAvgd[i] = pitchProxAvgd[i]/dividersPitchProx[i];
+			}
+			else {
+				pitchProxAvgd[i] = -1;
+			}
+			if (dividersIoProx[i] != 0) {
+				ioProxAvgd[i] = ioProxAvgd[i]/dividersIoProx[i];
+			}
+			else {
+				ioProxAvgd[i] = -1;
+			}
+			if (dividersOoProx[i] != 0) {
+				ooProxAvgd[i] = ooProxAvgd[i]/dividersOoProx[i];
+			}
+			else {
+				ooProxAvgd[i] = -1;
+			}
+		}
+		return Arrays.asList(new double[][]{pitchProxAvgd, ioProxAvgd, ooProxAvgd});
+	}
+
+
 	/**
 	 * 
 	 * @param btp
@@ -2107,14 +2475,14 @@ public class FeatureGenerator {
 		List<Integer[]> voicesCoDNotes, Integer[][] bnp, Transcription transcription, Note currentNote, 
 		List<List<Double>> voiceLabels, List<Integer[]> meterInfo, int noteIndex, int highestNumberOfVoicesTraining,
 		boolean argModelDuration, ProcessingMode procMode, FeatureVector featVec, 
-		MelodyPredictor mp, int decisionContextSize) { 
+		MelodyPredictor mp, int decisionContextSize, boolean avgProc) { 
 
 		Transcription.verifyCase(btp, bnp);
 
 		// 1. Get the note feature vector 
 		List<Double> nfvPlus = generateNoteFeatureVectorDISS(btp, durationLabels, voicesCoDNotes,
 			bnp, transcription, currentNote, voiceLabels, meterInfo, noteIndex, argModelDuration, 
-			procMode, featVec, decisionContextSize);
+			procMode, featVec, decisionContextSize, avgProc);
 
 		// 2. For every possible voice: model the probability of currentNote belonging to voice
 //		MelodyFeatureGenerator melodyFeatureGenerator = new MelodyFeatureGenerator(this);
@@ -2190,8 +2558,9 @@ public class FeatureGenerator {
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
 		FeatureVector featVec = 
 			Runner.ALL_FEATURE_VECTORS[modelParameters.get(Runner.FEAT_VEC).intValue()];
-		int decContSize = Runner.getModelParams().get(Runner.DECISION_CONTEXT_SIZE).intValue();
-		
+		int decContSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
+		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROC).intValue());
+
 		List<List<Double>> allNoteFeatureVectors = new ArrayList<List<Double>>();  
 
 		// Create voiceLabels and durationLabels
@@ -2237,7 +2606,7 @@ public class FeatureGenerator {
 //			if (mp == null) {
 			allNoteFeatureVectors.add(generateNoteFeatureVectorDISS(btp, durationLabels, voicesCoDNotes,
 				bnp, transcription, currentNote, voiceLabels, meterInfo, noteIndex, modelDuration, 
-				pm, featVec, decContSize));
+				pm, featVec, decContSize, avgProc));
 //			}
 //			else {
 //				int highestNumberOfVoicesTraining = -1;
@@ -2463,6 +2832,7 @@ public class FeatureGenerator {
 	 * @param noteIndex
 	 * @param argModelBackward
 	 * @param decisionContextSize
+	 * @param avgProc
 	 * @return 
 	 */
 	// TESTED for both tablature and non-tablature case
@@ -2470,7 +2840,7 @@ public class FeatureGenerator {
 		List<List<Double>> predictedDurationLabels, List<Integer[]> predictedVoicesCoDNotes, 
 		Integer[][] bnp, Transcription predictedTranscription, Note currentNote, 
 		List<List<Double>> predictedVoiceLabels, List<Integer[]> meterInfo, int noteIndex,
-		boolean argModelDuration, int decisionContextSize) { 
+		boolean argModelDuration, int decisionContextSize, boolean avgProc) { 
 
 		Transcription.verifyCase(btp, bnp);
 
@@ -2539,7 +2909,7 @@ public class FeatureGenerator {
 //		System.out.println("noteIndex = " + noteIndex); bla
 		List<double[][]> pitchAndTimeProximitiesToPrevious = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.LEFT, argModelDuration, isBidirectional, decisionContextSize);
+			Direction.LEFT, argModelDuration, isBidirectional, decisionContextSize, avgProc);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToPrevious) {
 			for (double[] d : pAndTProx) {
 				polyEmb.add(d);
@@ -2557,7 +2927,7 @@ public class FeatureGenerator {
 		// Pitch- and time proximities to next notes
 		List<double[][]> pitchAndTimeProximitiesToNext = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.RIGHT, argModelDuration, isBidirectional, decisionContextSize);
+			Direction.RIGHT, argModelDuration, isBidirectional, decisionContextSize, avgProc);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToNext) {
 			for (double[] d : pAndTProx) {
 				polyEmb.add(d);
@@ -2613,7 +2983,7 @@ public class FeatureGenerator {
 	public static List<Double> generateBidirectionalNoteFeatureVectorOLD(Integer[][] btp, List<List<Double>>
 		predictedDurationLabels, List<Integer[]> predictedVoicesCoDNotes, Integer[][] bnp, Transcription 
 		predictedTranscription, Note currentNote, List<List<Double>> predictedVoiceLabels, List<Integer[]> 
-		meterInfo, int noteIndex, int decisionContextSize) { //, boolean argModelBackward) { 
+		meterInfo, int noteIndex, int decisionContextSize, boolean avgProc) { //, boolean argModelBackward) { 
 
 		Transcription.verifyCase(btp, bnp);
 
@@ -2647,7 +3017,7 @@ public class FeatureGenerator {
 		// Pitch- and time proximities to previous notes
 		List<double[][]> pitchAndTimeProximitiesToPrevious = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.LEFT, modelDuration, argIsBidir, decisionContextSize);
+			Direction.LEFT, modelDuration, argIsBidir, decisionContextSize, avgProc);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToPrevious) {
 			for (double[] d : pAndTProx) {
 				tabDurVoice.add(d);
@@ -2665,7 +3035,7 @@ public class FeatureGenerator {
 		// Pitch- and time proximities to next notes
 		List<double[][]> pitchAndTimeProximitiesToNext = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.RIGHT, modelDuration, argIsBidir, decisionContextSize);
+			Direction.RIGHT, modelDuration, argIsBidir, decisionContextSize, avgProc);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToNext) {
 			for (double[] d : pAndTProx) {
 				tabDurVoice.add(d);
@@ -2706,6 +3076,7 @@ public class FeatureGenerator {
 	 * @return
 	 */ 
 	public static List<List<Double>> generateAllBidirectionalNoteFeatureVectors(
+		Map<String, Double> modelParameters,
 		Integer[][] btp, List<Integer[]> predictedVoicesCoDNotes, Integer[][] bnp, 
 		Transcription predictedTranscription, List<List<Double>> predictedLabels, 
 		List<Integer[]> meterInfo, List<Integer> chordSizes, boolean argModelDuration,
@@ -2713,6 +3084,8 @@ public class FeatureGenerator {
 
 		Transcription.verifyCase(btp, bnp);
 
+		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROC).intValue());
+		
 		List<List<Double>> allBidirNoteFeatureVectors = new ArrayList<List<Double>>();  
 
 	 	// Create voiceLabels and durationLabels
@@ -2757,7 +3130,7 @@ public class FeatureGenerator {
 			allBidirNoteFeatureVectors.add(generateBidirectionalNoteFeatureVector(btp, 
 				predictedDurationLabels, predictedVoicesCoDNotes, bnp, predictedTranscription,
 				currentNote, predictedVoiceLabels, meterInfo, noteIndex, argModelDuration,
-				decisionContextSize));
+				decisionContextSize, avgProc));
 		}
 
 		return allBidirNoteFeatureVectors;

@@ -195,6 +195,7 @@ public class Runner {
 	public static final String ESTIMATE_ENTRIES = "voice entry estimation";
 //	public static final String GIVE_FIRST = "give first";
 	public static final String MODEL_DURATION_AGAIN = "model duration again";
+	public static final String AVERAGE_PROC = "average proximities";
 //	public static final String USE_VALIDATION_SET = "use validation set";
 
 	// Enum lists

@@ -356,8 +356,8 @@ public class FeatureGeneratorChord {
 				int voice = currentVoices.get(j);
 				NotationVoice currentVoice = transcription.getPiece().getScore().get(voice).get(0);
 				double[] pitchAndTimeProximities = 
-				FeatureGenerator.getProximitiesAndMovementToVoice(btp, currentVoice, 
-					currentNote, Direction.LEFT, 1).get(0); // TODO turn Direction.LEFT into method argument 
+				FeatureGenerator.getProximitiesAndMovementToVoiceAll(btp, currentVoice, 
+					currentNote, Direction.LEFT, 1, false).get(0); // TODO turn Direction.LEFT into method argument 
 				pitchProx[voice] = pitchAndTimeProximities[0];
 				interOnsetProx[voice] = pitchAndTimeProximities[1];		  
 				offsetOnsetProx[voice] = pitchAndTimeProximities[2];

@@ -3331,6 +3331,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	// TWEE gedaan
 	public void testGetPitchAndTimeProximitiesToAllVoices() {
 		Tablature tablature = new Tablature(encodingTestpiece1, true);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -3429,7 +3430,7 @@ public class FeatureGeneratorTest extends TestCase {
 		expLeftNoDur.add(new double[][]{{0.0, 5.0, 12.0, 24.0, 24.0}, {1/2.0, 3/4.0, 3/4.0, 3/4.0, 1.0},
 			{1/4.0, 11/16.0, 11/16.0, 11/16.0, 7/8.0}});
 		expected.addAll(expLeftNoDur);
-		
+
 		// Modelling duration
 		List<double[][]> expLeftDur = new ArrayList<double[][]>();
 		for (int i = 0; i < expLeftNoDur.size(); i++) {
@@ -3863,7 +3864,7 @@ public class FeatureGeneratorTest extends TestCase {
 		expRightBwd.add(new double[][]{{3.0, 0.0, 12.0, 24.0, 22.0}, {-1/4.0, -1/4.0, -1/4.0, -1/4.0, -1/2.0}, 
 			{0.0, 0.0, 0.0, 0.0, -1/4.0}});
 		expected.addAll(expRightBwd);
-  	
+
 		// Using the bi-directional model (where the full duration of the current note is known (= modelling duration))
 		List<double[][]> expRightBiDir = new ArrayList<double[][]>();
 		for (int i = 0; i < expRightBwd.size(); i++) {
@@ -3926,8 +3927,158 @@ public class FeatureGeneratorTest extends TestCase {
 		expRightBiDir.get(38)[2] = new double[]{0.0, 0.0, 0.0, 0.0, -1/4.0};
 		expected.addAll(expRightBiDir);
 
-		// For all elements of expected: turn the elements in all Arrays from distances into proximities
-		for (int i = 0; i < expected.size(); i++) {
+		// d. Direction.LEFT (decisionContextSize = 3, averaged) 	
+		List<double[][]> expectedAvg = new ArrayList<double[][]>();
+		// Not modelling duration
+		// Chord 0
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0}, 
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}}); 
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0},
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}});
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0},	
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}});
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0}, 
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}});
+		// Chord 1
+		expectedAvg.add(new double[][]{
+			{1.0/(24+1), 1.0/(20+1), 1.0/(12+1), 1.0/(5+1), -1.0}, 
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0}, 
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0}, 
+			{-24.0, -20.0, -12.0, -5.0, 0.0}
+		}); 
+		expectedAvg.add(new double[][]{
+			{1.0/(12+1), 1.0/(8+1), 1.0/(0+1), 1.0/(7+1), -1.0},
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0},
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0},
+			{-12.0, -8.0, 0.0, 7.0, 0.0}
+		}); 
+		expectedAvg.add(new double[][]{
+			{1.0/(3+1), 1.0/(7+1), 1.0/(15+1), 1.0/(22+1), -1.0},
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0},
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0},
+			{3.0, 7.0, 15.0, 22.0, 0.0}
+		}); 	
+		expectedAvg.add(new double[][]{
+			{1.0/(0+1), 1.0/(4+1), 1.0/(12+1), 1.0/(19+1), -1.0},
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0},
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0},
+			{0.0, 4.0, 12.0, 19.0, 0.0}
+		});
+		// Chord 5
+		expectedAvg.add(new double[][]{
+			{(1.0/(20+1) + 1.0/(27+1) + 1.0/(24+1)) / 3.0, // pitchProx 
+			 (1.0/(20+1) + 1.0/(24+1) + 1.0/(20+1)) / 3.0, 
+			 (1.0/(14+1) + 1.0/(12+1) + 1.0/(12+1)) / 3.0, 
+			 (1.0/(5+1)  + 1.0/(3+1)  + 1.0/(0+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/(2+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-20 + -27 + -24) / 3.0, // mvmts
+			 (-20 + -24 + -20) / 3.0, 
+			 (-14 + -12 + -12) / 3.0, 
+			 (-5 + -3 + 0) / 3.0, 
+			 -0.99999 /*(0 + -2) / 2.0*/}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(8+1) + 1.0/(15+1) + 1.0/(12+1)) / 3.0, // pitchProx 
+			 (1.0/(8+1) + 1.0/(12+1) + 1.0/(8+1)) / 3.0, 
+			 (1.0/(2+1) + 1.0/(0+1) + 1.0/(0+1)) / 3.0, 
+			 (1.0/(7+1)  + 1.0/(9+1)  + 1.0/(12+1))  / 3.0, 
+			 (1.0/(12+1) + 1.0/(10+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-8 + -15 + -12) / 3.0, // mvmts
+			 (-8 + -12 + -8) / 3.0, 
+			 (-2 + -0 + -0) / 3.0, 
+			 (7 + 9 + 12) / 3.0, 
+			 (12 + 10) / 2.0}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(8+1) + 1.0/(15+1) + 1.0/(12+1)) / 3.0, // pitchProx 
+			 (1.0/(8+1) + 1.0/(12+1) + 1.0/(8+1)) / 3.0, 
+			 (1.0/(2+1) + 1.0/(0+1) + 1.0/(0+1)) / 3.0, 
+			 (1.0/(7+1)  + 1.0/(9+1)  + 1.0/(12+1))  / 3.0, 
+			 (1.0/(12+1) + 1.0/(10+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-8 + -15 + -12) / 3.0, // mvmts
+			 (-8 + -12 + -8) / 3.0, 
+			 (-2 + -0 + -0) / 3.0, 
+			 (7 + 9 + 12) / 3.0, 
+			 (12 + 10) / 2.0}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(5+1) + 1.0/(12+1) + 1.0/(9+1)) / 3.0, // pitchProx 
+			 (1.0/(5+1) + 1.0/(9+1) + 1.0/(5+1)) / 3.0, 
+			 (1.0/(1+1) + 1.0/(3+1) + 1.0/(3+1)) / 3.0, 
+			 (1.0/(10+1) + 1.0/(12+1)  + 1.0/(15+1))  / 3.0, 
+			 (1.0/(15+1) + 1.0/(13+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-5 + -12 + -9) / 3.0, // mvmts
+			 (-5 + -9 + -5) / 3.0, 
+			 (1 + 3 + 3) / 3.0, 
+			 (10 + 12 + 15) / 3.0, 
+			 (15 + 13) / 2.0}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(4+1) + 1.0/(3+1) + 1.0/(0+1)) / 3.0, // pitchProx 
+			 (1.0/(4+1) + 1.0/(0+1) + 1.0/(4+1)) / 3.0, 
+			 (1.0/(10+1) + 1.0/(12+1) + 1.0/(12+1)) / 3.0, 
+			 (1.0/(19+1) + 1.0/(21+1)  + 1.0/(24+1))  / 3.0, 
+			 (1.0/(24+1) + 1.0/(22+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(4 + -3 + 0) / 3.0, // mvmts
+			 (4 + 0 + 4) / 3.0, 
+			 (10 + 12 + 12) / 3.0, 
+			 (19 + 21 + 24) / 3.0, 
+			 (24 + 22) / 2.0}
+		});
+		expected.addAll(expectedAvg);
+
+		// For all non-averaged elements of expected: turn the elements in all Arrays from distances into proximities
+		for (int i = 0; i < (expected.size() - expectedAvg.size()); i++) {
 			double[][] currentExpected = expected.get(i);
 			for (int j = 0; j < currentExpected.length; j++) {
 				// Do only if not movements 
@@ -3950,37 +4101,43 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 
 		List<double[][]> actual = new ArrayList<double[][]>();
-		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
+		Integer[][] btp = tablature.getBasicTabSymbolProperties();
 		NoteSequence noteSeq = transcription.getNoteSequence();
 		// a. Direction.LEFT (decisionContextSize = 1)
 		// Not modelling duration
-		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
-			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(basicTabSymbolProperties, 
-				transcription, noteSeq.get(i), Direction.LEFT, false, false, 1));
+		for (int i = 0; i < btp.length; i++) {
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
+				transcription, noteSeq.get(i), Direction.LEFT, false, false, 1, false));
 		}
 		// Modelling duration
-		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
-			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(basicTabSymbolProperties, 
-				transcription, noteSeq.get(i), Direction.LEFT, true, false, 1));
+		for (int i = 0; i < btp.length; i++) {
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
+				transcription, noteSeq.get(i), Direction.LEFT, true, false, 1, false));
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		// Not modelling duration
-		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
-			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(basicTabSymbolProperties, 
-				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3));
+		for (int i = 0; i < btp.length; i++) {
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
+				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3, false));
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = 
 			FeatureGenerator.getBackwardsMapping(tablature.getNumberOfNotesPerChord());
 		// Using the bwd model
 		for (int i : backwardsMapping) {
-			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(basicTabSymbolProperties, 
-				transcription, noteSeq.get(i), Direction.RIGHT, false, false, 1));
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
+				transcription, noteSeq.get(i), Direction.RIGHT, false, false, 1, false));
 		}
 		// Using the bi-directional model
 		for (int i : backwardsMapping) {
-			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(basicTabSymbolProperties, 
-				transcription, noteSeq.get(i), Direction.RIGHT, true, true, 1));
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
+				transcription, noteSeq.get(i), Direction.RIGHT, true, true, 1, false));
+		}
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)		
+		// Not modelling duration
+		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 14, 15, 16, 17, 18})) {
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
+				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3, true));
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -4472,8 +4629,158 @@ public class FeatureGeneratorTest extends TestCase {
 			{0.0, 0.0, 0.0, 0.0, -1/4.0}});
 		expected.addAll(expectedRight);
 
-		// For all elements of expected: turn the elements in all three Arrays from distances into proximities
-		for (int i = 0; i < expected.size(); i++) {
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)
+		List<double[][]> expectedAvg = new ArrayList<double[][]>();
+		// Chord 0
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0}, 
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}}); 
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0},
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}});
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0},	
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}});
+		expectedAvg.add(new double[][]{{-1.0, -1.0, -1.0, -1.0, -1.0}, {-1.0, -1.0, -1.0, -1.0, -1.0}, 
+			{-1.0, -1.0, -1.0, -1.0, -1.0}, {0.0, 0.0, 0.0, 0.0, 0.0}});
+		// Chord 1
+		expectedAvg.add(new double[][]{
+			{1.0/(24+1), 1.0/(20+1), 1.0/(12+1), 1.0/(5+1), -1.0}, 
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0}, 
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0}, 
+			{-24.0, -20.0, -12.0, -5.0, 0.0}
+		}); 
+		expectedAvg.add(new double[][]{
+			{1.0/(12+1), 1.0/(8+1), 1.0/(0+1), 1.0/(7+1), -1.0},
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0},
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0},
+			{-12.0, -8.0, 0.0, 7.0, 0.0}
+		});
+		expectedAvg.add(new double[][]{
+			{1.0/(0+1), 1.0/(4+1), 1.0/(12+1), 1.0/(19+1), -1.0},
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0},
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0},
+			{0.0, 4.0, 12.0, 19.0, 0.0}
+		});
+		expectedAvg.add(new double[][]{
+			{1.0/(3+1), 1.0/(7+1), 1.0/(15+1), 1.0/(22+1), -1.0},
+			{1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), 1.0/((1/4.0)+1), -1.0},
+			{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0},
+			{3.0, 7.0, 15.0, 22.0, 0.0}
+		});
+		// Chord 5
+		expectedAvg.add(new double[][]{
+			{(1.0/(20+1) + 1.0/(27+1) + 1.0/(24+1)) / 3.0, // pitchProx 
+			 (1.0/(20+1) + 1.0/(24+1) + 1.0/(20+1)) / 3.0, 
+			 (1.0/(14+1) + 1.0/(12+1) + 1.0/(12+1)) / 3.0, 
+			 (1.0/(5+1)  + 1.0/(3+1)  + 1.0/(0+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/(2+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((3/8.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-20 + -27 + -24) / 3.0, // mvmts
+			 (-20 + -24 + -20) / 3.0, 
+			 (-14 + -12 + -12) / 3.0, 
+			 (-5 + -3 + 0) / 3.0, 
+			 -0.99999 /*(0 + -2) / 2.0*/}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(8+1) + 1.0/(15+1) + 1.0/(12+1)) / 3.0, // pitchProx 
+			 (1.0/(8+1) + 1.0/(12+1) + 1.0/(8+1)) / 3.0, 
+			 (1.0/(2+1) + 1.0/(0+1) + 1.0/(0+1)) / 3.0, 
+			 (1.0/(7+1)  + 1.0/(9+1)  + 1.0/(12+1))  / 3.0, 
+			 (1.0/(12+1) + 1.0/(10+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((3/8.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-8 + -15 + -12) / 3.0, // mvmts
+			 (-8 + -12 + -8) / 3.0, 
+			 (-2 + -0 + -0) / 3.0, 
+			 (7 + 9 + 12) / 3.0, 
+			 (12 + 10) / 2.0}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(8+1) + 1.0/(15+1) + 1.0/(12+1)) / 3.0, // pitchProx 
+			 (1.0/(8+1) + 1.0/(12+1) + 1.0/(8+1)) / 3.0, 
+			 (1.0/(2+1) + 1.0/(0+1) + 1.0/(0+1)) / 3.0, 
+			 (1.0/(7+1)  + 1.0/(9+1)  + 1.0/(12+1))  / 3.0, 
+			 (1.0/(12+1) + 1.0/(10+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((3/8.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-8 + -15 + -12) / 3.0, // mvmts
+			 (-8 + -12 + -8) / 3.0, 
+			 (-2 + -0 + -0) / 3.0, 
+			 (7 + 9 + 12) / 3.0, 
+			 (12 + 10) / 2.0}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(5+1) + 1.0/(12+1) + 1.0/(9+1)) / 3.0, // pitchProx 
+			 (1.0/(5+1) + 1.0/(9+1) + 1.0/(5+1)) / 3.0, 
+			 (1.0/(1+1) + 1.0/(3+1) + 1.0/(3+1)) / 3.0, 
+			 (1.0/(10+1) + 1.0/(12+1)  + 1.0/(15+1))  / 3.0, 
+			 (1.0/(15+1) + 1.0/(13+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((3/8.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(-5 + -12 + -9) / 3.0, // mvmts
+			 (-5 + -9 + -5) / 3.0, 
+			 (1 + 3 + 3) / 3.0, 
+			 (10 + 12 + 15) / 3.0, 
+			 (15 + 13) / 2.0}
+		});
+		expectedAvg.add(new double[][]{
+			{(1.0/(4+1) + 1.0/(3+1) + 1.0/(0+1)) / 3.0, // pitchProx 
+			 (1.0/(4+1) + 1.0/(0+1) + 1.0/(4+1)) / 3.0, 
+			 (1.0/(10+1) + 1.0/(12+1) + 1.0/(12+1)) / 3.0, 
+			 (1.0/(19+1) + 1.0/(21+1)  + 1.0/(24+1))  / 3.0, 
+			 (1.0/(24+1) + 1.0/(22+1)) / 2.0},
+			{(1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, // ioProx 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((2/4.0)+1) + 1.0/((3/4.0)+1)) / 3.0, 
+			 (1.0/((1/4.0)+1) + 1.0/((5/16.0)+1) + 1.0/((2/4.0)+1))  / 3.0, 
+			 (1.0/((1/8.0)+1) + 1.0/((1/4.0)+1)) / 2.0},
+			{(1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, // ooProx
+			 (1.0/((1/8.0)+1) + 1.0/((3/8.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((2/4.0)+1)) / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/4.0)+1) + 1.0/((5/16.0)+1))  / 3.0, 
+			 (1.0/(0+1) + 1.0/((1/8.0)+1)) / 2.0},
+			{(4 + -3 + 0) / 3.0, // mvmts
+			 (4 + 0 + 4) / 3.0, 
+			 (10 + 12 + 12) / 3.0, 
+			 (19 + 21 + 24) / 3.0, 
+			 (24 + 22) / 2.0}
+		});
+		expected.addAll(expectedAvg);
+		
+		// For all (non-averaged) elements of expected: turn the elements in all three Arrays 
+		// from distances into proximities
+		for (int i = 0; i < (expected.size() - expectedAvg.size()); i++) {
 			double[][] currentExpected = expected.get(i);
 			for (int j = 0; j < currentExpected.length; j++) {
 				// Do only if not movements 
@@ -4501,20 +4808,25 @@ public class FeatureGeneratorTest extends TestCase {
 		for (int i = 0; i < noteSeq.size(); i++) {
 			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, currentNote, Direction.LEFT, false, false, 1));
+				transcription, currentNote, Direction.LEFT, false, false, 1, false));
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		for (int i = 0; i < noteSeq.size(); i++) {
 			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, currentNote, Direction.LEFT, false, false, 3));
+				transcription, currentNote, Direction.LEFT, false, false, 3, false));
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(transcription.getNumberOfNewNotesPerChord());
 		for (int i : backwardsMapping) {
 			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, currentNote, Direction.RIGHT, false, false, 1));
+				transcription, currentNote, Direction.RIGHT, false, false, 1, false));
+		}
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)
+		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17, 18, 19})) {
+			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
+				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3, true));
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -4528,9 +4840,318 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
+	
+	
+//	public void testGetProximitiesAndMovementToVoiceAvg() {
+//		Tablature tablature = new Tablature(encodingTestpiece1, true);
+//		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+//
+//		List<double[]> expected = new ArrayList<double[]>();
+//		// a. Direction.LEFT (decisionContextSize = 1)
+//		// Chord 0
+//		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		 // Chord 1
+//		expected.add(new double[]{5.0, 1/4.0, 0.0, 0.0, -5.0});
+//		expected.add(new double[]{0.0, 1/4.0, 0.0, 0.0, 0.0});
+//		expected.add(new double[]{3.0, 1/4.0, 0.0, 0.0, 3.0});
+//		expected.add(new double[]{4.0, 1/4.0, 0.0, 0.0, 4.0});
+//		// Chord 2
+//		expected.add(new double[]{3.0, 3/16.0, 0.0, 0.0, 3.0});
+//		// Chord 3
+//		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expected.add(new double[]{2.0, 1/16.0, 0.0, 0.0, 2.0});
+//		expected.add(new double[]{2.0, 1/4.0, 1/16.0, 0.0, 2.0});
+//		expected.add(new double[]{7.0, 1/4.0, 1/16.0, 0.0, -7.0});
+//		expected.add(new double[]{4.0, 1/4.0, 1/16.0, 1/8.0, -4.0});
+//		// Chord 4
+//		expected.add(new double[]{2.0, 1/8.0, 0.0, 0.0, -2.0});
+//		// Chord 5
+//		expected.add(new double[]{0.0, 1/8.0, 0.0, 0.0, 0.0});
+//		expected.add(new double[]{7.0, 1/4.0, 1/8.0, 0.0, 7.0});
+//		expected.add(new double[]{2.0, 1/4.0, 1/8.0, 0.0, -2.0});
+//		expected.add(new double[]{5.0, 1/4.0, 1/8.0, 1/8.0, -5.0});
+//		expected.add(new double[]{4.0, 1/4.0, 1/8.0, 0.0, 4.0});
+//		// Chord 6
+//		expected.add(new double[]{0.0, 1/4.0, 0.0, 0.0, 0.0});
+//		expected.add(new double[]{3.0, 1/4.0, 0.0, 0.0, 3.0});
+//		expected.add(new double[]{5.0, 1/4.0, 0.0, 0.0, -5.0});
+//		expected.add(new double[]{9.0, 1/4.0, 0.0, 0.0, 9.0});
+//		// Chord 7
+//		expected.add(new double[]{1.0, 1/8.0, 0.0, 0.0, -1.0});
+//		expected.add(new double[]{4.0, 1/8.0, 0.0, 0.0, 4.0});
+//		// Chord 8
+//		expected.add(new double[]{12.0, 1/2.0, 1/4.0, 0.0, -12.0});
+//		expected.add(new double[]{2.0, 1/8.0, 0.0, 0.0, -2.0});
+//		expected.add(new double[]{5.0, 1/4.0, 1/8.0, 0.0, -5.0});
+//		expected.add(new double[]{1.0, 1/8.0, 0.0, 0.0, 1.0});
+//		// Chords 9-14
+//		expected.add(new double[]{1.0, 1/16.0, 0.0, 0.0, -1.0});
+//		expected.add(new double[]{1.0, 1/16.0, 0.0, 0.0, 1.0});
+//		expected.add(new double[]{1.0, 1/32.0, 0.0, 0.0, -1.0});
+//		expected.add(new double[]{2.0, 1/32.0, 0.0, 0.0, -2.0});
+//		expected.add(new double[]{2.0, 1/32.0, 0.0, 0.0, 2.0});
+//		expected.add(new double[]{1.0, 1/32.0, 0.0, 0.0, 1.0});
+//		 // Chord 15
+//		expected.add(new double[]{0.0, 3/4.0, 11/16.0, 1/4.0, 0.0});
+//		expected.add(new double[]{0.0, 3/4.0, 11/16.0, 1/4.0, 0.0});
+//		expected.add(new double[]{0.0, 3/4.0, 11/16.0, 1/4.0,0.0});
+//		expected.add(new double[]{0.0, 2/4.0, 1/4.0, 1/4.0, 0.0});
+//
+//		// b. Direction.LEFT (decisionContextSize = 3)
+//		// Chord 0
+//		// Note 0
+////		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+////		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+////		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+////		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+////		// Chord 1
+////		expected.add(new double[]{5.0, 1/4.0, 0.0, 0.0, -5.0});
+////		expected.add(new double[]{0.0, 1/4.0, 0.0, 0.0, 0.0});
+////		expected.add(new double[]{3.0, 1/4.0, 0.0, 0.0, 3.0});
+////		expected.add(new double[]{4.0, 1/4.0, 0.0, 0.0, 4.0});
+////		// Chord 2
+////		// Note 8
+////		expected.add(new double[]{(3+5)/2.0, ((3/16.0)+(1/4.0))/2.0, (0+0)/2.0, (0+0)/2.0, (3+-5)/2.0}); // hoer 8
+////		// Chord 3
+////		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+////		expected.add(new double[]{(2+5+0)/3.0, ((1/16.0)+(1/4.0)+(1/2.0))/3.0, (0+(1/16.0)+(1/4.0))/3.0, (0+(1/16.0)+(1/4.0))/3.0, (2+5+0)/3.0});
+////		expected.add(new double[]{(2+2)/2.0, ((1/4.0)+(1/2.0))/2.0, ((1/16.0)+(1/4.0))/2.0, (0+(1/4.0))/2.0, (2+2)/2.0});
+////		expected.add(new double[]{(7+4)/2.0, ((1/4.0)+(1/2.0))/2.0, ((1/16.0)+(1/4.0))/2.0, (0+(1/4.0))/2.0, (-7+-4)/2.0});
+////		expected.add(new double[]{(4+0)/2.0, ((1/4.0)+(1/2.0))/2.0, ((1/16.0)+(1/4.0))/2.0, ((1/8.0)+(1/4.0))/2.0, (-4+0)/2.0});
+////		// Chord 4
+////		expected.add(new double[]{2.0, 1/8.0, 0.0, 0.0, -2.0});
+////		// Chord 5
+////		expected.add(new double[]{(0+2)/2.0, ((1/8.0)+(1/4.0))/2.0, (0+(1/8.0))/2.0, (0+(1/8.0))/2.0, (0+-2)/2.0});
+////		expected.add(new double[]{(7+9+12)/3.0, ((1/4.0)+(5/16.0)+(1/2.0))/3.0, ((1/8.0)+(1/4.0)+(5/16.0))/3.0, (0+(1/4.0)+(5/16.0))/3.0, (7+9+12)/3.0});
+////		expected.add(new double[]{(2+0+0)/3.0, ((1/4.0)+(1/2.0)+(3/4.0))/3.0, ((1/8.0)+(5/16.0)+(1/2.0))/3.0, (0+(1/4.0)+(1/2.0))/3.0, (-2+0+0)/3.0});
+////		expected.add(new double[]{(5+9+5)/3.0, ((1/4.0)+(1/2.0)+(3/4.0))/3.0, ((1/8.0)+(5/16.0)+(1/2.0))/3.0, ((1/8.0)+(3/8.0)+(1/2.0))/3.0, (-5+-9+-5)/3.0});
+////		expected.add(new double[]{(4+3+0)/3.0, ((1/4.0)+(1/2.0)+(3/4.0))/3.0, ((1/8.0)+(5/16.0)+(1/2.0))/3.0, (0+(1/4.0)+(1/2.0))/3.0, (4+-3+0)/3.0});
+////		// Chord 6
+////		// Note 19
+////		expected.add(new double[]{0.0, 1/4.0, 0.0, 0.0, 0.0}); // hoer 20
+////		expected.add(new double[]{0.0, 3/8.0, 1/4.0, 1/4.0, 0.0});
+////		expected.add(new double[]{2.0, 1/2.0, 3/8.0, 3/8.0, -2.0});
+////		// Note 20
+////		expected.add(new double[]{3.0, 1/4.0, 0.0, 0.0, 3.0});
+////		expected.add(new double[]{1.0, 1/2.0, 3/8.0, 1/4.0, 1.0});
+////		expected.add(new double[]{3.0, 3/4.0, 9/16.0, 1/2.0, 3.0});
+////		// Note 21
+////		expected.add(new double[]{5.0, 1/4.0, 0.0, 0.0, -5.0});
+////		expected.add(new double[]{1.0, 1/2.0, 3/8.0, 1/4.0, -1.0});
+////		expected.add(new double[]{8.0, 3/4.0, 9/16.0, 1/2.0, -8.0});
+////		// Note 22
+////		expected.add(new double[]{9.0, 1/4.0, 0.0, 0.0, 9.0});
+////		expected.add(new double[]{4.0, 1/2.0, 3/8.0, 3/8.0, 4.0});
+////		expected.add(new double[]{0.0, 3/4.0, 9/16.0, 5/8.0, 0.0});
+////		// Chord 7
+////		// Note 23
+////		expected.add(new double[]{1.0, 1/8.0, 0.0, 0.0, -1.0});
+////		expected.add(new double[]{2.0, 3/8.0, 1/8.0, 1/8.0, 2.0});
+////		expected.add(new double[]{0.0, 5/8.0, 1/2.0, 3/8.0, 0.0});
+////		// Note 24
+////		expected.add(new double[]{4.0, 1/8.0, 0.0, 0.0, 4.0});
+////		expected.add(new double[]{1.0, 3/8.0, 1/8.0, 1/8.0, -1.0});
+////		expected.add(new double[]{3.0, 5/8.0, 1/2.0, 3/8.0, 3.0});
+////		// Chord 8
+////		// Note 25
+////		expected.add(new double[]{12.0, 1/2.0, 1/4.0, 0.0, -12.0});
+////		expected.add(new double[]{5.0, 3/4.0, 5/8.0, 1/2.0, -5.0});
+////		expected.add(new double[]{3.0, 13/16.0, 3/4.0, 3/4.0, -3.0});
+////		// Note 26
+////		expected.add(new double[]{2.0, 1/8.0, 0.0, 0.0, -2.0});
+////		expected.add(new double[]{3.0, 1/4.0, 1/8.0, 1/8.0, -3.0});
+////		expected.add(new double[]{0.0, 1/2.0, 1/4.0, 1/4.0, 0.0});
+////		// Note 27
+////		expected.add(new double[]{5.0, 1/4.0, 1/8.0, 0.0, -5.0});
+////		expected.add(new double[]{4.0, 1/2.0, 1/4.0, 1/4.0, 4.0});
+////		expected.add(new double[]{1.0, 3/4.0, 5/8.0, 5/8.0, -1.0});
+////		// Note 28
+////		expected.add(new double[]{1.0, 1/8.0, 0.0, 0.0, 1.0});
+////		expected.add(new double[]{5.0, 1/4.0, 1/8.0, 1/8.0, 5.0});
+////		expected.add(new double[]{0.0, 1/2.0, 1/4.0, 1/4.0, 0.0});
+////		// Chords 9-14
+////		// Note 29
+////		expected.add(new double[]{1.0, 1/16.0, 0.0, 0.0, -1.0});
+////		expected.add(new double[]{0.0, 3/16.0, 1/16.0, 1/16.0, 0.0});
+////		expected.add(new double[]{4.0, 5/16.0, 3/16.0, 3/16.0, 4.0});
+////		// Note 30
+////		expected.add(new double[]{1.0, 1/16.0, 0.0, 0.0, 1.0});
+////		expected.add(new double[]{0.0, 1/8.0, 1/16.0, 1/16.0, 0.0});
+////		expected.add(new double[]{1.0, 1/4.0, 1/8.0, 1/8.0, 1.0});
+////		// Note 31
+////		expected.add(new double[]{1.0, 1/32.0, 0.0, 0.0, -1.0});
+////		expected.add(new double[]{0.0, 3/32.0, 1/32.0, 1/32.0, 0.0});
+////		expected.add(new double[]{1.0, 5/32.0, 3/32.0, 3/32.0, -1.0});
+////		// Note 32
+////		expected.add(new double[]{2.0, 1/32.0, 0.0, 0.0, -2.0});
+////		expected.add(new double[]{3.0, 1/16.0, 1/32.0, 1/32.0, -3.0});
+////		expected.add(new double[]{2.0, 1/8.0, 1/16.0, 1/16.0, -2.0});
+////		// Note 33
+////		expected.add(new double[]{2.0, 1/32.0, 0.0, 0.0, 2.0});
+////		expected.add(new double[]{0.0, 1/16.0, 1/32.0, 1/32.0, 0.0});
+////		expected.add(new double[]{1.0, 3/32.0, 1/16.0, 1/16.0, -1.0});
+////		// Note 34
+////		expected.add(new double[]{1.0, 1/32.0, 0.0, 0.0, 1.0});
+////		expected.add(new double[]{3.0, 1/16.0, 1/32.0, 1/32.0, 3.0});
+////		expected.add(new double[]{1.0, 3/32.0, 1/16.0, 1/16.0, 1.0}); 
+////		// Chord 15
+////		// Note 35
+////		expected.add(new double[]{0.0, 3/4.0, 11/16.0, 1/4.0, 0.0});
+////		expected.add(new double[]{12.0, 5/4.0, 4/4.0, 3/4.0, -12.0});
+////		expected.add(new double[]{5.0, 6/4.0, 11/8.0, 5/4.0, -5.0});
+////		// Note 36
+////		expected.add(new double[]{0.0, 3/4.0, 11/16.0, 1/4.0, 0.0});
+////		expected.add(new double[]{2.0, 7/8.0, 3/4.0, 3/4.0, -2.0});
+////		expected.add(new double[]{3.0, 4/4.0, 7/8.0, 7/8.0, -3.0});
+////		// Note 37
+////		expected.add(new double[]{0.0, 3/4.0, 11/16.0, 1/4.0,0.0});
+////		expected.add(new double[]{5.0, 4/4.0, 7/8.0, 3/4.0, -5.0});
+////		expected.add(new double[]{4.0, 5/4.0, 4/4.0, 4/4.0, 4.0});
+////		// Note 38
+////		expected.add(new double[]{0.0, 1/2.0, 1/4.0, 1/4.0, 0.0});
+////		expected.add(new double[]{1.0, 17/32.0, 1/2.0, 1/2.0, 1.0});
+////		expected.add(new double[]{3.0, 9/16.0, 17/32.0, 17/32.0, 3.0});
+//
+//		// c. Direction.RIGHT (decisionContextSize = 1)
+//		List<double[]> expectedRight = new ArrayList<double[]>();	
+//		// Chord 15
+//		expectedRight.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expectedRight.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expectedRight.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expectedRight.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		// Chords 14-9
+//		expectedRight.add(new double[]{0.0, -1/2.0, -1/4.0, -1/4.0, 0.0});
+//		expectedRight.add(new double[]{1.0, -1/32.0, 0.0, 0.0, -1.0});
+//		expectedRight.add(new double[]{2.0, -1/32.0, 0.0, 0.0, -2.0});
+//		expectedRight.add(new double[]{2.0, -1/32.0, 0.0, 0.0, 2.0});
+//		expectedRight.add(new double[]{1.0, -1/32.0, 0.0, 0.0, 1.0});
+//		expectedRight.add(new double[]{1.0, -1/16.0, 0.0, 0.0, -1.0});
+//		// Chord 8
+//		expectedRight.add(new double[]{0.0, -3/4.0, -11/16.0, -1/4.0, 0.0});
+//		expectedRight.add(new double[]{0.0, -3/4.0, -11/16.0, -1/4.0, 0.0});
+//		expectedRight.add(new double[]{0.0, -3/4.0, -11/16.0, -1/4.0, 0.0});
+//		expectedRight.add(new double[]{1.0, -1/16.0, 0.0, 0.0, 1.0});
+//		// Chord 7
+//		expectedRight.add(new double[]{2.0, -1/8.0, 0.0, 0.0, 2.0});
+//		expectedRight.add(new double[]{1.0, -1/8.0, 0.0, 0.0, -1.0});
+//		// Chord 6
+//		expectedRight.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+//		expectedRight.add(new double[]{1.0, -1/8.0, 0.0, 0.0, 1.0});
+//		expectedRight.add(new double[]{4.0, -1/8.0, 0.0, 0.0, -4.0});
+//		expectedRight.add(new double[]{5.0, -1/4.0, -1/8.0, 0.0, 5.0});
+//		// Chord 5
+//		expectedRight.add(new double[]{0.0, -1/4.0, 0.0, 0.0, 0.0});
+//		expectedRight.add(new double[]{12.0, -1/2.0, -1/4.0, 0.0, 12.0});
+//		expectedRight.add(new double[]{3.0, -1/4.0, 0.0, 0.0, -3.0});
+//		expectedRight.add(new double[]{9.0, -1/4.0, 0.0, 0.0, -9.0});
+//		expectedRight.add(new double[]{5.0, -1/4.0, 0.0, 0.0, 5.0});
+//		// Chord 4
+//		expectedRight.add(new double[]{0.0, -1/8.0, 0.0, 0.0, 0.0});
+//		// Chord 3
+//		expectedRight.add(new double[]{2.0, -1/8.0, 0.0, 0.0, 2.0});
+//		expectedRight.add(new double[]{7.0, -1/4.0, -1/8.0, 0.0, -7.0});
+//		expectedRight.add(new double[]{2.0, -1/4.0, -1/8.0, 0.0, 2.0});
+//		expectedRight.add(new double[]{4.0, -1/4.0, -1/8.0, 0.0, -4.0});
+//		expectedRight.add(new double[]{5.0, -1/4.0, -1/8.0, 0.0, 5.0}); // full duration of currentNote = 1/4 because in the NoteSequence, the CoDNote with the longest duration is retained 
+//		// Chord 2                                                        
+//		expectedRight.add(new double[]{2.0, -1/16.0, 0.0, 0.0, -2.0});
+//		// Chord 1
+//		expectedRight.add(new double[]{3.0, -3/16.0, 0.0, 0.0, -3.0});
+//		expectedRight.add(new double[]{2.0, -1/4.0, -1/16.0, 0.0, -2.0});
+//		expectedRight.add(new double[]{7.0, -1/4.0, -1/16.0, 0.0, 7.0});
+//		expectedRight.add(new double[]{4.0, -1/4.0, -1/16.0, -1/8.0, 4.0});
+//		// Chord 0
+//		expectedRight.add(new double[]{5.0, -1/4.0, 0.0, 0.0, 5.0});
+//		expectedRight.add(new double[]{0.0, -1/4.0, 0.0, 0.0, 0.0});
+//		expectedRight.add(new double[]{4.0, -1/4.0, 0.0, 0.0, -4.0});
+//		expectedRight.add(new double[]{3.0, -1/4.0, 0.0, 0.0, -3.0});
+//		expected.addAll(expectedRight);
+//
+//		// For each element of expected: turn the first four elements from distances into proximities
+//		for (int i = 0; i < expected.size(); i++) {
+//			double[] currentArray = expected.get(i);
+//			for (int j = 0; j < currentArray.length - 1; j++) {
+//				double oldValue = currentArray[j]; 
+//				// Do only if oldValue is not -1.0, i.e., if the voice is active
+//				if (oldValue != -1.0) {
+//					double newValue = 1.0/(oldValue + 1);
+//					// If oldValue is negative
+//					if (oldValue < 0) {
+//						newValue = -(1.0/(-oldValue + 1));
+//					}
+//					currentArray[j] = newValue;
+//				}
+//			}
+//		}
+//
+//		List<double[]> actual = new ArrayList<double[]>();
+//		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
+//		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
+//		NoteSequence noteSeq = transcription.getNoteSequence();
+//		// a. Direction.LEFT (decisionContextSize = 1)
+//		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
+//			Note currentNote = noteSeq.get(i);
+//			List<Double> currentLabel = voiceLabels.get(i);
+//			List<Integer> currentVoices = 
+//				DataConverter.convertIntoListOfVoices(currentLabel);
+//			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
+//			for (int j = 0; j < currentVoices.size(); j++) {
+//				int currentVoice = currentVoices.get(j);
+//				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+//				actual.add(FeatureGenerator.getProximitiesAndMovementToVoiceAvg(
+//					basicTabSymbolProperties, currentVoiceToCompareTo, currentNote, 
+//					Direction.LEFT, 1));
+//			}
+//		}
+//		// b. Direction.LEFT (decisionContextSize = 3)
+//		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
+//			Note currentNote = noteSeq.get(i);
+//			List<Double> currentLabel = voiceLabels.get(i);
+//			List<Integer> currentVoices = 
+//				DataConverter.convertIntoListOfVoices(currentLabel);
+//			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
+//			for (int j = 0; j < currentVoices.size(); j++) {
+//				int currentVoice = currentVoices.get(j);
+//				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+////				actual.add(FeatureGenerator.getProximitiesAndMovementToVoiceAvg(
+////					basicTabSymbolProperties, currentVoiceToCompareTo, currentNote, 
+////					Direction.LEFT, 3));
+//			}
+//		}
+//		// c. Direction.RIGHT (decisionContextSize = 1)
+//		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(tablature.getNumberOfNotesPerChord());
+//		for (int i : backwardsMapping) {
+//			Note currentNote = noteSeq.get(i);
+//			List<Double> currentLabel = voiceLabels.get(i);
+//			List<Integer> currentVoices = DataConverter.convertIntoListOfVoices(currentLabel);
+//			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
+//			for (int j = 0; j < currentVoices.size(); j++) {
+//				int currentVoice = currentVoices.get(j);
+//				NotationVoice currentVoiceToCompareTo = 
+//					transcription.getPiece().getScore().get(currentVoice).get(0);
+//				actual.add(FeatureGenerator.getProximitiesAndMovementToVoiceAvg(
+//					basicTabSymbolProperties, currentVoiceToCompareTo, 
+//					currentNote, Direction.RIGHT, 1));
+//			}
+//		}
+//
+//		assertEquals(expected.size(), actual.size());
+//		for (int i = 0; i < expected.size(); i++) {
+//			System.out.println("i = " + i);
+//			assertEquals(expected.get(i).length, actual.get(i).length);
+//			for (int j = 0; j < expected.get(i).length; j++) {
+//				System.out.println("j = " + j);
+//				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+//			}
+//		}
+//	}
 
 
-	public void testGetProximitiesAndMovementToVoice() {
+	// EEN gedaan
+	public void testGetProximitiesAndMovementToVoiceAll() {
 		Tablature tablature = new Tablature(encodingTestpiece1, true);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
@@ -4814,9 +5435,60 @@ public class FeatureGeneratorTest extends TestCase {
 		expectedRight.add(new double[]{4.0, -1/4.0, 0.0, 0.0, -4.0});
 		expectedRight.add(new double[]{3.0, -1/4.0, 0.0, 0.0, -3.0});
 		expected.addAll(expectedRight);
+		
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)
+		List<double[]> expectedAvg = new ArrayList<double[]>();	
+		// Chord 0
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, -1.0, 0.0});
+		// Chord 1
+		expectedAvg.add(new double[]{1.0/(5+1), 1.0/((1/4.0)+1), 1.0/(0+1), 1.0/(0+1), -5.0});
+		expectedAvg.add(new double[]{1.0/(0+1), 1.0/((1/4.0)+1), 1.0/(0+1), 1.0/(0+1), 0.0});
+		expectedAvg.add(new double[]{1.0/(3+1), 1.0/((1/4.0)+1), 1.0/(0+1), 1.0/(0+1), 3.0});
+		expectedAvg.add(new double[]{1.0/(4+1), 1.0/((1/4.0)+1), 1.0/(0+1), 1.0/(0+1), 4.0});
+		// Chord 5
+		expectedAvg.add(new double[]{
+			( (1.0/(0+1)) + (1.0/(2+1)) ) / 2.0, 
+			( (1.0/((1/8.0)+1)) + (1.0/((1/4.0)+1)) ) / 2.0,
+			( (1.0/(0+1)) + (1.0/((1/8.0)+1)) ) / 2.0,
+			( (1.0/(0+1)) + (1.0/((1/8.0)+1)) ) / 2.0,
+			( (0 + -2) ) / 2.0
+		});
+		expectedAvg.add(new double[]{ 
+			( (1.0/(7+1)) + (1.0/(9+1)) + (1.0/(12+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((5/16.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (1.0/((1/8.0)+1)) + (1.0/((1/4.0)+1)) + (1.0/((5/16.0)+1)) ) / 3.0,
+			( (1.0/(0+1)) + (1.0/((1/4.0)+1)) + (1.0/((5/16.0)+1)) ) / 3.0,
+			( (7 + 9 + 12) ) / 3.0
+		});
+		expectedAvg.add(new double[]{ 
+			( (1.0/(2+1)) + (1.0/(0+1)) + (1.0/(0+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) + (1.0/((3/4.0)+1)) ) / 3.0,
+			( (1.0/((1/8.0)+1)) + (1.0/((5/16.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (1.0/(0+1)) + (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (-2 + 0 + 0) ) / 3.0
+		});
+		expectedAvg.add(new double[]{ 
+			( (1.0/(5+1)) + (1.0/(9+1)) + (1.0/(5+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) + (1.0/((3/4.0)+1)) ) / 3.0,
+			( (1.0/((1/8.0)+1)) + (1.0/((5/16.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (1.0/((1/8.0)+1)) + (1.0/((3/8.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (-5 + -9 + -5) ) / 3.0
+		});
+		expectedAvg.add(new double[]{
+			( (1.0/(4+1)) + (1.0/(3+1)) + (1.0/(0+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) + (1.0/((3/4.0)+1)) ) / 3.0,
+			( (1.0/((1/8.0)+1)) + (1.0/((5/16.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (1.0/(0+1)) + (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (4 + -3 + 0) ) / 3.0
+		});
+		expected.addAll(expectedAvg);
 
-		// For each element of expected: turn the first four elements from distances into proximities
-		for (int i = 0; i < expected.size(); i++) {
+		// For each element of non-averaged expected: turn the first four elements from 
+		// distances into proximities
+		for (int i = 0; i < (expected.size() - expectedAvg.size()); i++) {
 			double[] currentArray = expected.get(i);
 			for (int j = 0; j < currentArray.length - 1; j++) {
 				double oldValue = currentArray[j]; 
@@ -4846,9 +5518,9 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
-				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoice(
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(
 					basicTabSymbolProperties, currentVoiceToCompareTo, currentNote, 
-					Direction.LEFT, 1));
+					Direction.LEFT, 1, false));
 			}
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
@@ -4861,9 +5533,9 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
-				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoice(
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(
 					basicTabSymbolProperties, currentVoiceToCompareTo, currentNote, 
-					Direction.LEFT, 3));
+					Direction.LEFT, 3, false));
 			}
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
@@ -4877,9 +5549,23 @@ public class FeatureGeneratorTest extends TestCase {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = 
 					transcription.getPiece().getScore().get(currentVoice).get(0);
-				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoice(
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(
 					basicTabSymbolProperties, currentVoiceToCompareTo, 
-					currentNote, Direction.RIGHT, 1));
+					currentNote, Direction.RIGHT, 1, false));
+			}
+		}
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)
+		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 14, 15, 16, 17, 18})) {
+			Note currentNote = noteSeq.getNoteAt(i);
+			List<Double> currentLabel = voiceLabels.get(i);
+			List<Integer> currentVoices = 
+				DataConverter.convertIntoListOfVoices(currentLabel);
+			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
+			for (int j = 0; j < currentVoices.size(); j++) {
+				int currentVoice = currentVoices.get(j);
+				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(basicTabSymbolProperties, 
+					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, true));
 			}
 		}
 
@@ -4893,7 +5579,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
-	public void testGetProximitiesAndMovementToVoiceNonTab() {    
+	public void testGetProximitiesAndMovementToVoiceAllNonTab() {    
 		Transcription transcription = new Transcription(midiTestpiece1, null);
 		
 		List<double[]> expected = new ArrayList<double[]>();
@@ -5122,7 +5808,7 @@ public class FeatureGeneratorTest extends TestCase {
 		expected.add(new double[]{0.0, 2/4.0, 1/4.0, 0.0});
 		expected.add(new double[]{1.0, 17/32.0, 1/2.0, 1.0});
 		expected.add(new double[]{3.0, 9/16.0, 17/32.0, 3.0});
-		
+				
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<double[]> expectedRight = new ArrayList<double[]>();	
 		// Chord 15
@@ -5178,8 +5864,54 @@ public class FeatureGeneratorTest extends TestCase {
 		expectedRight.add(new double[]{3.0, -1/4.0, 0.0, -3.0});
 		expected.addAll(expectedRight);
 
-		// For each element of expected: turn the first three elements from distances into proximities
-		for (int i = 0; i < expected.size(); i++) {
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)
+		List<double[]> expectedAvg = new ArrayList<double[]>();	
+		// Chord 0
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, 0.0});
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, 0.0});
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, 0.0});
+		expectedAvg.add(new double[]{-1.0, -1.0, -1.0, 0.0});
+		// Chord 1
+		expectedAvg.add(new double[]{1.0/(5+1), 1.0/((1/4.0)+1), 1.0/(0+1), -5.0});
+		expectedAvg.add(new double[]{1.0/(0+1), 1.0/((1/4.0)+1), 1.0/(0+1), 0.0});
+		expectedAvg.add(new double[]{1.0/(4+1), 1.0/((1/4.0)+1), 1.0/(0+1), 4.0});
+		expectedAvg.add(new double[]{1.0/(3+1), 1.0/((1/4.0)+1), 1.0/(0+1), 3.0});
+		// Chord 5
+		expectedAvg.add(new double[]{
+			( (1.0/(0+1)) + (1.0/(2+1)) ) / 2.0, 
+			( (1.0/((1/8.0)+1)) + (1.0/((1/4.0)+1)) ) / 2.0,
+			( (1.0/(0+1)) + (1.0/((1/8.0)+1)) ) / 2.0,
+			( (0 + -2) ) / 2.0
+		});
+		expectedAvg.add(new double[]{ 
+			( (1.0/(7+1)) + (1.0/(9+1)) + (1.0/(12+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((5/16.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (1.0/(0+1)) + (1.0/((1/4.0)+1)) + (1.0/((5/16.0)+1)) ) / 3.0,
+			( (7 + 9 + 12) ) / 3.0
+		});
+		expectedAvg.add(new double[]{ 
+			( (1.0/(2+1)) + (1.0/(0+1)) + (1.0/(0+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) + (1.0/((3/4.0)+1)) ) / 3.0,
+			( (1.0/(0+1)) + (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (-2 + 0 + 0) ) / 3.0
+		});
+		expectedAvg.add(new double[]{ 
+			( (1.0/(5+1)) + (1.0/(9+1)) + (1.0/(5+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) + (1.0/((3/4.0)+1)) ) / 3.0,
+			( (1.0/((1/8.0)+1)) + (1.0/((3/8.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (-5 + -9 + -5) ) / 3.0
+		});
+		expectedAvg.add(new double[]{
+			( (1.0/(4+1)) + (1.0/(3+1)) + (1.0/(0+1)) ) / 3.0, 
+			( (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) + (1.0/((3/4.0)+1)) ) / 3.0,
+			( (1.0/(0+1)) + (1.0/((1/4.0)+1)) + (1.0/((2/4.0)+1)) ) / 3.0,
+			( (4 + -3 + 0) ) / 3.0
+		});
+		expected.addAll(expectedAvg);
+
+		// For each element of non-averaged expected: turn the first three elements from 
+		// distances into proximities
+		for (int i = 0; i < (expected.size() - expectedAvg.size()); i++) {
 			double[] currentArray = expected.get(i);
 			for (int j = 0; j < currentArray.length - 1; j++) {
 				double oldValue = currentArray[j]; 
@@ -5210,8 +5942,8 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
-				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoice(null, 
-					currentVoiceToCompareTo, currentNote, Direction.LEFT, 1));
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
+					currentVoiceToCompareTo, currentNote, Direction.LEFT, 1, false));
 			}
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
@@ -5225,8 +5957,8 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
-				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoice(null, 
-					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3));
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
+					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, false));
 			}
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
@@ -5241,8 +5973,23 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
-				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoice(null, 
-					currentVoiceToCompareTo, currentNote, Direction.RIGHT, 1));
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
+					currentVoiceToCompareTo, currentNote, Direction.RIGHT, 1, false));
+			}
+		}
+		// d. Direction.LEFT (decisionContextSize = 3, averaged)
+		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17, 18, 19})) {
+			Note currentNote = noteSeq.getNoteAt(i);
+			List<Double> currentLabel = voiceLabels.get(i);
+			List<Integer> currentVoices = 
+				DataConverter.convertIntoListOfVoices(currentLabel);
+			// For each voice assigned to the Note
+			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
+			for (int j = 0; j < currentVoices.size(); j++) {
+				int currentVoice = currentVoices.get(j);
+				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
+					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, true));
 			}
 		}
 
@@ -6509,7 +7256,7 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 	}
 	
-	
+	// DRIE gedaan
 	public void testGenerateNoteFeatureVectorDISS() {
 		Tablature tablature = new Tablature(encodingTestpiece1, true);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -6602,6 +7349,60 @@ public class FeatureGeneratorTest extends TestCase {
 		expFwdNoDurThree23.addAll(Arrays.asList(new Double[]{0.0, 0.0, 0.0, 0.0, 0.0})); // voicesAlreadyOccupied
 		expected.add(expFwdNoDurThree23);
 
+		// Not modelling duration (decisionContextSize = 3, averaged)
+		// Chord 1, note at index 6
+		List<Double> expFwdNoDurThreeAvg6 = new ArrayList<Double>(); 
+		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{
+			70.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
+			3.0, 3.0, -1.0, // note-chord
+			4.0, 3/16.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
+			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
+		}));
+		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{1.0/(3+1), 1.0/(7+1), 1.0/(15+1), 1.0/(22+1), -1.0})); // pitchProximities 
+		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{1/((1/4.0) + 1), 1/((1/4.0) + 1), 1/((1/4.0) + 1), 1/((1/4.0) + 1), -1.0})); // interOnsetTimeProximities 
+		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0})); // offsetOnsetTimeProximities
+		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{3.0, 7.0, 15.0, 22.0, 0.0})); // pitchMovements
+		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{0.0, 0.0, 1.0, 1.0, 0.0})); // voicesAlreadyOccupied
+		expected.add(expFwdNoDurThreeAvg6);
+		// Chord 7, note at index 23
+		List<Double> expFwdNoDurThreeAvg23 = new ArrayList<Double>(); 
+		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{
+			57.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
+			0.0, -1.0, 9.0, // note-chord
+			2.0, 1/8.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0, // chord-level
+			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
+		}));
+		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{
+			( 1.0/(5+1) + 1.0/(10+1) + 1.0/(6+1) ) / 3.0,
+			( 1.0/(10+1) + 1.0/(1+1) + 1.0/(6+1) ) / 3.0,
+			( 1.0/(1+1) + 1.0/(2+1) + 1.0/(0+1) ) / 3.0,
+			( 1.0/(2+1) + 1.0/(9+1) + 1.0/(11+1) ) / 3.0,
+			( 1.0/(14+1) + 1.0/(14+1) + 1.0/(14+1) ) / 3.0
+		})); // pitchProximities 
+		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/((3/8.0)+1) + 1/((5/8.0)+1) + 1/((11/16.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((4/8.0)+1) ) / 3.0
+		})); // interOnsetTimeProximities		
+		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{
+			( 1/(0+1) + 1/((1/8.0)+1) + 1/((4/8.0)+1) ) / 3.0,
+			( 1/(0+1) + 1/((1/8.0)+1) + 1/((4/8.0)+1) ) / 3.0,
+			( 1/(0+1) + 1/((1/8.0)+1) + 1/((4/8.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((4/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/(0+1) + 1/((1/8.0)+1) + 1/((3/8.0)+1) ) / 3.0
+		})); // offsetOnsetTimeProximities  
+		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{
+			(-5 + -10 + -6) / 3.0,
+			(-10 + -1 + -6) / 3.0,
+			(-1 + 2 + 0) / 3.0,
+			(2 + 9 + 11) / 3.0,
+			(14 + 14 + 14) / 3.0
+		})); // pitchMovements
+		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{0.0, 0.0, 0.0, 0.0, 0.0})); // voicesAlreadyOccupied
+		expected.add(expFwdNoDurThreeAvg23);
+		
 		// Modelling duration (decisionContextSize = 1)
 		// Chord 1, note at index 6
 		List<Double> expFwdDur6 = new ArrayList<Double>(); 
@@ -6645,7 +7446,6 @@ public class FeatureGeneratorTest extends TestCase {
 		expBwdNoDur6.addAll(Arrays.asList(new Double[]{-1/((1/16.0) + 1), -1/((1/16.0) + 1), -1/((1/16.0) + 1), 1.0/(0+1), -1/((1/16.0) + 1)})); // offsetOnsetTimeProximities
 		expBwdNoDur6.addAll(Arrays.asList(new Double[]{0.0, 0.0, 1.0, 1.0, 0.0})); // voicesAlreadyOccupied
 		expected.add(expBwdNoDur6);
-
 		// Chord 7, note at index 23
 		List<Double> expBwdNoDur23 = new ArrayList<Double>(); 
 		expBwdNoDur23.addAll(Arrays.asList(new Double[]{
@@ -6676,39 +7476,46 @@ public class FeatureGeneratorTest extends TestCase {
 		// Not modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo, 
-			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1));		
+			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));		
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1));
+			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));
 		// Not modelling duration (decisionContextSize = 3)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo, 
-			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3));		
+			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false));		
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3));
+			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false));
+		// Not modelling duration (decisionContextSize = 3, averaged)
+		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
+			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
+			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true));
+		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
+			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
+			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true));
 		// Modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1));
+			6, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1));
+			23, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));
 		// b. Bwd model
 		// Not modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1));
+			6, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1));
+			23, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
 		// Modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1));
+			6, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1));
+			23, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -6805,6 +7612,58 @@ public class FeatureGeneratorTest extends TestCase {
 		//
 		expFwdThree24.addAll(Arrays.asList(new Double[]{0.0, 1.0, 0.0, 1.0, 1.0})); // voicesAlreadyOccupied
 		expected.add(expFwdThree24);
+		
+		// (decisionContextSize = 3, averaged)
+		// Chord 1, note at index 7
+		List<Double> expFwdThreeAvg7 = new ArrayList<Double>(); 
+		expFwdThreeAvg7.addAll(Arrays.asList(new Double[]{
+			72.0, 1/4.0, 0.0, // note-level
+			3.0, 3.0, -1.0, // note-chord
+			4.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0 // chord-level
+		}));
+		expFwdThreeAvg7.addAll(Arrays.asList(new Double[]{1.0/(3+1), 1.0/(7+1), 1.0/(15+1), 1.0/(22+1), -1.0})); // pitchProximities 
+		expFwdThreeAvg7.addAll(Arrays.asList(new Double[]{1/((1/4.0) + 1), 1/((1/4.0) + 1), 1/((1/4.0) + 1), 1/((1/4.0) + 1), -1.0})); // interOnsetTimeProximities 
+		expFwdThreeAvg7.addAll(Arrays.asList(new Double[]{1.0/(0+1), 1.0/(0+1), 1.0/(0+1), 1.0/(0+1), -1.0})); // offsetOnsetTimeProximities
+		expFwdThreeAvg7.addAll(Arrays.asList(new Double[]{3.0, 7.0, 15.0, 22.0, 0.0})); // pitchMovements
+		expFwdThreeAvg7.addAll(Arrays.asList(new Double[]{0.0, 1.0, 1.0, 1.0, 0.0})); // voicesAlreadyOccupied
+		expected.add(expFwdThreeAvg7);
+		// Chord 7, note at index 24
+		List<Double> expFwdThreeAvg24 = new ArrayList<Double>(); 
+		expFwdThreeAvg24.addAll(Arrays.asList(new Double[]{
+			59.0, 1/8.0, 0.0, // note-level
+			2.0, 2.0, 9.0, // note-chord
+			5.0, 7/8.0, 4.0, 12.0, 2.0, 9.0, 1.0 // chord-level
+		}));
+		expFwdThreeAvg24.addAll(Arrays.asList(new Double[]{
+			( 1.0/(5+1) + 1.0/(10+1) + 1.0/(6+1) ) / 3.0,
+			( 1.0/(10+1) + 1.0/(1+1) + 1.0/(6+1) ) / 3.0,
+			( 1.0/(1+1) + 1.0/(2+1) + 1.0/(0+1) ) / 3.0,
+			( 1.0/(2+1) + 1.0/(9+1) + 1.0/(11+1) ) / 3.0,
+			( 1.0/(14+1) + 1.0/(14+1) + 1.0/(14+1) ) / 3.0
+		})); // pitchProximities 
+		expFwdThreeAvg24.addAll(Arrays.asList(new Double[]{
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( 1/((3/8.0)+1) + 1/((5/8.0)+1) + 1/((11/16.0)+1) ) / 3.0,
+			( 1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((4/8.0)+1) ) / 3.0
+		})); // interOnsetTimeProximities		
+		expFwdThreeAvg24.addAll(Arrays.asList(new Double[]{
+			( 1/(0+1) + 1/((1/8.0)+1) + 1/((3/8.0)+1) ) / 3.0,
+			( -1/((1/8.0)+1) + 1/((1/8.0)+1) + 1/((4/8.0)+1) ) / 3.0,
+			( 1/(0+1) + 1/((1/8.0)+1) + 1/((3/8.0)+1) ) / 3.0,
+			( -1/((1/8.0)+1) + 1/((3/8.0)+1) + 1/((5/8.0)+1) ) / 3.0,
+			( -1/((1/8.0)+1) + 1/((1/8.0)+1) + 1/((3/8.0)+1) ) / 3.0
+		})); // offsetOnsetTimeProximities  
+		expFwdThreeAvg24.addAll(Arrays.asList(new Double[]{
+			(-5 + -10 + -6) / 3.0,
+			(-10 + -1 + -6) / 3.0,
+			(-1 + 2 + 0) / 3.0,
+			(2 + 9 + 11) / 3.0,
+			(14 + 14 + 14) / 3.0
+		})); // pitchMovements
+		expFwdThreeAvg24.addAll(Arrays.asList(new Double[]{0.0, 1.0, 0.0, 1.0, 1.0})); // voicesAlreadyOccupied
+		expected.add(expFwdThreeAvg24);
 
 		// b. Bwd model
 		// (decisionContextSize = 1)
@@ -6841,25 +7700,33 @@ public class FeatureGeneratorTest extends TestCase {
 		// (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
 		// (decisionContextSize = 3)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false)); // value of argModelDuration irrelevant
+		// (decisionContextSize = 3, averaged)
+		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
+			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true)); // value of argModelDuration irrelevant
+		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
+			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true)); // value of argModelDuration irrelevant		
+		
 		// b. Bwd model
 		// (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1)); // value of argModelDuration irrelevant
+			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1)); // value of argModelDuration irrelevant
+			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7231,17 +8098,17 @@ public class FeatureGeneratorTest extends TestCase {
 		boolean modelDuration = false;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1));
+			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1, false));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1));
+			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1, false));
 		modelDuration = true;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1));
+			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1, false));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1));
+			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1, false));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7327,10 +8194,10 @@ public class FeatureGeneratorTest extends TestCase {
 		boolean modelDuration = false;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(null, null, null,
 			basicNoteProperties, predictedTranscription, note7, predVoiceLabels, meterInfo,
-			7, modelDuration, 1));
+			7, modelDuration, 1, false));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(null, null, null, 
 			basicNoteProperties, predictedTranscription, note24, predVoiceLabels, meterInfo, 
-			24, modelDuration, 1));
+			24, modelDuration, 1, false));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7437,10 +8304,10 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> meterInfo = tablature.getMeterInfo();
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predictedTranscription, note6, predVoiceLabels, meterInfo, 6, 1));
+			predictedTranscription, note6, predVoiceLabels, meterInfo, 6, 1, false));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predictedTranscription, note23, predVoiceLabels, meterInfo, 23, 1));
+			predictedTranscription, note23, predVoiceLabels, meterInfo, 23, 1, false));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7532,10 +8399,10 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> meterInfo = gtTranscription.getMeterInfo();
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(null, null, 
 			null, basicNoteProperties, predictedTranscription, note7, predVoiceLabels, 
-			meterInfo, 7, 1));
+			meterInfo, 7, 1, false));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(null, null, 
 			null, basicNoteProperties, predictedTranscription, note24, predVoiceLabels, 
-			meterInfo, 24, 1));
+			meterInfo, 24, 1, false));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {

@@ -1156,7 +1156,7 @@ public class TestManager {
 						predictedLabels.add(currPredictedLabel);
 					}
 					noteFeatures = 
-						FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
+						FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(modelParameters,
 						basicTabSymbolProperties, predictedVoicesCoDNotes, basicNoteProperties, 
 						predictedTranscription, predictedLabels, meterInfo, chordSizes, 
 						modelDuration, decisionContextSize);
@@ -2122,7 +2122,8 @@ public class TestManager {
 //			trainingSettingsAndParameters.get(EncogNNManager.FEATURE_SET).intValue();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
-		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
+		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
+		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROC).intValue());
 		
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
@@ -2208,7 +2209,7 @@ public class TestManager {
 				FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
 				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, pm, featVec,
-				decisionContextSize);
+				decisionContextSize, avgProc);
 		}
 		else {
 			// NB: allDurationLabels, allVoicesCoDNotes, and allVoiceLabels are predicted (see testInApplicationMode())
@@ -2216,7 +2217,7 @@ public class TestManager {
 				FeatureGenerator.generateBidirectionalNoteFeatureVector(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
 				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration,
-				decisionContextSize);
+				decisionContextSize, avgProc);
 		}
 		if (mt == ModelType.ENS) {
 //			currentNoteFeatureVector = featureGenerator.generateNoteFeatureVectorPlus(basicTabSymbolProperties,

@@ -575,6 +575,7 @@ public class TrainingManager {
 							else {
 								currNoteFeatures = 
 									FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
+									modelParameters,
 									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels, 
 									currMeterInfo, currChordSizes, modelDuration, decisionContextSize);
 							}

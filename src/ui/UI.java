@@ -68,24 +68,24 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = true;
+			repeatExp = false;
 			useCV = true;
 			trainUserModel = false;
 			estimateEntries = false;
 			verbose = false;
 
-//			datasetID = DatasetID.WTC_4vv;
+			datasetID = DatasetID.WTC_4vv;
 //			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
-			datasetID = DatasetID.INT_3vv;
+//			datasetID = DatasetID.INT_4vv;
 
 			datasetVersion = "thesis"; // only for this if
 
-			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
+//			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
 //			expName = "ISMIR-2019/";
-//			expName = "hector/";
+			expName = "hector/";
 
-			m = Model.N_PRIME;
+			m = Model.N;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 			storedExpName = "thesis/exp_1";
@@ -109,13 +109,13 @@ public class UI {
 
 			// Tuned hyperparameters
 			// Shallow network
-			lambda = 0.00003; // 0.0001 with 60-80 iterations works best
-			hiddenLayerFactor = 0.5;
+			lambda = 0.00001; // 0.0001 with 60-80 iterations works best
+			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
-			keepProbability = 1.0; //0.875;
-			hiddenLayers = 1; //2;
-			hiddenLayerSize = 41; //66;
+			keepProbability = 0.875;
+			hiddenLayers = 2;
+			hiddenLayerSize = 66;
 			// MM
 			n = 2;
 			// ENS
@@ -200,9 +200,10 @@ public class UI {
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
-		int validationPercentage = (mt == ModelType.DNN) ? 20 : 0; // TODO or 20 : 20; 
-		int decisionContextSize = 1; 
-		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
+		int validationPercentage = (mt == ModelType.DNN) ? 20 : 20; // TODO or 20 : 0; 
+		int decisionContextSize = 5;
+		boolean averageProc = false;
+		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 :80;
 		double cycles = 10.0;
 		int epochs = 600;
 		double learningRate = (mt == ModelType.DNN) ? 0.01 : 1.0;
@@ -348,6 +349,7 @@ public class UI {
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(useCV));
 			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
 			modelParams.put(Runner.MODEL_DURATION_AGAIN, (double) ToolBox.toInt(modelDurationAgain));
+			modelParams.put(Runner.AVERAGE_PROC, (double) ToolBox.toInt(averageProc));
 		}
 		else {
 			modelParams = ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
