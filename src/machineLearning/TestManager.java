@@ -641,8 +641,8 @@ public class TestManager {
 				System.out.println("######## " + "export fold " + fold);
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
-				MEIExport.exportMEIFile(new Transcription(new File(expPath + ".mid"), null), 
-					tablature, colInd, false, expPath);
+//				MEIExport.exportMEIFile(new Transcription(new File(expPath + ".mid"), null), 
+//					tablature, colInd, false, expPath);
 			}
 			if (!applToNewData) {
 				System.out.println("... storing the test results ...");
@@ -2123,7 +2123,7 @@ public class TestManager {
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
-		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROC).intValue());
+		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);

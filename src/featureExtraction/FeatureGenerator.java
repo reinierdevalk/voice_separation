@@ -1075,7 +1075,7 @@ public class FeatureGenerator {
 	 *                    <li> if direction = Direction.RIGHT: offset currentNote minus onset next Note</li> 
 	 *                    </ul></li>
 	 *   </ul>
-	 *   and, if <code>decisionContextSize</code> > 1 
+	 *   and, if <code>decisionContextSize</code> > 1 or <code>averageProxAndMvmts == true</code>
 	 *   <ul>
 	 *   <li> as element 3:	a double[] containing the pitch movement of the current Note to the 
 	 *                      adjacent Note in each voice (1.0 if up and 0.0 if same or down).</li>
@@ -2056,7 +2056,7 @@ public class FeatureGenerator {
 	 * @param procMode
 	 * @param featVec
 	 * @param decisionContextSize
-	 * @param avgProc
+	 * @param avgProx
 	 * @return
 	 */
 	// TESTED
@@ -2065,10 +2065,12 @@ public class FeatureGenerator {
 		Transcription transcription, Note currentNote, List<List<Double>> voiceLabels,
 		List<Integer[]> meterInfo, int noteIndex, boolean argModelDuration,
 		ProcessingMode procMode, FeatureVector featVec, int decisionContextSize,
-		boolean avgProc) {
+		boolean avgProx) {
 
 		Transcription.verifyCase(btp, bnp);
 		
+		boolean includeMvmts = true;
+
 //		Map<String, Double> modelParameters = Runner.getModelParams();
 //		FeatureVector featVec = 
 //			Runner.ALL_FEATURE_VECTORS[modelParameters.get(Runner.FEAT_VEC).intValue()];
@@ -2131,17 +2133,16 @@ public class FeatureGenerator {
 				for (double d : adj) {
 					fv.add(d);
 				}
-				// proximities
+				// proximities include movements if decisionContextSize > 1 or avgProx == true
 				List<double[][]> prox = 
 					getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-					direction, argModelDuration, isBidirectional, decisionContextSize, avgProc);
+					direction, argModelDuration, isBidirectional, decisionContextSize, avgProx);
 
-				boolean includeMvmts = true;
 				for (double[][] pAndTProx : prox) {
 //					for (double[] p : pAndTProx) {
 					for (int i = 0; i < pAndTProx.length; i++) {
 						double[] p = pAndTProx[i];
-						if (i < pAndTProx.length-1 || i == pAndTProx.length-1 && includeMvmts) { 
+						if (i < 3 || i == 3 && includeMvmts) { // TODO 
 							for (double d : p) {
 								fv.add(d);
 							}
@@ -2235,16 +2236,16 @@ public class FeatureGenerator {
 
 			// 4. Polyphonic embedding features
 			if (featVec.getIntRep() > Runner.FeatureVector.PHD_C.getIntRep()) {
-				// proximities
+				// proximities include movements if decisionContextSize > 1 or avgProx == true
 				List<double[][]> prox = 
 					getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-					direction, argModelDuration, isBidirectional, decisionContextSize, avgProc);
+					direction, argModelDuration, isBidirectional, decisionContextSize, avgProx);
 
-				boolean includeMvmts = true;
 				for (double[][] pAndTProx : prox) {
+//					for (double[] p : pAndTProx) {
 					for (int i = 0; i < pAndTProx.length; i++) {
 						double[] p = pAndTProx[i];
-						if (i < pAndTProx.length-1 || i == pAndTProx.length-1 && includeMvmts) { 
+						if (i < 3 || i == 3 && includeMvmts) { // TODO 
 							for (double d : p) {
 								fv.add(d);
 							}
@@ -2475,14 +2476,14 @@ public class FeatureGenerator {
 		List<Integer[]> voicesCoDNotes, Integer[][] bnp, Transcription transcription, Note currentNote, 
 		List<List<Double>> voiceLabels, List<Integer[]> meterInfo, int noteIndex, int highestNumberOfVoicesTraining,
 		boolean argModelDuration, ProcessingMode procMode, FeatureVector featVec, 
-		MelodyPredictor mp, int decisionContextSize, boolean avgProc) { 
+		MelodyPredictor mp, int decisionContextSize, boolean avgProx) { 
 
 		Transcription.verifyCase(btp, bnp);
 
 		// 1. Get the note feature vector 
 		List<Double> nfvPlus = generateNoteFeatureVectorDISS(btp, durationLabels, voicesCoDNotes,
 			bnp, transcription, currentNote, voiceLabels, meterInfo, noteIndex, argModelDuration, 
-			procMode, featVec, decisionContextSize, avgProc);
+			procMode, featVec, decisionContextSize, avgProx);
 
 		// 2. For every possible voice: model the probability of currentNote belonging to voice
 //		MelodyFeatureGenerator melodyFeatureGenerator = new MelodyFeatureGenerator(this);
@@ -2559,7 +2560,7 @@ public class FeatureGenerator {
 		FeatureVector featVec = 
 			Runner.ALL_FEATURE_VECTORS[modelParameters.get(Runner.FEAT_VEC).intValue()];
 		int decContSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
-		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROC).intValue());
+		boolean avgProx = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 
 		List<List<Double>> allNoteFeatureVectors = new ArrayList<List<Double>>();  
 
@@ -2606,7 +2607,7 @@ public class FeatureGenerator {
 //			if (mp == null) {
 			allNoteFeatureVectors.add(generateNoteFeatureVectorDISS(btp, durationLabels, voicesCoDNotes,
 				bnp, transcription, currentNote, voiceLabels, meterInfo, noteIndex, modelDuration, 
-				pm, featVec, decContSize, avgProc));
+				pm, featVec, decContSize, avgProx));
 //			}
 //			else {
 //				int highestNumberOfVoicesTraining = -1;
@@ -2832,7 +2833,7 @@ public class FeatureGenerator {
 	 * @param noteIndex
 	 * @param argModelBackward
 	 * @param decisionContextSize
-	 * @param avgProc
+	 * @param avgProx
 	 * @return 
 	 */
 	// TESTED for both tablature and non-tablature case
@@ -2840,7 +2841,7 @@ public class FeatureGenerator {
 		List<List<Double>> predictedDurationLabels, List<Integer[]> predictedVoicesCoDNotes, 
 		Integer[][] bnp, Transcription predictedTranscription, Note currentNote, 
 		List<List<Double>> predictedVoiceLabels, List<Integer[]> meterInfo, int noteIndex,
-		boolean argModelDuration, int decisionContextSize, boolean avgProc) { 
+		boolean argModelDuration, int decisionContextSize, boolean avgProx) { 
 
 		Transcription.verifyCase(btp, bnp);
 
@@ -2906,10 +2907,10 @@ public class FeatureGenerator {
 				noteIndex));
 		}
 		// Pitch- and time proximities to previous notes
-//		System.out.println("noteIndex = " + noteIndex); bla
+		// proximities include movements if decisionContextSize > 1 or avgProx == true
 		List<double[][]> pitchAndTimeProximitiesToPrevious = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.LEFT, argModelDuration, isBidirectional, decisionContextSize, avgProc);
+			Direction.LEFT, argModelDuration, isBidirectional, decisionContextSize, avgProx);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToPrevious) {
 			for (double[] d : pAndTProx) {
 				polyEmb.add(d);
@@ -2925,9 +2926,10 @@ public class FeatureGenerator {
 				noteIndex));
 		}
 		// Pitch- and time proximities to next notes
+		// proximities include movements if decisionContextSize > 1 or avgProx == true
 		List<double[][]> pitchAndTimeProximitiesToNext = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.RIGHT, argModelDuration, isBidirectional, decisionContextSize, avgProc);
+			Direction.RIGHT, argModelDuration, isBidirectional, decisionContextSize, avgProx);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToNext) {
 			for (double[] d : pAndTProx) {
 				polyEmb.add(d);
@@ -2983,7 +2985,7 @@ public class FeatureGenerator {
 	public static List<Double> generateBidirectionalNoteFeatureVectorOLD(Integer[][] btp, List<List<Double>>
 		predictedDurationLabels, List<Integer[]> predictedVoicesCoDNotes, Integer[][] bnp, Transcription 
 		predictedTranscription, Note currentNote, List<List<Double>> predictedVoiceLabels, List<Integer[]> 
-		meterInfo, int noteIndex, int decisionContextSize, boolean avgProc) { //, boolean argModelBackward) { 
+		meterInfo, int noteIndex, int decisionContextSize, boolean avgProx) { //, boolean argModelBackward) { 
 
 		Transcription.verifyCase(btp, bnp);
 
@@ -3017,7 +3019,7 @@ public class FeatureGenerator {
 		// Pitch- and time proximities to previous notes
 		List<double[][]> pitchAndTimeProximitiesToPrevious = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.LEFT, modelDuration, argIsBidir, decisionContextSize, avgProc);
+			Direction.LEFT, modelDuration, argIsBidir, decisionContextSize, avgProx);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToPrevious) {
 			for (double[] d : pAndTProx) {
 				tabDurVoice.add(d);
@@ -3035,7 +3037,7 @@ public class FeatureGenerator {
 		// Pitch- and time proximities to next notes
 		List<double[][]> pitchAndTimeProximitiesToNext = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.RIGHT, modelDuration, argIsBidir, decisionContextSize, avgProc);
+			Direction.RIGHT, modelDuration, argIsBidir, decisionContextSize, avgProx);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToNext) {
 			for (double[] d : pAndTProx) {
 				tabDurVoice.add(d);
@@ -3084,7 +3086,7 @@ public class FeatureGenerator {
 
 		Transcription.verifyCase(btp, bnp);
 
-		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROC).intValue());
+		boolean avgProx = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		
 		List<List<Double>> allBidirNoteFeatureVectors = new ArrayList<List<Double>>();  
 
@@ -3130,7 +3132,7 @@ public class FeatureGenerator {
 			allBidirNoteFeatureVectors.add(generateBidirectionalNoteFeatureVector(btp, 
 				predictedDurationLabels, predictedVoicesCoDNotes, bnp, predictedTranscription,
 				currentNote, predictedVoiceLabels, meterInfo, noteIndex, argModelDuration,
-				decisionContextSize, avgProc));
+				decisionContextSize, avgProx));
 		}
 
 		return allBidirNoteFeatureVectors;

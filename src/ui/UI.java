@@ -99,7 +99,7 @@ public class UI {
 //			hyperParams = "HLF=1.0/lmb=0.001/";
 //			hyperParams = "eps=0.05/";
 			hyperParams = "";
-			
+
 			mmfs = Arrays.asList(new MelodyModelFeature[]{ // used both for MM and ENS
 				MelodyModelFeature.PITCH,
 				MelodyModelFeature.DUR,
@@ -201,9 +201,9 @@ public class UI {
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
 		int validationPercentage = (mt == ModelType.DNN) ? 20 : 20; // TODO or 20 : 0; 
-		int decisionContextSize = 5;
-		boolean averageProc = false;
-		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 :80;
+		int decisionContextSize = 1;
+		boolean averageProx = false;
+		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 		double cycles = 10.0;
 		int epochs = 600;
 		double learningRate = (mt == ModelType.DNN) ? 0.01 : 1.0;
@@ -349,7 +349,7 @@ public class UI {
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(useCV));
 			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
 			modelParams.put(Runner.MODEL_DURATION_AGAIN, (double) ToolBox.toInt(modelDurationAgain));
-			modelParams.put(Runner.AVERAGE_PROC, (double) ToolBox.toInt(averageProc));
+			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
 		}
 		else {
 			modelParams = ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 

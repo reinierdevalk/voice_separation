@@ -76,7 +76,8 @@ public class EvaluationManager {
 			Runner.APPL_TO_NEW_DATA,
 			Runner.CROSS_VAL, 
 			Runner.TRAIN_USER_MODEL, 
-			Runner.MODEL_DURATION_AGAIN
+			Runner.MODEL_DURATION_AGAIN,
+			Runner.AVERAGE_PROX
 		});
 	}
 	
