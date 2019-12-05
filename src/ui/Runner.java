@@ -152,6 +152,8 @@ public class Runner {
 	private static final String DECISION_CONTEXT = "decision context";
 	public static final String WEIGHTS_INIT = "weights initialisation";
 	// ints
+	public static final String VALIDATION_PERC = "validation percentage";
+	public static final String DECISION_CONTEXT_SIZE = "decision context size";
 	public static final String META_CYCLES = "metacycles";
 	public static final String HIDDEN_LAYER_FACTOR = "hidden layer factor";
 	public static final String HIGHEST_NUM_VOICES = "highest number of voices";
@@ -168,7 +170,7 @@ public class Runner {
 //	public static final String TREES = "decision trees";
 	
 	// DNN
-	public static final String VALIDATION_PERC = "validation percentage";
+
 	public static final String EPOCHS = "epochs";
 	public static final String NUM_HIDDEN_LAYERS = "hidden layers";
 	public static final String HIDDEN_LAYER_SIZE = "hidden layer size";
@@ -193,6 +195,7 @@ public class Runner {
 	public static final String ESTIMATE_ENTRIES = "voice entry estimation";
 //	public static final String GIVE_FIRST = "give first";
 	public static final String MODEL_DURATION_AGAIN = "model duration again";
+	public static final String AVERAGE_PROX = "average proximities";
 //	public static final String USE_VALIDATION_SET = "use validation set";
 
 	// Enum lists
@@ -947,7 +950,7 @@ public class Runner {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");						
-//				new TrainingManager().prepareTraining(startTr);
+				new TrainingManager().prepareTraining(startTr);
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}

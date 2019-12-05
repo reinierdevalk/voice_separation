@@ -13,17 +13,22 @@ import junit.framework.TestCase;
 import representations.Tablature;
 import representations.Transcription;
 import ui.Runner;
+import ui.UI;
+import ui.Runner.FeatureVector;
 import ui.Runner.ModellingApproach;
 
 public class TrainingManagerTest extends TestCase {
 	
-	private File midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
-	private File encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
-	
+	private File midiTestpiece1;
+	private File encodingTestpiece1;
+
 	TrainingManager tm = new TrainingManager();
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
+		encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
+		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");	
 	}
 
 	protected void tearDown() throws Exception {
@@ -516,7 +521,9 @@ public class TrainingManagerTest extends TestCase {
 		List<Integer> actual = new ArrayList<Integer>();
 		Map<String, Double> modelParameters = new LinkedHashMap<String, Double>();
 		modelParameters.put(Runner.MODELLING_APPROACH, (double) ModellingApproach.N2N.getIntRep());
-		modelParameters.put(Runner.FEAT_VEC, (double) FeatureGenerator.FEATURE_SET_D);	
+//		modelParameters.put(Runner.FEAT_VEC, (double) FeatureGenerator.FEATURE_SET_D);
+		modelParameters.put(Runner.FEAT_VEC, (double) FeatureVector.PHD_D.getIntRep());	
+		
 		for (double d : HLFactors) {
 			modelParameters.put(Runner.HIDDEN_LAYER_FACTOR, (double) d);
 			actual.add(TrainingManager.getNumberOfHiddenNeurons(modelParameters, numFeatures, false));

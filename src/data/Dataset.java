@@ -26,16 +26,16 @@ public class Dataset implements Serializable {
 	});
 			
 	public static final List<String> INTAB_4VV_NAMES = Arrays.asList(new String[]{
-//		"ochsenkun-1558_5-absolon_fili",
-//		"ochsenkun-1558_5-in_exitu",
-//		"ochsenkun-1558_5-qui_habitat",
+		"ochsenkun-1558_5-absolon_fili",
+		"ochsenkun-1558_5-in_exitu",
+		"ochsenkun-1558_5-qui_habitat",
 		"rotta-1546_15-bramo_morir",
 		"phalese-1547_7-tant_que-4vv",
 		"ochsenkun-1558_5-herr_gott",
 		"abondante-1548_1-mais_mamignone",
 		"phalese-1563_12-las_on",
 		"barbetta-1582-il_nest",
-//		"barbetta-1582-il_nest-thesis"
+//		"barbetta-1582-il_nest-corrected"
 	});
 	
 	public static final List<String> JOSQ_4VV_NAMES = Arrays.asList(new String[]{
@@ -192,18 +192,18 @@ public class Dataset implements Serializable {
 		"bach-WTC1-fuga_16-BWV_861",
 		"bach-WTC1-fuga_17-BWV_862",
 		"bach-WTC1-fuga_18-BWV_863",
-		"bach-WTC1-fuga_20-BWV_865",
-		"bach-WTC1-fuga_23-BWV_868",
-		"bach-WTC1-fuga_24-BWV_869",
-		"bach-WTC2-fuga_2-BWV_871",
-		"bach-WTC2-fuga_5-BWV_874",
-		"bach-WTC2-fuga_7-BWV_876",
-		"bach-WTC2-fuga_8-BWV_877",
-		"bach-WTC2-fuga_9-BWV_878",
-		"bach-WTC2-fuga_16-BWV_885",
-		"bach-WTC2-fuga_17-BWV_886",
-		"bach-WTC2-fuga_22-BWV_891",
-		"bach-WTC2-fuga_23-BWV_892"
+//		"bach-WTC1-fuga_20-BWV_865",
+//		"bach-WTC1-fuga_23-BWV_868",
+//		"bach-WTC1-fuga_24-BWV_869",
+//		"bach-WTC2-fuga_2-BWV_871",
+//		"bach-WTC2-fuga_5-BWV_874",
+//		"bach-WTC2-fuga_7-BWV_876",
+//		"bach-WTC2-fuga_8-BWV_877",
+//		"bach-WTC2-fuga_9-BWV_878",
+//		"bach-WTC2-fuga_16-BWV_885",
+//		"bach-WTC2-fuga_17-BWV_886",
+//		"bach-WTC2-fuga_22-BWV_891",
+//		"bach-WTC2-fuga_23-BWV_892"
 	});
 	
 	public static final List<String> FUGUES_5VV_NAMES = Arrays.asList(new String[]{

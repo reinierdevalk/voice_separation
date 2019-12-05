@@ -9,18 +9,23 @@ import junit.framework.TestCase;
 import representations.Tablature;
 import representations.Transcription;
 import ui.Runner;
+import ui.UI;
 import de.uos.fmt.musitech.utility.math.Rational;
 import featureExtraction.MelodyFeatureGenerator;
 
 public class MelodyFeatureGeneratorTest extends TestCase {
 
-	private File encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
-	private File midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
+	private File encodingTestpiece1;
+	private File midiTestpiece1;
 //	private MelodyFeatureGenerator mfg = new MelodyFeatureGenerator(new FeatureGenerator());
 	private MelodyFeatureGenerator mfg = new MelodyFeatureGenerator();
 	
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
+		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
+		encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
 	}
 
 	protected void tearDown() throws Exception {

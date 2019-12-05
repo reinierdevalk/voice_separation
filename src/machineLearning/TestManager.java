@@ -636,13 +636,13 @@ public class TestManager {
 				if (!applToNewData) {
 					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
 				}
-				Piece p = predictedTranscr.getPiece();
+//				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
 				System.out.println("######## " + "export fold " + fold);
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
-				MEIExport.exportMEIFile(new Transcription(new File(expPath + ".mid"), null), 
-					tablature, colInd, false, expPath);
+//				MEIExport.exportMEIFile(new Transcription(new File(expPath + ".mid"), null), 
+//					tablature, colInd, false, expPath);
 			}
 			if (!applToNewData) {
 				System.out.println("... storing the test results ...");
@@ -1094,7 +1094,8 @@ public class TestManager {
 //		List<Integer> ns = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 		ModelType mt = m.getModelType();
-		DecisionContext dc = m.getDecisionContext(); 
+		DecisionContext dc = m.getDecisionContext();
+		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
 		boolean modelDuration = m.getModelDuration();
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
@@ -1155,9 +1156,10 @@ public class TestManager {
 						predictedLabels.add(currPredictedLabel);
 					}
 					noteFeatures = 
-						FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
+						FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(modelParameters,
 						basicTabSymbolProperties, predictedVoicesCoDNotes, basicNoteProperties, 
-						predictedTranscription, predictedLabels, meterInfo, chordSizes, modelDuration);	
+						predictedTranscription, predictedLabels, meterInfo, chordSizes, 
+						modelDuration, decisionContextSize);
 				}
 //				}
 				boolean isMuSci = false; // TODO
@@ -2120,7 +2122,8 @@ public class TestManager {
 //			trainingSettingsAndParameters.get(EncogNNManager.FEATURE_SET).intValue();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
-		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
+		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
+		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
@@ -2128,7 +2131,8 @@ public class TestManager {
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 
 		ModelType mt = m.getModelType();
-		DecisionContext dc = m.getDecisionContext(); 
+		DecisionContext dc = m.getDecisionContext();
+		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
 		boolean modelDuration = m.getModelDuration();		
 //		DatasetID di = 
 //			Dataset.ALL_DATASET_IDS[modelParameters.get(Dataset.DATASET_ID).intValue()];
@@ -2204,14 +2208,16 @@ public class TestManager {
 			currentNoteFeatureVector = 
 				FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
-				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, pm, featVec);
+				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, pm, featVec,
+				decisionContextSize, avgProc);
 		}
 		else {
 			// NB: allDurationLabels, allVoicesCoDNotes, and allVoiceLabels are predicted (see testInApplicationMode())
 			currentNoteFeatureVector = 
 				FeatureGenerator.generateBidirectionalNoteFeatureVector(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
-				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration);
+				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration,
+				decisionContextSize, avgProc);
 		}
 		if (mt == ModelType.ENS) {
 //			currentNoteFeatureVector = featureGenerator.generateNoteFeatureVectorPlus(basicTabSymbolProperties,

@@ -68,23 +68,23 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = true;
+			repeatExp = false;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = true;
+			estimateEntries = false;
 			verbose = false;
 
-//			datasetID = DatasetID.WTC_4vv;
-			datasetID = DatasetID.tBYRD_4vv;
+			datasetID = DatasetID.WTC_4vv;
+//			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
 //			datasetID = DatasetID.INT_4vv;
 
 			datasetVersion = "thesis"; // only for this if
 
-			expName = "thesis/exp_1"; // publication + experiment (if applicable)
-			expName = "ISMIR-2019/";
+//			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
+//			expName = "ISMIR-2019/";
 			expName = "hector/";
-			
+
 			m = Model.N;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
@@ -99,7 +99,7 @@ public class UI {
 //			hyperParams = "HLF=1.0/lmb=0.001/";
 //			hyperParams = "eps=0.05/";
 			hyperParams = "";
-			
+
 			mmfs = Arrays.asList(new MelodyModelFeature[]{ // used both for MM and ENS
 				MelodyModelFeature.PITCH,
 				MelodyModelFeature.DUR,
@@ -113,9 +113,9 @@ public class UI {
 			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
-			keepProbability = 1.0; //0.875;
-			hiddenLayers = 1; //2;
-			hiddenLayerSize = 41; //66;
+			keepProbability = 0.875;
+			hiddenLayers = 2;
+			hiddenLayerSize = 66;
 			// MM
 			n = 2;
 			// ENS
@@ -201,6 +201,8 @@ public class UI {
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
 		int validationPercentage = (mt == ModelType.DNN) ? 20 : 20; // TODO or 20 : 0; 
+		int decisionContextSize = 1;
+		boolean averageProx = false;
 		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 		double cycles = 10.0;
 		int epochs = 600;
@@ -301,7 +303,7 @@ public class UI {
 //			trees = stored.get(Runner.N_EST).intValue();
 //		}
 
-		// 4. Set model parameters
+		// 4. Set model parameters  
 		// The order in which items are added to a LinkedHashMap is the order in which they
 		// are returned, and also in which they are printed in performance.txt
 		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
@@ -322,6 +324,7 @@ public class UI {
 			modelParams.put(Runner.DECODING_ALG, (m == Model.H) ? (double) decAlg.getIntRep() : null);
 			// c. Non-tuned hyperparameters 
 			modelParams.put(Runner.VALIDATION_PERC, (double) validationPercentage);
+			modelParams.put(Runner.DECISION_CONTEXT_SIZE, (double) decisionContextSize);
 			modelParams.put(Runner.META_CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) maxMetaCycles : null);
 			modelParams.put(NNManager.CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) cycles : null);
 			modelParams.put(Runner.EPOCHS, (mt == ModelType.DNN) ? (double) epochs : null);
@@ -346,6 +349,7 @@ public class UI {
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(useCV));
 			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
 			modelParams.put(Runner.MODEL_DURATION_AGAIN, (double) ToolBox.toInt(modelDurationAgain));
+			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
 		}
 		else {
 			modelParams = ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 

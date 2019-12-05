@@ -3,9 +3,12 @@ package machineLearning;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import data.Dataset;
+import data.Dataset.DatasetID;
 import machineLearning.OutputEvaluator;
 import junit.framework.TestCase;
 import tools.ToolBox;
@@ -31,6 +34,11 @@ public class OutputEvaluatorTest extends TestCase {
 
 
 	public void testDeterminePredictedVoices() {
+		OutputEvaluator.ignoreExceptionForTest = true;
+		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
+		modelParams.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		Runner.setModelParams(modelParams);
+
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		// a. N2N
 		// Results (taken from getTestOutputs())
@@ -117,22 +125,25 @@ public class OutputEvaluatorTest extends TestCase {
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		Map<String, Double> modelParameters = new HashMap<String, Double>();
 		// N2N
-		modelParameters.put(Runner.MODELLING_APPROACH, 
-			(double) ModellingApproach.N2N.getIntRep());
+		modelParameters.put(Runner.MODELLING_APPROACH, (double) ModellingApproach.N2N.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
+		Runner.setDataset(new Dataset(DatasetID.WTC_4vv)); // to keep deviationThreshold at default -1
 		modelParameters.put(Runner.DEV_THRESHOLD, 0.05);
-		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, getTestOutputs(), 
-			null));
+		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
+			getTestOutputs(), null));
 		modelParameters.put(Runner.SNU, 1.0);
-		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, getTestOutputs(), 
-			null));
+		Runner.setDataset(new Dataset(DatasetID.INT_4vv)); // to set deviationThreshold
+		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
+			getTestOutputs(), null));
 		// C2C
 		modelParameters.put(Runner.MODELLING_APPROACH, 
 			(double) ModellingApproach.C2C.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
+		Runner.setDataset(new Dataset(DatasetID.WTC_4vv)); // to keep deviationThreshold at default -1
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsNoCoD));
 		modelParameters.put(Runner.SNU, 1.0);
+		Runner.setDataset(new Dataset(DatasetID.INT_4vv)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsCoD));
 
@@ -147,11 +158,12 @@ public class OutputEvaluatorTest extends TestCase {
 
 
 	public void testDeterminePredictedDurations() {
+		OutputEvaluator.ignoreExceptionForTest = true;
+
 		Rational eighth = new Rational(1, 8);
 		Rational dottedQuarter = new Rational(3, 8);
 		Rational quarter = new Rational(1, 4);
-		
-		
+
 		List<Rational[]> expected = new ArrayList<Rational[]>();
 		expected.add(new Rational[]{quarter});
 		expected.add(new Rational[]{quarter});
@@ -266,7 +278,12 @@ public class OutputEvaluatorTest extends TestCase {
 	}
 
 
-	public void testInterpretNetworkOutput() {		
+	public void testInterpretNetworkOutput() {
+		OutputEvaluator.ignoreExceptionForTest = true;
+		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
+		modelParams.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		Runner.setModelParams(modelParams);
+		
 		List<List<List<Integer>>> expected = new ArrayList<List<List<Integer>>>();
 		// 1. When CoDs are not allowed
 		List<List<List<Integer>>> expectedNoCoD = new ArrayList<List<List<Integer>>>();

@@ -284,9 +284,9 @@ public class FeatureGeneratorChord {
 	// TESTED (for both tablature- and non-tablature case)
 	static double[] getProximitiesAndMovementsOfChord(Integer[][] btp, Integer[][] bnp, Transcription transcription,
 		int lowestNoteIndex, List<Integer> voiceAssignment) { 	
-			
+
 		Transcription.verifyCase(btp, bnp);
-				
+
 		// Create the proximity arrays and initialise with all -1.0 (when the voice is not active in the chord)  
 		double[] pitchProx = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
 		Arrays.fill(pitchProx, -1.0);
@@ -294,7 +294,7 @@ public class FeatureGeneratorChord {
 		Arrays.fill(interOnsetProx, -1.0);
 		double[] offsetOnsetProx = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
 		Arrays.fill(offsetOnsetProx, -1.0);
-		
+
 		// Create the pitch movements array and initialise with all 0.0 (when the voice is not active in the chord)
 		// NB: distinguish:
 		// (i) If voice x is not active in the chord, i.e., if element x of voiceAssignment is -1, pitchMovements[x] will
@@ -315,13 +315,11 @@ public class FeatureGeneratorChord {
 		//   (d) has a new note in the chord that is of the same pitch as the previous note in that voice
 		double[] pitchMovements = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
 		Arrays.fill(pitchMovements, 0.0);
-		
-	  // Get the voice labels that go with the given voice assignment; then get the voices
-		List<List<Double>> chordVoiceLabels = 
-			DataConverter.getChordVoiceLabels(voiceAssignment);
-		List<List<Integer>> voices = 
-			DataConverter.getVoicesInChord(chordVoiceLabels);
-		
+
+		// Get the voice labels that go with the given voice assignment; then get the voices
+		List<List<Double>> chordVoiceLabels = DataConverter.getChordVoiceLabels(voiceAssignment);
+		List<List<Integer>> voices = DataConverter.getVoicesInChord(chordVoiceLabels);
+
 		// Determine the size of the chord
 		// a. In the tablature case
 		int chordSize = 0;
@@ -332,52 +330,53 @@ public class FeatureGeneratorChord {
 		else {
 			chordSize = bnp[lowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
 		}
-		
+
 		// For each note in the chord
 		for (int i = 0; i < chordSize; i++) {
-	  	int currentNoteIndex = lowestNoteIndex + i; 
-	  	Note currentNote = null;
-	  	// a. In the tablature case
-	  	if (btp != null) {
-	  	  currentNote = Tablature.convertTabSymbolToNote(btp, currentNoteIndex);
-	  	}
-	  	// b. In the non-tablature case
-	  	else {
-	  		int pitch = bnp[currentNoteIndex][Transcription.PITCH];
-	  		Rational metricTime = new Rational(bnp[currentNoteIndex][Transcription.ONSET_TIME_NUMER], 
-	  			bnp[currentNoteIndex][Transcription.ONSET_TIME_DENOM]);
-	  		Rational metricDuration = new Rational(bnp[currentNoteIndex][Transcription.DUR_NUMER], 
-	  			bnp[currentNoteIndex][Transcription.DUR_DENOM]);
-	  		currentNote = Transcription.createNote(pitch, metricTime, metricDuration);
-	  	}
-	  	List<Integer> currentVoices = voices.get(i);
-	  	
-	  	// For each voice the note is assigned to: calculate the proximities to the previous Note in that voice
-	  	// and the pitch movement, and set the corresponding elements in the Arrays
-	  	for (int j = 0; j < currentVoices.size(); j++) {
-	  		int voice = currentVoices.get(j);
-	  		NotationVoice currentVoice = transcription.getPiece().getScore().get(voice).get(0);
-			  double[] pitchAndTimeProximities = FeatureGenerator.getProximitiesAndMovementToVoice(btp, currentVoice, currentNote, 
-			  	Direction.LEFT); // TODO turn Direction.LEFT into method argument 
+			int currentNoteIndex = lowestNoteIndex + i; 
+			Note currentNote = null;
+			// a. In the tablature case
+			if (btp != null) {
+				currentNote = Tablature.convertTabSymbolToNote(btp, currentNoteIndex);
+			}
+			// b. In the non-tablature case
+			else {
+				int pitch = bnp[currentNoteIndex][Transcription.PITCH];
+				Rational metricTime = new Rational(bnp[currentNoteIndex][Transcription.ONSET_TIME_NUMER], 
+					bnp[currentNoteIndex][Transcription.ONSET_TIME_DENOM]);
+				Rational metricDuration = new Rational(bnp[currentNoteIndex][Transcription.DUR_NUMER], 
+					bnp[currentNoteIndex][Transcription.DUR_DENOM]);
+				currentNote = Transcription.createNote(pitch, metricTime, metricDuration);
+			}
+			List<Integer> currentVoices = voices.get(i);
+
+			// For each voice the note is assigned to: calculate the proximities to the previous Note in that voice
+			// and the pitch movement, and set the corresponding elements in the Arrays
+			for (int j = 0; j < currentVoices.size(); j++) {
+				int voice = currentVoices.get(j);
+				NotationVoice currentVoice = transcription.getPiece().getScore().get(voice).get(0);
+				double[] pitchAndTimeProximities = 
+				FeatureGenerator.getProximitiesAndMovementToVoiceAll(btp, currentVoice, 
+					currentNote, Direction.LEFT, 1, false).get(0); // TODO turn Direction.LEFT into method argument 
 				pitchProx[voice] = pitchAndTimeProximities[0];
 				interOnsetProx[voice] = pitchAndTimeProximities[1];		  
-			  offsetOnsetProx[voice] = pitchAndTimeProximities[2];
-			  // a. In the tablature case
-			  if (btp != null) {
-			    pitchMovements[voice] = pitchAndTimeProximities[4];
-			  }
-			  // b. In the non-tablature case 
-			  else {
-			  	pitchMovements[voice] = pitchAndTimeProximities[3];
-			  }
-	    }
+				offsetOnsetProx[voice] = pitchAndTimeProximities[2];
+				// a. In the tablature case
+				if (btp != null) {
+					pitchMovements[voice] = pitchAndTimeProximities[4];
+				}
+				// b. In the non-tablature case 
+				else {
+					pitchMovements[voice] = pitchAndTimeProximities[3];
+				}
+			}
 		}
-	  
+
 		List<double[]> all = Arrays.asList(new double[][]{pitchProx, interOnsetProx, offsetOnsetProx, pitchMovements}); 
 		return ToolBox.concatDoubleArrays(all);
 	}
-	
-	
+
+
 	/**
 	 * Gets the voices thatare already occupied, i.e., the voices for any notes sustained beyond the onset time 
 	 * of the chord at lowestNoteIndex. Returns a binary vector indicating with 1.0s which voices are occupied. 
