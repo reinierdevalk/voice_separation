@@ -303,7 +303,7 @@ public class UI {
 //			trees = stored.get(Runner.N_EST).intValue();
 //		}
 
-		// 4. Set model parameters
+		// 4. Set model parameters  
 		// The order in which items are added to a LinkedHashMap is the order in which they
 		// are returned, and also in which they are printed in performance.txt
 		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
