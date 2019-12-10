@@ -887,9 +887,9 @@ public class FeatureGeneratorChord {
 	// TESTED for both tablature- and non-tablature case
 	double[] getProximitiesAndCourseInfoAheadChord(Integer[][]btp, Integer[][] bnp,	int lowestNoteIndex, 
 		int numNextChords) {
-				
+
 		Transcription.verifyCase(btp, bnp);
-				
+
 		// 0. Initialise pitchProxAndCourse and variables
 		double[] pitchProxAndCourse = null;
 		int chordSize = -1;
@@ -905,7 +905,7 @@ public class FeatureGeneratorChord {
 			chordSeqNum = btp[lowestNoteIndex][Tablature.CHORD_SEQ_NUM];
 			numChords = btp[btp.length - 1][Tablature.CHORD_SEQ_NUM] + 1;
 		}
-	  // b. In the non-tablature case
+		// b. In the non-tablature case
 		else {
 			pitchProxAndCourse = new double[6 * numNextChords];
 			chordSize = bnp[lowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS];
@@ -915,60 +915,60 @@ public class FeatureGeneratorChord {
 			numChords = bnp[bnp.length - 1][Transcription.CHORD_SEQ_NUM] + 1;
 		}
 		Arrays.fill(pitchProxAndCourse, -1.0);
-		
-	  // 1. Fill pitchProxAndCourse		
+
+		// 1. Fill pitchProxAndCourse		
 		int lowestNoteIndexNext = lowestNoteIndex + chordSize; 
 		for (int i = 1; i <= numNextChords; i++) {
 			int currLowestNoteIndex = lowestNoteIndexNext;
 			int chordSeqNumNext = chordSeqNum + i;
-		  // Only if there is a next chord
+			// Only if there is a next chord
 			if (chordSeqNumNext < numChords) {	
-  			int currLowestNoteIndexNext = -1;
-        // a. In the tablature case		
-  		  if (btp != null) {
-  		  	int arrayIndex = (i-1) * 11;  		  	
-    		  // Set inter-onset time proximity and increment arrayIndex
-    		  Rational currOnsetTime = new Rational(btp[currLowestNoteIndex][Tablature.ONSET_TIME], 
-    		    Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
-    		  pitchProxAndCourse[arrayIndex] = 1.0 / ((currOnsetTime.toDouble() - onsetTime.toDouble()) + 1);
-    		  arrayIndex++;
-    		  // Set pitches and courses and increment arrayIndex
-    		  int currChordSize = btp[currLowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS]; 
-    		  currLowestNoteIndexNext = currLowestNoteIndex + currChordSize;
-    		  for (int j = currLowestNoteIndex; j < currLowestNoteIndexNext; j++) {
-  		  		pitchProxAndCourse[arrayIndex] = (double) btp[j][Tablature.PITCH];
-  		  		arrayIndex ++;
-  		  		pitchProxAndCourse[arrayIndex] = (double) btp[j][Tablature.COURSE];
-  		  		arrayIndex ++;
-  		  	}
-  		  }
-  		  // b. In the non-tablature case
-  		  else {
-  		  	int arrayIndex = (i-1) * 6;
-  		  	// Set inter-onset time proximity and increment arrayIndex 
-  		  	Rational currOnsetTime = new Rational(bnp[currLowestNoteIndex][Transcription.ONSET_TIME_NUMER], 
-  		  		bnp[currLowestNoteIndex][Transcription.ONSET_TIME_DENOM]);
-  		  	pitchProxAndCourse[arrayIndex] = 1.0 / ((currOnsetTime.toDouble() - onsetTime.toDouble()) + 1);
-  		  	arrayIndex++;
-  		  	// Set pitches
-  		  	int currChordSize = bnp[currLowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS]; 
-  		  	currLowestNoteIndexNext = currLowestNoteIndex + currChordSize;
-  		  	for (int j = currLowestNoteIndex; j < currLowestNoteIndexNext; j++) {
-  		  		pitchProxAndCourse[arrayIndex] = (double) bnp[j][Transcription.PITCH];
-  		  		arrayIndex ++;
-  		  	}
-  		  }
-		    lowestNoteIndexNext = currLowestNoteIndexNext;
+				int currLowestNoteIndexNext = -1;
+				// a. In the tablature case		
+				if (btp != null) {
+					int arrayIndex = (i-1) * 11;  		  	
+					// Set inter-onset time proximity and increment arrayIndex
+					Rational currOnsetTime = new Rational(btp[currLowestNoteIndex][Tablature.ONSET_TIME], 
+						Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+					pitchProxAndCourse[arrayIndex] = 1.0 / ((currOnsetTime.toDouble() - onsetTime.toDouble()) + 1);
+					arrayIndex++;
+					// Set pitches and courses and increment arrayIndex
+					int currChordSize = btp[currLowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS]; 
+					currLowestNoteIndexNext = currLowestNoteIndex + currChordSize;
+					for (int j = currLowestNoteIndex; j < currLowestNoteIndexNext; j++) {
+						pitchProxAndCourse[arrayIndex] = (double) btp[j][Tablature.PITCH];
+						arrayIndex ++;
+						pitchProxAndCourse[arrayIndex] = (double) btp[j][Tablature.COURSE];
+						arrayIndex ++;
+					}
+				}
+				// b. In the non-tablature case
+				else {
+					int arrayIndex = (i-1) * 6;
+					// Set inter-onset time proximity and increment arrayIndex 
+					Rational currOnsetTime = new Rational(bnp[currLowestNoteIndex][Transcription.ONSET_TIME_NUMER], 
+						bnp[currLowestNoteIndex][Transcription.ONSET_TIME_DENOM]);
+					pitchProxAndCourse[arrayIndex] = 1.0 / ((currOnsetTime.toDouble() - onsetTime.toDouble()) + 1);
+					arrayIndex++;
+					// Set pitches
+					int currChordSize = bnp[currLowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS]; 
+					currLowestNoteIndexNext = currLowestNoteIndex + currChordSize;
+					for (int j = currLowestNoteIndex; j < currLowestNoteIndexNext; j++) {
+						pitchProxAndCourse[arrayIndex] = (double) bnp[j][Transcription.PITCH];
+						arrayIndex ++;
+					}
+				}
+				lowestNoteIndexNext = currLowestNoteIndexNext;
 			}
-		  // If there is no next chord
-		  else {
-		   	break;
-		  }
+			// If there is no next chord
+			else {
+				break;
+			}
 		}
 		return pitchProxAndCourse;	
 	}
-	
-	
+
+
 	// =================================== FEATURE VECTOR GENERATION ===================================
 	/**
 	 * Given a voice assignment, generates the chord feature vector for the chord at lowestNoteIndex.

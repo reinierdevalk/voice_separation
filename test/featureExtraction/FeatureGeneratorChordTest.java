@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.uos.fmt.musitech.data.structure.Note;
 import junit.framework.TestCase;
 import representations.Tablature;
 import representations.Transcription;
@@ -13,9 +14,6 @@ import tools.ToolBox;
 import ui.Runner;
 import ui.UI;
 import utility.DataConverter;
-import de.uos.fmt.musitech.data.structure.Note;
-import featureExtraction.FeatureGenerator;
-import featureExtraction.FeatureGeneratorChord;
 
 public class FeatureGeneratorChordTest extends TestCase {
 
