@@ -5036,7 +5036,7 @@ public class TestManager {
 										durationsAdapted.add(maxDur);
 	
 										// 2. Reset allDurationLabels, allPredictedDurations, and allNotes 
-										int maxDurAsInt =	maxDur.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+										int maxDurAsInt = maxDur.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
 										List<Double> predictedDurationLabelAdapted = Transcription.createDurationLabel(maxDurAsInt);
 										allDurationLabels.set(i, predictedDurationLabelAdapted);
 										if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
@@ -5053,7 +5053,7 @@ public class TestManager {
 									if (i == noteIndex) {
 										// Adapt predictedDurationLabel and predictedDuration
 										Rational maxDur = onsetTimeNextChord.sub(onset);
-										int maxDurAsInt =	maxDur.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+										int maxDurAsInt = maxDur.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
 										predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 										predictedDuration = maxDur;
 										predictedDuration.reduce();

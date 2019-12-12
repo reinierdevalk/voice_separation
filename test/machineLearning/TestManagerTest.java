@@ -531,9 +531,9 @@ public class TestManagerTest extends TestCase {
 
 		// allDurationLabelsExpected
 		List<List<Double>> allDurationLabelsExpected = new ArrayList<List<Double>>();
-		List<Double> eighthLabel = Transcription.createDurationLabel(4);
-		List<Double> quarterLabel = Transcription.createDurationLabel(8);
-		List<Double> halfLabel = Transcription.createDurationLabel(16);
+		List<Double> eighthLabel = Transcription.createDurationLabel(4*3); // trp dur
+		List<Double> quarterLabel = Transcription.createDurationLabel(8*3); // trp dur
+		List<Double> halfLabel = Transcription.createDurationLabel(16*3); // trp dur
 		// Chord 0
 		allDurationLabelsExpected.add(halfLabel);
 		allDurationLabelsExpected.add(halfLabel);
@@ -1113,9 +1113,9 @@ public class TestManagerTest extends TestCase {
 
 		// allDurationLabelsExpected (fwd)
 		List<List<Double>> allDurationLabelsExpected = new ArrayList<List<Double>>();
-		List<Double> eighthLabel = Transcription.createDurationLabel(4);
-		List<Double> quarterLabel = Transcription.createDurationLabel(8);
-		List<Double> halfLabel = Transcription.createDurationLabel(16);
+		List<Double> eighthLabel = Transcription.createDurationLabel(4*3); // trp dur
+		List<Double> quarterLabel = Transcription.createDurationLabel(8*3); // trp dur
+		List<Double> halfLabel = Transcription.createDurationLabel(16*3); // trp dur
 		// Chord 5
 		allDurationLabelsExpected.add(halfLabel);
 		allDurationLabelsExpected.add(halfLabel);
