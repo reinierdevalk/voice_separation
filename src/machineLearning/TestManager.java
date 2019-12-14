@@ -641,8 +641,10 @@ public class TestManager {
 				System.out.println("######## " + "export fold " + fold);
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
-//				MEIExport.exportMEIFile(new Transcription(new File(expPath + ".mid"), null), 
-//					tablature, colInd, false, expPath);
+				Transcription t = new Transcription(new File(expPath + ".mid"), null);
+				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
+				MEIExport.exportMEIFile(t, tablature.getBasicTabSymbolProperties(), mi,
+					t.getKeyInfo(), colInd, false, expPath);
 			}
 			if (!applToNewData) {
 				System.out.println("... storing the test results ...");
