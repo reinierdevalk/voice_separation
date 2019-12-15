@@ -606,12 +606,27 @@ public class TestManager {
 					groundTruthTranscription.getPiece().getHarmonyTrack());
 
 				// Element 0 of testResults contains the assignment errors, which has
-				// as element 1: the indices of all incorrect assignments;
-				// as element 2: the indices of all overlooked CoD assignments;
-				// as element 3: the indices of all superfluous CoD assignments;
-				// as element 4: the indices of all half CoD assignments;
+				// as element 0: general high-level voice assignment information
+				// as element 1: the indices of all incorrect assignments
+				// as element 2: the indices of all overlooked CoD assignments
+				// as element 3: the indices of all superfluous CoD assignments
+				// as element 4: the indices of all half CoD assignments
+				// and, if modelling duration
+				// as element 5: general high-level duration assignment information
+				// as element 6: the indices of all incorrect assignments
+				// as element 7: the indices of all overlooked CoD assignments
+				// (see ErrorCalculator.calculateAssignmentErrors())
 				List<List<Integer>> assigErrs = testResults.get(0);
-				List<List<Integer>> indiv = assigErrs.subList(1, assigErrs.size());
+				List<List<Integer>> indiv = 
+					new ArrayList<List<Integer>>(assigErrs.subList(1, /*assigErrs.size()*/ 5));
+				// In case of the bwd model, indices in are bwd indices and need to be reverted to fwd   
+				if (pm == ProcessingMode.BWD) {
+					for (int i = 0; i < indiv.size(); i++) {
+						List<Integer> reverted = new ArrayList<>();
+						indiv.get(i).forEach(ind -> reverted.add(backwardsMapping.get(ind)));
+						indiv.set(i, reverted);
+					}
+				}
 				List<Integer> combined = new ArrayList<>();
 				indiv.forEach(l -> combined.addAll(l));
 				Collections.sort(combined);
@@ -638,7 +653,6 @@ public class TestManager {
 				}
 //				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
-				System.out.println("######## " + "export fold " + fold);
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
 				Transcription t = new Transcription(new File(expPath + ".mid"), null);
