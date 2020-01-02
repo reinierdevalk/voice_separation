@@ -75,17 +75,17 @@ public class UI {
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;
-//			datasetID = DatasetID.BYRD_4vv;
+			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
-			datasetID = DatasetID.INT_3vv;
+//			datasetID = DatasetID.INT_3vv;
 
 			datasetVersion = "thesis"; // only for this if
 
-			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
+//			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
 //			expName = "ISMIR-2019/";
-//			expName = "hector/";
+			expName = "byrd/";
 
-			m = Model.N_PRIME;
+			m = Model.N;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd 
 			storedExpName = "thesis/exp_1";
@@ -109,8 +109,8 @@ public class UI {
 
 			// Tuned hyperparameters
 			// Shallow network
-			lambda = 0.00003; // 0.0001 with 60-80 iterations works best
-			hiddenLayerFactor = 0.5; //1.0;
+			lambda = 0.001; // byrd: 0.0001 with 60-80 iterations works best
+			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;

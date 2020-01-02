@@ -144,7 +144,7 @@ public class TrainingManager {
 					System.out.println("undapted: " + currTranscrDeorn.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
 
-		//			implement transposition
+//					implement transposition
 						
 					currTabTransPairRev = 
 						new TablatureTranscriptionPair(currTabRev, currTranscrRev);
