@@ -3340,7 +3340,6 @@ public class TestManager {
 			}
 //			System.out.println(voiceEntryInfo);
 			// 1. Traverse the piece note for note, and do for each note
-//			for (int i = 0; i < 1; i++) { // HOERO
 			for (int i = 0; i < numTestExamples; i++) {
 				// TODO in ENS model this loop gets slower as i increases
 //				for (int noteIndex = 0; noteIndex < numberOfTestExamples; noteIndex++) {
