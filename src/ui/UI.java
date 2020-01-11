@@ -71,7 +71,7 @@ public class UI {
 			repeatExp = true;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = false;
+			estimateEntries = true;
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;
@@ -84,10 +84,11 @@ public class UI {
 //			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
 //			expName = "ISMIR-2019/";
 			expName = "byrd/";
+//			expName = "ISMIR-2017-LBD/";
 
 			m = Model.N;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd 
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 			storedExpName = "thesis/exp_1";
 			storedM = Model.N;
 			storedPm = ProcessingMode.FWD;

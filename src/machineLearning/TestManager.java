@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -657,8 +656,9 @@ public class TestManager {
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
 				Transcription t = new Transcription(new File(expPath + ".mid"), null);
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
-				MEIExport.exportMEIFile(t, tablature.getBasicTabSymbolProperties(), mi,
-					t.getKeyInfo(), colInd, false, expPath);
+				MEIExport.exportMEIFile(
+					t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
+					mi, t.getKeyInfo(),	colInd, false, expPath);
 			}
 			if (!applToNewData) {
 				System.out.println("... storing the test results ...");
@@ -3334,9 +3334,23 @@ public class TestManager {
 			if (estimateEntries) {
 //				voiceEntryInfo =
 //					groundTruthTranscription.getImitativeVoiceEntries(highestNumVoicesTraining, 3);
-				voiceEntryInfo =
-					groundTruthTranscription.determineVoiceEntriesHIGHLEVEL(basicNoteProperties, 
-					highestNumVoicesTraining, 3);	
+
+//				in non-tab case: fake bnp from btp and 
+//				(1) feed them as arg to function below OR
+//				(2) set them to groundTruthTranscription
+//				first check if result of feeding as arg to function below has same effect 
+//				as getting them from the created transcription inside the function
+//				(i.e., in all functions called inside the function below, bnp must come 
+//				from the arg and not from getBasicNoteProperties())
+//				OR
+//				remove arg basicNoteProperties from function below and restore old implementation,
+//				add basicTabsymbolProperties as arg (can be null), and extract the information
+//				from there inside the function below
+
+				System.out.println(basicTabSymbolProperties);
+				System.exit(0);
+				voiceEntryInfo = groundTruthTranscription.determineVoiceEntriesHIGHLEVEL(
+					basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 3);	
 			}
 //			System.out.println(voiceEntryInfo);
 			// 1. Traverse the piece note for note, and do for each note
