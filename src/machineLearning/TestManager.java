@@ -3334,25 +3334,12 @@ public class TestManager {
 			if (estimateEntries) {
 //				voiceEntryInfo =
 //					groundTruthTranscription.getImitativeVoiceEntries(highestNumVoicesTraining, 3);
-
-//				in non-tab case: fake bnp from btp and 
-//				(1) feed them as arg to function below OR
-//				(2) set them to groundTruthTranscription
-//				first check if result of feeding as arg to function below has same effect 
-//				as getting them from the created transcription inside the function
-//				(i.e., in all functions called inside the function below, bnp must come 
-//				from the arg and not from getBasicNoteProperties())
-//				OR
-//				remove arg basicNoteProperties from function below and restore old implementation,
-//				add basicTabsymbolProperties as arg (can be null), and extract the information
-//				from there inside the function below
-
-				System.out.println(basicTabSymbolProperties);
-				System.exit(0);
+				List<List<Double>> dl = !isTablatureCase ? null : 
+					tablature.getMinimumDurationLabels(); // TODO or predicted durations
 				voiceEntryInfo = groundTruthTranscription.determineVoiceEntriesHIGHLEVEL(
-					basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 3);	
+					basicTabSymbolProperties, dl, basicNoteProperties, highestNumVoicesTraining, 3);	
 			}
-//			System.out.println(voiceEntryInfo);
+
 			// 1. Traverse the piece note for note, and do for each note
 			for (int i = 0; i < numTestExamples; i++) {
 				// TODO in ENS model this loop gets slower as i increases

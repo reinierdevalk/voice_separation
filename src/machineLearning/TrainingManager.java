@@ -785,6 +785,7 @@ public class TrainingManager {
 			List<List<Double>> voiceLabelsForGTs = new ArrayList<List<Double>>();
 			List<List<Double>> durLabelsForGTs = null;
 			if (ma == ModellingApproach.N2N) {
+//				if (modelDuration && (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR)) {
 				if (modelDuration && dc == DecisionContext.UNIDIR) {
 					durLabelsForGTs = new ArrayList<List<Double>>();
 				}
@@ -886,7 +887,8 @@ public class TrainingManager {
 			List<List<List<Double>>> vlSets = createTrainAndValSet(voiceLabelsForGTs, valPerc, indivPieceInds);
 			voiceLabelsForGTs = vlSets.get(0);
 			voiceLabelsForGTsVal = vlSets.get(1);
-			if (modelDuration) {
+			if (modelDuration && dc == DecisionContext.UNIDIR) { // 26.01.2020
+//			if (modelDuration) {
 				List<List<List<Double>>> dlSets = createTrainAndValSet(durLabelsForGTs, valPerc, indivPieceInds);
 				durLabelsForGTs = dlSets.get(0);
 				durLabelsForGTsVal = dlSets.get(1);

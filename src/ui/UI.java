@@ -68,10 +68,10 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = true;
+			repeatExp = false;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = true;
+			estimateEntries = false;
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;
@@ -81,17 +81,19 @@ public class UI {
 
 			datasetVersion = "thesis"; // only for this if
 
-//			expName = "thesis/exp_3.2"; // publication + experiment (if applicable)
+//			expName = "thesis/exp_3.3.1/"; // publication + experiment (if applicable)
+//			expName = "thesis/exp_3.2/";
 //			expName = "ISMIR-2019/";
 			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
 
-			m = Model.N;
+			m = Model.B_PRIME;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
-			storedExpName = "thesis/exp_1";
-			storedM = Model.N;
-			storedPm = ProcessingMode.FWD;
+//			storedExpName = "thesis/exp_3.2";
+			storedExpName = "byrd";
+			storedM = Model.N_PRIME;
+			storedPm = ProcessingMode.BWD;
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
@@ -110,8 +112,8 @@ public class UI {
 
 			// Tuned hyperparameters
 			// Shallow network
-			lambda = 0.001; // byrd: 0.0001 with 60-80 iterations works best
-			hiddenLayerFactor = 1.0;
+			lambda = 0.001; // 0.00003;  
+			hiddenLayerFactor = 1.0; // 0.5;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
