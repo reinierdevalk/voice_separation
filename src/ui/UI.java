@@ -68,7 +68,7 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = false;
+			repeatExp = true;
 			useCV = true;
 			trainUserModel = false;
 			estimateEntries = false;
@@ -87,12 +87,12 @@ public class UI {
 			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
 
-			m = Model.B_PRIME;
+			m = Model.B;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
 			storedExpName = "byrd";
-			storedM = Model.N_PRIME;
+			storedM = Model.N;
 			storedPm = ProcessingMode.BWD;
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
@@ -203,7 +203,7 @@ public class UI {
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
-		int validationPercentage = (mt == ModelType.DNN) ? 20 : 0; // TODO or 20 : 20; 
+		int validationPercentage = (mt == ModelType.DNN) ? 20 : 10; // TODO or 20 : 20; 
 		int decisionContextSize = 1;
 		boolean averageProx = false;
 		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
@@ -269,6 +269,7 @@ public class UI {
 			path = pathify(new String[]{pref, m.toString(), pm.getStringRep(), hyperParams});
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
 				pathStoredNN = pathify(new String[]{prefStored, storedM.toString(), storedPm.getStringRep()});
+//				pathStoredNN = pathStoredNN.substring(0, pathStoredNN.indexOf("fwd/"))+ "prev/";
 			}
 			if (mt == ModelType.ENS) {
 				pathStoredNN = pathify(new String[]{prefStored, Model.N.toString(), pm.getStringRep()});

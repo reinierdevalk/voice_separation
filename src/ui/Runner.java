@@ -950,7 +950,7 @@ public class Runner {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");						
-				new TrainingManager().prepareTraining(startTr);
+//				new TrainingManager().prepareTraining(startTr);
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}

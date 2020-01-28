@@ -365,6 +365,10 @@ public class EvaluationManager {
 			results[ACC_DUR_IND] = 
 				ErrorCalculator.calculateAccuracy(assignmentErrors, isTablatureCase, true);
 		}
+		
+		// Added 28.01.2020 to print prc and rec for tablature
+		ErrorCalculator.calculateAvgPrecisionRecallF1(allPredictedVoices, 
+			groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices);
 
 		// prc, rcl, snd, cmp, AVC, cre
 		if (!isTablatureCase) {

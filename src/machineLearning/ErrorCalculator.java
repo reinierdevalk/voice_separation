@@ -333,6 +333,16 @@ public class ErrorCalculator {
 
 		List<List<List<Integer>>> errorsPerVoice = getPositivesAndNegativesPerVoice(allPredictedVoices, 
 			groundTruthVoiceLabels, EDUInfo, highestNumVoices);
+		
+		for (int i = 0; i < errorsPerVoice.size(); i++) {
+			System.out.println("voice = " + i);
+			System.out.println("true positives");
+			System.out.println(errorsPerVoice.get(i).get(0));
+			System.out.println("false positives");
+			System.out.println(errorsPerVoice.get(i).get(1));
+			System.out.println("false negatives");
+			System.out.println(errorsPerVoice.get(i).get(2));
+		}
 
 		ErrorFraction[][] prcRclF1 = new ErrorFraction[2][3];
 		
@@ -350,6 +360,10 @@ public class ErrorCalculator {
 			int falseNeg = currentErrorsPerVoice.get(2).size();
 
 			ErrorFraction[] curr = calculatePrecisionRecallF1(truePos, falsePos, falseNeg);
+			System.out.println("voice = " + i);
+			System.out.println("prc = " + curr[0]);
+			System.out.println("rec = " + curr[1]);
+			System.out.println("F1  = " + curr[2]);
 
 			precisions.add(curr[0]);
 			recalls.add(curr[1]);
