@@ -361,9 +361,13 @@ public class ErrorCalculator {
 
 			ErrorFraction[] curr = calculatePrecisionRecallF1(truePos, falsePos, falseNeg);
 			System.out.println("voice = " + i);
-			System.out.println("prc = " + curr[0]);
-			System.out.println("rec = " + curr[1]);
-			System.out.println("F1  = " + curr[2]);
+			System.out.println("prc = " + curr[0] + " = " + curr[0].toDouble());
+			System.out.println("rec = " + curr[1] + " = " + curr[1].toDouble());
+			System.out.println("F1  = " + curr[2] + " = " + curr[2].toDouble());
+			TestManager.prcRcl += "voice = " + i + "\r\n";
+			TestManager.prcRcl += "prc" + "\t" + curr[0] + "\t" + curr[0].toDouble() + "\r\n";
+			TestManager.prcRcl += "rcl" + "\t" + curr[1] + "\t" + curr[1].toDouble() + "\r\n";
+			TestManager.prcRcl += "F1"  + "\t" + curr[2] + "\t" + curr[2].toDouble() + "\r\n";
 
 			precisions.add(curr[0]);
 			recalls.add(curr[1]);

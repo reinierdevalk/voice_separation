@@ -184,6 +184,7 @@ public class TestManager {
 					}
 				}
 			}
+			ToolBox.storeTextFile(prcRcl, new File(paths[0] + "prc-rcl_per_voice.txt"));
 		}
 	}
 	
@@ -245,6 +246,7 @@ public class TestManager {
 	}
 
 
+	public static String prcRcl = "";
 	/**
 	 * 
 	 * @param fold Fold number when using cross-validation; piece index when not.
@@ -329,6 +331,7 @@ public class TestManager {
 			pieceIndex = fold;
 		}
 		String testPieceName = dataset.getPieceNames().get(pieceIndex);
+		prcRcl += "fold = " + fold + "; piece = " + testPieceName;
 		
 		System.out.println("... processing " + testPieceName + " ...");
 
@@ -1142,6 +1145,8 @@ public class TestManager {
 			pathNN = argPaths[1];
 			pathMM = argPaths[2];
 		}
+		
+		prcRcl += " -- test mode" + "\r\n";
 
 		// 1.  Calculate features, get networkoutputs, determine predicted voices (and durations)
 		List<Rational[]> allPredictedDurationsTest = null; 
@@ -3211,6 +3216,8 @@ public class TestManager {
 			pathComb = argPaths[0];
 			pathNN = argPaths[1];
 		}
+		
+		prcRcl += " -- application mode" + "\r\n";
 			
 		// Create newTranscription
 //		System.out.println("... creating empty new transcription with the given number of voices (" + 

@@ -87,9 +87,9 @@ public class UI {
 			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
 
-			m = Model.B;
+			m = Model.N;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
+			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
 			storedExpName = "byrd";
 			storedM = Model.N;
