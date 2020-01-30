@@ -366,9 +366,23 @@ public class EvaluationManager {
 				ErrorCalculator.calculateAccuracy(assignmentErrors, isTablatureCase, true);
 		}
 		
-		// Added 28.01.2020 to print prc and rec for tablature
-		ErrorCalculator.calculateAvgPrecisionRecallF1(allPredictedVoices, 
+		// Added 28.01.2020 to print prc and rec per voice for tablature
+		List<ErrorFraction[]> prf = 
+			ErrorCalculator.calculatePrecisionRecallF1PerVoice(allPredictedVoices, 
 			groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices);
+		for (int i = 0; i < prf.size(); i++) {
+			ErrorFraction[] curr = prf.get(i);
+			TestManager.prcRcl += "voice = " + i + "\r\n";
+			TestManager.prcRcl += 
+				"prc" + "\t" + curr[0].getNumer() + "\t" + curr[0].getDenom() + "\t" + 
+				curr[0].toDouble() + "\r\n";
+			TestManager.prcRcl += 
+				"rcl" + "\t" + curr[1].getNumer() + "\t" + curr[1].getDenom() + "\t" +
+				curr[1].toDouble() + "\r\n";
+			TestManager.prcRcl += 
+				"F1"  + "\t" + curr[2].getNumer() + "\t" + curr[2].getDenom() + "\t" + 
+				curr[2].toDouble() + "\r\n";
+		}
 
 		// prc, rcl, snd, cmp, AVC, cre
 		if (!isTablatureCase) {

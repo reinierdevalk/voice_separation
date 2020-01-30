@@ -1146,7 +1146,7 @@ public class TestManager {
 			pathMM = argPaths[2];
 		}
 		
-		prcRcl += " -- test mode" + "\r\n";
+		prcRcl += " -- tst" + "\r\n";
 
 		// 1.  Calculate features, get networkoutputs, determine predicted voices (and durations)
 		List<Rational[]> allPredictedDurationsTest = null; 
@@ -3217,7 +3217,7 @@ public class TestManager {
 			pathNN = argPaths[1];
 		}
 		
-		prcRcl += " -- application mode" + "\r\n";
+		prcRcl += " -- app" + "\r\n";
 			
 		// Create newTranscription
 //		System.out.println("... creating empty new transcription with the given number of voices (" + 
