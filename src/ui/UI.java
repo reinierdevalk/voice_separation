@@ -42,7 +42,9 @@ public class UI {
 
 	private static FeatureVector fv;
 	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, C;
-	private static int hiddenLayers, hiddenLayerSize, matrixConfiguration, n, neighbours, trees;;
+	private static double alpha;
+	private static int hiddenLayers, hiddenLayerSize, matrixConfiguration, n, neighbours, trees;
+	private static int seed;
 	private static List<MelodyModelFeature> mmfs;
 	private static List<Integer> ns;
 
@@ -68,7 +70,7 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = true;
+			repeatExp = false;
 			useCV = true;
 			trainUserModel = false;
 			estimateEntries = false;
@@ -87,12 +89,14 @@ public class UI {
 			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
 
-			m = Model.B;
+			seed = 3;
+
+			m = Model.D_B;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
 			storedExpName = "byrd";
-			storedM = Model.N;
+			storedM = Model.D;
 			storedPm = ProcessingMode.BWD;
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
@@ -102,6 +106,8 @@ public class UI {
 //			hyperParams = "HLF=1.0/lmb=0.001/";
 //			hyperParams = "eps=0.05/";
 			hyperParams = "";
+//			hyperParams = "LR=0.003/HL=1/HLS=66/KP=0.875/";
+//			hyperParams = "final/";
 
 			mmfs = Arrays.asList(new MelodyModelFeature[]{ // used both for MM and ENS
 				MelodyModelFeature.PITCH,
@@ -116,9 +122,10 @@ public class UI {
 			hiddenLayerFactor = 1.0; // 0.5;
 			epsilon = 0.05;
 			// DNN
-			keepProbability = 0.875;
-			hiddenLayers = 2;
-			hiddenLayerSize = 66;
+			keepProbability = 0.75;
+			hiddenLayers = 1;
+			hiddenLayerSize = 75;
+			alpha = 0.003;
 			// MM
 			n = 2;
 			// ENS
@@ -132,7 +139,7 @@ public class UI {
 
 			// In case of grid search: set hyperparameter space (if no hyperparameter space
 			// is specified, the full space is assumed). Any values set above are overwritten
-			if (gridSearch) { 
+			if (gridSearch) {
 //				List<Object> hyperParameters = Arrays.asList(new Object[]{
 //					hiddenLayers, 
 //					hiddenLayerSize, 
@@ -141,15 +148,23 @@ public class UI {
 				List<List<Double>> hyperParamSpace = new ArrayList<List<Double>>();
 				if (hyperParamSpace.size() == 0) {
 					hyperParamSpace = ToolBox.createGrid(Arrays.asList(new List[]{
-						Arrays.asList(new Double[]{1., 2., 3.}), // num HL		
-						Arrays.asList(new Double[]{4., 5., 6.}), // HL size
-						Arrays.asList(new Double[]{7., 8., 9.}) // keep probabilities
+//						Arrays.asList(new Double[]{0.003, 0.001, 0.0003}), // learning rate
+						Arrays.asList(new Double[]{1., 2., 3.}), // num HL
+						Arrays.asList(new Double[]{33., 50., 66., 75.}), // HL size
+						Arrays.asList(new Double[]{.5, .75, .875, .9375}), // keep probabilities
 					}));
+					for (List<Double> l : hyperParamSpace) {
+						System.out.println(l);
+					}
 				}
 				for (List<Double> combination : hyperParamSpace) {
-					hiddenLayers = combination.get(0).intValue(); 
+//					alpha = combination.get(0);
+					hiddenLayers = combination.get(0).intValue();
 					hiddenLayerSize = combination.get(1).intValue(); 
 					keepProbability = combination.get(2);
+
+					hyperParams = "LR=" + alpha + "/" + "HL=" + hiddenLayers + "/" +
+						"HLS=" + hiddenLayerSize + "/" + "KP=" + keepProbability + "/";
 					set(args);
 				}
 			}
@@ -203,14 +218,14 @@ public class UI {
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
-		int validationPercentage = (mt == ModelType.DNN) ? 20 : 10; // TODO or 20 : 20; 
+		int validationPercentage = (mt == ModelType.DNN) ? 10 : 0; // TODO or 20 : 0; 
 		int decisionContextSize = 1;
 		boolean averageProx = false;
 		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 		double cycles = 10.0;
 		int epochs = 600;
-		double learningRate = (mt == ModelType.DNN) ? 0.01 : 1.0;
-		double deviationThreshold = 0.05;
+		double learningRate = (mt == ModelType.DNN) ? alpha : 1.0;
+		double deviationThreshold = 0.0; // 0.05;
 		int maxNumVoices = (ma == ModellingApproach.N2N) ? 5 : 4;
 
 		// 1. Set rootDir and paths to code and data
@@ -326,6 +341,7 @@ public class UI {
 			// b. Settings (ML)
 			modelParams.put(NNManager.ACT_FUNCTION, (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS) ? (double) actFunc.getIntRep() : null);
 			modelParams.put(Runner.DECODING_ALG, (m == Model.H) ? (double) decAlg.getIntRep() : null);
+			modelParams.put(Runner.SEED, (double) seed);
 			// c. Non-tuned hyperparameters 
 			modelParams.put(Runner.VALIDATION_PERC, (double) validationPercentage);
 			modelParams.put(Runner.DECISION_CONTEXT_SIZE, (double) decisionContextSize);

@@ -196,6 +196,7 @@ public class EvaluationManager {
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
+		ModelType mt = m.getModelType();
 		int totalNumExamples = dataset.getNumDataExamples(ma);
 
 		// Data
@@ -312,7 +313,9 @@ public class EvaluationManager {
 						}
 					}
 					else if (intKeys.contains(key)){
-						dataAndParams.append(value.intValue() + "\r\n");
+						if (!key.equals(Runner.SEED) || key.equals(Runner.SEED) && mt == ModelType.DNN) {
+							dataAndParams.append(value.intValue() + "\r\n");
+						}
 					}
 					else {
 						dataAndParams.append(value + "\r\n");
@@ -332,6 +335,7 @@ public class EvaluationManager {
 	 * @param ntwOutputsForCE
 	 * @param groundTruthVoiceLabels
 	 * @param equalDurationUnisonsInfo
+	 * @param isTestOrAppMode
 	 * 
 	 * @returns An Array of ErrorFractions, with at index <br>
 	 *          [0] accuracy (with, in the tablature case, num and denom multiplied by 2 to get rid of halves) <br>
@@ -346,7 +350,8 @@ public class EvaluationManager {
 	 */
 	public static ErrorFraction[] getMetricsSingleFold(List<List<Integer>> assignmentErrors, 
 		List<List<Integer>> allPredictedVoices, List<double[]> ntwOutputsForCE, 
-		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> equalDurationUnisonsInfo) {
+		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> equalDurationUnisonsInfo,
+		boolean isTestOrAppMode) {
 
 		ErrorFraction[] results = new ErrorFraction[10];
 		Arrays.fill(results, null);
@@ -366,22 +371,24 @@ public class EvaluationManager {
 				ErrorCalculator.calculateAccuracy(assignmentErrors, isTablatureCase, true);
 		}
 		
-		// Added 28.01.2020 to print prc and rec per voice for tablature
+		// Added 28.01.2020 to print prc and rec per voice for tablature (only in test/app mode)
 		List<ErrorFraction[]> prf = 
 			ErrorCalculator.calculatePrecisionRecallF1PerVoice(allPredictedVoices, 
 			groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices);
-		for (int i = 0; i < prf.size(); i++) {
-			ErrorFraction[] curr = prf.get(i);
-			TestManager.prcRcl += "voice = " + i + "\r\n";
-			TestManager.prcRcl += 
-				"prc" + "\t" + curr[0].getNumer() + "\t" + curr[0].getDenom() + "\t" + 
-				curr[0].toDouble() + "\r\n";
-			TestManager.prcRcl += 
-				"rcl" + "\t" + curr[1].getNumer() + "\t" + curr[1].getDenom() + "\t" +
-				curr[1].toDouble() + "\r\n";
-			TestManager.prcRcl += 
-				"F1"  + "\t" + curr[2].getNumer() + "\t" + curr[2].getDenom() + "\t" + 
-				curr[2].toDouble() + "\r\n";
+		if (isTestOrAppMode) {
+			for (int i = 0; i < prf.size(); i++) {
+				ErrorFraction[] curr = prf.get(i);
+				TestManager.prcRcl += "voice = " + i + "\r\n";
+				TestManager.prcRcl += 
+					"prc" + "\t" + curr[0].getNumer() + "\t" + curr[0].getDenom() + "\t" + 
+					curr[0].toDouble() + "\r\n";
+				TestManager.prcRcl += 
+					"rcl" + "\t" + curr[1].getNumer() + "\t" + curr[1].getDenom() + "\t" +
+					curr[1].toDouble() + "\r\n";
+				TestManager.prcRcl += 
+					"F1"  + "\t" + curr[2].getNumer() + "\t" + curr[2].getDenom() + "\t" + 
+					curr[2].toDouble() + "\r\n";
+			}
 		}
 
 		// prc, rcl, snd, cmp, AVC, cre

@@ -669,7 +669,7 @@ public class TestManager {
 				List<List<Integer>> assigErrs = testResults.get(0);
 				ErrorFraction[] evalNN = 
 					EvaluationManager.getMetricsSingleFold(assigErrs, testResults.get(1), 
-					ntwOutputsForCE, groundTruthVoiceLabels, equalDurationUnisonsInfo);
+					ntwOutputsForCE, groundTruthVoiceLabels, equalDurationUnisonsInfo, true);
 
 				// Details
 				boolean applUnidirCase = (dc == DecisionContext.UNIDIR && mode == Runner.APPL); 
