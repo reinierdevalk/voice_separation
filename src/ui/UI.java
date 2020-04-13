@@ -73,11 +73,11 @@ public class UI {
 			repeatExp = false;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = false;
+			estimateEntries = true;
 			verbose = false;
 
-//			datasetID = DatasetID.WTC_4vv;
-			datasetID = DatasetID.BYRD_4vv;
+			datasetID = DatasetID.WTC_4vv;
+//			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
 //			datasetID = DatasetID.INT_3vv;
 
@@ -86,18 +86,20 @@ public class UI {
 //			expName = "thesis/exp_3.3.1/"; // publication + experiment (if applicable)
 //			expName = "thesis/exp_3.2/";
 //			expName = "ISMIR-2019/";
-			expName = "byrd/";
+//			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
+			expName = "ISMIR-2020";
 
-			seed = 3;
+			seed = 0;
 
 			m = Model.D_B;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
-			storedExpName = "byrd";
+//			storedExpName = "byrd";
+			storedExpName = "ISMIR-2020";
 			storedM = Model.D;
-			storedPm = ProcessingMode.BWD;
+			storedPm = ProcessingMode.FWD;
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
@@ -122,10 +124,10 @@ public class UI {
 			hiddenLayerFactor = 1.0; // 0.5;
 			epsilon = 0.05;
 			// DNN
-			keepProbability = 0.75;
-			hiddenLayers = 1;
-			hiddenLayerSize = 75;
-			alpha = 0.003;
+			keepProbability = 0.875;
+			hiddenLayers = 2;
+			hiddenLayerSize = 66;
+			alpha = 0.01;
 			// MM
 			n = 2;
 			// ENS
@@ -218,7 +220,7 @@ public class UI {
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
-		int validationPercentage = (mt == ModelType.DNN) ? 10 : 0; // TODO or 20 : 0; 
+		int validationPercentage = (mt == ModelType.DNN) ? 20 : 0; // TODO or 10 : 0; 
 		int decisionContextSize = 1;
 		boolean averageProx = false;
 		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
