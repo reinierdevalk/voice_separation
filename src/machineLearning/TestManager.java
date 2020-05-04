@@ -667,7 +667,7 @@ public class TestManager {
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
 				MEIExport.exportMEIFile(
 					t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
-					mi, t.getKeyInfo(),	colInd, false, expPath);
+					mi, t.getKeyInfo(), tablature.getTripletOnsetPairs(), colInd, false, expPath);
 			}
 			if (!applToNewData) {
 				System.out.println("... storing the test results ...");
