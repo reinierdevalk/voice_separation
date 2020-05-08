@@ -242,172 +242,166 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 
 	public void testGetProximitiesAndMovementsOfChord() {
-    Tablature tablature = new Tablature(encodingTestpiece1, true);
-    Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
- 	
-  	// Determine expected
-  	List<double[]> expected = new ArrayList<double[]>();
-    // Chord 0
-  	expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, -1.0, -1.0, -1.0, -1.0,
-  		-1.0, -1.0, -1.0, -1.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
-  	// Chord 1
-  	expected.add(new double[]{3.0, 4.0, 0.0, 5.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, -1.0,
-    	0.0, 0.0, 0.0, 0.0, -1.0, /**/ 3.0, 4.0, 0.0, -5.0, 0.0});
-  	// Chord 2
-  	expected.add(new double[]{-1.0, -1.0, -1.0, 3.0, -1.0, /**/	-1.0, -1.0, -1.0, 3/16.0, -1.0,
-    	-1.0, -1.0, -1.0, 0.0, -1.0, /**/ 0.0, 0.0, 0.0, 3.0, 0.0});
-  	// Chord 3
-  	expected.add(new double[]{7.0, 4.0, 2.0, 2.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/16.0, -1.0,
-     	1/16.0, 1/16.0, 1/16.0, 0.0, -1.0, /**/	-7.0, -4.0, 2.0, 2.0, 0.0});
-  	// Chord 4
-  	expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 2.0, /**/ -1.0, -1.0, -1.0, -1.0, 1/8.0,
-  		-1.0, -1.0, -1.0, -1.0, 0.0, /**/ 0.0, 0.0, 0.0, 0.0, -2.0});
-  	// Chord 5
-  	expected.add(new double[]{4.0, 5.0, 2.0, 7.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, 1/8.0,
-    	1/8.0, 1/8.0, 1/8.0, 1/8.0, 0.0, /**/ 4.0, -5.0, -2.0, 7.0, 0.0});
-  	// Chord 6
-  	expected.add(new double[]{5.0, 9.0, 3.0, -1.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, -1.0, 1/4.0,
-      0.0, 0.0, 0.0, -1.0, 0.0, /**/ -5.0, 9.0, 3.0, 0.0, 0.0});
-  	// Chord 7
-  	expected.add(new double[]{4.0, -1.0, 1.0, -1.0, -1.0, /**/ 1/8.0, -1.0, 1/8.0, -1.0, -1.0,
-      0.0, -1.0, 0.0, -1.0, -1.0, /**/ 4.0, 0.0, -1.0, 0.0, 0.0});
-  	// Chord 8
-  	expected.add(new double[]{1.0, 5.0, 2.0, 12.0, -1.0, /**/ 1/8.0, 1/4.0, 1/8.0, 1/2.0, -1.0,
-      0.0, 1/8.0, 0.0, 1/4.0, -1.0, /**/ 1.0, -5.0, -2.0, -12.0, 0.0});
-  	// Chords 9-14
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ -2.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ 2.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
-  	// Chord 15
-  	expected.add(new double[]{0.0, 0.0, 0.0, 0.0, -1.0, /**/ 2/4.0, 3/4.0, 3/4.0, 3/4.0, -1.0,
-      1/4.0, 11/16.0, 11/16.0, 11/16.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
-    
-    // For each element of expected: turn the elements in the proximities arrays from distances into proximities
- 	  for (int i = 0; i < expected.size(); i++) {
- 	  	double[] currentExpected = expected.get(i);
- 	  	for (int j = 0; j < currentExpected.length - Transcription.MAXIMUM_NUMBER_OF_VOICES; j++) {
-	  		double currentValue = currentExpected[j]; 
-	  	  // Do only if currentValue is not -1.0, i.e., if the voice is active
-	  		if (currentValue != -1.0) {
-	  		  currentExpected[j] = 1.0/(currentValue + 1);
-	  		}
- 	  	}
- 	  }
-  	 	  
-  	// Calculate actual
- 	  List<double[]> actual = new ArrayList<double[]>();
-  	Integer[][] btp = tablature.getBasicTabSymbolProperties();
-  	List<List<Integer>> voiceAssignments = getVoiceAssignments();
-  	int lowestOnsetIndex = 0;
+		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+ 
+		List<double[]> expected = new ArrayList<double[]>();
+		// Chord 0
+		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, -1.0, -1.0, -1.0, -1.0,
+			-1.0, -1.0, -1.0, -1.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
+		// Chord 1
+		expected.add(new double[]{3.0, 4.0, 0.0, 5.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, -1.0,
+			0.0, 0.0, 0.0, 0.0, -1.0, /**/ 3.0, 4.0, 0.0, -5.0, 0.0});
+		// Chord 2
+		expected.add(new double[]{-1.0, -1.0, -1.0, 3.0, -1.0, /**/	-1.0, -1.0, -1.0, 3/16.0, -1.0,
+			-1.0, -1.0, -1.0, 0.0, -1.0, /**/ 0.0, 0.0, 0.0, 3.0, 0.0});
+		// Chord 3
+		expected.add(new double[]{7.0, 4.0, 2.0, 2.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/16.0, -1.0,
+			1/16.0, 1/16.0, 1/16.0, 0.0, -1.0, /**/	-7.0, -4.0, 2.0, 2.0, 0.0});
+		// Chord 4
+		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 2.0, /**/ -1.0, -1.0, -1.0, -1.0, 1/8.0,
+			-1.0, -1.0, -1.0, -1.0, 0.0, /**/ 0.0, 0.0, 0.0, 0.0, -2.0});
+		// Chord 5
+		expected.add(new double[]{4.0, 5.0, 2.0, 7.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, 1/8.0,
+			1/8.0, 1/8.0, 1/8.0, 1/8.0, 0.0, /**/ 4.0, -5.0, -2.0, 7.0, 0.0});
+		// Chord 6
+		expected.add(new double[]{5.0, 9.0, 3.0, -1.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, -1.0, 1/4.0,
+			0.0, 0.0, 0.0, -1.0, 0.0, /**/ -5.0, 9.0, 3.0, 0.0, 0.0});
+		// Chord 7
+		expected.add(new double[]{4.0, -1.0, 1.0, -1.0, -1.0, /**/ 1/8.0, -1.0, 1/8.0, -1.0, -1.0,
+			0.0, -1.0, 0.0, -1.0, -1.0, /**/ 4.0, 0.0, -1.0, 0.0, 0.0});
+		// Chord 8
+		expected.add(new double[]{1.0, 5.0, 2.0, 12.0, -1.0, /**/ 1/8.0, 1/4.0, 1/8.0, 1/2.0, -1.0,
+			0.0, 1/8.0, 0.0, 1/4.0, -1.0, /**/ 1.0, -5.0, -2.0, -12.0, 0.0});
+		// Chords 9-14
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ -2.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ 2.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
+		// Chord 15
+		expected.add(new double[]{0.0, 0.0, 0.0, 0.0, -1.0, /**/ 2/4.0, 3/4.0, 3/4.0, 3/4.0, -1.0,
+			1/4.0, 11/16.0, 11/16.0, 11/16.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
+
+		// For each element of expected: turn the elements in the proximities arrays from distances into proximities
+		for (int i = 0; i < expected.size(); i++) {
+			double[] currentExpected = expected.get(i);
+			for (int j = 0; j < currentExpected.length - Transcription.MAXIMUM_NUMBER_OF_VOICES; j++) {
+				double currentValue = currentExpected[j]; 
+				// Do only if currentValue is not -1.0, i.e., if the voice is active
+				if (currentValue != -1.0) {
+					currentExpected[j] = 1.0/(currentValue + 1);
+				}
+			}
+		}
+
+		List<double[]> actual = new ArrayList<double[]>();
+		Integer[][] btp = tablature.getBasicTabSymbolProperties();
+		List<List<Integer>> voiceAssignments = getVoiceAssignments();
+		int lowestOnsetIndex = 0;
 		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
-	  	actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(btp, null, transcription, 
-	  		lowestOnsetIndex, voiceAssignments.get(i)));
-	  	lowestOnsetIndex += tablature.getTablatureChords().get(i).size(); 	
+			actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(btp, null, transcription, 
+				lowestOnsetIndex, voiceAssignments.get(i)));
+			lowestOnsetIndex += tablature.getTablatureChords().get(i).size(); 	
 		}
-  	
-  	// Assert equality
-  	assertEquals(expected.size(), actual.size());
-  	for (int i = 0; i < expected.size(); i++) {
-  		assertEquals(expected.get(i).length, actual.get(i).length);
-  		for (int j = 0; j < expected.get(i).length; j++) {
-  			assertEquals(expected.get(i)[j], actual.get(i)[j]);
-  		}
-  	} 
+
+		assertEquals(expected.size(), actual.size());
+		for (int i = 0; i < expected.size(); i++) {
+			assertEquals(expected.get(i).length, actual.get(i).length);
+			for (int j = 0; j < expected.get(i).length; j++) {
+				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+			}
+		} 
 	}
-	
-	
+
+
 	public void testGetProximitiesAndMovementsOfChordNonTab() {
-    Transcription transcription = new Transcription(midiTestpiece1, null);
- 	
-  	// Determine expected
-  	List<double[]> expected = new ArrayList<double[]>();
-    // Chord 0
-  	expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, -1.0, -1.0, -1.0, -1.0,
-  		-1.0, -1.0, -1.0, -1.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
-  	// Chord 1
-  	expected.add(new double[]{3.0, 4.0, 0.0, 5.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, -1.0,
-    	0.0, 0.0, 0.0, 0.0, -1.0, /**/ 3.0, 4.0, 0.0, -5.0, 0.0});
-  	// Chord 2
-  	expected.add(new double[]{-1.0, -1.0, -1.0, 3.0, -1.0, /**/	-1.0, -1.0, -1.0, 3/16.0, -1.0,
-    	-1.0, -1.0, -1.0, 0.0, -1.0, /**/ 0.0, 0.0, 0.0, 3.0, 0.0});
-  	// Chord 3
-  	expected.add(new double[]{7.0, 4.0, 2.0, 2.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/16.0, -1.0,
-     	0.0, 1/8.0, 0.0, 0.0, -1.0, /**/	-7.0, -4.0, 2.0, 2.0, 0.0});
-  	// Chord 4
-  	expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 2.0, /**/ -1.0, -1.0, -1.0, -1.0, 1/8.0,
-  		-1.0, -1.0, -1.0, -1.0, 0.0, /**/ 0.0, 0.0, 0.0, 0.0, -2.0});
-  	// Chord 5
-  	expected.add(new double[]{4.0, 5.0, 2.0, 7.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, 1/8.0,
-    	0.0, 1/8.0, 0.0, 0.0, 0.0, /**/ 4.0, -5.0, -2.0, 7.0, 0.0});
-  	// Chord 6
-  	expected.add(new double[]{5.0, 9.0, 3.0, -1.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, -1.0, 1/4.0,
-      0.0, 0.0, 0.0, -1.0, 0.0, /**/ -5.0, 9.0, 3.0, 0.0, 0.0});
-  	// Chord 7
-  	expected.add(new double[]{4.0, -1.0, 1.0, -1.0, -1.0, /**/ 1/8.0, -1.0, 1/8.0, -1.0, -1.0,
-      0.0, -1.0, 0.0, -1.0, -1.0, /**/ 4.0, 0.0, -1.0, 0.0, 0.0});
-  	// Chord 8
-  	expected.add(new double[]{1.0, 5.0, 2.0, 12.0, -1.0, /**/ 1/8.0, 1/4.0, 1/8.0, 1/2.0, -1.0,
-      0.0, 0.0, 0.0, 0.0, -1.0, /**/ 1.0, -5.0, -2.0, -12.0, 0.0});
-  	// Chords 9-14
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ -2.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ 2.0, 0.0, 0.0, 0.0, 0.0});
-  	expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
-      0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
-  	// Chord 15
-  	expected.add(new double[]{0.0, 0.0, 0.0, 0.0, -1.0, /**/ 2/4.0, 3/4.0, 3/4.0, 3/4.0, -1.0,
-      1/4.0, 1/4.0, 1/4.0, 1/4.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
+		Transcription transcription = new Transcription(midiTestpiece1, null);
+
+		List<double[]> expected = new ArrayList<double[]>();
+		// Chord 0
+		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, -1.0, -1.0, -1.0, -1.0,
+			-1.0, -1.0, -1.0, -1.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
+		// Chord 1
+		expected.add(new double[]{3.0, 4.0, 0.0, 5.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, -1.0,
+			0.0, 0.0, 0.0, 0.0, -1.0, /**/ 3.0, 4.0, 0.0, -5.0, 0.0});
+		// Chord 2
+		expected.add(new double[]{-1.0, -1.0, -1.0, 3.0, -1.0, /**/	-1.0, -1.0, -1.0, 3/16.0, -1.0,
+			-1.0, -1.0, -1.0, 0.0, -1.0, /**/ 0.0, 0.0, 0.0, 3.0, 0.0});
+		// Chord 3
+		expected.add(new double[]{7.0, 4.0, 2.0, 2.0, -1.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/16.0, -1.0,
+			0.0, 1/8.0, 0.0, 0.0, -1.0, /**/	-7.0, -4.0, 2.0, 2.0, 0.0});
+		// Chord 4
+		expected.add(new double[]{-1.0, -1.0, -1.0, -1.0, 2.0, /**/ -1.0, -1.0, -1.0, -1.0, 1/8.0,
+			-1.0, -1.0, -1.0, -1.0, 0.0, /**/ 0.0, 0.0, 0.0, 0.0, -2.0});
+		// Chord 5
+		expected.add(new double[]{4.0, 5.0, 2.0, 7.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, 1/4.0, 1/8.0,
+			0.0, 1/8.0, 0.0, 0.0, 0.0, /**/ 4.0, -5.0, -2.0, 7.0, 0.0});
+		// Chord 6
+		expected.add(new double[]{5.0, 9.0, 3.0, -1.0, 0.0, /**/ 1/4.0, 1/4.0, 1/4.0, -1.0, 1/4.0,
+			0.0, 0.0, 0.0, -1.0, 0.0, /**/ -5.0, 9.0, 3.0, 0.0, 0.0});
+		// Chord 7
+		expected.add(new double[]{4.0, -1.0, 1.0, -1.0, -1.0, /**/ 1/8.0, -1.0, 1/8.0, -1.0, -1.0,
+			0.0, -1.0, 0.0, -1.0, -1.0, /**/ 4.0, 0.0, -1.0, 0.0, 0.0});
+		// Chord 8
+		expected.add(new double[]{1.0, 5.0, 2.0, 12.0, -1.0, /**/ 1/8.0, 1/4.0, 1/8.0, 1/2.0, -1.0,
+			0.0, 0.0, 0.0, 0.0, -1.0, /**/ 1.0, -5.0, -2.0, -12.0, 0.0});
+		// Chords 9-14
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/16.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ -1.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ -2.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{2.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ 2.0, 0.0, 0.0, 0.0, 0.0});
+		expected.add(new double[]{1.0, -1.0, -1.0, -1.0, -1.0, /**/ 1/32.0, -1.0, -1.0, -1.0, -1.0,
+			0.0, -1.0, -1.0, -1.0, -1.0, /**/ 1.0, 0.0, 0.0, 0.0, 0.0});
+		// Chord 15
+		expected.add(new double[]{0.0, 0.0, 0.0, 0.0, -1.0, /**/ 2/4.0, 3/4.0, 3/4.0, 3/4.0, -1.0,
+			1/4.0, 1/4.0, 1/4.0, 1/4.0, -1.0, /**/ 0.0, 0.0, 0.0, 0.0, 0.0});
     
-    // For each element of expected: turn the elements in the proximities arrays from distances into proximities
- 	  for (int i = 0; i < expected.size(); i++) {
- 	  	double[] currentExpected = expected.get(i);
- 	  	for (int j = 0; j < currentExpected.length - Transcription.MAXIMUM_NUMBER_OF_VOICES; j++) {
-	  		double currentValue = currentExpected[j]; 
-	  	  // Do only if currentValue is not -1.0, i.e., if the voice is active
-	  		if (currentValue != -1.0) {
-	  		  currentExpected[j] = 1.0/(currentValue + 1);
-	  		}
- 	  	}
- 	  }
-  	 	  
-  	// Calculate actual
- 	  List<double[]> actual = new ArrayList<double[]>();
-  	Integer[][] bnp = transcription.getBasicNoteProperties();
-  	List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
-  	int lowestOnsetIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
-	  	actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(null, bnp, transcription, 
-	  		lowestOnsetIndex, voiceAssignments.get(i)));
-	  	lowestOnsetIndex += transcription.getTranscriptionChords().get(i).size(); 	
+		// For each element of expected: turn the elements in the proximities arrays from distances into proximities
+		for (int i = 0; i < expected.size(); i++) {
+			double[] currentExpected = expected.get(i);
+			for (int j = 0; j < currentExpected.length - Transcription.MAXIMUM_NUMBER_OF_VOICES; j++) {
+				double currentValue = currentExpected[j]; 
+				// Do only if currentValue is not -1.0, i.e., if the voice is active
+				if (currentValue != -1.0) {
+					currentExpected[j] = 1.0/(currentValue + 1);
+				}
+			}
 		}
-  	
-  	// Assert equality
-  	assertEquals(expected.size(), actual.size());
-  	for (int i = 0; i < expected.size(); i++) {
-  		assertEquals(expected.get(i).length, actual.get(i).length);
-  		for (int j = 0; j < expected.get(i).length; j++) {
-  			assertEquals(expected.get(i)[j], actual.get(i)[j]);
-  		}
-  	} 
+
+		List<double[]> actual = new ArrayList<double[]>();
+		Integer[][] bnp = transcription.getBasicNoteProperties();
+		List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
+		int lowestOnsetIndex = 0;
+			for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+				actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(null, bnp, transcription, 
+					lowestOnsetIndex, voiceAssignments.get(i)));
+				lowestOnsetIndex += transcription.getTranscriptionChords().get(i).size(); 	
+			}
+
+		assertEquals(expected.size(), actual.size());
+		for (int i = 0; i < expected.size(); i++) {
+			assertEquals(expected.get(i).length, actual.get(i).length);
+			for (int j = 0; j < expected.get(i).length; j++) {
+				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+			}
+		}
 	}
-	
-	
+
+
 	public void testGetPitchVoiceRelationInChord() {
     Tablature tablature = new Tablature(encodingTestpiece1, true);
     Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
