@@ -70,29 +70,31 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = false;
+			repeatExp = true;
 			useCV = true;
 			trainUserModel = false;
-			estimateEntries = true;
+			estimateEntries = false;
 			verbose = false;
 
-			datasetID = DatasetID.WTC_4vv;
+//			datasetID = DatasetID.WTC_4vv;
 //			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
-//			datasetID = DatasetID.INT_3vv;
+			datasetID = DatasetID.INT_3vv;
 
 			datasetVersion = "thesis"; // only for this if
 
 //			expName = "thesis/exp_3.3.1/"; // publication + experiment (if applicable)
 //			expName = "thesis/exp_3.2/";
+			expName = "thesis/exp_1/";
 //			expName = "ISMIR-2019/";
 //			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
-			expName = "ISMIR-2020";
+//			expName = "ISMIR-2020";
 
 			seed = 0;
 
-			m = Model.D_B;
+//			m = Model.D_B;
+			m = Model.N;
 			fv = FeatureVector.PHD_D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
@@ -227,7 +229,7 @@ public class UI {
 		double cycles = 10.0;
 		int epochs = 600;
 		double learningRate = (mt == ModelType.DNN) ? alpha : 1.0;
-		double deviationThreshold = 0.0; // 0.05;
+		double deviationThreshold = 0.05; // 0.0;
 		int maxNumVoices = (ma == ModellingApproach.N2N) ? 5 : 4;
 
 		// 1. Set rootDir and paths to code and data
