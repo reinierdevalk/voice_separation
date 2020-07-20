@@ -732,7 +732,7 @@ public class Runner {
 	
 	public static void setPathsToCodeAndData(String argRootDir, boolean appliedToNewData) {
 		if (!appliedToNewData) {
-			pathToData = argRootDir + "data/";
+			pathToData = argRootDir + "data/data/";
 			pathToCode = argRootDir + "software/code/";
 			scriptPathPython = pathToCode + "python/";
 			scriptPathMatlab = pathToCode + "MATLAB/";

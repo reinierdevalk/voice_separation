@@ -16,6 +16,6 @@
 	<classpathentry kind="lib" path="lib/commons-lang3-3.8.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.8.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/formats-representations"/>
-	<classpathentry kind="lib" path="F:/research/software/code/eclipse_workspace/voice_separation/lib/forms-1.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/forms-1.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
