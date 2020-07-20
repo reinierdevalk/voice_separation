@@ -153,6 +153,7 @@ public class Runner {
 	public static final String WEIGHTS_INIT = "weights initialisation";
 	// ints
 	public static final String VALIDATION_PERC = "validation percentage";
+	public static final String SEED = "seed";
 	public static final String DECISION_CONTEXT_SIZE = "decision context size";
 	public static final String META_CYCLES = "metacycles";
 	public static final String HIDDEN_LAYER_FACTOR = "hidden layer factor";
@@ -264,6 +265,7 @@ public class Runner {
 		kNN_CL("kNN_cls", 20, ModelType.OTHER, DecisionContext.UNIDIR, false, ModellingApproach.N2N),
 		
 		D("D", 21, ModelType.DNN, DecisionContext.UNIDIR, false, ModellingApproach.N2N),
+		D_B("D_B", 22, ModelType.DNN, DecisionContext.BIDIR, false, ModellingApproach.N2N),
 		;
 
 		private String stringRep;
@@ -645,6 +647,7 @@ public class Runner {
 		keys.add(NUM_HIDDEN_LAYERS);
 		keys.add(EPOCHS);
 		keys.add(VALIDATION_PERC);
+		keys.add(SEED);
 //		keys.add(CONFIG);
 		return keys;
 	}
@@ -737,7 +740,8 @@ public class Runner {
 			midiPath = pathToData + "MIDI/";
 			encodingsPathTest = encodingsPath + "test/";
 			midiPathTest = midiPath + "test/";
-			resultsPath = pathToData + "experiments/";
+//			resultsPath = pathToData + "experiments/";
+			resultsPath = argRootDir + "experiments/";
 //			storedNNPath = pathToData + "stored/NN/";
 //			storedMMPath = pathToData + "stored/MM/";
 			storedDatasetsPath = pathToData + "datasets/";
@@ -950,7 +954,7 @@ public class Runner {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");						
-				new TrainingManager().prepareTraining(startTr);
+//				new TrainingManager().prepareTraining(startTr);
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}

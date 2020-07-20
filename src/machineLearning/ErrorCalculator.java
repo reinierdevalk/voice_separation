@@ -314,6 +314,39 @@ public class ErrorCalculator {
 
 
 	/**
+	 * Calculates the precision, recall, and F1-score per voice.
+	 * 
+	 * @param allPredictedVoices
+	 * @param groundTruthVoiceLabels
+	 * @param EDUInfo
+	 * @param highestNumVoices
+	 * @return A List<ErrorFraction[]> containing, for each voice <br>
+	 * 		   as element 0: the prc                       
+	 *         as element 1: the rcl
+	 * 	       as element 2: the F1-score
+	 */
+	// TODO test
+	public static List<ErrorFraction[]> calculatePrecisionRecallF1PerVoice(List<List<Integer>> 
+		allPredictedVoices, List<List<Double>> groundTruthVoiceLabels, List<Integer[]> EDUInfo, 
+		int highestNumVoices) {
+		
+		List<List<List<Integer>>> errorsPerVoice = 
+			getPositivesAndNegativesPerVoice(allPredictedVoices, groundTruthVoiceLabels, 
+			EDUInfo, highestNumVoices);
+		
+		List<ErrorFraction[]> ef = new ArrayList<>();
+		for (int i = 0; i < highestNumVoices; i++) {
+			List<List<Integer>> currentErrorsPerVoice = errorsPerVoice.get(i);
+			int truePos = currentErrorsPerVoice.get(0).size();
+			int falsePos = currentErrorsPerVoice.get(1).size();
+			int falseNeg = currentErrorsPerVoice.get(2).size();
+			ef.add(calculatePrecisionRecallF1(truePos, falsePos, falseNeg));
+		}
+		return ef;
+	}
+
+
+	/**
 	 * Calculates the (weighted) average precision, recall, and F1-score over all 
 	 * predicted voices.
 	 * 
@@ -363,18 +396,19 @@ public class ErrorCalculator {
 		Rational avgRcl = sumRcl.div(highestNumVoices);
 		Rational avgF1 = sumF1.div(highestNumVoices);
 		
-		prcRclF1[0] = new ErrorFraction[]{ErrorFraction.getWeightedAverage(precisions),
+		prcRclF1[0] = new ErrorFraction[]{
+			ErrorFraction.getWeightedAverage(precisions),
 			ErrorFraction.getWeightedAverage(recalls), null};
 		prcRclF1[1] = new ErrorFraction[]{
 			new ErrorFraction(avgPrc.getNumer(), avgPrc.getDenom()),
 			new ErrorFraction(avgRcl.getNumer(), avgRcl.getDenom()), 
 			new ErrorFraction(avgF1.getNumer(), avgF1.getDenom())
 		};
-		
+
 		return prcRclF1;		
 	}
-	
-	
+
+
 	/**
 	 * Returns, per voice, a List<List<> containing:
 	 * as element 0: the indices of the notes that are true positives (the notes that were assigned 

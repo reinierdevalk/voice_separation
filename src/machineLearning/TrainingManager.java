@@ -144,7 +144,7 @@ public class TrainingManager {
 					System.out.println("undapted: " + currTranscrDeorn.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
 
-		//			implement transposition
+//					implement transposition
 						
 					currTabTransPairRev = 
 						new TablatureTranscriptionPair(currTabRev, currTranscrRev);
@@ -277,37 +277,41 @@ public class TrainingManager {
 			}
 		}
 
-		List<List<Double>> classErrPerMetaCyclePerFold = new ArrayList<>();
-		List<List<Double>> classErrValPerMetaCyclePerFold = new ArrayList<>();
-		// For each metaCycle: get value for each fold
-		for (int i = 0; i < maxMetaCycles; i++) {
-			List<Double> currMetaCycle = new ArrayList<>();
-			List<Double> currMetaCycleVal = new ArrayList<>();
-			for (int j = 0; j < datasetSize; j++) {
-				currMetaCycle.add(classificationErrorsAllFolds.get(j).get(i));
-				currMetaCycleVal.add(classificationErrorsValAllFolds.get(j).get(i));
+		boolean trainUserModel = 
+			ToolBox.toBoolean(modelParameters.get(Runner.TRAIN_USER_MODEL).intValue());
+		if (!trainUserModel) {
+			List<List<Double>> classErrPerMetaCyclePerFold = new ArrayList<>();
+			List<List<Double>> classErrValPerMetaCyclePerFold = new ArrayList<>();
+			// For each metaCycle: get value for each fold
+			for (int i = 0; i < maxMetaCycles; i++) {
+				List<Double> currMetaCycle = new ArrayList<>();
+				List<Double> currMetaCycleVal = new ArrayList<>();
+				for (int j = 0; j < datasetSize; j++) {
+					currMetaCycle.add(classificationErrorsAllFolds.get(j).get(i));
+					currMetaCycleVal.add(classificationErrorsValAllFolds.get(j).get(i));
+				}
+				classErrPerMetaCyclePerFold.add(currMetaCycle);
+				classErrValPerMetaCyclePerFold.add(currMetaCycleVal);
 			}
-			classErrPerMetaCyclePerFold.add(currMetaCycle);
-			classErrValPerMetaCyclePerFold.add(currMetaCycleVal);
-		}
 
-		// For each metaCycle: average
-		List<Double> avgClassErrPerMetaCycle = new ArrayList<>();
-		List<Double> avgClassErrValPerMetaCycle = new ArrayList<>();
-		for (int i = 0; i < maxMetaCycles; i++) {
-			avgClassErrPerMetaCycle.add(ToolBox.getAverage(classErrPerMetaCyclePerFold.get(i)));
-			avgClassErrValPerMetaCycle.add(ToolBox.getAverage(classErrValPerMetaCyclePerFold.get(i)));
-		}
+			// For each metaCycle: average
+			List<Double> avgClassErrPerMetaCycle = new ArrayList<>();
+			List<Double> avgClassErrValPerMetaCycle = new ArrayList<>();
+			for (int i = 0; i < maxMetaCycles; i++) {
+				avgClassErrPerMetaCycle.add(ToolBox.getAverage(classErrPerMetaCyclePerFold.get(i)));
+				avgClassErrValPerMetaCycle.add(ToolBox.getAverage(classErrValPerMetaCyclePerFold.get(i)));
+			}
 
-		String avgErrs = "avg trn and val errors" + "\r\n";
-		for (int i = 0; i < avgClassErrPerMetaCycle.size(); i++) {
-			avgErrs += i + "\t" + avgClassErrPerMetaCycle.get(i) + "\t" + 
-				avgClassErrValPerMetaCycle.get(i) + "\r\n";  
+			String avgErrs = "avg trn and val errors" + "\r\n";
+			for (int i = 0; i < avgClassErrPerMetaCycle.size(); i++) {
+				avgErrs += i + "\t" + avgClassErrPerMetaCycle.get(i) + "\t" + 
+					avgClassErrValPerMetaCycle.get(i) + "\r\n";  
+			}
+			System.out.println(avgErrs);
+			System.out.println();
+			System.out.println("optimal metaCycles" + "\r\n");
+			System.out.println(optimalMetaCyclesAllFolds);
 		}
-		System.out.println(avgErrs);
-		System.out.println();
-		System.out.println("optimal metaCycles" + "\r\n");
-		System.out.println(optimalMetaCyclesAllFolds);
 	}
 
 
@@ -785,6 +789,7 @@ public class TrainingManager {
 			List<List<Double>> voiceLabelsForGTs = new ArrayList<List<Double>>();
 			List<List<Double>> durLabelsForGTs = null;
 			if (ma == ModellingApproach.N2N) {
+//				if (modelDuration && (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR)) {
 				if (modelDuration && dc == DecisionContext.UNIDIR) {
 					durLabelsForGTs = new ArrayList<List<Double>>();
 				}
@@ -886,7 +891,8 @@ public class TrainingManager {
 			List<List<List<Double>>> vlSets = createTrainAndValSet(voiceLabelsForGTs, valPerc, indivPieceInds);
 			voiceLabelsForGTs = vlSets.get(0);
 			voiceLabelsForGTsVal = vlSets.get(1);
-			if (modelDuration) {
+			if (modelDuration && dc == DecisionContext.UNIDIR) { // 26.01.2020
+//			if (modelDuration) {
 				List<List<List<Double>>> dlSets = createTrainAndValSet(durLabelsForGTs, valPerc, indivPieceInds);
 				durLabelsForGTs = dlSets.get(0);
 				durLabelsForGTsVal = dlSets.get(1);
@@ -1257,7 +1263,7 @@ public class TrainingManager {
 			// 4. Create csv table(s)
 			ErrorFraction[] evalNN = 
 				EvaluationManager.getMetricsSingleFold(assignmentErrors, predictedVoices,
-				ntwOutputsForCE, groundTruths.get(0), allEDUInfo);
+				ntwOutputsForCE, groundTruths.get(0), allEDUInfo, false);
 			evalNN[EvaluationManager.NTW_ERR_IND] = new ErrorFraction(netwErr);
 			boolean isForDur = false;
 			int iter = 1;
