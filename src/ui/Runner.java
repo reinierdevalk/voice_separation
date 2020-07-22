@@ -734,8 +734,10 @@ public class Runner {
 		if (!appliedToNewData) {
 			pathToData = argRootDir + "data/data/";
 			pathToCode = argRootDir + "software/code/";
-			scriptPathPython = pathToCode + "python/";
-			scriptPathMatlab = pathToCode + "MATLAB/";
+//			scriptPathPython = pathToCode + "python/";
+			scriptPathPython = pathToCode + "eclipse/voice_separation/py/";
+//			scriptPathMatlab = pathToCode + "MATLAB/";
+			scriptPathMatlab = pathToCode + "eclipse/voice_separation/m/";
 			encodingsPath = pathToData + "encodings/";
 			midiPath = pathToData + "MIDI/";
 			encodingsPathTest = encodingsPath + "test/";
@@ -744,7 +746,8 @@ public class Runner {
 			resultsPath = argRootDir + "experiments/";
 //			storedNNPath = pathToData + "stored/NN/";
 //			storedMMPath = pathToData + "stored/MM/";
-			storedDatasetsPath = pathToData + "datasets/";
+//			storedDatasetsPath = pathToData + "datasets/";
+			storedDatasetsPath = argRootDir + "data/" + "datasets/";
 //			MEITemplatePath = pathToData + "templates/MEI/";
 		}
 		else {
