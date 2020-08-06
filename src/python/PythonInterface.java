@@ -32,7 +32,8 @@ public class PythonInterface {
 //		cmd[2] = "hoi";
 //		cmd[3] = "hallo";
 //		applyModel(cmd);
-		
+				
+		System.exit(0);
 		test();
 //		initPython(null);
 //		callPython(null);
@@ -637,6 +638,7 @@ public class PythonInterface {
 			e.printStackTrace();
 		}
 	}
+	
 	
 	/**
 	* @param args
