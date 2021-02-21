@@ -34,8 +34,8 @@ public class Dataset implements Serializable {
 		"ochsenkun-1558_5-herr_gott",
 		"abondante-1548_1-mais_mamignone",
 		"phalese-1563_12-las_on",
-		"barbetta-1582-il_nest",
-//		"barbetta-1582-il_nest-corrected"
+		"barbetta-1582_1-il_nest",
+//		"barbetta-1582_1-il_nest-corrected"
 	});
 	
 	public static final List<String> JOSQ_4VV_NAMES = Arrays.asList(new String[]{
@@ -47,7 +47,7 @@ public class Dataset implements Serializable {
 //		"ochsenkun-1558_5-herr_gott",
 //		"abondante-1548_1-mais_mamignone",
 //		"phalese-1563_12-las_on",
-//		"barbetta-1582-il_nest",
+//		"barbetta-1582_1-il_nest",
 		//	
 //		"5265_14_absalon_fili_me_desprez-cropped",
 //		"5263_12_in_exitu_israel_de_egipto_desprez-1-cropped",
@@ -854,7 +854,7 @@ public class Dataset implements Serializable {
 //		tabFour.add("ochsenkun-1558-herr_gott");
 //		tabFour.add("abondante-1548-mais_mamignone");
 //		tabFour.add("phalese-1563-las_on");
-//		tabFour.add("barbetta-1582-il_nest");
+//		tabFour.add("barbetta-1582_1-il_nest");
 //		return tabFour;
 //	}
 	
