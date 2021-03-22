@@ -1334,7 +1334,8 @@ public class TestManager {
 					boolean LSTM = true;
 					if (LSTM) {
 						List<Integer[]> mi = groundTruthTranscription.getMeterInfo(); 
-						String meter = mi.get(0)[0] + "/" + mi.get(0)[1];
+						String meter = mi.get(0)[Transcription.MI_NUM] + "/" + 
+							mi.get(0)[Transcription.MI_DEN];
 						int n = 5;
 						List<List<List<Rational[]>>> lastNNotesPerVoicePerNote = 
 							groundTruthTranscription.getLastNotesInVoices(n);
