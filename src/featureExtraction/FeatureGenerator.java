@@ -80,31 +80,36 @@ public class FeatureGenerator {
 	// tabFeatures
 	/**
 	 * Gets the basic features of the note at noteIndex. Returns a double[] containing
-	 *   in the tablature case:
-	 *     as element 0:     the pitch (as a MIDInumber) of the tablature note;
-	 *     as element 1:     the course the tablature note is on;
-	 *     as element 2:     the fret the tablature note is on;
-	 *     as element 3:     the minimum duration (as given in the tablature, in whole notes) of the tablature note;
-	 *     as element 4:     the maximum duration of the tablature note, i.e., the difference between its onset time and the
+	 * <br>
+	 * in the tablature case:
+	 * <ul>
+	 * <li>as element 0:     the pitch (as a MIDInumber) of the tablature note</li>
+	 * <li>as element 1:     the course the tablature note is on</li>
+	 * <li>as element 2:     the fret the tablature note is on</li>
+	 * <li>as element 3:     the minimum duration (as given in the tablature, in whole notes) of the tablature note</li>
+	 * <li>as element 4:     the maximum duration of the tablature note, i.e., the difference between its onset time and the
 	 *                       onset time of the next tablature note on the same course. When the note is in the last chord, the
-	 *                       maximum duration is equal to the chord's minimum duration;
-	 *     as element 5:     whether the tablature note has ornamentation characteristics, which is so if it is the only onset
-	 *                       (not necessarily the only note!) within the chord and has a duration of a 16th note or smaller.
-	 *     as element 6:     the metric position of the tablature note within the bar;  
-	 *     as elements 7-24: the onset time proximity, the pitch proximity and course information for the next 
-	 *                       NUM_NEXT_CHORDS chords (where x = (6 + (NUM_NEXT_CHORDS * 6)) )
-	 *     as element 25:    the number of new onsets in the next chord 
+	 *                       maximum duration is equal to the chord's minimum duration</li>
+	 * <li>as element 5:     whether the tablature note has ornamentation characteristics, which is so if it is the only onset
+	 *                       (not necessarily the only note!) within the chord and has a duration of a 16th note or smaller</li>
+	 * <li>as element 6:     the metric position of the tablature note within the bar</li>  
+	 * <li>as elements 7-24: the onset time proximity, the pitch proximity and course information for the next 
+	 *                       NUM_NEXT_CHORDS chords (where x = (6 + (NUM_NEXT_CHORDS * 6)) )</li>
+	 * <li>as element 25:    the number of new onsets in the next chord</li> 
+	 * </ul> 
 	 *   
-	 *   in the non-tablature case:
-	 *     as element 0:     the pitch (as a MIDInumber) of the note;
-	 *     as element 1:     the full duration (in whole notes) of the note;
-	 *     as element 2:     whether the note has ornamentation characteristics, which is so if it is the only onset (not 
-	 *                       necessarily the only note!) within the chord and has a duration of a 16th note or smaller;
-	 *     as element 3:     the metric position of the note within the bar;
-	 *     as elements 4-15: the onset time proximity and pitch proximity information for the next NUM_NEXT_CHORDS
-	 *                       chords (where x = (3 + (NUM_NEXT_CHORDS*4)) ) 
-	 *     as element 16:    the number of new onsets in the next chord
-	 *     
+	 * in the non-tablature case:
+	 * <ul>  
+	 * <li>as element 0:     the pitch (as a MIDInumber) of the note</li>
+	 * <li>as element 1:     the full duration (in whole notes) of the note</li>
+	 * <li>as element 2:     whether the note has ornamentation characteristics, which is so if it is the only onset (not 
+	 *                       necessarily the only note!) within the chord and has a duration of a 16th note or smaller</li>
+	 * <li>as element 3:     the metric position of the note within the bar</li>
+	 * <li>as elements 4-15: the onset time proximity and pitch proximity information for the next NUM_NEXT_CHORDS
+	 *                       chords (where x = (3 + (NUM_NEXT_CHORDS*4)) )</li> 
+	 * <li>as element 16:    the number of new onsets in the next chord</li>
+	 * </ul>  
+	 *   
 	 * @param btp Must be <code>null</code> in the non-tablature case
 	 * @param bnp Must be <code>null</code> in the tablature case
 	 * @param meterInfo

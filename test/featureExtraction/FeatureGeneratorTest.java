@@ -7967,14 +7967,16 @@ public class FeatureGeneratorTest extends TestCase {
 //		List<Integer[]> predVoicesCoDNotes = gtTranscription.getVoicesCoDNotes();
 		// Chord 0: note 0 becomes CoD (voices 3 and 4) of length 1/8; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 1.0, 1.0}));
-		predDurationLabels.set(0, Transcription.createDurationLabel(4));
-//		predVoicesCoDNotes.set(0, new Integer[]{4, 3});
+		predDurationLabels.set(0, Transcription.EIGHTH);
+//		predDurationLabels.set(0, Transcription.createDurationLabel(4));
 		Collections.swap(predVoiceLabels, 2, 3);
 		// Chord 1: note 6 gets length 1/8
-		predDurationLabels.set(6, Transcription.createDurationLabel(4));
+		predDurationLabels.set(6, Transcription.EIGHTH);
+//		predDurationLabels.set(6, Transcription.createDurationLabel(4));
 		// Chord 3: notes 9 and 10 swap voice and note 10 gets length 1/8
 		Collections.swap(predVoiceLabels, 9, 10);
-		predDurationLabels.set(10, Transcription.createDurationLabel(4));
+		predDurationLabels.set(10, Transcription.EIGHTH);
+//		predDurationLabels.set(10, Transcription.createDurationLabel(4));
 
 		// Create predicted Transcription
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
@@ -8219,14 +8221,16 @@ public class FeatureGeneratorTest extends TestCase {
 //		List<Integer[]> predVoicesCoDNotes = gtTranscription.getVoicesCoDNotes();
 		// Chord 0: note 0 becomes CoD (voices 3 and 4) of length 1/8; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 1.0, 1.0}));
-		predDurationLabels.set(0, Transcription.createDurationLabel(4));
-//		predVoicesCoDNotes.set(0, new Integer[]{4, 3});
+		predDurationLabels.set(0, Transcription.EIGHTH);
+//		predDurationLabels.set(0, Transcription.createDurationLabel(4));
 		Collections.swap(predVoiceLabels, 2, 3);
 		// Chord 1: note 6 gets length 1/8
-		predDurationLabels.set(6, Transcription.createDurationLabel(4));
+		predDurationLabels.set(6, Transcription.EIGHTH);
+//		predDurationLabels.set(6, Transcription.createDurationLabel(4));
 		// Chord 3: notes 9 and 10 swap voice and note 10 gets length 1/8
 		Collections.swap(predVoiceLabels, 9, 10);
-		predDurationLabels.set(10, Transcription.createDurationLabel(4));
+		predDurationLabels.set(10, Transcription.EIGHTH);
+//		predDurationLabels.set(10, Transcription.createDurationLabel(4));
 
 		// Create predicted Transcription
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();

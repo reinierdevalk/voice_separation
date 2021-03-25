@@ -233,8 +233,10 @@ public class ErrorCalculatorTest extends TestCase {
 		List<List<Double>> groundTruthVoiceLabels = new ArrayList<List<Double>>();
 		List<Rational[]> allPredictedDurations = new ArrayList<Rational[]>();
 		List<List<Double>> groundTruthDurationLabels = new ArrayList<List<Double>>();
-		List<Double> quarter = Transcription.createDurationLabel(8);
-		List<Double> half = Transcription.createDurationLabel(16);
+		List<Double> quarter = Transcription.QUARTER;
+//		List<Double> quarter = Transcription.createDurationLabel(8);
+		List<Double> half = Transcription.HALF;
+//		List<Double> half = Transcription.createDurationLabel(16);
 
 		// 1. predictedVoices/-Durations contain one element
 		// a. actualVoices/-Durations contain one element
