@@ -9,9 +9,9 @@ train = 0
 test = 1
 appl = 2
 
-seed=0 # seed=0 used for all experiments ISMIR 2018 paper 
+seed=-1 # seed=0 used for all experiments ISMIR 2018 paper 
 
-# when used as a script
+# when used as a script (e.g., through Eclipse)
 if len(argv) > 1:
 	script, mdl, arg_mode, arg_path, arg_exts, arg_params, arg_stored_weights = argv
 
@@ -20,13 +20,15 @@ if len(argv) > 1:
 	both the output and the weights in the same path. 
 
 	Arguments
-	mdl				the model used
+	mdl					the model used
 	arg_mode 			the mode: train, test, or application
 	arg_path			the path where to load and store the data and model
-	arg_ext				the extension used for the feature vectors, labels, and model outputs
-	arg_param			the parameters and hyperparameters to tune
+	arg_exts			the extension used for the feature vectors, labels, and model outputs
+	arg_params			the parameters and hyperparameters to tune
 	arg_stored_weights	whether or not to initialise the network with the stored initial weights
 	"""
+
+	print('as a script')
 
 	print('mdl', mdl)
 	print('arg_mode', arg_mode)
@@ -59,7 +61,7 @@ if len(argv) > 1:
 #	num_features = len(genfromtxt(fold_path + fv_ext, delimiter=',')[0])
 #	num_classes = len(genfromtxt(fold_path + lbl_ext, delimiter=',')[0])
 
-	# parameters and hyperparameterss
+	# parameters and hyperparameters
 	params = [s.strip() for s in arg_params.split(',')]
 	param_dict = {}
 	for item in params:
@@ -76,6 +78,7 @@ if len(argv) > 1:
 	lrn_rate = param_dict['learning rate']
 	kp = param_dict['keep probability']
 	epochs = param_dict['epochs'] # one epoch is one fwd-bwd propagation
+	seed = param_dict['seed']
 #	num_nodes_HL = [num_features, num_features, num_features, num_features]                                  
 #	layer_sizes = [num_features]
 	layer_sizes = [IL_size]
@@ -96,6 +99,8 @@ if len(argv) > 1:
 
 # when used as a module
 else:
+	print('as a module')
+	seed=-1 #'set_me'
 	script = argv
 	mode = appl
 	fv_ext = 'x_app.csv'
@@ -233,7 +238,6 @@ def evaluate_neural_network(data, keep_prob, num_layers, weights, biases):
 		z = tf.add(tf.matmul(a_prev, weights['W' + str(i+1)]), biases['b' + str(i+1)])
 		a = tf.nn.relu(z)
 		a_r = tf.nn.dropout(a, keep_prob, seed=seed) 
-#		a_r = tf.nn.dropout(a, keep_prob, seed=0) 
 		a_prev = a_r
 	# calculate linear output for the output layer
 	z_o = tf.add(tf.matmul(a_prev, weights['W' + str(num_layers)]), biases['b' + str(num_layers)])
@@ -491,7 +495,6 @@ sess = tf.InteractiveSession()
 # set seed to ensure deterministic dropout
 # see https://stackoverflow.com/questions/49175704/tensorflow-reproducing-results-when-using-dropout
 tf.set_random_seed(seed)
-#tf.set_random_seed(0)
 if mode == train or mode == test:
 	run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, fold_path)
 #elif mode == appl:

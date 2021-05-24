@@ -1312,7 +1312,8 @@ public class TestManager {
 						"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES + "," +
 						"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
 						"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
-						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue();
+						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue() + "," +
+						"seed=" + modelParameters.get(Runner.SEED).intValue();
 					String[] cmd = new String[]{
 						"python", 
 						Runner.scriptPathPython + Runner.script, 
@@ -1336,25 +1337,26 @@ public class TestManager {
 						List<Integer[]> mi = groundTruthTranscription.getMeterInfo(); 
 						String meter = mi.get(0)[Transcription.MI_NUM] + "/" + 
 							mi.get(0)[Transcription.MI_DEN];
-						int n = 5;
-						List<List<List<Rational[]>>> lastNNotesPerVoicePerNote = 
-							groundTruthTranscription.getLastNotesInVoices(n);
-						// Make test data in csv format, where each row is a note that has
-						// have V sequences that have N notes (or are null)
-						String testData = 
-							Transcription.getLastNotesInVoicesString(lastNNotesPerVoicePerNote, 
-							meter);
-						ToolBox.storeObjectBinary(testData, new File(pathNN + "seq_test" + ".csv"));
+						boolean doLastNNotesThing = false;
+						if (doLastNNotesThing) {
+							int n = 5;
+							List<List<List<Rational[]>>> lastNNotesPerVoicePerNote = 
+								groundTruthTranscription.getLastNotesInVoices(n);
+							// Make test data in csv format, where each row is a note that has
+							// have V sequences that have N notes (or are null)
+							String testData = 
+								Transcription.getLastNotesInVoicesString(lastNNotesPerVoicePerNote, 
+								meter);
+							ToolBox.storeObjectBinary(testData, new File(pathNN + "seq_test" + ".csv"));
 						
-						// - these are the possibilities at onset time to for that note
-						// for each note
-						// get onset time; get lastNNotes
-						// give all lastNNotes elements to model
+							// - these are the possibilities at onset time to for that note
+							// for each note
+							// get onset time; get lastNNotes
+							// give all lastNNotes elements to model
 						
-						
-						
-						// give them each to model and see which one predicts closest to note
-						// that becomes the predicted voice
+							// give them each to model and see which one predicts closest to note
+							// that becomes the predicted voice
+						}
 						
 					}
 					

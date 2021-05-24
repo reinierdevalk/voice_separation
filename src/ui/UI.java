@@ -77,31 +77,30 @@ public class UI {
 			verbose = false;
 
 //			datasetID = DatasetID.WTC_4vv;
-//			datasetID = DatasetID.BYRD_4vv;
+			datasetID = DatasetID.BYRD_4vv;
 //			datasetID = DatasetID.JOSQ_4vv;
-			datasetID = DatasetID.INT_3vv;
+//			datasetID = DatasetID.INT_3vv;
 
 			datasetVersion = "thesis"; // only for this if
 
 //			expName = "thesis/exp_3.3.1/"; // publication + experiment (if applicable)
 //			expName = "thesis/exp_3.2/";
-			expName = "thesis/exp_1/";
+//			expName = "thesis/exp_1/";
 //			expName = "ISMIR-2019/";
-//			expName = "byrd/";
+			expName = "byrd/";
 //			expName = "ISMIR-2017-LBD/";
 //			expName = "ISMIR-2020";
 
-			seed = 0;
-
-//			m = Model.D_B;
-			m = Model.N;
+			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
+			
+			m = Model.D;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
+			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
-//			storedExpName = "byrd";
-			storedExpName = "ISMIR-2020";
+			storedExpName = "byrd/";
+//			storedExpName = "ISMIR-2020";
 			storedM = Model.D;
-			storedPm = ProcessingMode.FWD;
+			storedPm = ProcessingMode.BWD;
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
@@ -127,9 +126,9 @@ public class UI {
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
-			hiddenLayers = 2;
+			hiddenLayers = 1;
 			hiddenLayerSize = 66;
-			alpha = 0.01;
+			alpha = 0.003;
 			// MM
 			n = 2;
 			// ENS
@@ -222,14 +221,14 @@ public class UI {
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
 		//
-		int validationPercentage = (mt == ModelType.DNN) ? 20 : 0; // TODO or 10 : 0; 
+		int validationPercentage = (mt == ModelType.DNN) ? 10 : 0; // TODO or 20 : 0; 
 		int decisionContextSize = 1;
 		boolean averageProx = false;
 		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 		double cycles = 10.0;
 		int epochs = 600;
 		double learningRate = (mt == ModelType.DNN) ? alpha : 1.0;
-		double deviationThreshold = 0.05; // 0.0;
+		double deviationThreshold = 0.0; // 0.05;
 		int maxNumVoices = (ma == ModellingApproach.N2N) ? 5 : 4;
 
 		// 1. Set rootDir and paths to code and data

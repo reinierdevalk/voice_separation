@@ -649,6 +649,8 @@ public class Runner {
 		keys.add(VALIDATION_PERC);
 		keys.add(SEED);
 //		keys.add(CONFIG);
+		keys.add(HIDDEN_LAYER_SIZE);
+		keys.add(DECISION_CONTEXT_SIZE);
 		return keys;
 	}
 	

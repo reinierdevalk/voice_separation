@@ -1086,7 +1086,8 @@ public class TrainingManager {
 						"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES + "," +
 						"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
 						"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
-						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue();
+						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue() + "," + 
+						"seed=" + modelParameters.get(Runner.SEED).intValue();
 					cmd = new String[]{
 						"python", 
 						Runner.scriptPathPython + Runner.script, 
