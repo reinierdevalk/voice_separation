@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.org.apache.bcel.internal.generic.ISTORE;
+
 import data.Dataset;
 import data.Dataset.DatasetID;
 import machineLearning.EvaluationManager;
@@ -33,7 +35,8 @@ public class UI {
 
 	private static String rootDir = "F:/research/"; // TODO also defined in MEIExport; should be in one place only
 
-	private static boolean appliedToNewData, repeatExp, useCV, trainUserModel, verbose, estimateEntries;
+	private static boolean appliedToNewData, repeatExp, useCV, trainUserModel, verbose, 
+		estimateEntries;
 	private static String expName, storedExpName, userDefinedName, datasetVersion, hyperParams;
 	private static Model m, storedM;
 	private static ProcessingMode pm, storedPm;
@@ -41,12 +44,13 @@ public class UI {
 	private static DatasetID datasetID, datasetIDTrain; 
 
 	private static FeatureVector fv;
-	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, C;
-	private static double alpha;
-	private static int hiddenLayers, hiddenLayerSize, matrixConfiguration, n, neighbours, trees;
-	private static int seed;
+	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, alpha, C, 
+		learningRate, deviationThreshold;
+	private static int hiddenLayers, hiddenLayerSize, n, neighbours, trees, cycles, 
+		maxMetaCycles, epochs, maxNumVoices, validationPercentage, seed;
 	private static List<MelodyModelFeature> mmfs;
 	private static List<Integer> ns;
+
 
 	private static void setRootDir(String arg) {
 		rootDir = arg;
@@ -70,9 +74,9 @@ public class UI {
 		if (!appliedToNewData) {
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = true;
-			useCV = true;
-			trainUserModel = false;
+			repeatExp = false;
+			useCV = false;
+			trainUserModel = true;
 			estimateEntries = false;
 			verbose = false;
 
@@ -91,11 +95,11 @@ public class UI {
 //			expName = "ISMIR-2017-LBD/";
 //			expName = "ISMIR-2020";
 
-			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
+			seed = 3; // seed = 0 used for all experiments ISMIR 2018 paper
 			
-			m = Model.D;
+			m = Model.D_B;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd 
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
 //			storedExpName = "thesis/exp_3.2";
 			storedExpName = "byrd/";
 //			storedExpName = "ISMIR-2020";
@@ -121,14 +125,14 @@ public class UI {
 
 			// Tuned hyperparameters
 			// Shallow network
-			lambda = 0.001; // 0.00003;  
-			hiddenLayerFactor = 1.0; // 0.5;
+			lambda = 0.001; // regularisation parameter  
+			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
-			hiddenLayers = 1;
-			hiddenLayerSize = 66;
-			alpha = 0.003;
+			hiddenLayers = 2;
+			hiddenLayerSize = 50;
+			alpha = 0.003; // learning rate (1.0 in shallow network case)
 			// MM
 			n = 2;
 			// ENS
@@ -139,6 +143,21 @@ public class UI {
 			C = 1.0; // 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0
 			neighbours = 5; // 1, 3, 5, 10, 30, 100, 300
 			trees = 10; // 1, 3, 10, 30, 100, 300
+
+			// Non-tuned hyperparameters 
+			// Shallow network
+			maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
+			cycles = 10;
+			// DNN
+			epochs = 130;
+			// General
+			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
+			deviationThreshold = 0.0; // 0.05;
+			validationPercentage = (m.getModelType() == ModelType.DNN) ? 10 : 0; // 20 : 0;
+			if (trainUserModel) {
+				validationPercentage = 0;
+			}
+			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
 
 			// In case of grid search: set hyperparameter space (if no hyperparameter space
 			// is specified, the full space is assumed). Any values set above are overwritten
@@ -215,21 +234,22 @@ public class UI {
 		int	sliceIndEncoding = ToolBox.encodeListOfIntegers(MelodyFeatureGenerator.getSliceIndices(mmfs));
 		int	nsEncoding = ToolBox.encodeListOfIntegers(ns);
 		
-		// 0. Set predefined and derived settings, and non-tuned hyperparameters
+		// 0. Set predefined and derived settings
 		boolean modelDurationAgain = false;
+		int decisionContextSize = 1;
+		boolean averageProx = false;
 		WeightsInit wi = repeatExp ? WeightsInit.INIT_FROM_LIST : WeightsInit.INIT_RANDOM;
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
-		//
-		int validationPercentage = (mt == ModelType.DNN) ? 10 : 0; // TODO or 20 : 0; 
-		int decisionContextSize = 1;
-		boolean averageProx = false;
-		double maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
-		double cycles = 10.0;
-		int epochs = 600;
-		double learningRate = (mt == ModelType.DNN) ? alpha : 1.0;
-		double deviationThreshold = 0.0; // 0.05;
-		int maxNumVoices = (ma == ModellingApproach.N2N) ? 5 : 4;
+		
+//		// Non-tuned hyperparameters 
+//		int validationPercentage = (mt == ModelType.DNN) ? 10 : 0; // TODO or 20 : 0;
+//		int maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
+//		int cycles = 10;
+//		int epochs = 600;
+//		double learningRate = (mt == ModelType.DNN) ? alpha : 1.0;
+//		double deviationThreshold = 0.0; // 0.05;
+//		int maxNumVoices = (ma == ModellingApproach.N2N) ? 5 : 4;
 
 		// 1. Set rootDir and paths to code and data
 		if (!appliedToNewData) {
@@ -284,7 +304,8 @@ public class UI {
 		if (!appliedToNewData) {
 			String pref = Runner.resultsPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
 			String prefStored = pref.replace(expName, storedExpName);
-			path = pathify(new String[]{pref, m.toString(), pm.getStringRep(), hyperParams});
+			path = pathify(new String[]{pref, m.toString() + 
+				(trainUserModel ? "-user_model" : ""), pm.getStringRep(), hyperParams});
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
 				pathStoredNN = pathify(new String[]{prefStored, storedM.toString(), storedPm.getStringRep()});
 //				pathStoredNN = pathStoredNN.substring(0, pathStoredNN.indexOf("fwd/"))+ "prev/";

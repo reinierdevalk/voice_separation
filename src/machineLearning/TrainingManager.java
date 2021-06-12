@@ -168,6 +168,17 @@ public class TrainingManager {
 						new File(paths[1] + Runner.output + "fold_" +
 						ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex)) + "-" + 
 						currPieceName + ".ser"));
+					List<List<Double>> vl = predTranscr.getVoiceLabels();
+					System.out.println("currPieceName = " + currPieceName);
+					System.out.println("first ten ----");
+					for (int ii = 0; ii < 10; ii++) {
+						System.out.println(vl.get(ii));
+					}
+					System.out.println("last five ----");
+					for (int ii = vl.size() - 5; ii < vl.size(); ii++) {
+						System.out.println(vl.get(ii));
+					}
+					System.out.println("############");
 				}
 				currTabTransPair = 
 					new TablatureTranscriptionPair(currTab, predTranscr, currTranscr);
@@ -911,6 +922,7 @@ public class TrainingManager {
 			List<List<List<Double>>> lblSets = createTrainAndValSet(allLabels, valPerc, indivPieceInds);
 			allLabels = lblSets.get(0);
 			allLabelsVal = lblSets.get(1);
+
 			// Other
 			if (modelDuration) {
 				List<List<Integer[]>> vcnSets = createTrainAndValSet(allVoicesCoDNotes, valPerc, indivPieceInds);
@@ -1087,7 +1099,9 @@ public class TrainingManager {
 						"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
 						"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
 						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue() + "," + 
-						"seed=" + modelParameters.get(Runner.SEED).intValue();
+						"seed=" + modelParameters.get(Runner.SEED).intValue() + "," + 
+						"validation percentage=" + modelParameters.get(Runner.VALIDATION_PERC).intValue() + "," +
+						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
 					cmd = new String[]{
 						"python", 
 						Runner.scriptPathPython + Runner.script, 

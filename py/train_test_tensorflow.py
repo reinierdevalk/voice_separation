@@ -71,14 +71,20 @@ if len(argv) > 1:
 		else:
 			param_dict[nameVal[0]] = int(nameVal[1])
 
-	num_HL =  param_dict['hidden layers'] #int(float(arg_param))
-	IL_size = param_dict['input layer size']
-	HL_size = param_dict['hidden layer size']
-	OL_size = param_dict['output layer size']
-	lrn_rate = param_dict['learning rate']
-	kp = param_dict['keep probability']
-	epochs = param_dict['epochs'] # one epoch is one fwd-bwd propagation
-	seed = param_dict['seed']
+	num_HL 		= param_dict['hidden layers'] #int(float(arg_param))
+	IL_size 	= param_dict['input layer size']
+	HL_size 	= param_dict['hidden layer size']
+	OL_size 	= param_dict['output layer size']
+	lrn_rate 	= param_dict['learning rate']
+	kp 			= param_dict['keep probability']
+	epochs 		= param_dict['epochs'] # one epoch is one fwd-bwd propagation
+	seed 		= param_dict['seed']
+	val_perc	= param_dict['validation percentage']
+	user_model	= True if param_dict['user model'] == 1 else False 
+
+	for item in param_dict.items():
+		print(item)
+
 #	num_nodes_HL = [num_features, num_features, num_features, num_features]                                  
 #	layer_sizes = [num_features]
 	layer_sizes = [IL_size]
@@ -87,15 +93,7 @@ if len(argv) > 1:
 		layer_sizes.append(HL_size)
 #	layer_sizes.append(num_classes)
 	layer_sizes.append(OL_size)
-	
-	print('num_HL', num_HL)
-	print('IL_size', IL_size)
-	print('HL_size', HL_size)
-	print('OL_size', OL_size)
-	print('lrn_rate', lrn_rate)
-	print('kp', kp)
-	print('epochs', epochs)
-	print(layer_sizes)
+
 
 # when used as a module
 else:
@@ -113,8 +111,9 @@ tf.reset_default_graph()
 if mode == train:
 	x_train = genfromtxt(fold_path + fv_ext, delimiter=',')
 	y_train = genfromtxt(fold_path + lbl_ext, delimiter=',')
-	x_val = genfromtxt(fold_path + exts[0] + 'vld.csv', delimiter=',')
-	y_val = genfromtxt(fold_path + exts[1] + 'vld.csv', delimiter=',')
+	if val_perc != 0:
+		x_val = genfromtxt(fold_path + exts[0] + 'vld.csv', delimiter=',')
+		y_val = genfromtxt(fold_path + exts[1] + 'vld.csv', delimiter=',')
 	batch_size = len(x_train)  
 elif mode == test:
 	x_test  = genfromtxt(fold_path + fv_ext, delimiter=',')
@@ -324,12 +323,14 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 #				print('epoch', epoch, 'completed out of', epochs, '; loss =', epoch_loss)
 			if epoch % 10 == 0:
 				acc_tr = accuracy.eval({x:x_train, y:y_train, keep_prob: kp}) ## HIERO
-				acc_val = accuracy.eval({x:x_val, y:y_val, keep_prob: 1.0})
+				if val_perc != 0:
+					acc_val = accuracy.eval({x:x_val, y:y_val, keep_prob: 1.0})
 #				corrrr = correct.eval({x:x_val, y:y_val, keep_prob: 1.0});
 				
 				costs.append(epoch_loss)
 				accs_tr.append(acc_tr) ## HIERO
-				accs_val.append(acc_val) ## HIERO
+				if val_perc != 0:
+					accs_val.append(acc_val) ## HIERO
 
 				dothis = False
 				if dothis:
@@ -353,21 +354,31 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 #					print('volgens mij, acc val = ' + str((num_ex - incorr)/num_ex)) #, 'volgens tf, acc tr =' + str(acc_tr))
 			
 				saver = tf.train.Saver()
-				if acc_val > best_acc:
-#					print('best acc val is now', acc_val, '(epoch =', epoch, ')')#), 'best acc trn is now', acc_tr)
-					best_acc = acc_val
-					save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
-					# save the model output
-					# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
-					softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
-					np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=",")
-#					np.savetxt(fold_path + 'best_epoch.txt', 'highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch), delimiter="", fmt="%s")			
-					with open(fold_path + 'best_epoch.txt', 'w') as text_file:
-						text_file.write('highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch))
+				if not user_model:
+					if acc_val > best_acc:
+#						print('best acc val is now', acc_val, '(epoch =', epoch, ')')#), 'best acc trn is now', acc_tr)
+						best_acc = acc_val
+						save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
+						# save the model output
+						# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
+						softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
+						np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=",")
+#						np.savetxt(fold_path + 'best_epoch.txt', 'highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch), delimiter="", fmt="%s")			
+						with open(fold_path + 'best_epoch.txt', 'w') as text_file:
+							text_file.write('highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch))
 
-		print(accs_tr) ## HIERO
-		print(accs_val) ## HIERO
+		# Added 06.12.2021 for Byrd presentation
+		if user_model:
+			save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
+			# save the model output
+			# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
+			softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
+			np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=",")
 
+		print('accs_tr')
+		print(accs_tr)
+		print('accs_val')
+		print(accs_val)
 
 		# save the weights
 #		saver = tf.train.Saver()    

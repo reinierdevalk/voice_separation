@@ -187,7 +187,7 @@ public class EvaluationManager {
 	 * @param paramsToExcl
 	 * @return
 	 */
-	public static String getDataAndParamsInfo(int mode, int fold/*, List<String> paramsToExcl*/) {
+	public static String getDataAndParamsInfo(int mode, int fold) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Dataset dataset = Runner.getDataset();
 		StringBuffer dataAndParams = new StringBuffer();
@@ -230,7 +230,6 @@ public class EvaluationManager {
 		// Overall case
 		else {
 			dataAndParams.append(ToolBox.tabify("dataset", 4) + allPieceNames.get(0) + "\r\n");
-//			for (String s : allPieceNames) {
 			for (int i = 1; i < allPieceNames.size(); i++) {
 				dataAndParams.append(ToolBox.tabify("", 4) + allPieceNames.get(i) + "\r\n");
 			}
@@ -246,46 +245,9 @@ public class EvaluationManager {
 //			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue() + "\r\n");	
 		
 		// Model parameters
-		boolean addModelParam = false;
 		if (fold == -1) {
-			addModelParam = true;
-		}
-		if (fold == -1) {
-//		if (addModelParam) {
 			dataAndParams.append("\r\n");
 			dataAndParams.append("M O D E L  P A R A M E T E R S" + "\r\n");
-//			Set<Entry<String, Double>> paramSet = modelParameters.entrySet();
-//			Map<String, Object[]> enumKeys = Runner.getEnumKeys(/*m.getModelType()*/);
-//			List<String> booleanKeys = Runner.getBooleanKeys();
-//			List<String> intKeys = Runner.getIntKeys();
-//			List<String> done = Arrays.asList(new String[]{Dataset.DATASET_ID, 
-//				Runner.LARGEST_CHORD_SIZE, Runner.HIGHEST_NUM_VOICES});
-//			for (Entry<String, Double> e : paramSet) {
-//				String key = e.getKey();
-//				double value = e.getValue();
-//				if (!paramsToExcl.contains(key) && !done.contains(key)) {
-//					dataAndParams.append(ToolBox.tabify(key, 4));
-//					if (enumKeys.containsKey(key)) {
-//						dataAndParams.append(enumKeys.get(key)[(int) value] + "\r\n");
-//					}
-//					else if (booleanKeys.contains(key)) {
-//						if (key.equals(Runner.SNU) || key.equals(Runner.ESTIMATE_ENTRIES)) {
-//							// Ternary conditional operator; see https://stackoverflow.com/questions/10336899/what-is-a-question-mark-and-colon-operator-used-for
-//							String s = (value == 1.0) ? "yes" : "no";
-//							dataAndParams.append(s + "\r\n");
-//						}
-//						else {
-//							dataAndParams.append(ToolBox.toBoolean((int)value) + "\r\n");
-//						}
-//					}
-//					else if (intKeys.contains(key)){
-//						dataAndParams.append((int) value + "\r\n");
-//					}
-//					else {
-//						dataAndParams.append(value + "\r\n");
-//					}
-//				}
-//			}
 			Map<String, Object[]> enumKeys = Runner.getEnumKeys();
 			List<String> booleanKeys = Runner.getBooleanKeys();
 			List<String> intKeys = Runner.getIntKeys();

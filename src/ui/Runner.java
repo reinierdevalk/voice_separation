@@ -959,11 +959,14 @@ public class Runner {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");						
-//				new TrainingManager().prepareTraining(startTr);
+				new TrainingManager().prepareTraining(startTr);
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}
 			if (ToolBox.toBoolean(argModelParams.get(TRAIN_USER_MODEL).intValue())) {
+				ToolBox.storeTextFile(EvaluationManager.getDataAndParamsInfo(Runner.TRAIN, -1),
+					new File(path + modelParameters + ".txt"));
+				ToolBox.storeObjectBinary(modelParams, new File(path + modelParameters + ".ser"));
 				System.exit(0);
 			}
 
