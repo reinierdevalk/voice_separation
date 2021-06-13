@@ -546,34 +546,36 @@ public class Dataset implements Serializable {
 //		System.exit(0);
 		
 		String numVoices = getNumVoices() + "vv/";
-		String argEncodingsPath, argTabMidiPath, argMidiPath;
-		
-		if (altPaths == null) {	
-//			argEncodingsPath = Runner.encodingsPath.concat(numVoices);
-			argEncodingsPath = Runner.encodingsPath.concat(getName().concat("/").concat(numVoices));
-//			argTabMidiPath = Runner.tabMidiPath.concat(numVoices);
-			argTabMidiPath = Runner.midiPath.concat(getName().concat("/").concat(numVoices));
-//			argMidiPath = Runner.bachMidiPath.concat(numVoices);
+		String argEncodingsPath, argMidiPath;
+		String argTabMidiPath = null;
+
+		if (altPaths == null) {
+//			argEncodingsPath = Runner.encodingsPath.concat(getName().concat("/").concat(numVoices));
+//			argTabMidiPath = Runner.midiPath.concat(getName().concat("/").concat(numVoices));
 
 			if (!appliedToNewData) {
+				argEncodingsPath = 
+					Runner.encodingsPath.concat(getName().concat("/").concat(numVoices));
+				argTabMidiPath = 
+					Runner.midiPath.concat(getName().concat("/").concat(numVoices));				
 				argMidiPath = Runner.midiPath.concat(getName().concat("/").
 					concat(version).concat("/").concat(numVoices));
 			}
 			else {
-//			if (!useCrossVal && appliedToNewData) {
 //				argEncodingsPath = Runner.encodingsPathUser.concat(numVoices);
 				argEncodingsPath = Runner.encodingsPathUser.concat(getName());
 				if (!argEncodingsPath.endsWith("/")) {
-					argMidiPath = argEncodingsPath.concat("/");
+					argEncodingsPath = argEncodingsPath.concat("/");
+//					argMidiPath = argEncodingsPath.concat("/");
 				}
 //				argMidiPath = Runner.midiPathUser.concat(getName().concat("/").concat(numVoices));
 //				argMidiPath = Runner.midiPathUser;
 				argMidiPath = Runner.midiPathUser.concat(getName());
 				if (!argMidiPath.endsWith("/")) {
 					argMidiPath = argMidiPath.concat("/");
-				}
-				
+				}		
 			}
+			
 		}
 		else {
 			argEncodingsPath = altPaths[0];

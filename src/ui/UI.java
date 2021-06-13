@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sun.org.apache.bcel.internal.generic.ISTORE;
 
@@ -69,7 +70,6 @@ public class UI {
 		
 		appliedToNewData = 
 			(args.length == 0 || args.length == 1 && args[0].startsWith("path=") ? false : true);
-		
 		// If repeating an existing experiment or conducting a new one: set parameters and settings
 		if (!appliedToNewData) {
 			// Settings
@@ -195,6 +195,7 @@ public class UI {
 			}
 		}
 		// If applying a trained model to new data: deduce parameters and settings  	
+		// D bwd BYRD_4vv 'F:/research/experiments/byrd/byrd-int/4vv/' '' 'folder_name'
 		else {
 			// User-defined settings
 			m = storedM = Model.valueOf(args[0]);
@@ -315,11 +316,35 @@ public class UI {
 				pathStoredMM = pathify(new String[]{prefStored, m.getMelodyModel().toString()}); 
 			}
 		}
-		else {
-			String pref = Runner.userPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
-			String prefStored = pref.replace(expName, storedExpName).replace(ds.getName(), dsTrain.getName());
-			path = pathify(new String[]{pref, m.toString(), pm.getStringRep(), dsTrain.getDatasetID().name()});	
+		else {			
+			String datasetTrainID = dsTrain.getDatasetID().name();
+			// The path where the output of the trained model applied to the new data is stored 
+			// consists of
+			// - rootDir (as given to the CLI) + user/out/
+			// - name and number of voices of unseen dataset
+			// - the DatasetID of the dataset the trained model is trained on
+			// - the model and pm used
+			// e.g. <rootDir>/user/out/ + ITMH/4vv/ + BYRD_4vv/ + D/bwd/
+			String pref = 
+				Runner.userPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
+			path = pathify(new String[]{pref, datasetTrainID, 
+				m.toString(), pm.getStringRep()}); // type and processing mode of the trained model
+			// The path where the trained model is stored consists of
+			// - rootDir (as given to the CLI) + user/models/
+			// - the DatasetID of the dataset the trained model is trained on
+			// - the model and pm used
+			// e.g., <rootDir>/user/models/ + BYRD_4vv/ + D/bwd/
+			String prefStored = Runner.userPath + storedExpName + "/" + datasetTrainID;
 			pathStoredNN = pathify(new String[]{prefStored, storedM.toString(), storedPm.getStringRep()});
+			
+//			String pref = 
+//				Runner.userPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
+//			String prefStored = 
+//				pref.replace(expName, storedExpName).replace(ds.getName(), dsTrain.getName());
+//			path = pathify(new String[]{
+//				pref, m.toString(), pm.getStringRep(), dsTrain.getDatasetID().name()});
+//			pathStoredNN = pathify(new String[]{
+//				prefStored, storedM.toString(), storedPm.getStringRep()});
 		}
 
 //		// 4. If applying a trained model to new data: get missing model parameters
@@ -397,8 +422,17 @@ public class UI {
 		}
 		else {
 			modelParams = ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
-				new File(pathStoredNN + Runner.modelParameters + ".ser"));
-//			modelParams.put(Runner.ESTIMATE_ENTRIES, (double) ToolBox.toInt(estimateEntries)); // TODO necessary?
+				new File(pathStoredNN + Runner.modelParameters + ".ser"));			
+			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
+			modelParams.put(Runner.APPL_TO_NEW_DATA, (double) ToolBox.toInt(appliedToNewData));
+//			modelParams.put(Runner.ESTIMATE_ENTRIES, (double) ToolBox.toInt(estimateEntries));
+			
+			for (Entry<String, Double> e : modelParams.entrySet()) {
+				String key = e.getKey();
+				Double value = e.getValue(); 
+				System.out.println("key  : " + key);
+				System.out.println("value: " + value);
+			}
 		}
 
 		// 5. Set metrics

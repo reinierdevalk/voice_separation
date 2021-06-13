@@ -124,7 +124,12 @@ public class TestManager {
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext();
 				
+		
 		int datasetSize = dataset.getNumPieces();
+		System.out.println(dataset.getDatasetID());
+		System.out.println(datasetSize);
+		System.out.println("DJU");
+		System.exit(0);
 		String tePreProcTime = 
 			String.valueOf(ToolBox.getTimeDiffPrecise(start, ToolBox.getTimeStampPrecise()));
 		// a. Without cross-validation
