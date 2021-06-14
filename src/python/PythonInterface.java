@@ -450,7 +450,8 @@ public class PythonInterface {
 //				defRunNeuralNetwork += s + cr;
 //			}
 			//
-			String call = 
+
+			String call =
 				"sess = tf.InteractiveSession()" + cr +
 				"tf.set_random_seed(0)" + cr +
 				"lrn_rate = 0" + cr +

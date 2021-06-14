@@ -6,12 +6,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import com.sun.org.apache.bcel.internal.generic.ISTORE;
 
 import data.Dataset;
 import data.Dataset.DatasetID;
+import featureExtraction.MelodyFeatureGenerator;
+import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
 import machineLearning.EvaluationManager;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.MelodyPredictor;
@@ -29,8 +28,6 @@ import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
 import ui.Runner.WeightsInit;
-import featureExtraction.MelodyFeatureGenerator;
-import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
 
 public class UI {
 
@@ -70,13 +67,15 @@ public class UI {
 		
 		appliedToNewData = 
 			(args.length == 0 || args.length == 1 && args[0].startsWith("path=") ? false : true);
+
 		// If repeating an existing experiment or conducting a new one: set parameters and settings
 		if (!appliedToNewData) {
+			
 			// Settings
 			boolean gridSearch = false;
-			repeatExp = false;
-			useCV = false;
-			trainUserModel = true;
+			repeatExp = true;
+			useCV = true;
+			trainUserModel = false;
 			estimateEntries = false;
 			verbose = false;
 
@@ -95,11 +94,11 @@ public class UI {
 //			expName = "ISMIR-2017-LBD/";
 //			expName = "ISMIR-2020";
 
-			seed = 3; // seed = 0 used for all experiments ISMIR 2018 paper
-			
-			m = Model.D_B;
+			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
+						
+			m = Model.D;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd 
+			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd	
 //			storedExpName = "thesis/exp_3.2";
 			storedExpName = "byrd/";
 //			storedExpName = "ISMIR-2020";
@@ -130,8 +129,8 @@ public class UI {
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
-			hiddenLayers = 2;
-			hiddenLayerSize = 50;
+			hiddenLayers = 1;
+			hiddenLayerSize = 66;
 			alpha = 0.003; // learning rate (1.0 in shallow network case)
 			// MM
 			n = 2;
@@ -149,7 +148,7 @@ public class UI {
 			maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
 			cycles = 10;
 			// DNN
-			epochs = 130;
+			epochs = 600;
 			// General
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
 			deviationThreshold = 0.0; // 0.05;
@@ -158,7 +157,7 @@ public class UI {
 				validationPercentage = 0;
 			}
 			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
-
+			
 			// In case of grid search: set hyperparameter space (if no hyperparameter space
 			// is specified, the full space is assumed). Any values set above are overwritten
 			if (gridSearch) {
@@ -204,15 +203,19 @@ public class UI {
 			rootDir = args[3];
 			verbose = Boolean.parseBoolean(args[4]);
 			userDefinedName = args[5]; // only for this if
-
+			
+			// Unused fv must be made for Runner.ALL_FEATURE_VECTORS to be filled TODO
+			FeatureVector unused = FeatureVector.values()[0];			
+						
 			// Fixed settings
 			repeatExp = false;
 			useCV = false;
 			trainUserModel = false;
-			datasetID = DatasetID.USER;
+			datasetID = datasetIDTrain.isTablatureSet() ? DatasetID.USER_TAB : DatasetID.USER;
 			expName = "out";
 			storedExpName = "models";
-
+			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
+			
 			set(args);
 		}
 	}
@@ -284,7 +287,11 @@ public class UI {
 		else {
 			dsTrain = new Dataset(datasetIDTrain);
 			datasetID.setNumVoices(datasetIDTrain.getNumVoices()); // TODO use alg that calculates num voices
-			datasetID.setPieceNames(getFileNamesWithExtension(new File(Runner.midiPathUser), ".mid"));
+			System.out.println(Runner.midiPathUser);
+			System.out.println(Runner.encodingsPathUser);
+			String pathStr = datasetID.isTablatureSet() ? Runner.encodingsPathUser : Runner.midiPathUser; 
+			String extension = datasetID.isTablatureSet() ? ".tbp" : ".mid";
+			datasetID.setPieceNames(getFileNamesWithExtension(new File(pathStr), extension));
 			ds = new Dataset(datasetID);
 			ds.setName(userDefinedName);
 		}
@@ -326,7 +333,7 @@ public class UI {
 			// - the model and pm used
 			// e.g. <rootDir>/user/out/ + ITMH/4vv/ + BYRD_4vv/ + D/bwd/
 			String pref = 
-				Runner.userPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
+				Runner.userPath + expName + "/"; // + ds.getName() + "/" + ds.getNumVoices() + "vv";
 			path = pathify(new String[]{pref, datasetTrainID, 
 				m.toString(), pm.getStringRep()}); // type and processing mode of the trained model
 			// The path where the trained model is stored consists of
@@ -427,12 +434,12 @@ public class UI {
 			modelParams.put(Runner.APPL_TO_NEW_DATA, (double) ToolBox.toInt(appliedToNewData));
 //			modelParams.put(Runner.ESTIMATE_ENTRIES, (double) ToolBox.toInt(estimateEntries));
 			
-			for (Entry<String, Double> e : modelParams.entrySet()) {
-				String key = e.getKey();
-				Double value = e.getValue(); 
-				System.out.println("key  : " + key);
-				System.out.println("value: " + value);
-			}
+//			for (Entry<String, Double> e : modelParams.entrySet()) {
+//				String key = e.getKey();
+//				Double value = e.getValue(); 
+//				System.out.println("key  : " + key);
+//				System.out.println("value: " + value);
+//			}
 		}
 
 		// 5. Set metrics

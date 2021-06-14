@@ -124,12 +124,7 @@ public class TestManager {
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext();
 				
-		
 		int datasetSize = dataset.getNumPieces();
-		System.out.println(dataset.getDatasetID());
-		System.out.println(datasetSize);
-		System.out.println("DJU");
-		System.exit(0);
 		String tePreProcTime = 
 			String.valueOf(ToolBox.getTimeDiffPrecise(start, ToolBox.getTimeStampPrecise()));
 		// a. Without cross-validation
@@ -263,7 +258,7 @@ public class TestManager {
 	 * @param mode
 	 * @param times
 	 */
-	private void startTestProcess(int fold, String[] argPaths, int mode, String[] times) {		
+	private void startTestProcess(int fold, String[] argPaths, int mode, String[] times) {
 		long tePreProcTime = 0;
 		if (mode == Runner.TEST) { 
 			tePreProcTime = (long) Integer.parseInt(times[0]);
@@ -283,7 +278,6 @@ public class TestManager {
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
 		int highestNumVoicesTraining = Runner.getHighestNumVoicesTraining();
-//			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
 		boolean applToNewData = 
 			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
@@ -344,7 +338,7 @@ public class TestManager {
 		prcRcl += "fold = " + fold + "; piece = " + testPieceName;
 		
 		System.out.println("... processing " + testPieceName + " ...");
-
+	
 		// 1. Set tablature and GT transcription as well as derived information
 		if (isTablatureCase) {
 			tablature = dataset.getAllTablatures().get(pieceIndex);
@@ -399,56 +393,59 @@ public class TestManager {
 
 		// 2. Set GT/voice-related information (derived from GT transcription)
 		// a. For N2N, C2C, and HMM
-		groundTruthVoiceLabels = groundTruthTranscription.getVoiceLabels();
-		if (!isTablatureCase) {
-			equalDurationUnisonsInfo = groundTruthTranscription.getEqualDurationUnisonsInfo();
-			// When using the bwd model, equalDurationUnisonsInfo must be set in bwd order
-			if (pm == ProcessingMode.BWD) {
-				List<Integer[]> equalDurationUnisonsInfoBwd = new ArrayList<Integer[]>();
-				for (int i : backwardsMapping) {
-					equalDurationUnisonsInfoBwd.add(equalDurationUnisonsInfo.get(i));
+		if (!applToNewData) { // zondag
+			groundTruthVoiceLabels = groundTruthTranscription.getVoiceLabels();
+		
+			if (!isTablatureCase) {
+				equalDurationUnisonsInfo = groundTruthTranscription.getEqualDurationUnisonsInfo();
+				// When using the bwd model, equalDurationUnisonsInfo must be set in bwd order
+				if (pm == ProcessingMode.BWD) {
+					List<Integer[]> equalDurationUnisonsInfoBwd = new ArrayList<Integer[]>();
+					for (int i : backwardsMapping) {
+						equalDurationUnisonsInfoBwd.add(equalDurationUnisonsInfo.get(i));
+					}
+					equalDurationUnisonsInfo = equalDurationUnisonsInfoBwd;
 				}
-				equalDurationUnisonsInfo = equalDurationUnisonsInfoBwd;
 			}
-		}
-		// b. Only for N2N and HMM
-		if (ma == ModellingApproach.N2N || ma == ModellingApproach.HMM) {
-			if (!modelDuration) {
-				groundTruthLabels = groundTruthVoiceLabels;
-			}
-			if (isTablatureCase && modelDuration) {
-				if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
-					groundTruthDurationLabels = groundTruthTranscription.getDurationLabels();
-					groundTruthVoicesCoDNotes = groundTruthTranscription.getVoicesCoDNotes();
+			// b. Only for N2N and HMM
+			if (ma == ModellingApproach.N2N || ma == ModellingApproach.HMM) {
+				if (!modelDuration) {
+					groundTruthLabels = groundTruthVoiceLabels;
 				}
-				groundTruthLabels = new ArrayList<List<Double>>();
-				for (int i = 0; i < groundTruthVoiceLabels.size(); i++) {
-					List<Double> combined = new ArrayList<Double>();
-					combined.addAll(groundTruthVoiceLabels.get(i));
+				if (isTablatureCase && modelDuration) {
 					if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
-						combined.addAll(groundTruthDurationLabels.get(i));
+						groundTruthDurationLabels = groundTruthTranscription.getDurationLabels();
+						groundTruthVoicesCoDNotes = groundTruthTranscription.getVoicesCoDNotes();
 					}
-					groundTruthLabels.add(combined);
+					groundTruthLabels = new ArrayList<List<Double>>();
+					for (int i = 0; i < groundTruthVoiceLabels.size(); i++) {
+						List<Double> combined = new ArrayList<Double>();
+						combined.addAll(groundTruthVoiceLabels.get(i));
+						if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
+							combined.addAll(groundTruthDurationLabels.get(i));
+						}
+						groundTruthLabels.add(combined);
+					}
 				}
-			}
-			// When using the bwd model, groundTruthVoiceLabels (and groundTruthDurationLabels) 
-			// must be set in bwd order. This does not apply to groundTruthLabels and 
-			// groundTruthVoicesCoDNotes, which are needed in fwd order for the feature generation,
-			// and are given so as argument to generateAllNoteFeatureVectors(). groundTruthLabels
-			// is no longer needed after the feature calculation and therefore need not be set in 
-			// bwd order; groundTruthVoicesCoDNotes is set in bwd order after the feature calculation.
-			if (pm == ProcessingMode.BWD) { // TODO this could go outside of the N2N-if
-				List<List<Double>> groundTruthVoiceLabelsBwd = new ArrayList<List<Double>>();
-				for (int index : backwardsMapping) {
-					groundTruthVoiceLabelsBwd.add(groundTruthVoiceLabels.get(index));
-				}
-				groundTruthVoiceLabels = groundTruthVoiceLabelsBwd;
-				if (dc == DecisionContext.UNIDIR && modelDuration || dc == DecisionContext.BIDIR && modelDuration && modelDurationAgain) {
-					List<List<Double>> groundTruthDurationLabelsBwd = new ArrayList<List<Double>>();
+				// When using the bwd model, groundTruthVoiceLabels (and groundTruthDurationLabels) 
+				// must be set in bwd order. This does not apply to groundTruthLabels and 
+				// groundTruthVoicesCoDNotes, which are needed in fwd order for the feature generation,
+				// and are given so as argument to generateAllNoteFeatureVectors(). groundTruthLabels
+				// is no longer needed after the feature calculation and therefore need not be set in 
+				// bwd order; groundTruthVoicesCoDNotes is set in bwd order after the feature calculation.
+				if (pm == ProcessingMode.BWD) { // TODO this could go outside of the N2N-if
+					List<List<Double>> groundTruthVoiceLabelsBwd = new ArrayList<List<Double>>();
 					for (int index : backwardsMapping) {
-				  		groundTruthDurationLabelsBwd.add(groundTruthDurationLabels.get(index));
+						groundTruthVoiceLabelsBwd.add(groundTruthVoiceLabels.get(index));
 					}
-					groundTruthDurationLabels = groundTruthDurationLabelsBwd;
+					groundTruthVoiceLabels = groundTruthVoiceLabelsBwd;
+					if (dc == DecisionContext.UNIDIR && modelDuration || dc == DecisionContext.BIDIR && modelDuration && modelDurationAgain) {
+						List<List<Double>> groundTruthDurationLabelsBwd = new ArrayList<List<Double>>();
+						for (int index : backwardsMapping) {
+							groundTruthDurationLabelsBwd.add(groundTruthDurationLabels.get(index));
+						}
+						groundTruthDurationLabels = groundTruthDurationLabelsBwd;
+					}
 				}
 			}
 		}
@@ -500,8 +497,8 @@ public class TestManager {
 			}			
 		}
 		// b. Only NN or combined model: test in test and (possibly) in application mode
-		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER || mt == ModelType.ENS
-			|| mt == ModelType.HMM) {
+		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER || 
+			mt == ModelType.ENS || mt == ModelType.HMM) {
 			double[][] minAndMaxFeatureValues = null;
 			if (mt != ModelType.HMM) {
 				minAndMaxFeatureValues = 
@@ -559,18 +556,20 @@ public class TestManager {
 			// If the bwd model is used: chordSizes and groundTruthVoicesCoDNotes, both needed in
 			// fwd order for the feature calculation, must still be reversed/set in bwd order
 			if (pm == ProcessingMode.BWD) {
-				// chordSizes: reverse
-				List<Integer> chordSizesReversed = new ArrayList<Integer>(chordSizes);
-				Collections.reverse(chordSizesReversed);
-				chordSizes = chordSizesReversed;
-				// groundTruthVoicesCoDNotes: set in bwd order
-				if (dc == DecisionContext.UNIDIR && modelDuration ||
-					dc == DecisionContext.BIDIR && modelDuration && modelDurationAgain) {
-					List<Integer[]> groundTruthVoicesCoDNotesBwd = new ArrayList<Integer[]>();
-					for (int i : backwardsMapping) {
-						groundTruthVoicesCoDNotesBwd.add(groundTruthVoicesCoDNotes.get(i));
+				if (!applToNewData) { // zondag
+					// chordSizes: reverse
+					List<Integer> chordSizesReversed = new ArrayList<Integer>(chordSizes);
+					Collections.reverse(chordSizesReversed);
+					chordSizes = chordSizesReversed;
+					// groundTruthVoicesCoDNotes: set in bwd order
+					if (dc == DecisionContext.UNIDIR && modelDuration ||
+						dc == DecisionContext.BIDIR && modelDuration && modelDurationAgain) {
+						List<Integer[]> groundTruthVoicesCoDNotesBwd = new ArrayList<Integer[]>();
+						for (int i : backwardsMapping) {
+							groundTruthVoicesCoDNotesBwd.add(groundTruthVoicesCoDNotes.get(i));
+						}
+						groundTruthVoicesCoDNotes = groundTruthVoicesCoDNotesBwd;
 					}
-					groundTruthVoicesCoDNotes = groundTruthVoicesCoDNotesBwd;
 				}
 			}
 
@@ -611,42 +610,57 @@ public class TestManager {
 				if (isTablatureCase) {
 					encodingFile = dataset.getAllEncodingFiles().get(pieceIndex);
 				}
-				Transcription predictedTranscr = 
-//					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),
-					new Transcription(testPieceName,	
-					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 
-					allVoiceLabels, allDurationLabels, groundTruthTranscription.getPiece().getMetricalTimeLine(),
-					groundTruthTranscription.getPiece().getHarmonyTrack());
+				
+				MetricalTimeLine mtl = // zondag
+					!applToNewData ? groundTruthTranscription.getPiece().getMetricalTimeLine() : 
+					new MetricalTimeLine(); 
+				SortedContainer<Marker> ht = // zondag
+					!applToNewData ? groundTruthTranscription.getPiece().getHarmonyTrack() :
+					new SortedContainer<Marker>();
 
-				// Element 0 of testResults contains the assignment errors, which has
-				// as element 0: general high-level voice assignment information
-				// as element 1: the indices of all incorrect assignments
-				// as element 2: the indices of all overlooked CoD assignments
-				// as element 3: the indices of all superfluous CoD assignments
-				// as element 4: the indices of all half CoD assignments
-				// and, if modelling duration
-				// as element 5: general high-level duration assignment information
-				// as element 6: the indices of all incorrect assignments
-				// as element 7: the indices of all overlooked CoD assignments
-				// (see ErrorCalculator.calculateAssignmentErrors())
-				List<List<Integer>> assigErrs = testResults.get(0);
-				List<List<Integer>> indiv = 
-					new ArrayList<List<Integer>>(assigErrs.subList(1, /*assigErrs.size()*/ 5));
-				// In case of the bwd model, indices in are bwd indices and need to be reverted to fwd   
-				if (pm == ProcessingMode.BWD) {
-					for (int i = 0; i < indiv.size(); i++) {
-						List<Integer> reverted = new ArrayList<>();
-						indiv.get(i).forEach(ind -> reverted.add(backwardsMapping.get(ind)));
-						indiv.set(i, reverted);
-					}
-				}
-				List<Integer> combined = new ArrayList<>();
-				indiv.forEach(l -> combined.addAll(l));
-				Collections.sort(combined);
+				Transcription predictedTranscr =
+					new Transcription(testPieceName,	
+//					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
+					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 
+					allVoiceLabels, allDurationLabels,
+					mtl,
+//					groundTruthTranscription.getPiece().getMetricalTimeLine(),
+					ht);
+//					groundTruthTranscription.getPiece().getHarmonyTrack());
+
+				// Set the colour indices for the predicted Transcription
 				List<List<Integer>> colInd = new ArrayList<>();
-				colInd.add(combined);
-				colInd.addAll(indiv);
-				predictedTranscr.setColourIndices(colInd);
+				if (!applToNewData) {
+					// Element 0 of testResults contains the assignment errors, which has
+					// as element 0: general high-level voice assignment information
+					// as element 1: the indices of all incorrect assignments
+					// as element 2: the indices of all overlooked CoD assignments
+					// as element 3: the indices of all superfluous CoD assignments
+					// as element 4: the indices of all half CoD assignments
+					// and, if modelling duration
+					// as element 5: general high-level duration assignment information
+					// as element 6: the indices of all incorrect assignments
+					// as element 7: the indices of all overlooked CoD assignments
+					// (see ErrorCalculator.calculateAssignmentErrors())
+					List<List<Integer>> assigErrs = testResults.get(0);
+					List<List<Integer>> indiv = 
+						new ArrayList<List<Integer>>(assigErrs.subList(1, /*assigErrs.size()*/ 5));
+					// In case of the bwd model, indices in are bwd indices and need to be reverted to fwd   
+					if (pm == ProcessingMode.BWD) {
+						for (int i = 0; i < indiv.size(); i++) {
+							List<Integer> reverted = new ArrayList<>();
+							indiv.get(i).forEach(ind -> reverted.add(backwardsMapping.get(ind)));
+							indiv.set(i, reverted);
+						}
+					}
+					List<Integer> combined = new ArrayList<>();
+					indiv.forEach(l -> combined.addAll(l));
+					Collections.sort(combined);
+//					List<List<Integer>> colInd = new ArrayList<>();
+					colInd.add(combined);
+					colInd.addAll(indiv);
+					predictedTranscr.setColourIndices(colInd);
+				}
 
 				String dir;
 				if (useCV) {
@@ -655,7 +669,9 @@ public class TestManager {
 				}
 				else {
 					if (applToNewData) {
-						dir = pathComb;						
+						dir = pathComb;
+						System.out.println(dir);
+//						System.exit(0);
 					}
 					else {
 						dir = pathNN + Runner.output;
@@ -670,6 +686,7 @@ public class TestManager {
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
 				Transcription t = new Transcription(new File(expPath + ".mid"), null);
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
+				System.out.println(t.getKeyInfo());
 				MEIExport.exportMEIFile(
 					t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
 					mi, t.getKeyInfo(), tablature.getTripletOnsetPairs(), colInd, false, expPath);
@@ -2229,6 +2246,8 @@ public class TestManager {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
+		boolean applToNewData = 
+			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());
 		
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
@@ -2388,10 +2407,14 @@ public class TestManager {
 				List<List<Double>> fvWrapped = new ArrayList<List<Double>>();
 				fvWrapped.add(currentNoteFeatureVector);
 				data.add(fvWrapped);
-				List<List<Double>> lblWrapped = new ArrayList<List<Double>>();
-				lblWrapped.add(groundTruthVoiceLabels.get(noteIndex));
-				data.add(lblWrapped);
+				// Store label
+				if (!applToNewData) { // zondag	
+					List<List<Double>> lblWrapped = new ArrayList<List<Double>>();
+					lblWrapped.add(groundTruthVoiceLabels.get(noteIndex));
+					data.add(lblWrapped);
+				}
 				TrainingManager.storeData(path, Runner.application + ".csv", data);
+				
 				boolean isScikit = false;
 				// For scikit
 				if (isScikit) {
@@ -2407,7 +2430,7 @@ public class TestManager {
 				PythonInterface.predict(new String[]{
 					path, m.name(), fv, Runner.application
 				});
-					
+
 				// Retrieve the model output
 				String[][] outpCsv = 
 					ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(path + 
@@ -2441,6 +2464,7 @@ public class TestManager {
 //						fv = fv.concat(",");
 //					}
 //				}
+
 				currentNetworkOutput = PythonInterface.predictNoLoading(fv);
 			}
 		}
@@ -3307,19 +3331,27 @@ public class TestManager {
 			
 		// Create newTranscription
 //		System.out.println("... creating empty new transcription with the given number of voices (" + 
-// 			highestNumVoicesTraining + ") and the given key and time signature ...");
-	//	TimeSignature timeSignature = 
-		long[][] ts = groundTruthTranscription.getPiece().getMetricalTimeLine().getTimeSignature(); // TODO
-		MetricalTimeLine mtl = groundTruthTranscription.getPiece().getMetricalTimeLine();
+// 			highestNumVoicesTraining + ") and the given key and time signature ..."); 
+		
+		MetricalTimeLine mtl = // zondag
+			!applToNewData ? groundTruthTranscription.getPiece().getMetricalTimeLine() : 
+			new MetricalTimeLine(); 
+		long[][] ts = mtl.getTimeSignature(); // zondag
+//		long[][] ts = !applToNewData ?
+//			groundTruthTranscription.getPiece().getMetricalTimeLine().getTimeSignature() : 
+//			null;
+
+		
 //		TimeSignature timeSignature = new TimeSignature((int)ts[0][0], (int) ts[0][1]);
 		KeyMarker keyMarker = new KeyMarker();
 		keyMarker.setMode(Mode.MODE_MINOR); // TODO
 		keyMarker.setAlterationNum(-1); // TODO
-//		newTranscription = makeEmptyTranscription(timeSignature, keyMarker, highestNumVoicesTraining);
-		newTranscription = 
-			makeEmptyTranscription(groundTruthTranscription.getPiece().getMetricalTimeLine(),
-			highestNumVoicesTraining);
-
+		
+		newTranscription = makeEmptyTranscription(mtl, highestNumVoicesTraining);
+//		newTranscription = 
+//			makeEmptyTranscription(groundTruthTranscription.getPiece().getMetricalTimeLine(),
+//			highestNumVoicesTraining);
+		
 		// Initialise lists
 		allPredictedVoices = new ArrayList<List<Integer>>();
 		allVoiceLabels = new ArrayList<List<Double>>();
@@ -3770,9 +3802,12 @@ public class TestManager {
 //			ErrorCalculator.calculateAssignmentErrors(allPredictedVoices, gtvl, 
 //			allPredictedDurations, groundTruthDurationLabels, edui);
 
-		List<List<Integer>> assignmentErrors =
-			ErrorCalculator.calculateAssignmentErrors(allPredictedVoices, groundTruthVoiceLabels, 
-			allPredictedDurations, groundTruthDurationLabels, equalDurationUnisonsInfo);
+		List<List<Integer>> assignmentErrors = null;
+		if (!applToNewData) { // zondag
+			assignmentErrors = 
+				ErrorCalculator.calculateAssignmentErrors(allPredictedVoices, groundTruthVoiceLabels, 
+				allPredictedDurations, groundTruthDurationLabels, equalDurationUnisonsInfo);
+		}
 //		assignmentErrors = errorCalculator.calculateAssignmentErrors(allPredictedVoices, groundTruthVoiceLabels, 
 //		  equalDurationUnisonsInfo);
 			

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import data.Dataset;
 import featureExtraction.FeatureGenerator;
@@ -207,7 +208,7 @@ public class Runner {
 	public static Implementation[] ALL_IMPLEMENTATIONS = new Implementation[ARR_SIZE];
 	public static ProcessingMode[] ALL_PROC_MODES = new ProcessingMode[ARR_SIZE];
 	public static FeatureVector[] ALL_FEATURE_VECTORS = new FeatureVector[ARR_SIZE];
-	private static DecisionContext[] ALL_DECISION_CONTEXTS = new DecisionContext[ARR_SIZE];
+	private static DecisionContext[] ALL_DECISION_CONTEXTS = new DecisionContext[ARR_SIZE]; 
 	public static WeightsInit[] ALL_WEIGHTS_INIT = new WeightsInit[ARR_SIZE];
 
 	public static enum ModellingApproach {
@@ -493,6 +494,23 @@ public class Runner {
 		}
 	}
 
+
+	private Map<String, Integer> fvNames = new LinkedHashMap<String, Integer>();
+	{ 
+		fvNames.put("ISMIR_2013", 0);
+		fvNames.put("EM_2015", 1);
+		fvNames.put("PhD", 2);
+		fvNames.put("PhD, A", 3);
+		fvNames.put("PhD, B", 4);
+		fvNames.put("PhD, C", 5);
+		fvNames.put("PhD, D", 6);
+		fvNames.put("PhD, D_star", 7);
+		fvNames.put("CMA_2016", 8);
+		fvNames.put("ISMIR_2017", 9);
+		fvNames.put("ISMIR_2018", 10);
+	}
+
+
 	public static enum FeatureVector {
 		ISMIR13("ISMIR_2013", 0), 
 		EM15("EM_2015", 1),
@@ -754,8 +772,14 @@ public class Runner {
 		}
 		else {
 			pathToData = argRootDir;
-			pathToCode = argRootDir;
-			scriptPathPython = argRootDir;
+			if (!appliedToNewData) { // zondag
+				pathToCode = argRootDir;
+				scriptPathPython = argRootDir;
+			}
+			else {
+				pathToCode = "F:/research/" + "software/code/"; // TODO
+				scriptPathPython = pathToCode + "eclipse/voice_separation/py/";
+			}
 			encodingsPathUser = pathToData + "user/in/encodings/";
 			midiPathUser = pathToData + "user/in/MIDI/";
 			userPath = pathToData + "user/";
@@ -823,7 +847,7 @@ public class Runner {
 		if (!applToNewData) {
 			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {
-				ds.populateDataset(/*argModelParams,*/ datasetVersion, null, applToNewData);
+				ds.populateDataset(datasetVersion, null, applToNewData);
 				ToolBox.storeObjectBinary(ds, datasetFile);
 			}
 			else {
@@ -831,7 +855,7 @@ public class Runner {
 			}
 		}
 		else {
-			ds.populateDataset(/*argModelParams,*/ datasetVersion, null, applToNewData);
+			ds.populateDataset(datasetVersion, null, applToNewData);
 		}
 		setDataset(ds);
 		setDatasetTrain(dsTrain);
@@ -959,7 +983,7 @@ public class Runner {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");						
-				new TrainingManager().prepareTraining(startTr);
+//				new TrainingManager().prepareTraining(startTr);
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}

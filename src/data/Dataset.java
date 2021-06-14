@@ -540,11 +540,7 @@ public class Dataset implements Serializable {
 //			ToolBox.toBoolean(Runner.getModelParams().get(Runner.APPL_TO_NEW_DATA).intValue());
 //		boolean appliedToNewData =
 //			ToolBox.toBoolean(modelParams.get(Runner.APPL_TO_NEW_DATA).intValue());
-		
-//		System.out.println(isTablatureCase + ", " + isTabAsNonTab);
-//		System.out.println(altPaths[2].concat("" + getNumVoices() + "vv/"));
-//		System.exit(0);
-		
+
 		String numVoices = getNumVoices() + "vv/";
 		String argEncodingsPath, argMidiPath;
 		String argTabMidiPath = null;
@@ -562,20 +558,16 @@ public class Dataset implements Serializable {
 					concat(version).concat("/").concat(numVoices));
 			}
 			else {
-//				argEncodingsPath = Runner.encodingsPathUser.concat(numVoices);
-				argEncodingsPath = Runner.encodingsPathUser.concat(getName());
+				argEncodingsPath = Runner.encodingsPathUser; //.concat(getName().concat(numVoices));
 				if (!argEncodingsPath.endsWith("/")) {
 					argEncodingsPath = argEncodingsPath.concat("/");
 //					argMidiPath = argEncodingsPath.concat("/");
 				}
-//				argMidiPath = Runner.midiPathUser.concat(getName().concat("/").concat(numVoices));
-//				argMidiPath = Runner.midiPathUser;
-				argMidiPath = Runner.midiPathUser.concat(getName());
+				argMidiPath = Runner.midiPathUser; //.concat(getName().concat("/").concat(numVoices));
 				if (!argMidiPath.endsWith("/")) {
 					argMidiPath = argMidiPath.concat("/");
 				}		
 			}
-			
 		}
 		else {
 			argEncodingsPath = altPaths[0];
@@ -611,7 +603,9 @@ public class Dataset implements Serializable {
 //			if (!useCrossVal && appliedToNewData) {
 //				midiFile = new File(midiFile + ".mid");
 //			}
-			Transcription currentTranscription = new Transcription(midiFile, encodingFile);
+			Transcription currentTranscription = // zondag
+				!appliedToNewData ? new Transcription(midiFile, encodingFile) : null;
+//			Transcription currentTranscription = new Transcription(midiFile, encodingFile);
 			
 			if (isTabAsNonTab) {
 				int currInterval = 0;
@@ -633,12 +627,13 @@ public class Dataset implements Serializable {
 				currentLargestChordSize = currentTablature.getLargestTablatureChord();
 			}
 			else {
-//				System.out.println(currentPieceName);
 				currentLargestChordSize = currentTranscription.getLargestTranscriptionChord();
-//				System.out.println(currentLargestChordSize);
 			}
 			// Determine the current highest number of voices
-			int currentNumberOfVoices = currentTranscription.getNumberOfVoices(); 
+			int currentNumberOfVoices = // zondag
+				!appliedToNewData ? currentTranscription.getNumberOfVoices() : 
+				currentLargestChordSize; // TODO this assumption might not always hold true
+//			int currentNumberOfVoices = currentTranscription.getNumberOfVoices();	
 			if (currentNumberOfVoices > argHighestNumVoices) {
 				argHighestNumVoices = currentNumberOfVoices;
 			}

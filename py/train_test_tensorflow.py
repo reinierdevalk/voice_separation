@@ -11,7 +11,7 @@ appl = 2
 
 seed=-1 # seed=0 used for all experiments ISMIR 2018 paper 
 
-# when used as a script (e.g., through Eclipse)
+# when used as a script (train and test mode)
 if len(argv) > 1:
 	script, mdl, arg_mode, arg_path, arg_exts, arg_params, arg_stored_weights = argv
 
@@ -95,7 +95,7 @@ if len(argv) > 1:
 	layer_sizes.append(OL_size)
 
 
-# when used as a module
+# when used as a module (application mode)
 else:
 	print('as a module')
 	seed=-1 #'set_me'
@@ -444,7 +444,6 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 
 	if mode == appl:
 		# Features loaded from file
-
 		x_appl = genfromtxt(fold_path + fv_ext, delimiter=',')
 		# Features given as argument		
 #		list_from_string = [float(s.strip()) for s in feature_vector.split(',')]

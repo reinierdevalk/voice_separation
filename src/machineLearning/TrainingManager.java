@@ -2104,9 +2104,9 @@ public class TrainingManager {
 	 * @param data Contains two elements: <br>
 	 * 			   (1) at index 0: the feature vectors <br>
 	 * 			   (2) at index 1: the ground truth labels <br>
+	 * 			   NB: element (2) is not added when applying the model to new data.
 	 */
 	public static void storeData(String path, String ext, List<List<List<Double>>> data) {
-
 		// Store features, labels, and classes as csv files 
 		for (int ind = 0; ind < data.size(); ind++) {
 			List<List<Double>> curr = data.get(ind); 
