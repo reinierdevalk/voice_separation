@@ -1118,8 +1118,8 @@ public class Runner {
 			// Store info
 			else {
 				String s =
-					"model =      " + ALL_MODELS[argModelParams.get(MODEL).intValue()] + "\r\n" +
-					"proc_mode =  " + ALL_PROC_MODES[argModelParams.get(PROC_MODE).intValue()] + "\r\n" +
+					"model      = " + ALL_MODELS[argModelParams.get(MODEL).intValue()] + "\r\n" +
+					"proc_mode  = " + ALL_PROC_MODES[argModelParams.get(PROC_MODE).intValue()] + "\r\n" +
 					"train_data = " + dsTrain.getDatasetID().name();
 				System.out.println(s);
 				System.out.println("\n" + ds.getNumPieces() + " files processed successfully.");

@@ -43,6 +43,7 @@ import ui.Runner.Model;
 import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
+import ui.UI;
 import utility.DataConverter;
 
 public class TestManager {
@@ -455,12 +456,19 @@ public class TestManager {
 			if (m == Model.B_STAR || m == Model.B_PRIME_STAR) {
 				predictedTranscription = groundTruthTranscription;
 			}
-			else {
-				predictedTranscription =	
-					ToolBox.getStoredObjectBinary(new Transcription(), 
-					new File((new File(pathPredBidir)).getParent() + "/" + Runner.output + 
-					"fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + "-" + 
-					testPieceName + ".ser"));
+			else {		
+				if (!applToNewData) { // zondag
+					predictedTranscription =	
+						ToolBox.getStoredObjectBinary(new Transcription(), 
+						new File((new File(pathPredBidir)).getParent() + "/" + 
+						Runner.output + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
+						"-" + testPieceName + ".ser"));
+				}
+				else {
+					predictedTranscription =	
+						ToolBox.getStoredObjectBinary(new Transcription(), 
+						new File(pathNN + testPieceName + ".ser"));			
+				}
 			}
 		}
 
@@ -501,9 +509,16 @@ public class TestManager {
 			mt == ModelType.ENS || mt == ModelType.HMM) {
 			double[][] minAndMaxFeatureValues = null;
 			if (mt != ModelType.HMM) {
-				minAndMaxFeatureValues = 
-					ToolBox.getStoredObjectBinary(new double[][]{}, 
-					new File(pathNN + Runner.minMaxFeatVals + ".ser"));
+				if (m.getDecisionContext() == DecisionContext.BIDIR && applToNewData) { // zondag
+					minAndMaxFeatureValues = 
+						ToolBox.getStoredObjectBinary(new double[][]{}, 
+						new File(UI.getRootDir() + "D_B-user/fwd/" + Runner.minMaxFeatVals + ".ser"));
+				}
+				else {
+					minAndMaxFeatureValues = 
+						ToolBox.getStoredObjectBinary(new double[][]{}, 
+						new File(pathNN + Runner.minMaxFeatVals + ".ser"));
+				}
 			}
 
 			// Create the network. The network is not needed when using the combined model in 
@@ -523,7 +538,7 @@ public class TestManager {
 					ToolBox.getStoredObjectBinary(new ArrayList<Double>(), 
 					new File(pathComb + Runner.modelWeighting + ".ser"));
 			}
-
+			
 			// Get the test results
 			List<List<List<Integer>>> testResults = null;
 			String tstOrAppRec = null;
@@ -545,6 +560,7 @@ public class TestManager {
 				testResults = 
 					testInApplicationMode(fold, minAndMaxFeatureValues, modelWeighting,	argPaths);
 				tstOrAppRec = Runner.application;
+
 //				// Reset STM
 //				if (combinedModel) {
 //					for (int i = 0; i < sliceIndices.size(); i++) {
@@ -670,26 +686,28 @@ public class TestManager {
 				else {
 					if (applToNewData) {
 						dir = pathComb;
-						System.out.println(dir);
-//						System.exit(0);
 					}
 					else {
 						dir = pathNN + Runner.output;
 					}
 				}
-				if (!applToNewData) {
-					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
-				}
+//				if (!applToNewData) {
+				ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
+//				}
+				
 //				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
 				Transcription t = new Transcription(new File(expPath + ".mid"), null);
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
-				System.out.println(t.getKeyInfo());
-				MEIExport.exportMEIFile(
-					t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
-					mi, t.getKeyInfo(), tablature.getTripletOnsetPairs(), colInd, false, expPath);
+
+				for (boolean grandStaff : new Boolean[]{false, true}) {
+					MEIExport.exportMEIFile(
+						t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
+						mi, t.getKeyInfo(), tablature.getTripletOnsetPairs(), colInd, 
+						grandStaff, expPath);
+				}
 			}
 			if (!applToNewData) {
 				System.out.println("... storing the test results ...");
@@ -2424,6 +2442,7 @@ public class TestManager {
 						Runner.outpExt + "app.csv"
 					});
 				}
+
 				// For TensorFlow
 				String fvAsStr = currentNoteFeatureVector.toString();
 				String fv = fvAsStr.substring(1, fvAsStr.length()-1);
@@ -3255,7 +3274,7 @@ public class TestManager {
 	private List<List<List<Integer>>> testInApplicationMode(int fold, double[][] minAndMaxFeatureValues, 
 		List<Double> modelWeighting, String[] argPaths/*, String pieceName 
 		int numTestExamples*/) {
-
+		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 		
 		Map<String, Double> modelParameters = Runner.getModelParams();
@@ -3326,9 +3345,8 @@ public class TestManager {
 			pathComb = argPaths[0];
 			pathNN = argPaths[1];
 		}
-		
 		prcRcl += " -- app" + "\r\n";
-			
+
 		// Create newTranscription
 //		System.out.println("... creating empty new transcription with the given number of voices (" + 
 // 			highestNumVoicesTraining + ") and the given key and time signature ..."); 
@@ -3441,9 +3459,13 @@ public class TestManager {
 				// For TensorFlow
 //				int param = modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue();
 				// TODO fix retrieving number of features
+				int numFeat = minAndMaxFeatureValues[0].length;
+//				if (m.getDecisionContext() == DecisionContext.BIDIR && applToNewData) {
+//					numFeat = 61; // zondag
+//				}
 				String paramsAndHyperparams = 
 					"hidden layers=" + modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue() + "," +
-					"input layer size=" + minAndMaxFeatureValues[0].length + "," +
+					"input layer size=" + numFeat + "," +
 					"hidden layer size=" + modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + "," +
 					"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES;
 //					"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +

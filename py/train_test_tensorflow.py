@@ -260,6 +260,8 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 	print('run_neural_network called in mode',  mode)
 #	prediction = create_neural_network(x, layer_sizes, use_stored_weights, mode) # train and test
 	
+	print(fold_path)
+	
 	# train, test, application
 	weights_biases = {}
 	if mode == train or mode == test:

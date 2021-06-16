@@ -32,7 +32,8 @@ import ui.Runner.WeightsInit;
 public class UI {
 
 	private static String rootDir = "F:/research/"; // TODO also defined in MEIExport; should be in one place only
-
+	public static String repl = "user/models/BYRD_4vv/D/bwd/";
+	
 	private static boolean appliedToNewData, repeatExp, useCV, trainUserModel, verbose, 
 		estimateEntries;
 	private static String expName, storedExpName, userDefinedName, datasetVersion, hyperParams;
@@ -197,23 +198,44 @@ public class UI {
 		// D bwd BYRD_4vv 'F:/research/experiments/byrd/byrd-int/4vv/' '' 'folder_name'
 		else {
 			// User-defined settings
-			m = storedM = Model.valueOf(args[0]);
-			pm = storedPm = ProcessingMode.valueOf(args[1].toUpperCase());
+			m = Model.valueOf(args[0]);
+			pm = ProcessingMode.valueOf(args[1].toUpperCase());
+			if (m.getDecisionContext() == DecisionContext.UNIDIR) {
+				storedM = m;
+//				m = storedM = Model.valueOf(args[0]);
+				storedPm = pm;
+//				pm = storedPm = ProcessingMode.valueOf(args[1].toUpperCase());
+			}
+			else {
+//				m = Model.valueOf(args[0]);
+				storedM = Model.D; // TODO
+//				pm = ProcessingMode.valueOf(args[1].toUpperCase());
+				storedPm = ProcessingMode.BWD; // TODO
+			}
 			datasetIDTrain = DatasetID.valueOf(args[2]); // only for this if
 			rootDir = args[3];
 			verbose = Boolean.parseBoolean(args[4]);
 			userDefinedName = args[5]; // only for this if
 			
 			// Unused fv must be made for Runner.ALL_FEATURE_VECTORS to be filled TODO
-			FeatureVector unused = FeatureVector.values()[0];			
-						
+			FeatureVector unused = FeatureVector.values()[0];
+
 			// Fixed settings
 			repeatExp = false;
 			useCV = false;
 			trainUserModel = false;
 			datasetID = datasetIDTrain.isTablatureSet() ? DatasetID.USER_TAB : DatasetID.USER;
 			expName = "out";
-			storedExpName = "models";
+			if (m.getDecisionContext() == DecisionContext.UNIDIR) {
+				storedExpName = "models";
+			}
+			else { // zondag TODO
+				storedExpName = "out/";
+			}
+//			System.out.println(m);
+//			System.out.println(pm);
+//			System.out.println(datasetIDTrain);
+//			System.exit(0);
 			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
 			
 			set(args);
@@ -312,8 +334,9 @@ public class UI {
 		if (!appliedToNewData) {
 			String pref = Runner.resultsPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
 			String prefStored = pref.replace(expName, storedExpName);
-			path = pathify(new String[]{pref, m.toString() + 
-				(trainUserModel ? "-user_model" : ""), pm.getStringRep(), hyperParams});
+			path = 
+				pathify(new String[]{pref, m.toString() + (trainUserModel ? "-user" : ""), 
+				pm.getStringRep(), hyperParams});
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
 				pathStoredNN = pathify(new String[]{prefStored, storedM.toString(), storedPm.getStringRep()});
 //				pathStoredNN = pathStoredNN.substring(0, pathStoredNN.indexOf("fwd/"))+ "prev/";
@@ -428,10 +451,22 @@ public class UI {
 			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
 		}
 		else {
-			modelParams = ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
-				new File(pathStoredNN + Runner.modelParameters + ".ser"));			
+			if (m.getDecisionContext() == DecisionContext.UNIDIR) {
+				modelParams = 
+					ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
+					new File(pathStoredNN + Runner.modelParameters + ".ser"));
+			}
+			else {
+				modelParams = 
+					ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
+					new File(rootDir + repl + Runner.modelParameters + ".ser")); // TODO
+			}
 			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
 			modelParams.put(Runner.APPL_TO_NEW_DATA, (double) ToolBox.toInt(appliedToNewData));
+			if (m.getDecisionContext() == DecisionContext.BIDIR) {
+				modelParams.put(Runner.MODEL, (double) m.getIntRep());
+				modelParams.put(Runner.PROC_MODE, (double) pm.getIntRep());
+			}
 //			modelParams.put(Runner.ESTIMATE_ENTRIES, (double) ToolBox.toInt(estimateEntries));
 			
 //			for (Entry<String, Double> e : modelParams.entrySet()) {

@@ -566,7 +566,7 @@ public class Dataset implements Serializable {
 				argMidiPath = Runner.midiPathUser; //.concat(getName().concat("/").concat(numVoices));
 				if (!argMidiPath.endsWith("/")) {
 					argMidiPath = argMidiPath.concat("/");
-				}		
+				}
 			}
 		}
 		else {
