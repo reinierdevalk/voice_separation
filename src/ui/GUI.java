@@ -200,22 +200,22 @@ public class GUI {
 	
 	public static List<DatasetID> excludeDatasetIDs() {
 		List<DatasetID> l = Arrays.asList(new DatasetID[]{
-			DatasetID.INT_5vv,
-			DatasetID.INT_3vv,
-			DatasetID.tINT_4vv,
-			DatasetID.tINT_5vv,	
-			DatasetID.IMI, 
-			DatasetID.IMI_SHORTER, 
-			DatasetID.SEMI, 
-			DatasetID.FREE, 
-			DatasetID.FREE_MORE, 
-			DatasetID.IMI_NON_TAB, 
-			DatasetID.IMI_SHORTER_NON_TAB, 
-			DatasetID.SEMI_NON_TAB,
-			DatasetID.FREE_NON_TAB,	
-			DatasetID.FREE_MORE_NON_TAB,
-			DatasetID.TESTPIECE_SET,
-			DatasetID.TESTPIECE_SET_NON_TAB
+			DatasetID.TAB_INT_5VV,
+			DatasetID.TAB_INT_3VV,
+			DatasetID.TAB_INT_T_4VV,
+			DatasetID.TAB_INT_T_5VV,	
+			DatasetID.TAB_INT_IMI_4VV, 
+			DatasetID.TAB_INT_IMI_SHORT_4VV, 
+			DatasetID.TAB_INT_SEMI_4VV, 
+			DatasetID.TAB_INT_FREE_4VV, 
+			DatasetID.TAB_INT_FREE_MORE_4VV, 
+			DatasetID.TAB_INT_IMI_T_4VV, 
+			DatasetID.TAB_INT_IMI_SHORT_T_4VV, 
+			DatasetID.TAB_INT_SEMI_T_4VV,
+			DatasetID.TAB_INT_FREE_T_4VV,	
+			DatasetID.TAB_INT_FREE_MORE_T_4VV,
+			DatasetID.TAB_TST,
+			DatasetID.TAB_TST_T
 		});	
 		return l;
 	}

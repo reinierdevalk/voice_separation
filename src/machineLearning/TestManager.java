@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import data.Dataset;
 import de.uos.fmt.musitech.data.score.NotationChord;
@@ -302,29 +304,36 @@ public class TestManager {
 			ns = ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 		}
 
+		String storePath = null;
+		String pathPredTrans = null;
 		String pathNN = null;
 		String pathMM = null;
-		String pathPredBidir = null;
-		String pathComb = null;
-		String storePath = null;
+//		String pathComb = null;
 		if (mt == ModelType.NN || mt == ModelType.HMM || mt == ModelType.DNN || mt == ModelType.OTHER) {
-			pathNN = argPaths[0];
-			storePath = pathNN;
-			pathPredBidir = argPaths[1];
+			storePath = argPaths[0];
+//			pathNN = argPaths[0];
+//			storePath = pathNN;
+			if (m.getDecisionContext() == DecisionContext.BIDIR) {
+				pathPredTrans = argPaths[1];
+			}
 		}
 		else if (mt == ModelType.MM) {
-			pathMM = argPaths[0];
+//			pathMM = argPaths[0];
+			storePath = argPaths[0];
 		}
 		else if (mt == ModelType.ENS) {
-			pathComb = argPaths[0];
+			storePath = argPaths[0];
+//			pathComb = argPaths[0];
 			pathNN = argPaths[1];
-//			pathMM = argPaths[2];
-			storePath = pathComb;
+			pathMM = argPaths[2];
+//			storePath = pathComb;
 		}
 		if (!useCV && applToNewData) {
-			pathComb = argPaths[0];
+			storePath = argPaths[0];
+//			pathComb = argPaths[0];
 			pathNN = argPaths[1];
-			storePath = pathComb;
+			pathPredTrans = argPaths[1];
+//			storePath = pathComb;
 		}
 
 //		int pieceIndex;
@@ -460,14 +469,15 @@ public class TestManager {
 				if (!applToNewData) { // zondag
 					predictedTranscription =	
 						ToolBox.getStoredObjectBinary(new Transcription(), 
-						new File((new File(pathPredBidir)).getParent() + "/" + 
+						new File((new File(pathPredTrans)).getParent() + "/" + 
 						Runner.output + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
 						"-" + testPieceName + ".ser"));
 				}
 				else {
 					predictedTranscription =	
 						ToolBox.getStoredObjectBinary(new Transcription(), 
-						new File(pathNN + testPieceName + ".ser"));			
+						new File(pathPredTrans + //pathNN +
+							testPieceName + ".ser"));			
 				}
 			}
 		}
@@ -487,7 +497,8 @@ public class TestManager {
 				int sliceInd = sliceIndices.get(i);
 				MelodyPredictor mp = new MelodyPredictor(MelodyPredictor.getMelModelType(), 
 					MelodyPredictor.getTermType(), n, sliceInd);
-				mp.loadModel(new File(pathMM + Runner.melodyModel + "-" +
+				mp.loadModel(new File(storePath + //pathMM + 
+					Runner.melodyModel + "-" +
 					MelodyPredictor.getSliceIndexString(sliceInd) + ".ser"));
 				
 				double[][] evalNum = testMM(mp, i);
@@ -497,11 +508,14 @@ public class TestManager {
 				String model = Runner.melodyModel + "-" +
 					MelodyPredictor.getSliceIndexString(sliceIndices.get(i)) + "-";
 				ToolBox.storeObjectBinary(evalNum, 
-					new File(pathMM + model + Runner.evalMM + "-" + Runner.test + ".ser"));
+					new File(storePath + //pathMM + 
+						model + Runner.evalMM + "-" + Runner.test + ".ser"));
 				ToolBox.storeTextFile(evalString,
-					new File(pathMM + model + Runner.evalMM + "-" + Runner.test + ".txt"));
+					new File(storePath + //pathMM + 
+						model + Runner.evalMM + "-" + Runner.test + ".txt"));
 				ToolBox.storeObjectBinary(melodyModelOutputs, 
-					new File(pathMM + model + Runner.outputMM + "-" + Runner.test + ".ser"));
+					new File(storePath + //pathMM + 
+						model + Runner.outputMM + "-" + Runner.test + ".ser"));
 			}			
 		}
 		// b. Only NN or combined model: test in test and (possibly) in application mode
@@ -517,15 +531,17 @@ public class TestManager {
 				else {
 					minAndMaxFeatureValues = 
 						ToolBox.getStoredObjectBinary(new double[][]{}, 
-						new File(pathNN + Runner.minMaxFeatVals + ".ser"));
+						new File(((mt == ModelType.ENS || applToNewData) ? pathNN : storePath) + //pathNN + 
+						Runner.minMaxFeatVals + ".ser"));
 				}
 			}
 
-			// Create the network. The network is not needed when using the combined model in 
+			// Create the network. The network is not needed when using the ENS model in 
 			// test mode, or when using a non-NN model 
 			if (!(mt == ModelType.ENS && mode == Runner.TEST) && mt != ModelType.DNN && 
 				mt != ModelType.OTHER && mt != ModelType.HMM) {
-				initialiseNetwork(pathNN, minAndMaxFeatureValues[0].length);
+				initialiseNetwork(mt == ModelType.ENS ? pathNN : storePath, //pathNN, 
+					minAndMaxFeatureValues[0].length);
 			}
 			List<Double> modelWeighting = null;
 			if (mt == ModelType.ENS) {
@@ -536,7 +552,8 @@ public class TestManager {
 				}
 				modelWeighting = 
 					ToolBox.getStoredObjectBinary(new ArrayList<Double>(), 
-					new File(pathComb + Runner.modelWeighting + ".ser"));
+					new File(storePath + //pathComb + 
+						Runner.modelWeighting + ".ser"));
 			}
 			
 			// Get the test results
@@ -548,7 +565,7 @@ public class TestManager {
 						testInTestMode(fold, minAndMaxFeatureValues, modelWeighting, argPaths);
 				}
 				else if (ma == ModellingApproach.HMM) {
-					testResults = testHMM(fold, argPaths, 
+					testResults = testHMM(fold, storePath, //argPaths, 
 						Runner.ALL_CONFIGS[modelParameters.get(Runner.CONFIG).intValue()]);
 				}
 				tstOrAppRec = Runner.test;
@@ -680,16 +697,18 @@ public class TestManager {
 
 				String dir;
 				if (useCV) {
-					dir = new File(pathNN).getParent() + "/" + Runner.output + "fold_" +	
+					dir = new File(storePath //pathNN
+						).getParent() + "/" + Runner.output + "fold_" +	
 						ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + "-"; 
 				}
 				else {
-					if (applToNewData) {
-						dir = pathComb;
-					}
-					else {
-						dir = pathNN + Runner.output;
-					}
+					dir = !applToNewData ? storePath + Runner.output : storePath;
+//					if (applToNewData) {
+//						dir = storePath; //pathComb;
+//					}
+//					else {
+//						dir = storePath + Runner.output; //pathNN +
+//					}
 				}
 //				if (!applToNewData) {
 				ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
@@ -705,7 +724,8 @@ public class TestManager {
 				for (boolean grandStaff : new Boolean[]{false, true}) {
 					MEIExport.exportMEIFile(
 						t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
-						mi, t.getKeyInfo(), tablature.getTripletOnsetPairs(), colInd, 
+						mi, t.getKeyInfo(), 
+						(tablature != null) ? tablature.getTripletOnsetPairs() : null, colInd, 
 						grandStaff, expPath);
 				}
 			}
@@ -1026,7 +1046,8 @@ public class TestManager {
 	}
 
 
-	private List<List<List<Integer>>> testHMM(int fold, String[] argPaths, Configuration config) {		
+	private List<List<List<Integer>>> testHMM(int fold, String path, /*String[] argPaths,*/
+		Configuration config) {		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 
 		// Generate and store observations.csv so that they can be read by evaluate_HMM.m
@@ -1034,12 +1055,12 @@ public class TestManager {
 		// script, but given directly as input to the Matlab script
 		List<List<Integer>> observations = generateObservations();
 		ToolBox.storeListOfListsAsCSVFile(observations, 
-			new File(argPaths[0] + Runner.observations + ".csv"));
+			new File(path /*argPaths[0]*/ + Runner.observations + ".csv"));
 
 		// Create the Matlab command
 		String cmd = "matlab -wait -nosplash -nodesktop -r \"";
-		cmd += "code_path = '" + Runner.scriptPathMatlab + "'; ";
-		cmd += "exp_path = '" + Paths.get(argPaths[0]).getParent().toString().replace("\\", "/") + "/" + "'; ";
+		cmd += "code_path = '" + Runner.scriptMatlabPath + "'; ";
+		cmd += "exp_path = '" + Paths.get(path /*argPaths[0]*/ ).getParent().toString().replace("\\", "/") + "/" + "'; ";
 		cmd += "addpath(genpath(code_path)); "; // make all dirs in the code path availalbe to Matlab
 		cmd += "addpath(genpath(exp_path)); "; // make all dirs in the experiment path available to Matlab
 		// NB: the order of the elements in fileNamesList must be the same as in the MATLAB code
@@ -1089,7 +1110,7 @@ public class TestManager {
 
 		// Load indices predicted by the HMM and add them, together with the accompanying 
 		// mappings, to the lists
-		File outputFile = new File(argPaths[0] + Runner.outputs + ".csv");
+		File outputFile = new File(path /*argPaths[0]*/ + Runner.outputs + ".csv");
 		List<List<Integer>> predictedIndicesWrapped = 
 			ToolBox.readCSVFile(ToolBox.readTextFile(outputFile), ",", false);
 		List<Integer> predictedIndices = new ArrayList<Integer>();
@@ -1151,14 +1172,10 @@ public class TestManager {
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
-//		List<Integer> sliceIndices = 
-//			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
 		Dataset dataset = Runner.getDataset();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];	
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
-//		List<Integer> ns = 
-//			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext();
 		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
@@ -1166,9 +1183,6 @@ public class TestManager {
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
 		int highestNumVoicesTraining = Runner.getHighestNumVoicesTraining();
-//			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
-//		Implementation im = 
-//			Runner.ALL_IMPLEMENTATIONS[modelParameters.get(Runner.IMPLEMENTATION).intValue()];
 		boolean estimateEntries = 
 			ToolBox.toBoolean(modelParameters.get(Runner.ESTIMATE_ENTRIES).intValue());
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
@@ -1185,16 +1199,20 @@ public class TestManager {
 		}
 		
 		// Set paths
+		String storePath = null;
 		String pathNN = null;
 		String pathMM = null;
 //		String pathComb = null;
 		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER) {
-			pathNN = argPaths[0];
+//			pathNN = argPaths[0];
+//			storePath = pathNN;
+			storePath = argPaths[0];
 		}
-		else if (mt == ModelType.ENS) {		
+		else if (mt == ModelType.ENS) {
 //			pathComb = argPaths[0];
+			storePath = argPaths[0];
 			pathNN = argPaths[1];
-			pathMM = argPaths[2];
+			pathMM = argPaths[2];	
 		}
 		
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
@@ -1316,7 +1334,8 @@ public class TestManager {
 			if (ma == ModellingApproach.N2N) {
 				if (mt == ModelType.NN) {
 					allNetworkOutputs = networkManager.createAllNetworkOutputs(noteFeatures);
-					File f = new File(pathNN + Runner.outputs + ".ser");
+					File f = new File(storePath + //pathNN + 
+						Runner.outputs + ".ser");
 					List<List<double[]>> outputs = 
 						ToolBox.getStoredObjectBinary(new ArrayList<List<double[]>>(), f);
 					outputs.set(Runner.TEST, new ArrayList<double[]>(allNetworkOutputs));
@@ -1329,7 +1348,8 @@ public class TestManager {
 					List<List<List<Double>>> data = new ArrayList<List<List<Double>>>();
 					data.add(noteFeatures);
 					data.add(groundTruthVoiceLabels);
-					TrainingManager.storeData(pathNN, Runner.test + ".csv", data);
+					TrainingManager.storeData(storePath, //pathNN, 
+						Runner.test + ".csv", data);
 
 					boolean doThis = true;
 					if (doThis) {
@@ -1338,7 +1358,7 @@ public class TestManager {
 					// For scikit
 					if (isScikit) {
 						String[] cmd = new String[]{
-							"python", Runner.scriptPathPython, m.name(), "test", pathNN, 
+							"python", Runner.scriptPythonPath, m.name(), "test", storePath, //pathNN, 
 							Runner.fvExt, Runner.clExt, Runner.outpExt,
 							Runner.getOtherParam(modelParameters)};
 					}
@@ -1358,10 +1378,10 @@ public class TestManager {
 						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
 					String[] cmd = new String[]{
 						"python", 
-						Runner.scriptPathPython + Runner.script, 
+						Runner.scriptPythonPath + Runner.scriptTensorFlow, 
 						m.name(), 
 						Runner.test, 
-						pathNN, 
+						storePath, //pathNN, 
 						extensions, 
 						paramsAndHyperparams, 
 						"true"};
@@ -1370,7 +1390,7 @@ public class TestManager {
 					
 					// Retrieve the model output
 					String[][] outpCsv = 
-						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(pathNN + 
+						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(storePath  + //pathNN + 
 						Runner.outpExt + "tst.csv")));
 					List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 					
@@ -1389,7 +1409,8 @@ public class TestManager {
 							String testData = 
 								Transcription.getLastNotesInVoicesString(lastNNotesPerVoicePerNote, 
 								meter);
-							ToolBox.storeObjectBinary(testData, new File(pathNN + "seq_test" + ".csv"));
+							ToolBox.storeObjectBinary(testData, new File(storePath + //pathNN + 
+								"seq_test" + ".csv"));
 						
 							// - these are the possibilities at onset time to for that note
 							// for each note
@@ -2178,8 +2199,7 @@ public class TestManager {
 	/**
 	 * Makes an empty Transcription with the given time signature, key signature, and number of voices.
 	 *
-	 * @param timeSig
-	 * @param keyMarker
+	 * @param mtl
 	 * @param numberOfVoices
 	 * @return
 	 */
@@ -2250,16 +2270,21 @@ public class TestManager {
 	 *     version of it, in which those elements corresponding to voices already taken in the chord are given
 	 *     an activation value of 0.0, which makes them unavailable for the current prediction.  
 	 * 
-	 * @param path
+	 * @param path The path where the features and the model output are stored. Only in the 
+	 *             case of <code>ModelType.DNN</code> or <code>ModelType.OTHER</code>.
 	 * @param minAndMaxFeatureValues
 	 * @param noteIndex
 	 * @param voiceEntryInfo
 	 * @param modelWeighting
+	 * 
+	 * @return A list containing
+	 *         as element 0: the feature vector for the note
+	 *         as element 1: the predicted label for the note
 	 */
-	private void predictVoices(String path, double[][] minAndMaxFeatureValues, int noteIndex, 
+	private List<List<Double>> predictVoices(String path, double[][] minAndMaxFeatureValues, int noteIndex, 
 		List<List<Integer>> voiceEntryInfo, List<Double> modelWeighting) {
-//		int featureSetUsedForTraining = 
-//			trainingSettingsAndParameters.get(EncogNNManager.FEATURE_SET).intValue();
+
+		List<List<Double>> fvAndPredLbl = new ArrayList<>();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
@@ -2382,7 +2407,7 @@ public class TestManager {
 //			melodyModelOutputs.add(currentMelodyModelOutput);
 		}
 //		}
-		boolean isMuSci = false; // TODO
+		boolean isMuSci = false;
 		if (isMuSci) {
 //		else if (im == Implementation.MU_SCI) {
 //			int featureSetUsedForTraining = 
@@ -2420,19 +2445,21 @@ public class TestManager {
 
 			boolean storeFiles = true;
 			if (storeFiles) {
-				// Store feature vector
+				// Add feature vector to data
 				List<List<List<Double>>> data = new ArrayList<List<List<Double>>>();
 				List<List<Double>> fvWrapped = new ArrayList<List<Double>>();
 				fvWrapped.add(currentNoteFeatureVector);
 				data.add(fvWrapped);
-				// Store label
+				// Add label to data
 				if (!applToNewData) { // zondag	
 					List<List<Double>> lblWrapped = new ArrayList<List<Double>>();
 					lblWrapped.add(groundTruthVoiceLabels.get(noteIndex));
 					data.add(lblWrapped);
 				}
+				// Store
 				TrainingManager.storeData(path, Runner.application + ".csv", data);
-				
+				fvAndPredLbl.add(currentNoteFeatureVector);
+
 				boolean isScikit = false;
 				// For scikit
 				if (isScikit) {
@@ -2457,7 +2484,7 @@ public class TestManager {
 					
 				List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 //				System.out.println(Arrays.toString(predictedOutputs.get(0)));
-
+				
 				// +1.0E-6
 //				for (double[] d : predictedOutputs) {
 //					for (int i = 0; i < d.length; i++) {
@@ -2467,6 +2494,10 @@ public class TestManager {
 //					}
 //				}
 				currentNetworkOutput = predictedOutputs.get(0);
+				// Arrays.asList() does not work on primitive types, see 
+				// https://stackoverflow.com/questions/5178854/convert-a-double-array-to-double-arraylist
+				fvAndPredLbl.add(DoubleStream.of(currentNetworkOutput).boxed().collect(Collectors.toList()));
+				
 				// get all voices so far from newTranscription
 				// let trained LSTM predict next note for each
 				// see for which voice the note is most likely
@@ -2598,6 +2629,13 @@ public class TestManager {
 		}
 //		}
 		// HIER EINDE1
+		
+		if (mt == ModelType.DNN || mt == ModelType.OTHER){
+			return fvAndPredLbl;
+		}
+		else {
+			return null;
+		}
 	}
 
 
@@ -3263,8 +3301,8 @@ public class TestManager {
 	
 	
 	/**
-	 * Tests the network in application mode, where the features are generated using the voice assignments 
-	 * created incrementally by the network. Returns the assignment errors. 
+	 * Tests the network in application mode, where the features are generated using the voice
+	 * assignments created incrementally by the network. Returns the assignment errors. 
 	 *
 	 * @param trainingSettingsAndParameters
 	 * @param minAndMaxFeatureValues
@@ -3272,18 +3310,13 @@ public class TestManager {
 	 * @return
 	 */
 	private List<List<List<Integer>>> testInApplicationMode(int fold, double[][] minAndMaxFeatureValues, 
-		List<Double> modelWeighting, String[] argPaths/*, String pieceName 
-		int numTestExamples*/) {
+		List<Double> modelWeighting, String[] argPaths) {
 		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 		
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
-//		List<Integer> sliceIndices =
-//			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);	
-//		List<Integer> ns = 
-//			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		ModelType mt = m.getModelType();
@@ -3327,22 +3360,28 @@ public class TestManager {
 		int numTestExamples = dataset.getIndividualPieceSizes(ma).get(pieceIndex);
 		
 		// Set paths
+		String storePath = null;
 		String pathNN = null;
 		String pathMM = null;
-		String pathComb = null;
+//		String pathComb = null;
 		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER) {
-			pathNN = argPaths[0];
+			storePath = argPaths[0];
+//			pathNN = argPaths[0];
+//			storePath = pathNN;
 		}
 //		else if (onlyMM) {
 //			pathMM = fullPaths[0];
 //		}
 		else if (mt == ModelType.ENS) {		
-			pathComb = argPaths[0];
+			storePath = argPaths[0];
+//			pathComb = argPaths[0];
 			pathNN = argPaths[1];
 			pathMM = argPaths[2];
+//			storePath = pathComb;
 		}
 		if (!useCV && applToNewData) {
-			pathComb = argPaths[0];
+//			pathComb = argPaths[0]; // only used for ENS model
+			storePath = argPaths[0];
 			pathNN = argPaths[1];
 		}
 		prcRcl += " -- app" + "\r\n";
@@ -3454,7 +3493,8 @@ public class TestManager {
 				boolean isScikit = false;
 				// For scikit
 				if (isScikit) {
-					String[] s = new String[]{pathNN, m.name(), Runner.fvExt + "app.csv"};
+					String[] s = new String[]{storePath, //pathNN, 
+						m.name(), Runner.fvExt + "app.csv"};
 				}
 				// For TensorFlow
 //				int param = modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue();
@@ -3471,8 +3511,10 @@ public class TestManager {
 //					"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
 //					"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
 //					"epochs=" + modelParameters.get(Runner.EPOCHS).intValue();
-				String[] s = new String[]{pathNN, m.name(), paramsAndHyperparams};
-				System.out.println(Arrays.toString(s));	
+				String[] s = new String[]{!applToNewData ? storePath : pathNN, //pathNN, 
+					m.name(), paramsAndHyperparams};
+				System.out.println("cmdStr = " + Arrays.toString(s));
+				// Calls create_neural_network(), which restores the weights stored at storePath
 				PythonInterface.init(s);
 			}
 //			allNetworkOutputs = new ArrayList<double[]>();
@@ -3488,6 +3530,8 @@ public class TestManager {
 			}
 
 			// 1. Traverse the piece note for note, and do for each note
+			List<List<Double>> allFv = new ArrayList<>();
+			List<List<Double>> allPredLbl = new ArrayList<>();
 			for (int i = 0; i < numTestExamples; i++) {
 				// TODO in ENS model this loop gets slower as i increases
 //				for (int noteIndex = 0; noteIndex < numberOfTestExamples; noteIndex++) {
@@ -3499,13 +3543,26 @@ public class TestManager {
 //				System.out.println("noteIndexBwd = " + noteIndex);
 //				System.out.println(allVoiceLabels);
 
-				predictVoices(pathNN, minAndMaxFeatureValues, noteIndex, voiceEntryInfo, modelWeighting);
+				List<List<Double>> fvAndPredLbl = 
+					predictVoices(storePath, minAndMaxFeatureValues, noteIndex, 
+					voiceEntryInfo, modelWeighting);
 				// Add the note to the predicted voices
 				addNote(noteIndex);
 				// Set the adapted voice labels to the Transcription 
 				newTranscription.setVoiceLabels(allVoiceLabels);
+				
+				if (mt == ModelType.DNN || mt == ModelType.OTHER) {
+					allFv.add(fvAndPredLbl.get(0));
+					allPredLbl.add(fvAndPredLbl.get(1));
+				}
 			}
 			if (mt == ModelType.DNN || mt == ModelType.OTHER) {
+				// Overwrite last saved features and model output files with those for
+				// all features and model outputs
+				ToolBox.storeListOfListsAsCSVFile(allFv, 
+					new File(storePath, Runner.fvExt + Runner.application + ".csv"));
+				ToolBox.storeListOfListsAsCSVFile(allPredLbl, 
+					new File(storePath, Runner.outpExt + Runner.application + ".csv"));
 				// notes in fold processed; exit Python process
 			}
 
@@ -3751,9 +3808,10 @@ public class TestManager {
 ////		ToolBox.storeObjectBinary(newTranscription, new File(dir + pieceName + ".ser"));
 //		ToolBox.storeObjectBinary(predictedTranscr, new File(dir + pieceName + ".ser"));
 	
-		// Do not store outputs in the real world application case
+		// Store outputs (but not in the real world application case)
 		if (!(!useCV && applToNewData) && mt == ModelType.NN) {
-			File f = new File(pathNN + Runner.outputs + ".ser"); 
+			File f = new File(storePath + //pathNN + 
+				Runner.outputs + ".ser"); 
 			if (ma == ModellingApproach.N2N) {
 				List<List<double[]>> outps = 
 					ToolBox.getStoredObjectBinary(new ArrayList<List<double[]>>(), f);
@@ -3794,13 +3852,14 @@ public class TestManager {
 					String evalString =	EvaluationManager.getPerformanceSingleFoldMM(evalNum, 
 						outputs, groundTruthVoiceLabels);
 //					model = model.concat("_n=" + n);
-					String subPathComb = pathComb.concat("n=" + ns.get(nInd) + "/");
+					String subStorePath = storePath. //pathComb.
+						concat("n=" + ns.get(nInd) + "/");
 					ToolBox.storeObjectBinary(evalNum, 
-						new File(subPathComb + model + Runner.evalMM + "-" + Runner.application + ".ser")); // new: subPathComb was pathComb
+						new File(subStorePath + model + Runner.evalMM + "-" + Runner.application + ".ser")); // new: subStorePath was pathComb
 					ToolBox.storeTextFile(evalString, 	
-						new File(subPathComb + model + Runner.evalMM + "-" + Runner.application + ".txt")); // new: subPathComb was pathComb
+						new File(subStorePath + model + Runner.evalMM + "-" + Runner.application + ".txt")); // new: subStorePath was pathComb
 					ToolBox.storeObjectBinary(outputs, 
-						new File(subPathComb + model + Runner.outputMM + "-" + Runner.application +".ser")); // new: subPathComb was pathComb
+						new File(subStorePath + model + Runner.outputMM + "-" + Runner.application +".ser")); // new: subStorePath was pathComb
 				}
 			}
 			// Reset STM
@@ -3911,8 +3970,8 @@ public class TestManager {
 	 * @return
 	 */
 	// TESTED For type (iv) conflicts only
-	static Rational getMaximumDuration(Rational metricTime, Rational metricTimeNext, Transcription transcription, 
-		List<Integer> predictedVoices) {
+	static Rational getMaximumDuration(Rational metricTime, Rational metricTimeNext, 
+		Transcription transcription, List<Integer> predictedVoices) {
 		Rational maxDur = null;
 
 		// For each predicted voice: determine the onset time of the next note in that voice
@@ -7387,7 +7446,7 @@ public class TestManager {
 	}
 	
 	
-	private boolean resolveConflictsBidirectionalOUD(List<double[]> allNetworkOutputsTest, 
+	private boolean resolveConflictsBidirectionalOLD(List<double[]> allNetworkOutputsTest, 
 		List<Integer> considerSolved, int highestNumberOfVoices) {
 
 		Map<String, Double> modelParameters = Runner.getModelParams();

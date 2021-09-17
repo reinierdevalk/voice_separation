@@ -73,11 +73,13 @@ public class EvaluationManager {
 		paramsNotPrinted = Arrays.asList(new String[]{
 			Runner.MODELLING_APPROACH, 
 			Runner.WEIGHTS_INIT, 
-			Runner.APPL_TO_NEW_DATA,
 			Runner.CROSS_VAL, 
-			Runner.TRAIN_USER_MODEL, 
 			Runner.MODEL_DURATION_AGAIN,
-			Runner.AVERAGE_PROX
+			Runner.AVERAGE_PROX,
+			Runner.APPL_TO_NEW_DATA,
+			Runner.TRAIN_USER_MODEL,
+			Runner.VERBOSE,
+			Runner.SKIP_TRAINING,
 		});
 	}
 	
@@ -275,8 +277,13 @@ public class EvaluationManager {
 						}
 					}
 					else if (intKeys.contains(key)){
-						if (!key.equals(Runner.SEED) || key.equals(Runner.SEED) && mt == ModelType.DNN) {
+						if (!key.equals(Runner.SEED) || (key.equals(Runner.SEED) && mt == ModelType.DNN)) {
 							dataAndParams.append(value.intValue() + "\r\n");
+						}
+						else if (key.equals(Runner.SEED) && mt != ModelType.DNN) {
+//							dataAndParams.append("n/a" + "\r\n");
+							dataAndParams = new StringBuffer().append(
+								dataAndParams.substring(0, dataAndParams.indexOf(Runner.SEED)));
 						}
 					}
 					else {
@@ -333,7 +340,7 @@ public class EvaluationManager {
 				ErrorCalculator.calculateAccuracy(assignmentErrors, isTablatureCase, true);
 		}
 		
-		// Added 28.01.2020 to print prc and rec per voice for tablature (only in test/app mode)
+		// Added 28.01.2020 to print prc and rcl per voice for tablature (only in test/app mode)
 		List<ErrorFraction[]> prf = 
 			ErrorCalculator.calculatePrecisionRecallF1PerVoice(allPredictedVoices, 
 			groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices);

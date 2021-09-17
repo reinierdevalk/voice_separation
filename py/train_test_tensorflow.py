@@ -11,7 +11,7 @@ appl = 2
 
 seed=-1 # seed=0 used for all experiments ISMIR 2018 paper 
 
-# when used as a script (train and test mode)
+# When used as a script (train and test mode)
 if len(argv) > 1:
 	script, mdl, arg_mode, arg_path, arg_exts, arg_params, arg_stored_weights = argv
 
@@ -57,6 +57,7 @@ if len(argv) > 1:
 	if arg_stored_weights.casefold() == 'true':
 		use_stored_weights = True
 
+	# fold_path is the path where the stored features and labels are retrieved from
 	fold_path = arg_path
 #	num_features = len(genfromtxt(fold_path + fv_ext, delimiter=',')[0])
 #	num_classes = len(genfromtxt(fold_path + lbl_ext, delimiter=',')[0])
@@ -95,7 +96,7 @@ if len(argv) > 1:
 	layer_sizes.append(OL_size)
 
 
-# when used as a module (application mode)
+# When used as a module (application mode)
 else:
 	print('as a module')
 	seed=-1 #'set_me'
@@ -104,6 +105,7 @@ else:
 	fv_ext = 'x_app.csv'
 	lbl_ext = 'y_app.csv'
 	out_ext = 'out_app.csv'
+	user_model = True
 
 
 tf.reset_default_graph()
@@ -139,9 +141,12 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, fold_path):
 		layer_sizes				the sizes of the input, hidden, and output layers
 		use_stored_weights		whether or not to initialise the network with stored weights
 		mode 					the evaluation mode: train, test, or application
+		fold_path				the path where the weights are stored at or retrieved from (depending on whether 
+			 					use_stored_weights == False or True, respectively)
 	"""
 
 	print('create_neural_network called')
+
 	# hidden and output layers
 	num_layers = len(layer_sizes) - 1
 	weights = {}
@@ -149,8 +154,8 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, fold_path):
 
 	print('creating a DNN with', str(num_layers-1), 'hidden layers of size', str(layer_sizes[1:len(layer_sizes)-1]))
 
-	# initialise the weights
-	# (a) create new weights and biases
+	# Initialise the weights
+	# (a) Create new weights and biases
 	if not use_stored_weights:
 		print('use_stored_weights =', use_stored_weights)
 		for i in range(num_layers):            
@@ -171,7 +176,7 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, fold_path):
 #		print('W1', sess.run(weights['W1']))
 		# END OF SESSION    
 
-	# (b) restore existing weights and biases
+	# (b) Restore existing weights and biases
 	else:
 		print('use_stored_weights = ', use_stored_weights)
 		for i in range(num_layers):
@@ -221,6 +226,7 @@ def evaluate_neural_network(data, keep_prob, num_layers, weights, biases):
 
 	Arguments:
 		data					the features
+		keep_prob				the dropout keep probability placeholder
 		num_layers				the number of hidden and output layers
 		weights 				the weight
 		biases 					the biases
@@ -251,17 +257,23 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 
 	Arguments:
 		x						the features
+		keep_prob				the dropout keep probability placeholder
+		lrn_rate 				the learning rate
+		kp 						the dropout keep probability value
+		epoch 					the number of epochs to train for
 		layer_sizes				the sizes of the input, hidden, and output layers
 		use_stored_weights		whether or not to initialise the network with stored weights
 		mode 					the evaluation mode: train, test, or application
+		fold_path				the path where 
+								- the weights are stored at or retrieved from
+								- the outputs and additional information (.txt files, figures) are stored at
+								- the stored features are retrieved from (only when mode is application)
 		*args 					the weights and biases dictionary (only when mode is application)
 	"""
 
-	print('run_neural_network called in mode',  mode)
+	print('run_neural_network called in mode', mode)
 #	prediction = create_neural_network(x, layer_sizes, use_stored_weights, mode) # train and test
-	
-	print(fold_path)
-	
+
 	# train, test, application
 	weights_biases = {}
 	if mode == train or mode == test:
@@ -372,7 +384,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 		# Added 06.12.2021 for Byrd presentation
 		if user_model:
 			save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
-			# save the model output
+			# Save the model output
 			# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
 			softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
 			np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=",")
@@ -498,15 +510,15 @@ def make_validation_set(x_tr, y_tr, perc):
 	return arrs
 
 
-# interactive session needed to be able to share variables between functions; 
-# 'with tf.Session() as sess:' does not work
-# see https://www.tensorflow.org/api_docs/python/tf/InteractiveSession
-# example of passing around sessions at  
+# Interactive session needed to be able to share variables between functions; 'with tf.Session() as sess:' does not work.
+# See https://www.tensorflow.org/api_docs/python/tf/InteractiveSession
+# Example of passing around sessions at  
 # https://stackoverflow.com/questions/44660572/function-scopes-with-tensorflow-sessions
 sess = tf.InteractiveSession() 
-# set seed to ensure deterministic dropout
+# Set seed to ensure deterministic dropout;
 # see https://stackoverflow.com/questions/49175704/tensorflow-reproducing-results-when-using-dropout
 tf.set_random_seed(seed)
+
 if mode == train or mode == test:
 	run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, fold_path)
 #elif mode == appl:
@@ -514,9 +526,3 @@ if mode == train or mode == test:
 #	# https://pythontips.com/2013/08/04/args-and-kwargs-in-python-explained/
 #	run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, fold_path, weights_biases)
 sess.close()
-
-#if mode == test:
-#	print(nums_tst)
-#	print(dens_tst)
-#	print(str(sum(nums_tst)/sum(dens_tst)))
-

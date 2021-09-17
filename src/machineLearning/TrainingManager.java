@@ -168,6 +168,11 @@ public class TrainingManager {
 						new File(paths[1] + Runner.output + "fold_" +
 						ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex)) + "-" + 
 						currPieceName + ".ser"));
+					System.out.println(paths[1]);
+					System.out.println(Runner.output + "fold_" +
+						ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex)) + "-" + 
+						currPieceName + ".ser");
+					System.out.println(predTranscr);
 					List<List<Double>> vl = predTranscr.getVoiceLabels();
 					System.out.println("currPieceName = " + currPieceName);
 					System.out.println("first ten ----");
@@ -356,7 +361,8 @@ public class TrainingManager {
 		boolean modelDuration = m.getModelDuration();
 		DecisionContext dc = m.getDecisionContext();
 		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
-		boolean verbose = Runner.getVerbose();
+		boolean verbose = 
+			ToolBox.toBoolean(modelParameters.get(Runner.VERBOSE).intValue());
 		List<Integer> sliceIndices = null;
 		if (mt == ModelType.MM || mt == ModelType.ENS) {
 			sliceIndices = 
@@ -371,22 +377,25 @@ public class TrainingManager {
 //			System.out.println("key = " + e.getKey() + "; value = " + e.getValue());	
 //		}
 
+		String storePath = null;
 		String pathNN = null;
 		String pathMM = null;
-		String pathComb = null;
-		String storePath = null;
+//		String pathComb = null;
 		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER) {
-			pathNN = argPaths[0];
-			storePath = pathNN;	
+//			pathNN = argPaths[0];
+//			storePath = pathNN;
+			storePath = argPaths[0];
 		}
 		else if (mt == ModelType.MM) {
-			pathMM = argPaths[0];
+//			pathMM = argPaths[0];
+			storePath = argPaths[0];
 		}
 		else if (mt == ModelType.ENS) {
-			pathComb = argPaths[0];
+//			pathComb = argPaths[0];
+			storePath = argPaths[0];
 			pathNN = argPaths[1];
 			pathMM = argPaths[2];
-			storePath = pathComb;
+//			storePath = pathComb;
 		}
 
 		// 1. Initialise the superlists representing the entire training set
@@ -998,7 +1007,8 @@ public class TrainingManager {
 						FeatureGenerator.scaleSetOfSetsOfFeatureVectors(allChordFeatures, 
 						minAndMax, ma);
 				}
-				ToolBox.storeObjectBinary(minAndMax, new File(pathNN + Runner.minMaxFeatVals + ".ser"));
+				ToolBox.storeObjectBinary(minAndMax, new File(storePath //pathNN
+					+ Runner.minMaxFeatVals + ".ser"));
 
 				// Create the training and validation data
 				if (ma == ModellingApproach.N2N) {
@@ -1019,7 +1029,7 @@ public class TrainingManager {
 
 		// 4. Train and evaluate; store results in .csv file
 		List<String[][]> csvTables = new ArrayList<String[][]>();
-		// a. NN, OTHER, and ENS case
+		// a. NN, DNN, OTHER, and ENS case
 		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER || mt == ModelType.ENS) {
 			// 1. Determine output variables
 			List<double[]> networkOutputs = null;
@@ -1054,7 +1064,8 @@ public class TrainingManager {
 						new Integer[]{numFeatures, numHiddenNeurons, numOutputNeurons};
 					System.out.println("network layer sizes (input-hidden-output): " + Arrays.toString(layerSizes));
 					List<List<List<Integer>>> trainingResults = 
-						train(layerSizes, pathNN, trainingData, groundTruths, 
+						train(layerSizes, storePath, //pathNN, 
+						trainingData, groundTruths, 
 						validationData, groundTruthsVal, allEDUInfo, allEDUInfoVal, 
 						allVoiceAssignmentPossibilities);
 
@@ -1065,9 +1076,11 @@ public class TrainingManager {
 				}
 				if (mt == ModelType.DNN || mt == ModelType.OTHER) {		
 					// Store features and labels
-					storeData(pathNN, Runner.train + ".csv", trainingData);
+					storeData(storePath, //pathNN, 
+						Runner.train + ".csv", trainingData);
 					if (valPerc != 0) {
-						storeData(pathNN, Runner.validation + ".csv", validationData);
+						storeData(storePath, //pathNN, 
+							Runner.validation + ".csv", validationData);
 					}
 
 					// Train
@@ -1079,10 +1092,10 @@ public class TrainingManager {
 						smoothen = true;
 						cmd = new String[]{
 							"python", 
-							Runner.scriptPathPython + Runner.scriptScikit, 
+							Runner.scriptPythonPath + Runner.scriptScikit, 
 							m.name(), 
 							"train", 
-							pathNN, 
+							storePath, //pathNN, 
 							Runner.fvExt, 
 							Runner.clExt, 
 							Runner.outpExt, 
@@ -1104,10 +1117,10 @@ public class TrainingManager {
 						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
 					cmd = new String[]{
 						"python", 
-						Runner.scriptPathPython + Runner.script, 
+						Runner.scriptPythonPath + Runner.scriptTensorFlow, 
 						m.name(), 
 						Runner.train, 
-						pathNN, 
+						storePath, //pathNN, 
 						extensions, 
 						paramsAndHyperparams,
 						Boolean.toString((wi == WeightsInit.INIT_FROM_LIST))};
@@ -1120,8 +1133,8 @@ public class TrainingManager {
 
 					// Set networkOutputs, predictedVoices, and assignmentErrors
 					String[][] outpCsv = 
-						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(pathNN + 
-						Runner.outpExt + Runner.train + ".csv")));
+						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(storePath //pathNN 
+						+ Runner.outpExt + Runner.train + ".csv")));
 					List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 					if (smoothen) {
 						predictedOutputs = smoothenOutput(predictedOutputs, 0.000001);
@@ -1162,7 +1175,8 @@ public class TrainingManager {
 					outputs.add(null);
 					outputs.add(null);
 					outputs.set(Runner.TRAIN, networkOutputs);
-					ToolBox.storeObjectBinary(outputs, new File(pathNN + Runner.outputs + ".ser"));
+					ToolBox.storeObjectBinary(outputs, new File(storePath //pathNN 
+						+ Runner.outputs + ".ser"));
 				}
 			}
 			// ENS case (where there is no actual training): determine output variables
@@ -1220,7 +1234,8 @@ public class TrainingManager {
 					modelWeights.add(w);
 				}
 				ToolBox.storeObjectBinary(modelWeights, 
-					new File(pathComb + Runner.modelWeighting + ".ser"));
+					new File(storePath + //pathComb + 
+						Runner.modelWeighting + ".ser"));
 
 				// Combine model outputs
 				combinedOutputs = 
@@ -1246,7 +1261,8 @@ public class TrainingManager {
 					outputs.add(null);
 					outputs.add(null);
 					outputs.set(Runner.TRAIN, combinedOutputs);
-					ToolBox.storeObjectBinary(outputs, new File(pathComb + Runner.outputs + ".ser"));
+					ToolBox.storeObjectBinary(outputs, new File(storePath + //pathComb + 
+						Runner.outputs + ".ser"));
 				}
 			}
 
@@ -1333,7 +1349,8 @@ public class TrainingManager {
 					new MelodyPredictor(MelodyPredictor.getMelModelType(), 
 					MelodyPredictor.getTermType(), modelParameters.get(Runner.N).intValue(), currSI);
 				mp.trainModel(allMFVs);
-				mp.saveModel(new File(pathMM + Runner.melodyModel + "-" +
+				mp.saveModel(new File(storePath + //pathMM + 
+					Runner.melodyModel + "-" +
 					MelodyPredictor.getSliceIndexString(currSI) + ".ser"));
 				
 				// Gather the MM outputs for the training set
@@ -1371,11 +1388,14 @@ public class TrainingManager {
 					Runner.melodyModel + "-" + 
 					MelodyPredictor.getSliceIndexString(sliceIndices.get(i)) + "-";
 				ToolBox.storeObjectBinary(evalNum, 
-					new File(pathMM + model + Runner.evalMM + "-" + Runner.train + ".ser"));
+					new File(storePath + //pathMM + 
+					model + Runner.evalMM + "-" + Runner.train + ".ser"));
 				ToolBox.storeTextFile(evalString,	
-					new File(pathMM + model + Runner.evalMM + "-" + Runner.train + ".txt"));
+					new File(storePath + //pathMM + 
+					model + Runner.evalMM + "-" + Runner.train + ".txt"));
 				ToolBox.storeObjectBinary(currMMOutp, 
-					new File(pathMM + model + Runner.outputMM + "-" + Runner.train + ".ser"));
+					new File(storePath + //pathMM + 
+					model + Runner.outputMM + "-" + Runner.train + ".ser"));
 			}
 		}
 
@@ -1519,7 +1539,7 @@ public class TrainingManager {
 	 * @param layerInfo Contains the number of input neurons (element 0), hidden neurons 
 	 *                  (element 1), and output neurons (element 2). Bias neurons are always
 	 *                   excluded. 
-	 * @param path
+	 * @param path The path to store the weights at and retrieve the stored weights from.
 	 * @param trainingData N2N case: contains two elements: 
 	 *                               at index 0: features 
                                      at index 1: full labels (i.e., including duration, if applicable)

@@ -62,11 +62,11 @@ public class FeatureGeneratorTest extends TestCase {
 		List<List<Double>> predVoiceLabels = ToolBox.getStoredObject(new ArrayList<List<Double>>(),
 			new File("F/PhD/data" + "results/gen_labels/tab/4vv/" + 
 //			"Predicted voice labels " +	pieceName + ".xml"));
-			Runner.genVoiceLabels +	pieceName + ".ser"));
+			"voice_lab-" +	pieceName + ".ser"));
 		List<List<Double>> predDurationLabels = ToolBox.getStoredObject(new ArrayList<List<Double>>(), 
 			new File("F/PhD/data" + "results/gen_labels/tab/4vv/" +  
 //			"Predicted duration labels " + pieceName + ".xml"));
-			Runner.genDurLabels + pieceName + ".ser"));
+			"dur_lab-" + pieceName + ".ser"));
 		
 		Piece argPiece = Transcription.createPiece(tab.getBasicTabSymbolProperties(), null, predVoiceLabels,
 			predDurationLabels, 4, null, null);

@@ -16,7 +16,7 @@ import utility.DataConverter;
 
 public class HMMManager {
 
-	public static String HMMPath = Runner.resultsPath;
+	public static String HMMPath = Runner.experimentsPath;
 	private static boolean useFullSizeMapping;
 	private static boolean storeAlsoAsSerialised = false;
 	
@@ -29,12 +29,12 @@ public class HMMManager {
 		// =============== USER-ADAPTABLE SETTINGS ===============
 		// a. Choose dataset
 //		DatasetID id = DatasetID.INT_3vv; 
-		DatasetID id = DatasetID.INT_4vv; 
+		DatasetID id = DatasetID.TAB_INT_4VV; 
 //		DatasetID id = DatasetID.WTC_3vv;
 //		DatasetID id = DatasetID.WTC_4vv;
 		boolean isTablatureCase = id.isTablatureSet();  
 		List<String> pieceNames = id.getPieceNames(); 
-		String vv = id.getNumVoices() + "vv";
+		String vv = id.getNumVoices() + Runner.voices;
 		// b. Create a folder in results/HMM/ for the current occasion and the current experiment (optional) 
 		String occasion = "Thesis - Copy 1/";
 		String experiment = "optimisation/";
@@ -73,7 +73,7 @@ public class HMMManager {
 			"thesis/prl_2/" + id.getName() + "/" + vv + "/" + "H/" + configuration; // TODO EB
 		
 //		String path = "F:/research/data" + HMMPath + folderName + "/data/";
-		String path = Runner.resultsPath + folderName + "data/"; 
+		String path = Runner.experimentsPath + folderName + "data/"; 
 		System.out.println(path);
 		System.exit(0);
 

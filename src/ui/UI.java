@@ -1,6 +1,7 @@
 package ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -31,12 +32,13 @@ import ui.Runner.WeightsInit;
 
 public class UI {
 
-	private static String rootDir = "F:/research/"; // TODO also defined in MEIExport; should be in one place only
+	private static String rootDir = "F:/research/";
+	private static String rootDirUser = "F:/research/data/";
 	public static String repl = "user/models/BYRD_4vv/D/bwd/";
-	
+
 	private static boolean appliedToNewData, repeatExp, useCV, trainUserModel, verbose, 
-		estimateEntries;
-	private static String expName, storedExpName, userDefinedName, datasetVersion, hyperParams;
+		estimateEntries, skipTraining;
+	private static String expName, storedExpName, userDefinedName, hyperParams;
 	private static Model m, storedM;
 	private static ProcessingMode pm, storedPm;
 	private static Configuration config;
@@ -59,51 +61,44 @@ public class UI {
 		return rootDir; 
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// Scenarios
 		//  useCV && !appliedToNewData:	model selection phase
 		//  useCV &&  appliedToNewData:	never
 		// !useCV && !appliedToNewData:	application case with known GT (transfer learning) 
-		// !useCV &&  appliedToNewData:	application case with unknown GT (real-world)
+		// !useCV &&  appliedToNewData:	application case with unknown GT (real-world/deploy)
 		
 		appliedToNewData = 
 			(args.length == 0 || args.length == 1 && args[0].startsWith("path=") ? false : true);
 
 		// If repeating an existing experiment or conducting a new one: set parameters and settings
 		if (!appliedToNewData) {
-			
+
 			// Settings
 			boolean gridSearch = false;
 			repeatExp = true;
 			useCV = true;
+			skipTraining = false;
 			trainUserModel = false;
 			estimateEntries = false;
 			verbose = false;
 
-//			datasetID = DatasetID.WTC_4vv;
-			datasetID = DatasetID.BYRD_4vv;
-//			datasetID = DatasetID.JOSQ_4vv;
-//			datasetID = DatasetID.INT_3vv;
+//			datasetID = DatasetID.BYRD_INT_4VV;
+			datasetID = DatasetID.TAB_INT_3VV;
 
-			datasetVersion = "thesis"; // only for this if
-
-//			expName = "thesis/exp_3.3.1/"; // publication + experiment (if applicable)
+//			expName = "thesis/exp_1/"; // publication + experiment (if applicable)
+			expName = "thesis/exp_3.3.1/";
 //			expName = "thesis/exp_3.2/";
-//			expName = "thesis/exp_1/";
-//			expName = "ISMIR-2019/";
-			expName = "byrd/";
-//			expName = "ISMIR-2017-LBD/";
-//			expName = "ISMIR-2020";
+//			expName = "ISMIR-2018/";
+//			expName = "byrd/";
 
-			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
-						
-			m = Model.D;
+			m = Model.B;
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd	
-//			storedExpName = "thesis/exp_3.2";
-			storedExpName = "byrd/";
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd	
+			storedExpName = "thesis/exp_3.1";
+//			storedExpName = "byrd/";
 //			storedExpName = "ISMIR-2020";
-			storedM = Model.D;
+			storedM = Model.N;
 			storedPm = ProcessingMode.BWD;
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
@@ -130,8 +125,8 @@ public class UI {
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
-			hiddenLayers = 1;
-			hiddenLayerSize = 66;
+			hiddenLayers = 2;
+			hiddenLayerSize = 50;
 			alpha = 0.003; // learning rate (1.0 in shallow network case)
 			// MM
 			n = 2;
@@ -146,13 +141,14 @@ public class UI {
 
 			// Non-tuned hyperparameters 
 			// Shallow network
-			maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
+			maxMetaCycles = (m == Model.C) ? 60 : 40;
 			cycles = 10;
 			// DNN
+			seed = 3; // seed = 0 used for all experiments ISMIR 2018 paper
 			epochs = 600;
 			// General
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
-			deviationThreshold = 0.0; // 0.05;
+			deviationThreshold = 0.05; // 0.0;
 			validationPercentage = (m.getModelType() == ModelType.DNN) ? 10 : 0; // 20 : 0;
 			if (trainUserModel) {
 				validationPercentage = 0;
@@ -194,50 +190,113 @@ public class UI {
 				set(args);
 			}
 		}
-		// If applying a trained model to new data: deduce parameters and settings  	
-		// D bwd BYRD_4vv 'F:/research/experiments/byrd/byrd-int/4vv/' '' 'folder_name'
+		// If applying a trained model to new data: deduce parameters and settings		
+		// CLI usage:
+		// $ java -cp <classPaths> ui.UI <model> <pm> <dsIDTrain> '<rootPath>' '<verbose>' '<userDefinedName>'
+		//
+		// The class ui.UI takes four arguments: 
+		// - <modelName>		the trained model's name, consisting of the model, pm, and 
+		//						datasetID of the dataset it was trained on, separated by dashes
+		// 						(e.g., N-bwd-bach-WTC-4vv). In case of a bidirectional model, the
+		// 						unidirectional model whose output is used is added, separated
+		// 						by a colon (e.g., N_B-fwd-bach-WTC-4vv:N-bwd-bach-WTC-4vv) 
+		// - <rootPath>			the path containing the user/ dir; fixed to F:/research/data/
+		// 						(optional; can be empty string if pwd is rootPath)
+		// - <verbose>			true if verbose output is wanted, false if not (optional; can
+		// 						be empty string (i.e., false)) 
+		// - <userDefinedName>  a user-defined name given to the data that is processed 
+		//                      (optional; can be empty string (i.e., none))  
+		//
+		// The -cp arg <classPaths> contains all paths to .java (in bin/ dirs) and .jar 
+		// (in lib/ dirs) files, and these paths must be added separately. Depending on the 
+		// number of dirs in <codePath>, this can result in a very long and repetitive command
+		// $ java -cp '<codePath>/<dir_1>/bin;<codePath>/<dir_1>/lib/*;
+		//             ...
+		//             <codePath>/<dir_n>/bin;<codePath>/<dir_n>/lib/*;
+		//        ui.UI <modelName> <rootPath> <verbose> <userDefinedName>
+		//
+		// However, this arg can be generated using the following bash command (to be plugged 
+		// into the java command), which simply adds a 'bin/' and a 'lib/*' extension to *each*
+		// path p in <codePath>, and echoes a semicolon-separated concatenation of all of them
+		// (even if they are non-existent)
+		// $ for p in <codePath>/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done
+		//
+		// where the variable $p is a path in <codePath>; $p"/bin"";"$p"/lib/*"";" is a 
+		// concatenation of six strings; and the arg -n removes the newline after each echo.
+		// NB: It is also possible to add the 'lib/*' extension only if p contains a lib/ dir
+		// $ for p in <codePath>/* ; do echo -n $p"/bin"";" ; if [ -d $p"/lib" ] ; then echo -n $p"/lib/*"";" ; fi ; done
+		//
+		// 1. Example CLI command with absolute class paths
+		// a. pwd is rootPath (rootPath does not have to be provided as arg)
+		//    $ cd <rootPath>
+		//    $ java -cp $(for p in <codePath>/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done) 
+		//           ui.UI <modelName> '' <verbose> <userDefinedName>
+		//    e.g.,
+		//    $ cd /cygdrive/f/research/data/
+		//    $ java -cp $(for p in F:/research/software/code/eclipse/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done) 
+		//           ui.UI D-bwd-byrd-int-4vv '' '' '' 
+		// b. pwd is not rootPath (rootPath must be provided as arg)
+		//    $ cd <somePath>
+		//    $ java -cp $(for p in <codePath>/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done) 
+		//           ui.UI <modelName> <rootPath> <verbose> <userDefinedName>
+		//  
+		// 2. Example CLI command with relative (to the pwd) class paths; folder structure is
+		//    <path>
+		//     |-- <dirA>
+		//     |    |-- <subDirA>
+		//     |         |-- <rootDir> // the user/ dir; from here it is three dirs up to <path>
+		//     |-- <dirB>
+		// 	   |    |-- <codeDir>      // the dir containing the code dirs
+		//     |-- <dirC>
+		//          |-- <subDirC>
+		//               |-- <someDir> // a random dir; from here it is three dirs up to <path>
+		// c. pwd is rootPath (rootPath does not have to be provided as arg)
+		//    $ cd <path>/dirA>/<subdirA>/<rootDir>
+		//    $ java -cp $(for p in <path>/<dirB>/<codeDir>/* ; do echo -n "../../../""<dirB>/<codeDir>/"${p##*/}"/bin"";""../../../""<dirB>/<codeDir>/"${p##*/}"/lib/*"";" ; done) 
+		//           ui.UI <modelName> '' <verbose> <userDefinedName>
+		//    e.g.,
+		//    $ cd /cygdrive/f/research/data/user
+		//    $ java -cp $(for p in F:/research/software/code/eclipse/* ; do echo -n "../../""software/code/eclipse/"${p##*/}"/bin"";""../../""software/code/eclipse/"${p##*/}"/lib/*"";" ; done) 
+		//           ui.UI D-bwd-byrd-int-4vv '' '' ''
+		// d. pwd is not rootPath (rootPath must be provided as arg)
+		//    $ cd <path>/dirC>/<subdirC>/<someDir>
+		//    $ java -cp $(for p in <path>/<dirB>/<codeDir>/* ; do echo -n "../../../""<dirB>/<codeDir>/"${p##*/}"/bin"";""../../../""<dirB>/<codeDir>/"${p##*/}"/lib/*"";" ; done) 
+		//           ui.UI <modelName> <rootPath> <verbose> <userDefinedName>
+		//
+		// NB: Note the use of ${p##*/} (and not $p, as under 1a. and 1b.) to get only the last 
+		//     dir in p and not the full path. See https://stackoverflow.com/questions/2107945/how-to-loop-over-directories-in-linux 
 		else {
 			// User-defined settings
-			m = Model.valueOf(args[0]);
-			pm = ProcessingMode.valueOf(args[1].toUpperCase());
-			if (m.getDecisionContext() == DecisionContext.UNIDIR) {
-				storedM = m;
-//				m = storedM = Model.valueOf(args[0]);
-				storedPm = pm;
-//				pm = storedPm = ProcessingMode.valueOf(args[1].toUpperCase());
+			String[] modelNames = args[0].split(":");
+			String[] modelName = modelNames[0].split("-");
+			String[] storedModelName = modelNames.length == 1 ? null : modelNames[1].split("-");
+			m = Model.valueOf(modelName[0]);
+			pm = ProcessingMode.valueOf(modelName[1].toUpperCase());
+			if (m.getDecisionContext() == DecisionContext.BIDIR) {
+				storedM = Model.valueOf(storedModelName[0]);
+				storedPm = ProcessingMode.valueOf(storedModelName[1].toUpperCase());
 			}
-			else {
-//				m = Model.valueOf(args[0]);
-				storedM = Model.D; // TODO
-//				pm = ProcessingMode.valueOf(args[1].toUpperCase());
-				storedPm = ProcessingMode.BWD; // TODO
-			}
-			datasetIDTrain = DatasetID.valueOf(args[2]); // only for this if
-			rootDir = args[3];
-			verbose = Boolean.parseBoolean(args[4]);
-			userDefinedName = args[5]; // only for this if
+			datasetIDTrain = DatasetID.getDatasetID(modelName[2] + "-" + modelName[3] + "-" + modelName[4]); // only for this if
+			rootDir = args[1];
+			verbose = Boolean.parseBoolean(args[2]);
+			userDefinedName = args[3]; // only for this if
 			
 			// Unused fv must be made for Runner.ALL_FEATURE_VECTORS to be filled TODO
 			FeatureVector unused = FeatureVector.values()[0];
-
+			
 			// Fixed settings
 			repeatExp = false;
 			useCV = false;
 			trainUserModel = false;
-			datasetID = datasetIDTrain.isTablatureSet() ? DatasetID.USER_TAB : DatasetID.USER;
+			datasetID = datasetIDTrain.isTablatureSet() ? DatasetID.USER : DatasetID.USER_NT;
 			expName = "out";
 			if (m.getDecisionContext() == DecisionContext.UNIDIR) {
-				storedExpName = "models";
+				storedExpName = "models"; //get this from runner
 			}
 			else { // zondag TODO
 				storedExpName = "out/";
 			}
-//			System.out.println(m);
-//			System.out.println(pm);
-//			System.out.println(datasetIDTrain);
-//			System.exit(0);
 			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
-			
 			set(args);
 		}
 	}
@@ -245,19 +304,15 @@ public class UI {
 
 	/**
 	 * 
-	 * @param args If of length 1, contains the alternative root directory. If of length > 1, contains
-	 *        as element 0: the model
-	 *        as element 1: the processing mode  
-	 *        as element 2: the training data
-	 *        as element 3: the root directory or an empty string, in which case the directory
-	 *                      from which this class is called is set as the root directory
-	 *		  as element 4: whether the output is verbose
-	 *		  as element 5: the name of the user dataset 
+	 * @param args If of length 1, contains the alternative root directory. If of length > 1, 
+	 *        contains the CLI arguments modelName, rootPath, verbose, and userDefinedName.
+	 * @throws IOException 
 	 */
-	public static void set(String[] args) {
+	public static void set(String[] args) throws IOException {
 		ModelType mt = m.getModelType();
 		ModellingApproach ma = m.getModellingApproach();
-		int	sliceIndEncoding = ToolBox.encodeListOfIntegers(MelodyFeatureGenerator.getSliceIndices(mmfs));
+		int	sliceIndEncoding = 
+			ToolBox.encodeListOfIntegers(MelodyFeatureGenerator.getSliceIndices(mmfs));
 		int	nsEncoding = ToolBox.encodeListOfIntegers(ns);
 		
 		// 0. Set predefined and derived settings
@@ -267,38 +322,41 @@ public class UI {
 		WeightsInit wi = repeatExp ? WeightsInit.INIT_FROM_LIST : WeightsInit.INIT_RANDOM;
 		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
 		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
-		
-//		// Non-tuned hyperparameters 
-//		int validationPercentage = (mt == ModelType.DNN) ? 10 : 0; // TODO or 20 : 0;
-//		int maxMetaCycles = (m == Model.C) ? 60 : 40; // TODO or 60 : 80;
-//		int cycles = 10;
-//		int epochs = 600;
-//		double learningRate = (mt == ModelType.DNN) ? alpha : 1.0;
-//		double deviationThreshold = 0.0; // 0.05;
-//		int maxNumVoices = (ma == ModellingApproach.N2N) ? 5 : 4;
 
 		// 1. Set rootDir and paths to code and data
+		// a. rootDir is F:/research/, which contains the dirs data/annotated/ (GT data) and 
+		// software/code/eclipse/ (code). Any alternative rootDir is given in args[0], must start
+		// with "rootDir=", and also contain the dirs data/annotated/ and software/code/eclipse/
 		if (!appliedToNewData) {
-			// rootDir is the directory containing the directories data/ and software/code/. Any
-			// alternative rootDir is given in args[0], which must start with "path=". This 
-			// alternative rootDir must also contain the directories data/ and software/code/
 			if (args.length == 1) {
 				setRootDir(pathify(new String[]{args[0].substring(args[0].indexOf("=")+1)}));
 			}
-			Runner.setPathsToCodeAndData(rootDir, false);
 		}
-		// "N" "FWD" "WTC_4vv" "Users/reinierdevalk/" "" "joepie"
+		// b. rootDir is F:/research/data/, which contains the dirs user/ (unseen input data)
+		// and models/ (trained models). The paths to the code are provided via the classPath.
+		// rootDir need not be provided if the pwd is rootdir, i.e., F:/research/data/
 		else {
-			// rootDir is the directory containing the directory user/ (see the halcyon README). 
-			// If no rootDir is provided, it is set to the current path. See
-			// http://stackoverflow.com/questions/2837263/how-do-i-get-the-directory-that-the-currently-executing-jar-file-is-in
-			// http://stackoverflow.com/questions/8275499/how-to-call-getclass-from-a-static-method-in-java
-			if (rootDir.equals("")) {
-				rootDir = new File("").getAbsolutePath();
+			// Do nothing if rootDir is rootDirUser; else
+			if (!rootDir.equals(rootDirUser)) {
+				// If <rootDir> arg is empty string: OK if pwd is rootDirUser
+				if (rootDir.equals("")) {
+					// http://stackoverflow.com/questions/2837263/how-do-i-get-the-directory-that-the-currently-executing-jar-file-is-in
+					String pwd = pathify(new String[]{new File("").getAbsolutePath()});
+					if (pwd.equals(rootDirUser)) {
+						rootDir = pwd;
+					}
+					else {
+						throw new RuntimeException("No <rootDir> provided, pwd must be " + rootDirUser);
+					}
+				}
+				// If <rootDir> arg is incorrect
+				else {
+					throw new RuntimeException("Incorrect <rootDir> provided; <rootDir> provided must be " + rootDirUser);
+				}
 			}
 			setRootDir(pathify(new String[]{rootDir}));
-			Runner.setPathsToCodeAndData(rootDir, true);
 		}
+		Runner.setPathsToCodeAndData(rootDir, appliedToNewData);
 
 		// 2. Set dataset(s)
 		Dataset ds, dsTrain;
@@ -307,68 +365,84 @@ public class UI {
 			dsTrain = null;
 		}
 		else {
-			dsTrain = new Dataset(datasetIDTrain);
-			datasetID.setNumVoices(datasetIDTrain.getNumVoices()); // TODO use alg that calculates num voices
-			System.out.println(Runner.midiPathUser);
-			System.out.println(Runner.encodingsPathUser);
-			String pathStr = datasetID.isTablatureSet() ? Runner.encodingsPathUser : Runner.midiPathUser; 
-			String extension = datasetID.isTablatureSet() ? ".tbp" : ".mid";
-			datasetID.setPieceNames(getFileNamesWithExtension(new File(pathStr), extension));
+			datasetID.setName(userDefinedName);
+			datasetID.setNumVoices(datasetIDTrain.getNumVoices());
+			datasetID.setPieceNames(getFileNamesWithExtension(new File(
+				datasetID.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
+				datasetID.isTablatureSet() ? ".tbp" : ".mid"));
 			ds = new Dataset(datasetID);
-			ds.setName(userDefinedName);
+			dsTrain = new Dataset(datasetIDTrain);
 		}
 
-		// 3. Set paths to model output
-		// The paths consist of (a) Runner.resultsPath (if repeating an existing experiment or 
-		// conducting a new one) or (b) Runner.userPath (if applying a trained model to new data), 
-		// both of which are completed as follows (* = optional)	
-		// publ			exp*		dataset		voices		model		proc mode*	hyperparams*
-		// Examples: (a) 1-2; (b) 3-4 (path where the trained model is stored; output path)
-		// thesis/		exp_1/		bach-WTC/	4vv/		N/			fwd/		-
-		// ISMIR-2018/				bach-WTC/	4vv/		D/			fwd/		HL=2/HLS=25/KP=0.75/
-		// -			models/		bach-WTC/	4vv/		N/			fwd/		-
-		// -			out/		myDataset/	4vv/		N/			fwd/		WTC_4vv 
-		String path = null;
+		// 3. Set paths
+		// (a) If repeating an existing experiment or conducting a new one
+		// The paths consist of Runner.experimentsPath, completed with (* = optional)
+		// - publication, *experiment, dataset, voices, model, processing mode, *hyperparams
+		// Examples:
+		// F:/research/experiments/thesis/exp_1/bach-WTC/4vv/N/fwd/ (no hyperparams)
+		// F:/research/experiments/ISMIR-2018/bach-WTC/4vv/D/fwd/HL=2/HLS=25/KP=0.75/ (no experiment)
+		String storePath = null;
+		String pathPredTrans = null;
 		String pathStoredNN = null;
 		String pathStoredMM = null;
 		if (!appliedToNewData) {
-			String pref = Runner.resultsPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
-			String prefStored = pref.replace(expName, storedExpName);
-			path = 
-				pathify(new String[]{pref, m.toString() + (trainUserModel ? "-user" : ""), 
-				pm.getStringRep(), hyperParams});
+			String dsvv = pathify(new String[]{ds.getName(), ds.getNumVoices() + Runner.voices});
+			storePath = pathify(new String[]{
+				Runner.experimentsPath, expName, 
+				dsvv, m.toString() + (trainUserModel ? "-user" : ""), pm.getStringRep(), 
+				hyperParams});
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
-				pathStoredNN = pathify(new String[]{prefStored, storedM.toString(), storedPm.getStringRep()});
-//				pathStoredNN = pathStoredNN.substring(0, pathStoredNN.indexOf("fwd/"))+ "prev/";
+				pathPredTrans = pathify(new String[]{
+					Runner.experimentsPath, storedExpName, 
+					dsvv, storedM.toString(), storedPm.getStringRep()});
 			}
 			if (mt == ModelType.ENS) {
-				pathStoredNN = pathify(new String[]{prefStored, Model.N.toString(), pm.getStringRep()});
-				pathStoredMM = pathify(new String[]{prefStored, m.getMelodyModel().toString()}); 
+				pathStoredNN = pathify(new String[]{
+					Runner.experimentsPath, storedExpName, 
+					dsvv, Model.N.toString(), pm.getStringRep()});
+				pathStoredMM = pathify(new String[]{
+					Runner.experimentsPath, storedExpName, 
+					dsvv, m.getMelodyModel().toString()}); 
 			}
 		}
-		else {			
+		// (b) if applying a trained model to new data
+		// The paths consists of rootPath, completed with (* = optional)
+		// out folder	model name	model		proc mode
+		// Examples (path where the trained model is stored; output path) 
+		// models/		BYRD_4vv/	N/			fwd/
+		// models		N-fwd-byrd-int-4vv
+		// out/			<dataset>/	N/			fwd/
+		else {		
 			String datasetTrainID = dsTrain.getDatasetID().name();
 			// The path where the output of the trained model applied to the new data is stored 
-			// consists of
+			// (storePath) consists of
 			// - rootDir (as given to the CLI) + user/out/
-			// - name and number of voices of unseen dataset
+			// (- name and number of voices of unseen dataset)
 			// - the DatasetID of the dataset the trained model is trained on
-			// - the model and pm used
-			// e.g. <rootDir>/user/out/ + ITMH/4vv/ + BYRD_4vv/ + D/bwd/
-			String pref = 
-				Runner.userPath + expName + "/"; // + ds.getName() + "/" + ds.getNumVoices() + "vv";
-			path = pathify(new String[]{pref, datasetTrainID, 
-				m.toString(), pm.getStringRep()}); // type and processing mode of the trained model
-			// The path where the trained model is stored consists of
+			// - type and pm of the model
+			// e.g. <rootDir>/user/out/ + (ITMH/4vv/ +) BYRD_4vv/ + D/bwd/
+			String pref = rootDir + expName + "/"; // + ds.getName() + "/" + ds.getNumVoices() + Runner.voices;
+			storePath = pathify(new String[]{pref, datasetTrainID, m.toString(), pm.getStringRep()}); 
+			// The path where the trained model itself is stored consists of
 			// - rootDir (as given to the CLI) + user/models/
 			// - the DatasetID of the dataset the trained model is trained on
-			// - the model and pm used
+			// - type and pm of the trained model
 			// e.g., <rootDir>/user/models/ + BYRD_4vv/ + D/bwd/
-			String prefStored = Runner.userPath + storedExpName + "/" + datasetTrainID;
+			String prefStored = rootDir + storedExpName + "/" + datasetTrainID;
 			pathStoredNN = pathify(new String[]{prefStored, storedM.toString(), storedPm.getStringRep()});
+			System.out.println(storePath);
+			System.out.println(pathStoredNN);
+			System.exit(0);
+			if (m.getDecisionContext() == DecisionContext.BIDIR) {
+				pathPredTrans = null;
+			}
+//			als model = D en pm = bwd
+//			F:/research/experiments/byrd/byrd-int/4vv/user/out/BYRD_4vv/D/bwd/
+//			F:/research/experiments/byrd/byrd-int/4vv/user/models/BYRD_4vv/D/bwd/
+			
 			
 //			String pref = 
-//				Runner.userPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + "vv";
+//				Runner.userPath + expName + "/" + ds.getName() + "/" + ds.getNumVoices() + Runner.voices;
 //			String prefStored = 
 //				pref.replace(expName, storedExpName).replace(ds.getName(), dsTrain.getName());
 //			path = pathify(new String[]{
@@ -441,22 +515,31 @@ public class UI {
 			modelParams.put(Runner.N_EST, (m == Model.RF || m == Model.RF_CL) ? (double) trees : null);
 			modelParams.put(Runner.N, (mt == ModelType.MM) ? (double) n : null);
 			modelParams.put(Runner.NS_ENC_SINGLE_DIGIT, (mt == ModelType.ENS) ? (double) nsEncoding : null);
-			// e. Other (not printed)
+			// e. Other (not printed -- see EvaluationManager.paramsNotPrinted)
 			modelParams.put(Runner.MODELLING_APPROACH, (double) ma.getIntRep());
 			modelParams.put(Runner.WEIGHTS_INIT, (double) wi.getIntRep());
-			modelParams.put(Runner.APPL_TO_NEW_DATA, (double) ToolBox.toInt(appliedToNewData));
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(useCV));
-			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
 			modelParams.put(Runner.MODEL_DURATION_AGAIN, (double) ToolBox.toInt(modelDurationAgain));
 			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
+			// TODO move the four below out of modelParams (bc they are not real params) and give them as arg to Runner.runExperiment()?
+			modelParams.put(Runner.APPL_TO_NEW_DATA, (double) ToolBox.toInt(appliedToNewData));
+			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
+			modelParams.put(Runner.VERBOSE, (double) ToolBox.toInt(verbose));
+			modelParams.put(Runner.SKIP_TRAINING, (double) ToolBox.toInt(skipTraining));
 		}
 		else {
 			if (m.getDecisionContext() == DecisionContext.UNIDIR) {
+//				System.out.println("pathStoredNN: " + pathStoredNN);
+//				System.out.println("rootDir = " + rootDir);
+//				System.exit(0);
 				modelParams = 
 					ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
 					new File(pathStoredNN + Runner.modelParameters + ".ser"));
 			}
 			else {
+				System.out.println("rootDir = " + rootDir);
+				System.out.println(pathStoredNN);
+//				System.exit(0);
 				modelParams = 
 					ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
 					new File(rootDir + repl + Runner.modelParameters + ".ser")); // TODO
@@ -511,11 +594,16 @@ public class UI {
 		MelodyPredictor.setMelModelType(MelModelType.SIMPLE_LM);
 		MelodyPredictor.setTermType(m.getKylmModelType());
 		EvaluationManager.setMetricsUsed(metricsUsed);
-		System.out.println("path         = " + path);
-		System.out.println("pathStoredNN = " + pathStoredNN);
-		System.out.println("pathStoredMM = " + pathStoredMM);
-//		System.exit(0);
-		Runner.runExperiment(modelParams, new String[]{path, pathStoredNN, pathStoredMM}, ds, dsTrain, datasetVersion, verbose);
+		System.out.println("storePath     = " + storePath);
+		System.out.println("pathPredTrans = " + pathPredTrans);
+		System.out.println("pathStoredNN  = " + pathStoredNN);
+		System.out.println("pathStoredMM  = " + pathStoredMM);
+		System.exit(0);
+		Runner.setPaths(new String[]{storePath, pathPredTrans,/*pathStoredNN,*/ pathStoredMM});
+		Runner.setModelParams(modelParams);
+		Runner.setDataset(ds); // still unpopulated; this is done in Runner.runExperiment()
+		Runner.setDatasetTrain(dsTrain);
+		Runner.runExperiment();
 	}
 
 
@@ -547,15 +635,15 @@ public class UI {
 		for (int i = 0; i < dirs.length; i++) {
 			String s = dirs[i];
 			path = path.concat(s);
-			// Add slash only if s does not end with one already, and, in the case of the final s,
-			// additionally only if trailingSlash is true
-			if ((i < dirs.length - 1 && !s.endsWith("/")) || 
-				(i == dirs.length - 1 && !s.endsWith("/"))) {
+			if (!s.endsWith("/")) {
 				path = path.concat("/");
 			}
 		}
 		if (path.contains("//")) {
 			path = path.replace("//", "/");
+		}
+		if (path.contains("\\")) {
+			path = path.replace("\\", "/");
 		}
 		return path;
 	} 

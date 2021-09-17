@@ -159,7 +159,7 @@ public class PythonInterface {
 			
 			// For TensorFlow
 			// Set imports and variables
-			String cdDir = Runner.scriptPathPython;
+			String cdDir = Runner.scriptPythonPath;
 //			String cdDir = "C:Users/Reinier/Dropbox/";
 			String imports =
 				"cd " + cdDir  + cr +
@@ -167,7 +167,7 @@ public class PythonInterface {
 				"import tensorflow as tf" + cr +
 				"import numpy as np" + cr +
 				"from numpy import genfromtxt" + cr +
-				"import " + Runner.script.substring(0, Runner.script.indexOf(".py")) + cr
+				"import " + Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py")) + cr
 			;
 			String variables =
 				"mode = " + Runner.APPL + cr + 
@@ -439,7 +439,7 @@ public class PythonInterface {
 				"x = tf.placeholder('float', [None, IL_size])" + cr +
 	//			"print(x)" + cr + 
 				"y = tf.placeholder('float')" + cr +
-				"keep_prob = tf.placeholder('float')" + cr
+				"keep_prob = tf.placeholder('float')" + cr 
 			; 
 //			String defEvaluateNeuralNetwork = "";
 //			for (String s : scriptToString(new File(Runner.scriptPath), "def evaluate_neural_network")) {
@@ -450,14 +450,16 @@ public class PythonInterface {
 //				defRunNeuralNetwork += s + cr;
 //			}
 			//
-
+			
 			String call =
 				"sess = tf.InteractiveSession()" + cr +
-				"tf.set_random_seed(0)" + cr +
+				"tf.set_random_seed(" + Runner.getModelParams().get(Runner.SEED).intValue() + ")" + cr +
+//				"tf.set_random_seed(0)" + cr +
 				"lrn_rate = 0" + cr +
 				"kp = 0.0" + cr +
 				"epochs = 0" + cr +
-				"train_test_tensorflow.run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, fold_path, weights_biases)" + cr +
+				"arg_fold_path = " + "'" + argPath + "'" + cr +
+				"train_test_tensorflow.run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, arg_fold_path, weights_biases)" + cr +
 				"sess.close()" + cr
 			;
 			cmdStr += placeholders; 
@@ -672,7 +674,7 @@ public class PythonInterface {
 			for (double d : outp) {
 				arrAsStr += d + ",";
 			}
-//			System.out.println(arrAsStr);
+			System.out.println(arrAsStr);
 			
 			// Retrieve error (if any) from Python script. See Listing 4.3 at 
 			// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html

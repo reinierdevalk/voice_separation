@@ -235,7 +235,7 @@ public class TestManagerTest extends TestCase {
 		Runner.setModelParams(modelParameters);
 		
 		// ds
-		Dataset ds = new Dataset(DatasetID.TESTPIECE_SET);
+		Dataset ds = new Dataset(DatasetID.TAB_TST);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
@@ -821,7 +821,7 @@ public class TestManagerTest extends TestCase {
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(DatasetID.TESTPIECE_SET);
+		Dataset ds = new Dataset(DatasetID.TAB_TST);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
@@ -1426,7 +1426,7 @@ public class TestManagerTest extends TestCase {
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(DatasetID.TESTPIECE_SET_NON_TAB);
+		Dataset ds = new Dataset(DatasetID.TAB_TST_T);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
@@ -1768,7 +1768,7 @@ public class TestManagerTest extends TestCase {
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(DatasetID.TESTPIECE_SET_NON_TAB);
+		Dataset ds = new Dataset(DatasetID.TAB_TST_T);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		

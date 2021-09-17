@@ -32,9 +32,9 @@ public class DatasetTest extends TestCase {
 			new String[]{Runner.encodingsPathTest, Runner.midiPathTest, Runner.midiPathTest};
 		Map<String, Double> mp = new LinkedHashMap<String, Double>();
 		mp.put(Runner.APPL_TO_NEW_DATA, 0.0);
-		Dataset ds = new Dataset(DatasetID.TESTPIECE_SET);
+		Dataset ds = new Dataset(DatasetID.TAB_TST);
 		ds.populateDataset(null, paths, false);
-		Dataset dsNonTab = new Dataset(DatasetID.TESTPIECE_SET_NON_TAB);
+		Dataset dsNonTab = new Dataset(DatasetID.TAB_TST_T);
 		dsNonTab.populateDataset(null, paths, false);
 
 		List<Integer> actual = new ArrayList<Integer>();
@@ -65,9 +65,9 @@ public class DatasetTest extends TestCase {
 			new String[]{Runner.encodingsPathTest, Runner.midiPathTest, Runner.midiPathTest};
 		Map<String, Double> mp = new LinkedHashMap<String, Double>();
 		mp.put(Runner.APPL_TO_NEW_DATA, 0.0);
-		Dataset ds = new Dataset(DatasetID.TESTPIECE_SET);
+		Dataset ds = new Dataset(DatasetID.TAB_TST);
 		ds.populateDataset(null, paths, false);
-		Dataset dsNonTab = new Dataset(DatasetID.TESTPIECE_SET_NON_TAB);
+		Dataset dsNonTab = new Dataset(DatasetID.TAB_TST_T);
 		dsNonTab.populateDataset(null, paths, false);
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.N2N));

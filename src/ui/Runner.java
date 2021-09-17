@@ -1,12 +1,12 @@
 package ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import data.Dataset;
 import featureExtraction.FeatureGenerator;
@@ -19,7 +19,7 @@ import n_grams.KylmModel;
 import tools.ToolBox;
 
 public class Runner {
-	
+
 	// General
 	public static final int TRAIN = 0;
 	public static final int TEST = 1;
@@ -28,55 +28,35 @@ public class Runner {
 	public static final int ASSESS = 3;
 	public static final int INIT_WEIGHTS = 0;
 	public static final int BEST_WEIGHTS = 1;
-	
-	// Directory names and paths
-	public static String pathToData; // = UI.getRootDir() + "data/";
-	public static String pathToCode; // = UI.getRootDir() + "software/code/";
-//	private static String encodingsDir = "encodings/dataset/";
-//	private static String tabMidiDir = "MIDI/tab/";
-//	private static String bachMidiDir = "MIDI/bach/";
-//	private static String inventionsDir = "inventions/";
-//	private static String wtcDir = "WTC/";
-//	private static String storedMM = "stored/MM/";
+	// 
+	private static Map<String, Double> modelParams;
+	private static Dataset dataset;
+	private static Dataset datasetTrain;
 
-//	public static String encodingsPath = rootDir + "encodings/clean/";
-	public static String encodingsPath; // = pathToData + "encodings/"; 
-	public static String encodingsPathTest; // = encodingsPath + "test/";
-//	public static String tabMidiPath = rootDir + "MIDI/clean/tab/";
-//	public static String bachMidiPath = rootDir + "MIDI/clean/bach/";
-	public static String midiPath; // = pathToData + "MIDI/";
-	public static String midiPathTest; // = midiPath + "test/";
-//	public static String userEncodingsPath = rootDir + "encodings/user/";
-//	public static String encodingsPathUser = encodingsPath + "user/";
-	public static String encodingsPathUser; // = pathToData + "user/in/encodings/";
-//	public static String userMidiPath = rootDir + "MIDI/user/";
-//	public static String midiPathUser = midiPath + "user/";
-	public static String midiPathUser; // = pathToData + "user/in/MIDI/";
-//	public static String encodingsPathTest = "F:/research/data/" + "encodings/test/";
-//	public static String midiPathTest = "F:/research/data/" + "MIDI/test/";
-//	public static String scriptPath = "F:/research/software/code/python/train_and_test_models.py";
-//	public static String scriptPath = "C:/Users/Reinier/Dropbox/";
-//	public static String scriptPath = "F:/research/software/code/python/";
-	public static String scriptPathPython; // = pathToCode + "python/";
-	public static String scriptPathMatlab;
-	public static String scriptScikit = "train_and_test_models.py";
-	public static String script = "train_test_tensorflow.py";
-
-//	public static String[] testPaths; // = new String[]{encodingsPathTest, midiPathTest, midiPathTest};
-	public static String resultsPath; // = pathToData + "experiments/";
-	public static String userPath; // = pathToData + "user/"; 
-//	public static String storedNNPath; // = pathToData + "stored/NN/";
-//	public static String storedMMPath; // = pathToData + "stored/MM/";
-//	private static String storedOutputsPath = pathToData + "stored/outputs/";
-	public static String storedDatasetsPath; // = pathToData + "stored/datasets/";
-//	public static String MEITemplatePath;
-//	private static String storedTranscriptionsPath = pathToData + "stored/transcriptions/";
+	// Paths, directory names, and scripts
+	// All paths are set in setPathsToCodeAndData()
+	private static String[] paths;
+	public static String dataPath;
+	public static String codePath;
+	public static String encodingsPath;
+	public static String encodingsPathTest;
+	public static String midiPath;
+	public static String midiPathTest;
+	public static String modelsPath;
+	public static String scriptPythonPath;
+	public static String scriptMatlabPath;
+	public static String experimentsPath;
+	public static String storedDatasetsPath;
+	//
 	public static String output = "out/";
-	
+	//
+	public static String scriptScikit = "train_and_test_models.py";
+	public static String scriptTensorFlow = "train_test_tensorflow.py";
+
 	// Naming conventions
 	// Abbreviate all metrics and self-defined names/terms, using 
 	// a. three-letter codes for single-word terms
-	//    1. if abbreviation exist, use it (e.g., avg, fwd)
+	//    1. if abbreviation exist, use it (e.g., avg, fwd, tab)
 	//    2. if not, use first three letters when the term starts with a vowel (e.g., acc)
 	//       and first three consonants when it starts with a consonant (e.g., prc)
 	// b. capitalised acronyms for multi-word terms
@@ -95,13 +75,9 @@ public class Runner {
 	public static String minMaxFeatVals = "feature_ranges";
 	public static String melodyModel = "MM";
 	public static String neuralNetwork = "NN";
-	public static String genVoiceLabels = "voice_lab-"; // TODO remove
-	public static String genDurLabels = "dur_lab-"; // TODO remove
 	private static String overallPerf = "performance";
 	private static String overallPerfDur = "overall_performance-dur";
 	public static String modelWeighting = "weighting";
-//	public static String initWeightsFileName = "init_weights";
-//	public static String bestWeightsFileName = "best_weights";
 	public static String weights = "weights";
 	
 	public static String train = "trn";
@@ -114,7 +90,7 @@ public class Runner {
 	public static String perfDur = "performance-dur";
 	public static String outputs = "model_output";
 	public static String details = "details";
-	public static String info = "info";
+	private static String userinfo = "info";
 	public static String prePr = "prp";
 	public static String postPr = "pst";
 	public static String average = "avg";
@@ -123,31 +99,29 @@ public class Runner {
 	public static String ISM = "ISM";
 	public static String OPM = "OPM";
 	public static String TPM = "TPM";
+	public static String voices = "vv";
 	public static String observations = "observations";
-//	public static String mappings = "mappings";
 	public static String mappingDict = "mapping_dictionary";
 	public static String chordDict = "chord_dictionary";
 	public static String modelParameters = "model_parameters";
-	
+
 //	public static String fvExt = "fv_"; // scikit
+//	public static String lblExt = "lbl_"; // scikit
+//	public static String outpExt = "outp_"; // scikit
 	public static String fvExt = "x_";
 	public static String clExt = "cl_";
-//	public static String lblExt = "lbl_"; // scikit
 	public static String lblExt = "y_";
-//	public static String outpExt = "outp_"; // scikit
 	public static String outpExt = "out_";
-	
+
 	public static boolean ignoreAppl = false;
 	public static boolean storeNetworkOutputs = true;
 	public static boolean textify = true;
-//	public static double parameterToTune;
 
 	// Keys
 	// Enums
 	public static final String MODELLING_APPROACH = "modelling approach";
 	public static final String MODEL = "model";
 	private static final String MODEL_TYPE = "model_type";
-//	public static final String IMPLEMENTATION = "implementation";
 	public static final String PROC_MODE = "processing mode";
 	public static final String FEAT_VEC = "feature vector";
 	private static final String DECISION_CONTEXT = "decision context";
@@ -161,18 +135,15 @@ public class Runner {
 	public static final String HIGHEST_NUM_VOICES = "highest number of voices";
 	public static final String LARGEST_CHORD_SIZE = "largest chord size";
 	public static final String N = "n";
-//	public static final String TOTAL_NUM_EXAMPLES = "total number of examples";
 	public static final String C = "regularisation parameter (alt.)";
 	public static final String N_NGH = "neighbours";
 	public static final String N_EST = "decision trees";
 	public static final String SLICE_IND_ENC_SINGLE_DIGIT = "slice indices";
 	public static final String NS_ENC_SINGLE_DIGIT = "n values";
-
 //	public static final String NEIGHBOURS = "neighbours";
 //	public static final String TREES = "decision trees";
 	
 	// DNN
-
 	public static final String EPOCHS = "epochs";
 	public static final String NUM_HIDDEN_LAYERS = "hidden layers";
 	public static final String HIDDEN_LAYER_SIZE = "hidden layer size";
@@ -195,10 +166,11 @@ public class Runner {
 	public static final String APPL_TO_NEW_DATA = "applied to new data";
 //	public static final String TAB_AS_NON_TAB = "tablature as non-tablature";
 	public static final String ESTIMATE_ENTRIES = "voice entry estimation";
-//	public static final String GIVE_FIRST = "give first";
 	public static final String MODEL_DURATION_AGAIN = "model duration again";
 	public static final String AVERAGE_PROX = "average proximities";
 //	public static final String USE_VALIDATION_SET = "use validation set";
+	public static final String VERBOSE = "verbose";
+	public static final String SKIP_TRAINING = "skip training";
 
 	// Enum lists
 	public static final int ARR_SIZE = 50; // TODO 
@@ -344,7 +316,6 @@ public class Runner {
 			return modellingApproach;
 		}
 
-// 		31.03		
 		public KylmModel.Type getKylmModelType() {
 			return kmType;
 		}
@@ -456,7 +427,6 @@ public class Runner {
 
 		@Override
 	    public String toString() {
-//			return String.valueOf(getIntRep());
 			return getStringRep();        
 	    }
 
@@ -684,10 +654,24 @@ public class Runner {
 		keys.add(KEEP_PROB);
 		return keys;
 	}
+	
+	
+	public static void setModelParams(Map<String, Double> arg) {
+		modelParams = arg;
+	}
 
+	public static Map<String, Double> getModelParams() {
+		return modelParams;
+	}
+	
+	public static void setPaths(String[] arg) {
+		paths = arg;
+	}
 
-	private static Dataset dataset;
-	private static Dataset datasetTrain;
+	public static String[] getPaths() {
+		return paths;
+	}
+
 	public static void setDataset(Dataset d) {
 		dataset = d;
 	}
@@ -711,78 +695,32 @@ public class Runner {
 		}
 		return highestNumVoices;
 	}
-	
-	
 
-	private static Map<String, Double> modelParams;
-	public static void setModelParams(Map<String, Double> arg) {
-		modelParams = arg;
-	}
 
-	public static Map<String, Double> getModelParams() {
-		return modelParams;
-	}
-
-	private static String[] paths;
-	private static void setPaths(String[] arg) {
-		paths = arg;
-	}
-
-	public static String[] getPaths() {
-		return paths;
-	}
-
-//	private static List<Integer> sliceIndices;
-//	public static void setSliceIndices(List<Integer> arg) {
-//		sliceIndices = arg;
-//	}
-//
-//	public static List<Integer> getSliceIndices() {
-//		return sliceIndices;		
-//	}
-
-	private static boolean verbose;
-	private static void setVerbose(boolean arg) {
-		verbose = arg;
-	}
-
-	public static boolean getVerbose() {
-		return verbose;
-	}
-	
-	public static void setPathsToCodeAndData(String argRootDir, boolean appliedToNewData) {
+	public static void setPathsToCodeAndData(String argRootDir, boolean appliedToNewData) throws IOException {
 		if (!appliedToNewData) {
-			pathToData = argRootDir + "data/data/";
-			pathToCode = argRootDir + "software/code/";
-//			scriptPathPython = pathToCode + "python/";
-			scriptPathPython = pathToCode + "eclipse/voice_separation/py/";
-//			scriptPathMatlab = pathToCode + "MATLAB/";
-			scriptPathMatlab = pathToCode + "eclipse/voice_separation/m/";
-			encodingsPath = pathToData + "encodings/";
-			midiPath = pathToData + "MIDI/";
-			encodingsPathTest = encodingsPath + "test/";
-			midiPathTest = midiPath + "test/";
-//			resultsPath = pathToData + "experiments/";
-			resultsPath = argRootDir + "experiments/";
-//			storedNNPath = pathToData + "stored/NN/";
-//			storedMMPath = pathToData + "stored/MM/";
-//			storedDatasetsPath = pathToData + "datasets/";
-			storedDatasetsPath = argRootDir + "data/" + "datasets/";
-//			MEITemplatePath = pathToData + "templates/MEI/";
+			codePath = UI.pathify(new String[]{argRootDir, "software/code/eclipse/"});
+			scriptPythonPath = UI.pathify(new String[]{codePath, "voice_separation/py/"});
+			scriptMatlabPath = UI.pathify(new String[]{codePath, "voice_separation/m/"});
+			//
+			dataPath = UI.pathify(new String[]{argRootDir, "data/annotated/"});
+			encodingsPath = UI.pathify(new String[]{dataPath, "encodings/"});
+			encodingsPathTest = UI.pathify(new String[]{encodingsPath, "test"});
+			midiPath = UI.pathify(new String[]{dataPath, "MIDI/"});
+			midiPathTest = UI.pathify(new String[]{midiPath, "test"});
+			//
+			experimentsPath = UI.pathify(new String[]{argRootDir, "experiments/"});
+			storedDatasetsPath = UI.pathify(new String[]{argRootDir, "data/" + "datasets/"});
 		}
 		else {
-			pathToData = argRootDir;
-			if (!appliedToNewData) { // zondag
-				pathToCode = argRootDir;
-				scriptPathPython = argRootDir;
-			}
-			else {
-				pathToCode = "F:/research/" + "software/code/"; // TODO
-				scriptPathPython = pathToCode + "eclipse/voice_separation/py/";
-			}
-			encodingsPathUser = pathToData + "user/in/encodings/";
-			midiPathUser = pathToData + "user/in/MIDI/";
-			userPath = pathToData + "user/";
+			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
+			codePath = UI.pathify(new String[]{
+				new File(argRootDir).getCanonicalFile().getParent(), "software/code/eclipse/"});
+			scriptPythonPath = UI.pathify(new String[]{codePath, "voice_separation/py/"});
+			//
+			encodingsPath = UI.pathify(new String[]{argRootDir, "user/in/encodings/"});
+			midiPath = UI.pathify(new String[]{argRootDir, "user/in/MIDI/"});
+			modelsPath = UI.pathify(new String[]{argRootDir, "models/"});
 		}
 	}
 
@@ -814,40 +752,31 @@ public class Runner {
 		perfCsvFilesStoreTimes.add(l);
 	}
 
-	public static void runExperiment(Map<String, Double> argModelParams, String[] argPaths, 
-		Dataset ds, Dataset dsTrain, /*List<Integer> argSliceIndices, 
-		List<Integer> argNs,*/ String datasetVersion, boolean verbose) {
-		
-//		System.out.println("ptd = " + pathToData);
-//		System.out.println("ptc = " + pathToCode);
-//		System.out.println("sp = " + scriptPath);
-//		System.exit(0);
-		
-		String startPreProc = ToolBox.getTimeStampPrecise();
-				
-//		String[] argPaths = getPaths();
-//		Map<String, Double> argModelParams = getModelParams();
-//		List<Integer> argSliceIndices = getSliceIndices();
+	public static void runExperiment() {
 
+		String startPreProc = ToolBox.getTimeStampPrecise();
+		
+		String[] argPaths = getPaths();
+		Map<String, Double> argModelParams = getModelParams();
 		ModellingApproach ma = 
 			ALL_MODELLING_APPROACHES[argModelParams.get(MODELLING_APPROACH).intValue()];	
+		boolean applToNewData = ToolBox.toBoolean(argModelParams.get(APPL_TO_NEW_DATA).intValue());
+		boolean skipTraining = ToolBox.toBoolean(argModelParams.get(SKIP_TRAINING).intValue());
 		Model m = ALL_MODELS[argModelParams.get(MODEL).intValue()]; 
 		boolean modelDuration = m.getModelDuration();
 		ModelType mt = m.getModelType();
-//		boolean useCrossVal = ToolBox.toBoolean(argModelParams.get(Runner.CROSS_VAL).intValue());
-		boolean applToNewData = ToolBox.toBoolean(argModelParams.get(APPL_TO_NEW_DATA).intValue());
 
-//		System.out.println("\n>> preparing the experiment");
-
-		// Create and set dataset; update modelParams
 		if (applToNewData) {
 			System.out.println("\nstarting halcyon.");
 		}
-		System.out.println("\ncreating the dataset.");		
+
+		// Populate and reset dataset
+		System.out.println("\ncreating the dataset.");
+		Dataset ds = getDataset();
 		if (!applToNewData) {
 			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {
-				ds.populateDataset(datasetVersion, null, applToNewData);
+				ds.populateDataset("thesis", null, applToNewData);
 				ToolBox.storeObjectBinary(ds, datasetFile);
 			}
 			else {
@@ -855,55 +784,38 @@ public class Runner {
 			}
 		}
 		else {
-			ds.populateDataset(datasetVersion, null, applToNewData);
+			ds.populateDataset(null, null, applToNewData);
 		}
 		setDataset(ds);
-		setDatasetTrain(dsTrain);
-		
-//		int largestChordSize = Runner.getDataset().getLargestChordSize();	
-//		argModelParams.put(LARGEST_CHORD_SIZE, (double) ds.getLargestChordSize());
-//		argModelParams.put(HIGHEST_NUM_VOICES, (double) ds.getHighestNumVoices());
-//		if (applToNewData) {
-//			argModelParams.put(HIGHEST_NUM_VOICES, (double) dsTrain.getNumVoices());
-//		}
-//		argModelParams.put(TOTAL_NUM_EXAMPLES, (double) dataset.getNumDataExamples(ma));
-		setModelParams(argModelParams);
-		
-		setPaths(argPaths);
-//		setSliceIndices(argSliceIndices);
-//		setNs(argNs);
-		setVerbose(verbose);
-		
-		// If the HMM is trained and tested
-//		if (mt == ModelType.HMM) {
 
-			
+		// If the HMM is trained and tested
+//		if (mt == ModelType.HMM) {			
 //			String path = argPaths[0];
-			
-			// 1. Train, i.e., generate matrices and test data
+//			
+//			// 1. Train, i.e., generate matrices and test data
 //			String startTr = ToolBox.getTimeStampPrecise();
 //			int hiNumVoicesAssumed = 4;
 //			hm.generateDictionariesAndMatrices(dataset, path, hiNumVoicesAssumed);
-			
-			// 2. Test, i.e, predict most likely mapping sequence
+//			
+//			// 2. Test, i.e, predict most likely mapping sequence
 //			String startTe = ToolBox.getTimeStampPrecise();
-			// Integrate Matlab code
+//			// Integrate Matlab code
 //			new TestManager().prepareTesting(null);
-
+//
+//			// 3. Evaluate
 //			hm.evaluate(null, null, null, false);
-			// 3. Evaluate
-
+//		
 //			System.exit(0);
 //		}
+
 		// If only the MM is trained and tested
 		if (mt == ModelType.MM) {				
 			int n = argModelParams.get(Runner.N).intValue();
 			String path = argPaths[0];
 			path = path.concat("n=").concat(String.valueOf(n)).concat("/");
-			System.out.println(path);
 			argPaths[0] = path;
 			setPaths(argPaths);			
-//			System.exit(0);
+
 
 			// 1. Train
 			String startTraining = ToolBox.getTimeStamp();
@@ -982,8 +894,10 @@ public class Runner {
 			if (!applToNewData) {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
-				System.out.println("\nstarting the training.");						
-//				new TrainingManager().prepareTraining(startTr);
+				System.out.println("\nstarting the training.");
+				if (!skipTraining) {
+					new TrainingManager().prepareTraining(startTr);
+				}
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}
@@ -1120,7 +1034,7 @@ public class Runner {
 				String s =
 					"model      = " + ALL_MODELS[argModelParams.get(MODEL).intValue()] + "\r\n" +
 					"proc_mode  = " + ALL_PROC_MODES[argModelParams.get(PROC_MODE).intValue()] + "\r\n" +
-					"train_data = " + dsTrain.getDatasetID().name();
+					"train_data = " + getDatasetTrain().getDatasetID().name();
 				System.out.println(s);
 				System.out.println("\n" + ds.getNumPieces() + " files processed successfully.");
 //				ToolBox.storeTextFile(s, new File(path + info + ".txt"));

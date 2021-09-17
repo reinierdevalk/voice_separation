@@ -127,23 +127,23 @@ public class OutputEvaluatorTest extends TestCase {
 		// N2N
 		modelParameters.put(Runner.MODELLING_APPROACH, (double) ModellingApproach.N2N.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
-		Runner.setDataset(new Dataset(DatasetID.WTC_4vv)); // to keep deviationThreshold at default -1
+		Runner.setDataset(new Dataset(DatasetID.BCH_WTC_4VV)); // to keep deviationThreshold at default -1
 		modelParameters.put(Runner.DEV_THRESHOLD, 0.05);
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
 			getTestOutputs(), null));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(DatasetID.INT_4vv)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(DatasetID.TAB_INT_4VV)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
 			getTestOutputs(), null));
 		// C2C
 		modelParameters.put(Runner.MODELLING_APPROACH, 
 			(double) ModellingApproach.C2C.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
-		Runner.setDataset(new Dataset(DatasetID.WTC_4vv)); // to keep deviationThreshold at default -1
+		Runner.setDataset(new Dataset(DatasetID.BCH_WTC_4VV)); // to keep deviationThreshold at default -1
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsNoCoD));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(DatasetID.INT_4vv)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(DatasetID.TAB_INT_4VV)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsCoD));
 

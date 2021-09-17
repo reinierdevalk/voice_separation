@@ -38,7 +38,7 @@ public class Dataset implements Serializable {
 //		"barbetta-1582_1-il_nest-corrected"
 	});
 	
-	public static final List<String> JOSQ_4VV_NAMES = Arrays.asList(new String[]{
+	public static final List<String> JOSQUIN_4VV_NAMES = Arrays.asList(new String[]{
 //		"ochsenkun-1558_5-absolon_fili",
 //		"ochsenkun-1558_5-in_exitu",
 //		"ochsenkun-1558_5-qui_habitat",
@@ -300,53 +300,52 @@ public class Dataset implements Serializable {
 	private static final Map<DatasetID, List<String>> pieceNamesMap;
 	static {
 		pieceNamesMap = new LinkedHashMap<DatasetID, List<String>>();
-		pieceNamesMap.put(DatasetID.INT_3vv, INTAB_3VV_NAMES);
-		pieceNamesMap.put(DatasetID.INT_4vv, INTAB_4VV_NAMES);
-		pieceNamesMap.put(DatasetID.INT_5vv, INTAB_5VV_NAMES);
-		pieceNamesMap.put(DatasetID.WTC_4vv, FUGUES_4VV_NAMES);
+		pieceNamesMap.put(DatasetID.TAB_INT_3VV, INTAB_3VV_NAMES);
+		pieceNamesMap.put(DatasetID.TAB_INT_4VV, INTAB_4VV_NAMES);
+		pieceNamesMap.put(DatasetID.TAB_INT_5VV, INTAB_5VV_NAMES);
+		pieceNamesMap.put(DatasetID.BACH_WTC_4VV, FUGUES_4VV_NAMES);
 	}
 
 	public static final String DATASET_ID = "dataset ID";	
-//	public static DatasetID[] ALL_DATASET_IDS = new DatasetID[3*Runner.ARR_SIZE];
+	public static DatasetID[] ALL_DATASET_IDS = new DatasetID[Runner.ARR_SIZE];
 	public enum DatasetID {
-		INT_3vv("tab-int-3vv", 0, true, false, 3, "tab-int", INTAB_3VV_NAMES),
-		INT_4vv("tab-int-4vv", 1, true, false, 4, "tab-int", INTAB_4VV_NAMES),  
-		INT_5vv("tab-int-5vv", 2, true, false, 5, "tab-int", INTAB_5VV_NAMES), 
+		TAB_INT_3VV("tab-int-3vv", 0, true, false, INTAB_3VV_NAMES),
+		TAB_INT_4VV("tab-int-4vv", 1, true, false, INTAB_4VV_NAMES),  
+		TAB_INT_5VV("tab-int-5vv", 2, true, false, INTAB_5VV_NAMES), 
 		
-		tINT_3vv("tab-int_t-3vv", 3, false, true, 3, "tab-int", INTAB_3VV_NAMES),
-		tINT_4vv("tab-int_t-4vv", 4, false, true, 4, "tab-int", INTAB_4VV_NAMES),
-		tINT_5vv("tab-int_t-5vv", 5, false, true, 5, "tab-int", INTAB_5VV_NAMES),
+		TAB_INT_T_3VV("tab-int_t-3vv", 3, false, true, INTAB_3VV_NAMES),
+		TAB_INT_T_4VV("tab-int_t-4vv", 4, false, true, INTAB_4VV_NAMES),
+		TAB_INT_T_5VV("tab-int_t-5vv", 5, false, true, INTAB_5VV_NAMES),
 		
-		WTC_2vv("bach-WTC-2vv", 6, false, false, 2, "bach-WTC", FUGUES_2VV_NAMES), 
-		WTC_3vv("bach-WTC-3vv", 7, false, false, 3, "bach-WTC", FUGUES_3VV_NAMES), 
-		WTC_4vv("bach-WTC-4vv", 8, false, false, 4, "bach-WTC", FUGUES_4VV_NAMES), 
-		WTC_5vv("bach-WTC-5vv", 9, false, false, 5, "bach-WTC", FUGUES_5VV_NAMES), 
-		INV_2vv("bach-inv-2vv", 10, false, false, 2, "bach-inv", INV_2VV_NAMES), 
-		INV_3vv("bach-inv-3vv", 11, false, false, 3, "bach-inv", INV_3VV_NAMES),
+		BACH_WTC_2VV("bach-WTC-2vv", 6, false, false, FUGUES_2VV_NAMES), 
+		BACH_WTC_3VV("bach-WTC-3vv", 7, false, false, FUGUES_3VV_NAMES), 
+		BACH_WTC_4VV("bach-WTC-4vv", 8, false, false, FUGUES_4VV_NAMES), 
+		BACH_WTC_5VV("bach-WTC-5vv", 9, false, false, FUGUES_5VV_NAMES), 
+		BACH_INV_2VV("bach-inv-2vv", 10, false, false, INV_2VV_NAMES), 
+		BACH_INV_3VV("bach-inv-3vv", 11, false, false, INV_3VV_NAMES),
 		
-		IMI("tab-int-imi-4vv", 12, true, false, 4, "tab-int", null), 
-		IMI_SHORTER("tab-int-imi_s-4vv", 13, true, false, 4, "tab-int", null), 
-		SEMI("tab-int-semi-4vv", 14, true, false, 4, "tab-int", null), 
-		FREE("tab-int-free-4vv", 15, true, false, 4, "tab-int", null), 
-		FREE_MORE("tab-int-free_m-4vv", 16, true, false, 4, "tab-int", null), 
+		TAB_INT_IMI_4VV("tab-int-imi-4vv", 12, true, false, null), 
+		TAB_INT_IMI_SHORT_4VV("tab-int-imi_short-4vv", 13, true, false, null), 
+		TAB_INT_SEMI_4VV("tab-int-semi-4vv", 14, true, false, null), 
+		TAB_INT_FREE_4VV("tab-int-free-4vv", 15, true, false, null), 
+		TAB_INT_FREE_MORE_4VV("tab-int-free_more-4vv", 16, true, false, null), 
 		
-		IMI_NON_TAB("tab-int-imi_t-4vv", 17, false, true, 4, "tab-int", null), 
-		IMI_SHORTER_NON_TAB("tab-int-imi_s_t-4vv", 18, false, true, 4, "tab-int", null),
-		SEMI_NON_TAB("tab-int-semi_t-4vv", 19, false, true, 4, "tab-int", null),
-		FREE_NON_TAB("tab-int-free_t-4vv", 20, false, true, 4, "tab-int", null),
-		FREE_MORE_NON_TAB("tab-int-free_m_t-4vv", 21, false, true, 4, "tab-int", null),
+		TAB_INT_IMI_T_4VV("tab-int-imi_t-4vv", 17, false, true, null), 
+		TAB_INT_IMI_SHORT_T_4VV("tab-int-imi_short_t-4vv", 18, false, true, null),
+		TAB_INT_SEMI_T_4VV("tab-int-semi_t-4vv", 19, false, true, null),
+		TAB_INT_FREE_T_4VV("tab-int-free_t-4vv", 20, false, true, null),
+		TAB_INT_FREE_MORE_T_4VV("tab-int-free_more_t-4vv", 21, false, true, null),
 		
-		TESTPIECE_SET("tab-test", 22, true, false, 5, "test", TESTPIECE_SET_NAMES),
-		TESTPIECE_SET_NON_TAB("test_t", 23, false, false, 5, "test", TESTPIECE_SET_NAMES),
+		TAB_TST("tab-tst", 22, true, false, TESTPIECE_SET_NAMES),
+		TAB_TST_NT("tab-test_nt", 23, false, false, TESTPIECE_SET_NAMES),
 		
-		USER_TAB("user", 24, true, false, 0, "user_def_name", null),
-		USER("user_t", 25, false, false, 0, "user_def_name", null),
+		USER("user", 24, true, false, null),
+		USER_NT("user_nt", 25, false, false, null),
 		
-		JOSQ_4vv("josq-4vv", 26, true, false, 4, "josq-int", JOSQ_4VV_NAMES),
+		JOSQUIN_INT_4VV("josquin-int-4vv", 26, true, false, JOSQUIN_4VV_NAMES),
 		
-		BYRD_4vv("byrd-int-4vv", 27, true, false, 4, "byrd-int", BYRD_4VV_NAMES),
-		tBYRD_4vv("byrd-int_t-4vv", 28, false, true, 4, "byrd-int", BYRD_4VV_NAMES);
-		
+		BYRD_INT_4VV("byrd-int-4vv", 27, true, false, BYRD_4VV_NAMES),
+		BYRD_INT_T_4VV("byrd-int_t-4vv", 28, false, true, BYRD_4VV_NAMES);
 		
 		private int intRep;
 		private String stringRep;
@@ -354,19 +353,31 @@ public class Dataset implements Serializable {
 		private boolean isTabAsNonTabSet;
 		private int numVoices ;
 		private String name;
+		private String nameWithVv;
 		private List<String> pieceNames;
-		DatasetID(String s, int i, boolean isTab, boolean isTabAsNonTab, int vv, String name, 
-			List<String> argPieceNames) {
+		DatasetID(String s, int i, boolean isTab, boolean isTabAsNonTab, List<String> argPieceNames) {
 			this.stringRep = s;
 			this.intRep = i;
 			this.isTablatureSet = isTab;
 			this.isTabAsNonTabSet = isTabAsNonTab;
-			this.numVoices = vv;
-			this.name = name;
 			this.pieceNames = argPieceNames;
+			if (s.endsWith(Runner.voices)) {
+				this.numVoices = Integer.valueOf(s.substring(s.lastIndexOf("-") + 1, s.lastIndexOf(Runner.voices)));
+			}
+			else {
+				this.numVoices = 0;
+			}
+			if (s.endsWith(Runner.voices)) {
+				this.name = s.substring(0, s.lastIndexOf("-"));
+			}
+			else {
+				this.name = s;
+			}
+			this.nameWithVv = s;
+			ALL_DATASET_IDS[i] = this;
 		}
 		
-		public String getStringRep() {
+		private String getStringRep() {
 			return stringRep;
 		}
 		
@@ -389,6 +400,10 @@ public class Dataset implements Serializable {
 		
 		public void setName(String arg) {
 			name = arg;
+		}
+		
+		public String getNameWithVv() {
+			return nameWithVv;
 		}
 		
 		private int getIntRep() {
@@ -416,16 +431,6 @@ public class Dataset implements Serializable {
 //			return res; 
 		
 			return pieceNamesMap.get(this);
-			
-//			System.out.println("mot det weer");
-//			System.out.println(this);
-//			System.out.println("this = " + this); 
-//			System.out.println(bla.size());
-
-//			System.out.println(bla.get(this));
-			
-//			System.exit(0);
-//			return bla.get(this);
 		}
 		
 		public List<String> getPieceNames() {
@@ -436,6 +441,14 @@ public class Dataset implements Serializable {
 			pieceNames = arg;
 		}
 		
+		public static DatasetID getDatasetID(String name) {
+			for (DatasetID d : ALL_DATASET_IDS) {
+				if (d.getNameWithVv().equals(name)) {
+					return d;
+				}
+			}
+			return null;
+		}
 	}
 
 
@@ -529,17 +542,9 @@ public class Dataset implements Serializable {
 	}
 
 
-	public void populateDataset(/*Map<String, Double> modelParams,*/ String version, 
-		String[] altPaths, boolean appliedToNewData) {
+	public void populateDataset(String datasetVersion, String[] altPaths, boolean appliedToNewData) {
 		boolean isTablatureCase = isTablatureSet();
 		boolean isTabAsNonTab = isTabAsNonTabSet();
-//		boolean useCrossVal = 
-//			ToolBox.toBoolean(Runner.getModelParams().get(Runner.CROSS_VAL).intValue());
-		
-//		boolean appliedToNewData =
-//			ToolBox.toBoolean(Runner.getModelParams().get(Runner.APPL_TO_NEW_DATA).intValue());
-//		boolean appliedToNewData =
-//			ToolBox.toBoolean(modelParams.get(Runner.APPL_TO_NEW_DATA).intValue());
 
 		String numVoices = getNumVoices() + "vv/";
 		String argEncodingsPath, argMidiPath;
@@ -549,21 +554,22 @@ public class Dataset implements Serializable {
 //			argEncodingsPath = Runner.encodingsPath.concat(getName().concat("/").concat(numVoices));
 //			argTabMidiPath = Runner.midiPath.concat(getName().concat("/").concat(numVoices));
 
+			argEncodingsPath = Runner.encodingsPath;
+			argMidiPath = Runner.midiPath;
 			if (!appliedToNewData) {
 				argEncodingsPath = 
-					Runner.encodingsPath.concat(getName().concat("/").concat(numVoices));
+					argEncodingsPath.concat(getName().concat("/").concat(numVoices));
 				argTabMidiPath = 
-					Runner.midiPath.concat(getName().concat("/").concat(numVoices));				
-				argMidiPath = Runner.midiPath.concat(getName().concat("/").
-					concat(version).concat("/").concat(numVoices));
+					argMidiPath.concat(getName().concat("/").concat(numVoices));				
+				argMidiPath = argMidiPath.concat(getName().concat("/").
+					concat(datasetVersion).concat("/").concat(numVoices));
 			}
 			else {
-				argEncodingsPath = Runner.encodingsPathUser; //.concat(getName().concat(numVoices));
+//				argEncodingsPath = Runner.encodingsPath; // Runner.encodingsPathUser; //.concat(getName().concat(numVoices));
 				if (!argEncodingsPath.endsWith("/")) {
 					argEncodingsPath = argEncodingsPath.concat("/");
-//					argMidiPath = argEncodingsPath.concat("/");
 				}
-				argMidiPath = Runner.midiPathUser; //.concat(getName().concat("/").concat(numVoices));
+//				argMidiPath = Runner.midiPath; //Runner.midiPathUser; //.concat(getName().concat("/").concat(numVoices));
 				if (!argMidiPath.endsWith("/")) {
 					argMidiPath = argMidiPath.concat("/");
 				}
@@ -1085,11 +1091,11 @@ public class Dataset implements Serializable {
 	private List<Integer> getTranspositionIntervals(DatasetID n) {
 	  List<Integer> transpositionIntervals = null; 
 		switch (n) {  
-	    case WTC_4vv:
+	    case BACH_WTC_4VV:
 	    	transpositionIntervals = 
 	    	  Arrays.asList(new Integer[]{new Integer(4), new Integer(2), new Integer(-1), new Integer(-2), new Integer(-3)});	    	  
 	    	break;
-	    case WTC_3vv:
+	    case BACH_WTC_3VV:
 	    	transpositionIntervals = 
 	    	  Arrays.asList(new Integer[]{new Integer(2), new Integer(1), new Integer(0), new Integer(-1), new Integer(-1)});
 	    	break;
