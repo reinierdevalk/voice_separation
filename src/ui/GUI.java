@@ -202,20 +202,20 @@ public class GUI {
 		List<DatasetID> l = Arrays.asList(new DatasetID[]{
 			DatasetID.TAB_INT_5VV,
 			DatasetID.TAB_INT_3VV,
-			DatasetID.TAB_INT_T_4VV,
-			DatasetID.TAB_INT_T_5VV,	
+			DatasetID.TAB_INT_ANT_4VV,
+			DatasetID.TAB_INT_ANT_5VV,	
 			DatasetID.TAB_INT_IMI_4VV, 
 			DatasetID.TAB_INT_IMI_SHORT_4VV, 
 			DatasetID.TAB_INT_SEMI_4VV, 
 			DatasetID.TAB_INT_FREE_4VV, 
 			DatasetID.TAB_INT_FREE_MORE_4VV, 
-			DatasetID.TAB_INT_IMI_T_4VV, 
-			DatasetID.TAB_INT_IMI_SHORT_T_4VV, 
-			DatasetID.TAB_INT_SEMI_T_4VV,
-			DatasetID.TAB_INT_FREE_T_4VV,	
-			DatasetID.TAB_INT_FREE_MORE_T_4VV,
-			DatasetID.TAB_TST,
-			DatasetID.TAB_TST_T
+			DatasetID.TAB_INT_IMI_ANT_4VV, 
+			DatasetID.TAB_INT_IMI_SHORT_ANT_4VV, 
+			DatasetID.TAB_INT_SEMI_ANT_4VV,
+			DatasetID.TAB_INT_FREE_ANT_4VV,	
+			DatasetID.TAB_INT_FREE_MORE_ANT_4VV,
+			DatasetID.TAB_TEST,
+			DatasetID.TEST
 		});	
 		return l;
 	}

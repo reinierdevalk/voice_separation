@@ -25,9 +25,9 @@ public class ErrorCalculatorTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
-		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
-		encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
+		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
+		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 	}
 
 

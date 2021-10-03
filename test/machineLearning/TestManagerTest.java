@@ -37,10 +37,11 @@ public class TestManagerTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
-		testPaths = new String[]{Runner.encodingsPathTest, Runner.midiPathTest, Runner.midiPathTest};
-		encodingTestpiece1 = new File(Runner.encodingsPathTest + "testpiece.tbp");
-		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");	
+		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		testPaths = new String[]{Runner.encodingsPath + "test/", Runner.midiPath + "test/", 
+			Runner.midiPath + "test/"};
+		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
+		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");	
 	}
 
 	protected void tearDown() throws Exception {
@@ -231,17 +232,17 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 		
 		// ds
-		Dataset ds = new Dataset(DatasetID.TAB_TST);
+		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicTabSymbolProperties and meterInfo
 		testManager.tablature = 
-			new Tablature(new File(Runner.encodingsPathTest + "test_resolve_conflicts.tbp"), false);
+			new Tablature(new File(Runner.encodingsPath + "test/" + "test_resolve_conflicts.tbp"), false);
 			testManager.basicTabSymbolProperties = testManager.tablature.getBasicTabSymbolProperties();
 			testManager.meterInfo = testManager.tablature.getMeterInfo();
 
@@ -817,17 +818,17 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(DatasetID.TAB_TST);
+		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicTabSymbolProperties (fwd) and meterInfo
 		testManager.tablature = 
-			new Tablature(new File(Runner.encodingsPathTest + "test_resolve_conflicts.tbp"), false);
+			new Tablature(new File(Runner.encodingsPath + "test/" + "test_resolve_conflicts.tbp"), false);
 		testManager.basicTabSymbolProperties = testManager.tablature.getBasicTabSymbolProperties();
 		testManager.meterInfo = testManager.tablature.getMeterInfo();
 
@@ -1422,17 +1423,17 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(DatasetID.TAB_TST_T);
+		Dataset ds = new Dataset(Dataset.TEST);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicNoteProperties
 		testManager.groundTruthTranscription = 
-			new Transcription(new File(Runner.midiPathTest + "test_resolve_conflicts_non_tab.mid"), null);
+			new Transcription(new File(Runner.midiPath + "test/" + "test_resolve_conflicts_non_tab.mid"), null);
 		testManager.basicNoteProperties = testManager.groundTruthTranscription.getBasicNoteProperties();
 //		testManager.meterInfo = testManager.tablature.getMeterInfo();
 
@@ -1764,17 +1765,17 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(DatasetID.TAB_TST_T);
+		Dataset ds = new Dataset(Dataset.TEST);
 		ds.populateDataset(null, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicNoteProperties (fwd)
 		testManager.groundTruthTranscription = 
-			new Transcription(new File(Runner.midiPathTest + "test_resolve_conflicts_non_tab.mid"), null);
+			new Transcription(new File(Runner.midiPath+ "test/" + "test_resolve_conflicts_non_tab.mid"), null);
 		testManager.basicNoteProperties = testManager.groundTruthTranscription.getBasicNoteProperties();
 
 		// Pre-set the necessary lists with dummy values

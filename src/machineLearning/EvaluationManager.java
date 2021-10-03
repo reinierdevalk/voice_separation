@@ -76,7 +76,7 @@ public class EvaluationManager {
 			Runner.CROSS_VAL, 
 			Runner.MODEL_DURATION_AGAIN,
 			Runner.AVERAGE_PROX,
-			Runner.APPL_TO_NEW_DATA,
+			Runner.DEPLOY_TRAINED_USER_MODEL,
 			Runner.TRAIN_USER_MODEL,
 			Runner.VERBOSE,
 			Runner.SKIP_TRAINING,
@@ -203,7 +203,8 @@ public class EvaluationManager {
 
 		// Data
 		dataAndParams.append("D A T A S E T" + "\r\n");
-		dataAndParams.append(ToolBox.tabify(Dataset.DATASET_ID, 4) + 
+		dataAndParams.append(ToolBox.tabify(dataset.getName(), 4) +
+//		dataAndParams.append(ToolBox.tabify(Dataset.DATASET_ID, 4) + 		
 			dataset.getDatasetID().toString().toLowerCase() + "\r\n");
 		// Per-fold case
 		if (fold != 0 && fold != -1) {
@@ -814,7 +815,7 @@ public class EvaluationManager {
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
 		boolean applToNewData =
-			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());				
+			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());				
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 		boolean modelDuration = m.getModelDuration();
 

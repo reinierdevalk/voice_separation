@@ -2,12 +2,8 @@ package data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import data.Dataset;
-import data.Dataset.DatasetID;
 import junit.framework.TestCase;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
@@ -17,7 +13,7 @@ public class DatasetTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
+		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
 	}
 
 	protected void tearDown() throws Exception {
@@ -28,13 +24,12 @@ public class DatasetTest extends TestCase {
 	public void testGetNumDataExamples() {
 		List<Integer> expected = Arrays.asList(new Integer[]{3*39, 3*16, 3*40, 3*16});
 
-		String[] paths = 
-			new String[]{Runner.encodingsPathTest, Runner.midiPathTest, Runner.midiPathTest};
-		Map<String, Double> mp = new LinkedHashMap<String, Double>();
-		mp.put(Runner.APPL_TO_NEW_DATA, 0.0);
-		Dataset ds = new Dataset(DatasetID.TAB_TST);
+		String[] paths = new String[]{
+			Runner.encodingsPath + "test/", Runner.midiPath + "test/", Runner.midiPath+ "test/"};
+
+		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, paths, false);
-		Dataset dsNonTab = new Dataset(DatasetID.TAB_TST_T);
+		Dataset dsNonTab = new Dataset(Dataset.TEST);
 		dsNonTab.populateDataset(null, paths, false);
 
 		List<Integer> actual = new ArrayList<Integer>();
@@ -62,12 +57,12 @@ public class DatasetTest extends TestCase {
 		expected.add(Arrays.asList(new Integer[]{16, 16, 16}));
 
 		String[] paths = 
-			new String[]{Runner.encodingsPathTest, Runner.midiPathTest, Runner.midiPathTest};
-		Map<String, Double> mp = new LinkedHashMap<String, Double>();
-		mp.put(Runner.APPL_TO_NEW_DATA, 0.0);
-		Dataset ds = new Dataset(DatasetID.TAB_TST);
+			new String[]{Runner.encodingsPath + "test/", Runner.midiPath + "test/", 
+			Runner.midiPath + "test/"};
+
+		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, paths, false);
-		Dataset dsNonTab = new Dataset(DatasetID.TAB_TST_T);
+		Dataset dsNonTab = new Dataset(Dataset.TEST);
 		dsNonTab.populateDataset(null, paths, false);
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.N2N));

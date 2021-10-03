@@ -2656,7 +2656,7 @@ public class FeatureGenerator {
 //		int highestNumberOfVoicesTraining =
 //			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
 		int highestNumberOfVoicesTraining = Runner.getDataset().getHighestNumVoices();
-		if (ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue())) {
+		if (ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue())) {
 			highestNumberOfVoicesTraining = Runner.getDatasetTrain().getNumVoices();
 		}
 		

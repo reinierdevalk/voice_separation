@@ -775,7 +775,7 @@ public class OutputEvaluator {
 		// remove -->
 		if (frequencyOfHighestValue > 1) {
 			boolean applToNewData = 
-				ToolBox.toBoolean(Runner.getModelParams().get(Runner.APPL_TO_NEW_DATA).intValue());
+				ToolBox.toBoolean(Runner.getModelParams().get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
 			if (!applToNewData) {	
 				System.out.println("The highest value appears more than once in the network output.");
 				System.out.println(highestValue);

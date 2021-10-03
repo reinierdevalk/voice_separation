@@ -28,13 +28,15 @@ public class HMMManager {
 
 		// =============== USER-ADAPTABLE SETTINGS ===============
 		// a. Choose dataset
-//		DatasetID id = DatasetID.INT_3vv; 
-		DatasetID id = DatasetID.TAB_INT_4VV; 
-//		DatasetID id = DatasetID.WTC_3vv;
-//		DatasetID id = DatasetID.WTC_4vv;
-		boolean isTablatureCase = id.isTablatureSet();  
-		List<String> pieceNames = id.getPieceNames(); 
-		String vv = id.getNumVoices() + Runner.voices;
+//		DatasetID id = DatasetID.TAB_INT_3VV;
+//		String id = DatasetID.INT_3vv; 
+		String id = Dataset.TAB_INT_4VV; 
+//		String id = DatasetID.WTC_3VV;
+//		String id = DatasetID.WTC_4VV;
+		Dataset ds = new Dataset(id);
+		boolean isTablatureCase = ds.isTablatureSet();  
+		List<String> pieceNames = ds.getPieceNames(); 
+		String vv = ds.getNumVoices() + Runner.voices;
 		// b. Create a folder in results/HMM/ for the current occasion and the current experiment (optional) 
 		String occasion = "Thesis - Copy 1/";
 		String experiment = "optimisation/";
@@ -70,7 +72,7 @@ public class HMMManager {
 //		String folderName = occasion + dataset + vv + experiment;
 //		String folderName = occasion + id.getName() + "/" + vv + "/" + experiment;
 		String folderName = 
-			"thesis/prl_2/" + id.getName() + "/" + vv + "/" + "H/" + configuration; // TODO EB
+			"thesis/prl_2/" + ds.getName() + "/" + vv + "/" + "H/" + configuration; // TODO EB
 		
 //		String path = "F:/research/data" + HMMPath + folderName + "/data/";
 		String path = Runner.experimentsPath + folderName + "data/"; 
@@ -117,8 +119,8 @@ public class HMMManager {
 
 		// 1. Get the pieces
 //		// NB: The tablature tuning is normalised to G
-//		String encodingsDir = Runner.encodingsPath + dataset.getName() + "/" + dataset.getNumVoices() + "vv/"; 
-//		String midiDir = Runner.midiPath + dataset.getName() + "/" + dataset.getNumVoices() + "vv/"; 	
+//		String encodingsDir = Runner.encodingsPath + dataset.getName() + "/" + dataset.getNumVoices() + Runner.voices + "/";
+//		String midiDir = Runner.midiPath + dataset.getName() + "/" + dataset.getNumVoices() + Runner.voices + "/";
 //		List<TablatureTranscriptionPair> pieces =
 //			TablatureTranscriptionPair.createSetOfTablatureTranscriptionPairs(pieceNames, 
 //			encodingsDir, midiDir, dataset.isTablatureSet());

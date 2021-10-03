@@ -102,9 +102,9 @@ else:
 	seed=-1 #'set_me'
 	script = argv
 	mode = appl
-	fv_ext = 'x_app.csv'
-	lbl_ext = 'y_app.csv'
-	out_ext = 'out_app.csv'
+	fv_ext = 'x-app.csv'
+	lbl_ext = 'y-app.csv'
+	out_ext = 'out-app.csv'
 	user_model = True
 
 
@@ -429,7 +429,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 	# test
 	if mode == test:
 		softmaxes_tst = sess.run([softm, pred_class], feed_dict={x: x_test, keep_prob: 1.0})[0]
-		np.savetxt(fold_path + out_ext, softmaxes_tst, delimiter=",")
+		np.savetxt(fold_path + out_ext, softmaxes_tst, delimiter=',')
  
 		dothis = False
 		if dothis:
@@ -503,10 +503,10 @@ def make_validation_set(x_tr, y_tr, perc):
 			x_tr_new.append(x_tr[i])
 			y_tr_new.append(y_tr[i])
  
-	arrs = {'x_val': np.array(x_val), 
-			'y_val': np.array(y_val), 
-			'x_tr_new': np.array(x_tr_new), 
-			'y_tr_new': np.array(y_tr_new)}
+	arrs = {'x-val': np.array(x_val), 
+			'y-val': np.array(y_val), 
+			'x-tr-new': np.array(x_tr_new), 
+			'y-tr-new': np.array(y_tr_new)}
 	return arrs
 
 

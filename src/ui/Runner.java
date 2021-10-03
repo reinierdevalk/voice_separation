@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
+import data.Dataset.DatasetID;
 import featureExtraction.FeatureGenerator;
 import machineLearning.EvaluationManager;
 import machineLearning.MelodyPredictor;
@@ -17,6 +18,7 @@ import machineLearning.TestManager;
 import machineLearning.TrainingManager;
 import n_grams.KylmModel;
 import tools.ToolBox;
+import ui.Runner.ModellingApproach;
 
 public class Runner {
 
@@ -36,12 +38,9 @@ public class Runner {
 	// Paths, directory names, and scripts
 	// All paths are set in setPathsToCodeAndData()
 	private static String[] paths;
-	public static String dataPath;
-	public static String codePath;
 	public static String encodingsPath;
-	public static String encodingsPathTest;
+	public static String outPath;
 	public static String midiPath;
-	public static String midiPathTest;
 	public static String modelsPath;
 	public static String scriptPythonPath;
 	public static String scriptMatlabPath;
@@ -108,10 +107,10 @@ public class Runner {
 //	public static String fvExt = "fv_"; // scikit
 //	public static String lblExt = "lbl_"; // scikit
 //	public static String outpExt = "outp_"; // scikit
-	public static String fvExt = "x_";
-	public static String clExt = "cl_";
-	public static String lblExt = "y_";
-	public static String outpExt = "out_";
+	public static String fvExt = "x-";
+	public static String clExt = "cl-";
+	public static String lblExt = "y-";
+	public static String outpExt = "out-";
 
 	public static boolean ignoreAppl = false;
 	public static boolean storeNetworkOutputs = true;
@@ -163,7 +162,7 @@ public class Runner {
 	public static final String SNU = "single-note unisons";
 	public static final String CROSS_VAL = "cross validation";
 	public static final String TRAIN_USER_MODEL = "train user model";
-	public static final String APPL_TO_NEW_DATA = "applied to new data";
+	public static final String DEPLOY_TRAINED_USER_MODEL = "deploy trained user model";
 //	public static final String TAB_AS_NON_TAB = "tablature as non-tablature";
 	public static final String ESTIMATE_ENTRIES = "voice entry estimation";
 	public static final String MODEL_DURATION_AGAIN = "model duration again";
@@ -182,7 +181,7 @@ public class Runner {
 	public static FeatureVector[] ALL_FEATURE_VECTORS = new FeatureVector[ARR_SIZE];
 	private static DecisionContext[] ALL_DECISION_CONTEXTS = new DecisionContext[ARR_SIZE]; 
 	public static WeightsInit[] ALL_WEIGHTS_INIT = new WeightsInit[ARR_SIZE];
-
+	
 	public static enum ModellingApproach {
 		N2N("MA1", 0), C2C("MA2", 1), HMM("MA3", 2), OTHER("OTHER", 3);
 
@@ -238,8 +237,7 @@ public class Runner {
 		kNN_CL("kNN_cls", 20, ModelType.OTHER, DecisionContext.UNIDIR, false, ModellingApproach.N2N),
 		
 		D("D", 21, ModelType.DNN, DecisionContext.UNIDIR, false, ModellingApproach.N2N),
-		D_B("D_B", 22, ModelType.DNN, DecisionContext.BIDIR, false, ModellingApproach.N2N),
-		;
+		D_B("D_B", 22, ModelType.DNN, DecisionContext.BIDIR, false, ModellingApproach.N2N);
 
 		private String stringRep;
 		private int intRep;
@@ -617,7 +615,7 @@ public class Runner {
 		keys.add(TRAIN_USER_MODEL);
 //		keys.add(TAB_AS_NON_TAB);
 //		keys.add(GIVE_FIRST);
-		keys.add(APPL_TO_NEW_DATA);
+		keys.add(DEPLOY_TRAINED_USER_MODEL);
 		keys.add(ESTIMATE_ENTRIES);
 		keys.add(UNIFORM_TPM);
 		keys.add(UNIFORM_ISM);
@@ -672,16 +670,16 @@ public class Runner {
 		return paths;
 	}
 
-	public static void setDataset(Dataset d) {
-		dataset = d;
+	public static void setDataset(Dataset ds) {
+		dataset = ds;
 	}
 
 	public static Dataset getDataset() {
 		return dataset;
 	}
 	
-	public static void setDatasetTrain(Dataset d) {
-		datasetTrain = d;
+	public static void setDatasetTrain(Dataset ds) {
+		datasetTrain = ds;
 	}
 
 	public static Dataset getDatasetTrain() {
@@ -690,7 +688,7 @@ public class Runner {
 	
 	public static int getHighestNumVoicesTraining() {
 		int highestNumVoices = getDataset().getHighestNumVoices();
-		if (ToolBox.toBoolean(modelParams.get(APPL_TO_NEW_DATA).intValue())) {
+		if (ToolBox.toBoolean(modelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue())) {
 			highestNumVoices = getDatasetTrain().getNumVoices();
 		}
 		return highestNumVoices;
@@ -699,27 +697,29 @@ public class Runner {
 
 	public static void setPathsToCodeAndData(String argRootDir, boolean appliedToNewData) throws IOException {
 		if (!appliedToNewData) {
-			codePath = UI.pathify(new String[]{argRootDir, "software/code/eclipse/"});
+			String codePath = UI.pathify(new String[]{argRootDir, "software/code/eclipse/"});
 			scriptPythonPath = UI.pathify(new String[]{codePath, "voice_separation/py/"});
 			scriptMatlabPath = UI.pathify(new String[]{codePath, "voice_separation/m/"});
 			//
-			dataPath = UI.pathify(new String[]{argRootDir, "data/annotated/"});
-			encodingsPath = UI.pathify(new String[]{dataPath, "encodings/"});
-			encodingsPathTest = UI.pathify(new String[]{encodingsPath, "test"});
-			midiPath = UI.pathify(new String[]{dataPath, "MIDI/"});
-			midiPathTest = UI.pathify(new String[]{midiPath, "test"});
+			String dataPath = UI.pathify(new String[]{argRootDir, "data/"});
+			encodingsPath = UI.pathify(new String[]{dataPath, "annotated/encodings/"});
+			midiPath = UI.pathify(new String[]{dataPath, "annotated/MIDI/"});
+			storedDatasetsPath = UI.pathify(new String[]{dataPath, "datasets/"});
+			modelsPath = UI.pathify(new String[]{dataPath, "models/"});
 			//
 			experimentsPath = UI.pathify(new String[]{argRootDir, "experiments/"});
-			storedDatasetsPath = UI.pathify(new String[]{argRootDir, "data/" + "datasets/"});
 		}
 		else {
 			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
-			codePath = UI.pathify(new String[]{
+			String codePath = UI.pathify(new String[]{
 				new File(argRootDir).getCanonicalFile().getParent(), "software/code/eclipse/"});
 			scriptPythonPath = UI.pathify(new String[]{codePath, "voice_separation/py/"});
 			//
-			encodingsPath = UI.pathify(new String[]{argRootDir, "user/in/encodings/"});
-			midiPath = UI.pathify(new String[]{argRootDir, "user/in/MIDI/"});
+			String userPath = UI.pathify(new String[]{argRootDir, "user/"});
+			encodingsPath = UI.pathify(new String[]{userPath, "in/encodings/"});
+			midiPath = UI.pathify(new String[]{userPath, "in/MIDI/"});
+			outPath = UI.pathify(new String[]{userPath, "out/"});
+			//
 			modelsPath = UI.pathify(new String[]{argRootDir, "models/"});
 		}
 	}
@@ -760,7 +760,7 @@ public class Runner {
 		Map<String, Double> argModelParams = getModelParams();
 		ModellingApproach ma = 
 			ALL_MODELLING_APPROACHES[argModelParams.get(MODELLING_APPROACH).intValue()];	
-		boolean applToNewData = ToolBox.toBoolean(argModelParams.get(APPL_TO_NEW_DATA).intValue());
+		boolean applToNewData = ToolBox.toBoolean(argModelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue());
 		boolean skipTraining = ToolBox.toBoolean(argModelParams.get(SKIP_TRAINING).intValue());
 		Model m = ALL_MODELS[argModelParams.get(MODEL).intValue()]; 
 		boolean modelDuration = m.getModelDuration();
@@ -785,6 +785,22 @@ public class Runner {
 		}
 		else {
 			ds.populateDataset(null, null, applToNewData);
+			System.out.println(ds.getDatasetID());
+			System.out.println(ds.getName());
+			System.out.println(ds.getPieceNames());
+			System.out.println(ds.getNumPieces());
+			System.out.println(ds.getNumVoices());
+			System.out.println(ds.isTablatureSet());
+			System.out.println(ds.isTabAsNonTabSet());
+			System.out.println(ds.getLargestChordSize());
+			System.out.println(ds.getHighestNumVoices());
+			System.out.println(ds.getAllEncodingFiles());
+			System.out.println(ds.getAllMidiFiles());
+			System.out.println(ds.getAllTablatures());
+			System.out.println(ds.getAllTranscriptions());
+			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
+			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
+			System.exit(0);
 		}
 		setDataset(ds);
 
@@ -1034,7 +1050,7 @@ public class Runner {
 				String s =
 					"model      = " + ALL_MODELS[argModelParams.get(MODEL).intValue()] + "\r\n" +
 					"proc_mode  = " + ALL_PROC_MODES[argModelParams.get(PROC_MODE).intValue()] + "\r\n" +
-					"train_data = " + getDatasetTrain().getDatasetID().name();
+					"train_data = " + getDatasetTrain().getDatasetID();
 				System.out.println(s);
 				System.out.println("\n" + ds.getNumPieces() + " files processed successfully.");
 //				ToolBox.storeTextFile(s, new File(path + info + ".txt"));

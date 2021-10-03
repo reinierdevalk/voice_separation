@@ -23,9 +23,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootDir(), false);
-		encodingTestpiece1 = new File(Runner.encodingsPathTest+ "testpiece.tbp");
-		midiTestpiece1 = new File(Runner.midiPathTest + "testpiece.mid");
+		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
+		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
 	}
 
 	protected void tearDown() throws Exception {

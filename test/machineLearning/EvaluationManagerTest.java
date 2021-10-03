@@ -67,7 +67,7 @@ public class EvaluationManagerTest extends TestCase {
 		});
 		EvaluationManager.setCsvLegend(altCSVTable);
 //		Runner.setDataset(new Dataset(DatasetID.TESTPIECE_SET));
-		Runner.setDataset(new Dataset(DatasetID.BCH_WTC_4VV));
+		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV));
 		
 		// modelParameters
 		Map<String, Double> modelParameters = new HashMap<String, Double>();

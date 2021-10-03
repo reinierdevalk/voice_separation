@@ -120,7 +120,7 @@ public class TestManager {
 
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		boolean applToNewData = 
-			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());
+			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
@@ -282,7 +282,7 @@ public class TestManager {
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
 		int highestNumVoicesTraining = Runner.getHighestNumVoicesTraining();
 		boolean applToNewData = 
-			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());
+			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		ModelType mt = m.getModelType();
@@ -526,7 +526,7 @@ public class TestManager {
 				if (m.getDecisionContext() == DecisionContext.BIDIR && applToNewData) { // zondag
 					minAndMaxFeatureValues = 
 						ToolBox.getStoredObjectBinary(new double[][]{}, 
-						new File(UI.getRootDir() + "D_B-user/fwd/" + Runner.minMaxFeatVals + ".ser"));
+						new File(UI.getRootPath() + "D_B-user/fwd/" + Runner.minMaxFeatVals + ".ser"));
 				}
 				else {
 					minAndMaxFeatureValues = 
@@ -2290,7 +2290,7 @@ public class TestManager {
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		boolean applToNewData = 
-			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());
+			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
 		
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
@@ -3336,7 +3336,7 @@ public class TestManager {
 //			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		boolean applToNewData = 
-			ToolBox.toBoolean(modelParameters.get(Runner.APPL_TO_NEW_DATA).intValue());
+			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
 		boolean estimateEntries = 
 			ToolBox.toBoolean(modelParameters.get(Runner.ESTIMATE_ENTRIES).intValue());
 		List<Integer> sliceIndices = null;

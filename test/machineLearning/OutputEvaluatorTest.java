@@ -36,7 +36,7 @@ public class OutputEvaluatorTest extends TestCase {
 	public void testDeterminePredictedVoices() {
 		OutputEvaluator.ignoreExceptionForTest = true;
 		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
-		modelParams.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParams);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -127,23 +127,23 @@ public class OutputEvaluatorTest extends TestCase {
 		// N2N
 		modelParameters.put(Runner.MODELLING_APPROACH, (double) ModellingApproach.N2N.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
-		Runner.setDataset(new Dataset(DatasetID.BCH_WTC_4VV)); // to keep deviationThreshold at default -1
+		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV)); // to keep deviationThreshold at default -1
 		modelParameters.put(Runner.DEV_THRESHOLD, 0.05);
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
 			getTestOutputs(), null));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(DatasetID.TAB_INT_4VV)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(Dataset.TAB_INT_4VV)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
 			getTestOutputs(), null));
 		// C2C
 		modelParameters.put(Runner.MODELLING_APPROACH, 
 			(double) ModellingApproach.C2C.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
-		Runner.setDataset(new Dataset(DatasetID.BCH_WTC_4VV)); // to keep deviationThreshold at default -1
+		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV)); // to keep deviationThreshold at default -1
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsNoCoD));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(DatasetID.TAB_INT_4VV)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(Dataset.TAB_INT_4VV)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsCoD));
 
@@ -281,7 +281,7 @@ public class OutputEvaluatorTest extends TestCase {
 	public void testInterpretNetworkOutput() {
 		OutputEvaluator.ignoreExceptionForTest = true;
 		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
-		modelParams.put(Runner.APPL_TO_NEW_DATA, 0.0);
+		modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParams);
 		
 		List<List<List<Integer>>> expected = new ArrayList<List<List<Integer>>>();
