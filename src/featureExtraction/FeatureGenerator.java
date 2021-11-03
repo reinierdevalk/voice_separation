@@ -2656,7 +2656,8 @@ public class FeatureGenerator {
 //		int highestNumberOfVoicesTraining =
 //			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
 		int highestNumberOfVoicesTraining = Runner.getDataset().getHighestNumVoices();
-		if (ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue())) {
+		if (Runner.getDeployTrainedUserModel()) {
+//		if (ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue())) {
 			highestNumberOfVoicesTraining = Runner.getDatasetTrain().getNumVoices();
 		}
 		
@@ -2962,11 +2963,7 @@ public class FeatureGenerator {
 		for (double d: polyphonicEmbedding) {
 			noteFeatureVector.add(d);
 		}
-		
-//		if (noteIndex == 179) {
-//			System.out.println(noteFeatureVector);
-//			System.exit(0);
-//		}
+
 		return noteFeatureVector;
 	}
 
@@ -3078,18 +3075,20 @@ public class FeatureGenerator {
 	 * @param predictedLabels
 	 * @param meterInfo
 	 * @param chordSizes
-	 * @param argModelDuration 
-	 * @param decisionContextSize
 	 * @return
 	 */ 
 	public static List<List<Double>> generateAllBidirectionalNoteFeatureVectors(
 		Map<String, Double> modelParameters,
 		Integer[][] btp, List<Integer[]> predictedVoicesCoDNotes, Integer[][] bnp, 
 		Transcription predictedTranscription, List<List<Double>> predictedLabels, 
-		List<Integer[]> meterInfo, List<Integer> chordSizes, boolean argModelDuration,
-		int decisionContextSize) {
+		List<Integer[]> meterInfo, List<Integer> chordSizes/*, boolean argModelDuration,
+		int decisionContextSize*/) {
 
 		Transcription.verifyCase(btp, bnp);
+		
+		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
+		boolean argModelDuration = m.getModelDuration();
+		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
 
 		boolean avgProx = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		

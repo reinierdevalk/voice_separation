@@ -76,10 +76,10 @@ public class EvaluationManager {
 			Runner.CROSS_VAL, 
 			Runner.MODEL_DURATION_AGAIN,
 			Runner.AVERAGE_PROX,
-			Runner.DEPLOY_TRAINED_USER_MODEL,
-			Runner.TRAIN_USER_MODEL,
-			Runner.VERBOSE,
-			Runner.SKIP_TRAINING,
+//			Runner.DEPLOY_TRAINED_USER_MODEL,
+//			Runner.TRAIN_USER_MODEL,
+//			Runner.VERBOSE,
+//			Runner.SKIP_TRAINING,
 		});
 	}
 	
@@ -240,7 +240,7 @@ public class EvaluationManager {
 		}
 		
 		int largestChordSize = dataset.getLargestChordSize();
-		int highestNumVoices = Runner.getHighestNumVoicesTraining();
+		int highestNumVoices = Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
 
 		dataAndParams.append(ToolBox.tabify(Runner.LARGEST_CHORD_SIZE, 4) + largestChordSize + "\r\n");
 //			modelParameters.get(Runner.LARGEST_CHORD_SIZE).intValue() + "\r\n"); 		
@@ -331,7 +331,7 @@ public class EvaluationManager {
 		boolean modelDuration = m.getModelDuration();
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
 //		int highestNumberOfVoices = modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
-		int highestNumberOfVoices = Runner.getHighestNumVoicesTraining();
+		int highestNumberOfVoices = Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
 
 		// acc, acc_dur
 		results[ACC_IND] = 
@@ -814,8 +814,8 @@ public class EvaluationManager {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
-		boolean applToNewData =
-			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());				
+		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
+//			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());				
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 		boolean modelDuration = m.getModelDuration();
 
@@ -946,7 +946,7 @@ public class EvaluationManager {
 			
 			// For the non-transfer learning experiments and for the transfer learning 
 			// experiments with only one test set
-			if (!applToNewData || (applToNewData && indicesOfFirstPieceOfTestSets == null)) {
+			if (!deployTrainedUserModel || (deployTrainedUserModel && indicesOfFirstPieceOfTestSets == null)) {
 				// Get results per mode per fold		
 				for (int i = Runner.TRAIN; i <= to; i++) {	
 					// Determine the first row for the current block of fold results

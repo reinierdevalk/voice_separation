@@ -32,41 +32,49 @@ public class ErrorCalculator {
 
 	/**
 	 * Calculates all the voices assignment errors for the given predicted voices. Only one error per note is 
-	 * allowed; there are four kinds of errors:
-	 * (1) Incorrect assignment: both predictedVoices and actualVoices contain one element, and they are not the same
-	 * (2) Overlooked CoD assignment: predictedVoices contains one element, actualVoices two (i.e., is a CoD), and
-	 *     the predicted voice is one of the actual voices. If the latter is not true: incorrect assignment 
-	 * (3) Superfluous CoD assignment: predictedVoices contains two elements (i.e., is a CoD), actualVoices one, and
-	 *     the actual voice is one of the predicted voices. If the latter is not true: incorrect assignment
-	 * (4) Half CoD assignment: both predictedVoices and actualVoices contain two elements (i.e., are CoDs), and 
+	 * allowed; there are four kinds of errors:<br>
+	 * <ul>
+	 * <li>(1) Incorrect assignment: both predictedVoices and actualVoices contain one element, and they are not the same</li>
+	 * <li>(2) Overlooked CoD assignment: predictedVoices contains one element, actualVoices two (i.e., is a CoD), and
+	 *     the predicted voice is one of the actual voices. If the latter is not true: incorrect assignment</li> 
+	 * <li>(3) Superfluous CoD assignment: predictedVoices contains two elements (i.e., is a CoD), actualVoices one, and
+	 *     the actual voice is one of the predicted voices. If the latter is not true: incorrect assignment</li>
+	 * <li>(4) Half CoD assignment: both predictedVoices and actualVoices contain two elements (i.e., are CoDs), and 
 	 *     only one of the predicted voices is an actual voice. If the latter is not true, i.e., if neither of the
-	 *     predicted voices is an actual voice: incorrect assignment
-	 *     
-	 * Returns a List<List>> with all the assignment errors, containing:
-	 *   as element 0: a List of size 5, containing general high-level information, i.e.: 
-	 *                 (0) the total number of notes; 
-	 *                 (1) the number of incorrect assignments; 
-	 *                 (2) the number of overlooked CoD assignments; 
-	 *                 (3) the number of superfluous CoD assignments; 
-	 *                 (4) the number of half CoD assignments.
-	 *   as element 1: the indices of all incorrect assignments;
-	 *   as element 2: the indices of all overlooked CoD assignments;
-	 *   as element 3: the indices of all superfluous CoD assignments;
-	 *   as element 4: the indices of all half CoD assignments;
-	 * and, if modelling duration,
-	 *   as element 5: a List of size 3, containing general high-level information, i.e.: 
-	 *                 (0) the total number of notes; 
-	 *                 (1) the number of incorrect duration assignments; 
-	 *                 (2) the number of overlooked CoD duration assignments; 
-	 *   as element 6: the indices of all incorrect duration assignments;
-	 *   as element 7: the indices of all overlooked CoD duration assignments.  
+	 *     predicted voices is an actual voice: incorrect assignment</li>
+	 * </ul>    
 	 * 
 	 * @param allPredictedVoices
 	 * @param groundTruthVoiceLabels
 	 * @param allPredictedDurations
 	 * @param groundTruthDurationLabels
 	 * @param equalDurationUnisonsInfo
-	 * @return 
+	 * @return A List of Lists with all the assignment errors, containing:
+	 * <ul>  
+	 * <li>as element 0: a List of size 5, containing general high-level information, i.e.:</li>  
+	 *                   <ul>
+	 *                   <li>(0) the total number of notes;</li> 
+	 *                   <li>(1) the number of incorrect assignments;</li> 
+	 *                   <li>(2) the number of overlooked CoD assignments;</li> 
+	 *                   <li>(3) the number of superfluous CoD assignments;</li> 
+	 *                   <li>(4) the number of half CoD assignments.</li>
+	 *                   </ul>
+	 * <li>as element 1: the indices of all incorrect assignments;</li>
+	 * <li>as element 2: the indices of all overlooked CoD assignments;</li>
+	 * <li>as element 3: the indices of all superfluous CoD assignments;</li>
+	 * <li>as element 4: the indices of all half CoD assignments;</li>
+	 * </ul>
+	 * and, if modelling duration,
+	 * <ul>
+	 * <li>as element 5: a List of size 3, containing general high-level information, i.e.:</li>
+	 * 					 <ul> 
+	 *                   <li>(0) the total number of notes;</li> 
+	 *                   <li>(1) the number of incorrect duration assignments;</li> 
+	 *                   <li>(2) the number of overlooked CoD duration assignments;</li>
+	 *                   </ul> 
+	 * <li>as element 6: the indices of all incorrect duration assignments;</li>
+	 * <li>as element 7: the indices of all overlooked CoD duration assignments.</li>  
+	 * </ul>
 	 */
 	// TESTED for both tablature- and non-tablature case; deals with EDU currectly
 	public static List<List<Integer>> calculateAssignmentErrors(List<List<Integer>> allPredictedVoices, 
@@ -233,7 +241,7 @@ public class ErrorCalculator {
 	/**
 	 * Calculates the accuracy, i.e., the number of note assigned correctly divided by
 	 * the total number of notes. In the tablature case, both numerator and denominator
-	 * are multiplied by two to get rid of .5 values resulting from SNUs. 
+	 * are multiplied by 2 to get rid of .5 values resulting from SNUs. 
 	 * 
 	 * @param assigErrs
 	 * @param isTabCase

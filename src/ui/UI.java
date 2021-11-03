@@ -35,89 +35,103 @@ public class UI {
 	private static String rootPath = "F:/research/";
 	private static String rootPathUser = "F:/research/data/";
 
-	private static boolean deployTrainedUserModel, repeatExp, useCV, trainUserModel, verbose, 
-		estimateEntries, skipTraining;
-	private static String expName, expNameFirstPass, userDefinedName, hyperParams;
-	private static Model m, mFirstPass;
-	private static ProcessingMode pm, pmFirstPass;
-	private static Configuration config;
-	private static String datasetID, datasetIDTrain;
-	private static String modelID, modelIDFirstPass;
+	// Runner settings
+	private static boolean deployTrainedUserModel, skipTraining, trainUserModel, verbose;
 
-	private static FeatureVector fv;
-	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, alpha, C, 
+	// Settings and hyperparameters, model training
+	private static boolean useCV, estimateEntries, modelDurationAgain, averageProx;
+	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, C, 
 		learningRate, deviationThreshold;
 	private static int hiddenLayers, hiddenLayerSize, n, neighbours, trees, cycles, 
-		maxMetaCycles, epochs, maxNumVoices, validationPercentage, seed;
+		maxMetaCycles, decisionContextSize, epochs, validationPercentage, seed;
+	private static Model m;
+	private static ProcessingMode pm;
+	private static FeatureVector fv;
+	private static Configuration config;
+	private static WeightsInit weightsInit;
+	private static ActivationFunction activationFunc;
+	private static DecodingAlgorithm decodingAlg;
 	private static List<MelodyModelFeature> mmfs;
 	private static List<Integer> ns;
+	
+	// Strings for path creation, model training (top) and deployment (bottom)
+	private static String expDir, expDirFirstPass, hyperparams;
+	private static String modelID, modelIDFirstPass;
+		
+	// Strings for dataset creation, model training (top) and deployment (bottom)
+	private static String datasetID;
+	private static String datasetIDTrain, datasetName;
 
 
 	public static void main(String[] args) throws IOException {
 		// Scenarios
-		//  useCV && !deployTrainedModel:	model selection phase
-		//  useCV &&  deployTrainedModel:	never
-		// !useCV && !deployTrainedModel:	application case with known GT (transfer learning) 
-		// !useCV &&  deployTrainedModel:	application case with unknown GT (real-world/deploy)
+		//  useCV && !deployTrainedModel: model selection phase
+		//  useCV &&  deployTrainedModel: never
+		// !useCV && !deployTrainedModel: application case with known GT (transfer learning)
+		// !useCV &&  deployTrainedModel: application case with unknown GT (real-world/deploy)
 		deployTrainedUserModel = args.length == 0 ? false : true;
 
 		// If repeating an existing experiment or conducting a new one: set parameters and settings
 		if (!deployTrainedUserModel) {
+			
 			// Settings
-			boolean gridSearch = false;
-			repeatExp = true;
-			useCV = true;
+			// a. Runner settings
 			skipTraining = false;
 			trainUserModel = false;
-			estimateEntries = false;
 			verbose = false;
 			
-//			datasetID = Dataset.BYRD_INT_4VV;
-			datasetID = Dataset.TAB_INT_3VV;
-			
-			// expName consists of publication + experiment (if applicable)
-//			expName = "thesis/exp_1/"; // 
-			expName = "thesis/exp_3.3.1/";
-//			expName = "thesis/exp_3.2/";
-//			expName = "ISMIR-2018/";
-//			expName = "byrd/";
-
-			m = Model.D_B;
+			// b. Variable settings
+			boolean gridSearch = false;
+			useCV = true;
+			estimateEntries = false;
+			weightsInit = WeightsInit.INIT_FROM_LIST;
+//			weightsInit = WeightsInit.INIT_RANDOM;
+			//
+			datasetID = Dataset.BYRD_INT_4VV;
+			m = Model.D;
+			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
-			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd	
-			expNameFirstPass = "thesis/exp_3.1";
-//			expNameFirstPass = "byrd/";
-//			expNameFirstPass = "ISMIR-2020";
-			mFirstPass = Model.N;
-			pmFirstPass = ProcessingMode.BWD;
+			expDir = "byrd/"; // publication + experiment (if applicable)
+			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
+			//
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
 //			config = Configuration.FOUR; // cnf 4; "4-data_TPM-data_ISM/"; // WAS "4. Output (with prior probability matrix)"
-//			hyperParams = "cnf=" + config.getStringRep(); // only for this if // "cnf=" + config.getStringRep(); "HLS=" + hiddenLayerSize; "KP=" + keepProbability;
-//			hyperParams = "HLF=1.0/lmb=0.001/";
-//			hyperParams = "eps=0.05/";
-			hyperParams = "";
-//			hyperParams = "LR=0.003/HL=1/HLS=66/KP=0.875/";
-//			hyperParams = "final/";
-
+			//
+			hyperparams = "";
+//			hyperparams = "cnf=" + config.getStringRep(); // "HLS=" + hiddenLayerSize; "KP=" + keepProbability;
+//			hyperparams = "HLF=1.0/lmb=0.001/";
+//			hyperparams = "eps=0.05/";
+//			hyperparams = "LR=0.003/HL=1/HLS=66/KP=0.875/";
+//			hyperparams = "final/";
+			//
 			mmfs = Arrays.asList(new MelodyModelFeature[]{ // used both for MM and ENS
 				MelodyModelFeature.PITCH,
 				MelodyModelFeature.DUR,
 				MelodyModelFeature.REL_PITCH,
 				MelodyModelFeature.IOI	
 			});
+			
+			// c. Predefined settings
+			modelDurationAgain = false;
+			averageProx = false;
+			activationFunc = 
+				(m.getModelType() == ModelType.DNN) ? ActivationFunction.RELU : 
+				ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
+			decodingAlg = DecodingAlgorithm.VITERBI;
 
-			// Tuned hyperparameters
+			// Hyperparameters
+			// a. Tuned hyperparameters
 			// Shallow network
-			lambda = 0.001; // regularisation parameter  
+			lambda = 0.00001; // regularisation parameter  
 			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
-			hiddenLayers = 2;
-			hiddenLayerSize = 50;
-			alpha = 0.003; // learning rate (1.0 in shallow network case)
+			hiddenLayers = 1;
+			hiddenLayerSize = 66;
+			double alpha = 0.003; // learning rate (1.0 in shallow network case)
 			// MM
 			n = 2;
 			// ENS
@@ -129,22 +143,22 @@ public class UI {
 			neighbours = 5; // 1, 3, 5, 10, 30, 100, 300
 			trees = 10; // 1, 3, 10, 30, 100, 300
 
-			// Non-tuned hyperparameters 
+			// b. Non-tuned hyperparameters 
 			// Shallow network
 			maxMetaCycles = (m == Model.C) ? 60 : 40;
 			cycles = 10;
 			// DNN
-			seed = 3; // seed = 0 used for all experiments ISMIR 2018 paper
+			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
 			epochs = 600;
 			// General
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
-			deviationThreshold = 0.05; // 0.0;
+			deviationThreshold = 0.0; // 0.05;
 			validationPercentage = (m.getModelType() == ModelType.DNN) ? 10 : 0; // 20 : 0;
 			if (trainUserModel) {
 				validationPercentage = 0;
 			}
-			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
-			
+			decisionContextSize = 1;
+
 			// In case of grid search: set hyperparameter space (if no hyperparameter space
 			// is specified, the full space is assumed). Any values set above are overwritten
 			if (gridSearch) {
@@ -156,10 +170,10 @@ public class UI {
 				List<List<Double>> hyperParamSpace = new ArrayList<List<Double>>();
 				if (hyperParamSpace.size() == 0) {
 					hyperParamSpace = ToolBox.createGrid(Arrays.asList(new List[]{
-//						Arrays.asList(new Double[]{0.003, 0.001, 0.0003}), // learning rate
-						Arrays.asList(new Double[]{1., 2., 3.}), // num HL
-						Arrays.asList(new Double[]{33., 50., 66., 75.}), // HL size
-						Arrays.asList(new Double[]{.5, .75, .875, .9375}), // keep probabilities
+//						Arrays.asList(new Double[]{0.003, 0.001, 0.0003}), // learningRate
+						Arrays.asList(new Double[]{1., 2., 3.}), // hiddenLayers
+						Arrays.asList(new Double[]{33., 50., 66., 75.}), // hiddenLayerSize
+						Arrays.asList(new Double[]{.5, .75, .875, .9375}), // keepProbability
 					}));
 					for (List<Double> l : hyperParamSpace) {
 						System.out.println(l);
@@ -171,8 +185,9 @@ public class UI {
 					hiddenLayerSize = combination.get(1).intValue(); 
 					keepProbability = combination.get(2);
 
-					hyperParams = "LR=" + alpha + "/" + "HL=" + hiddenLayers + "/" +
-						"HLS=" + hiddenLayerSize + "/" + "KP=" + keepProbability + "/";
+					hyperparams = ToolBox.pathify(new String[]{
+						"LR=" + alpha, "HL=" + hiddenLayers, "HLS=" + hiddenLayerSize, 
+						"KP=" + keepProbability});
 					set();
 				}
 			}
@@ -260,32 +275,25 @@ public class UI {
 			// User-defined settings				
 			// Get the ID of the trained model now applied and, in the bidir case, the ID
 			// of the first-pass model whose predicted labels are used
-			modelID = args[0].split(":")[0];
+			modelID = args[0].split(":")[0];			
 			modelIDFirstPass = args[0].split(":").length == 1 ? null : args[0].split(":")[1];
-			
-			m = Model.valueOf(modelID.split("-")[0]);
-			pm = ProcessingMode.valueOf(modelID.split("-")[1].toUpperCase());
-//			if (m.getDecisionContext() == DecisionContext.BIDIR) {
-//				mFirstPass = Model.valueOf(modelIDFirstPass.split("-")[0]);
-//				pmFirstPass = ProcessingMode.valueOf(modelIDFirstPass.split("-")[1].toUpperCase());
-//			}
-			datasetIDTrain = 
-				modelID.split("-")[2] + "-" + modelID.split("-")[3] + "-" + modelID.split("-")[4]; // only for this if
+			datasetIDTrain = modelID.split("-")[2] + "-" + modelID.split("-")[3] + "-" + modelID.split("-")[4];
 			rootPath = args[1];
 			verbose = Boolean.parseBoolean(args[2]);
-			userDefinedName = args[3]; // only for this if
+			datasetName = args[3];
 
-			// Unused fv must be made for Runner.ALL_FEATURE_VECTORS to be filled TODO
-			FeatureVector unused = FeatureVector.values()[0];
-			
-			// Fixed settings
-			repeatExp = false;
-			useCV = false;
-			trainUserModel = false;
-			datasetID = Dataset.isTablatureSet(datasetIDTrain) ? Dataset.USER_TAB : Dataset.USER;
-			maxNumVoices = (m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4;
 			set();
 		}
+	}
+
+
+	private static void setRootPath(String arg) {
+		rootPath = arg;
+	}
+
+
+	public static String getRootPath() {
+		return rootPath; 
 	}
 
 
@@ -294,20 +302,6 @@ public class UI {
 	 * @throws IOException 
 	 */
 	public static void set() throws IOException {
-		ModelType mt = m.getModelType();
-		ModellingApproach ma = m.getModellingApproach();
-		int	sliceIndEncoding = 
-			ToolBox.encodeListOfIntegers(MelodyFeatureGenerator.getSliceIndices(mmfs));
-		int	nsEncoding = ToolBox.encodeListOfIntegers(ns);
-		
-		// 0. Set predefined and derived settings
-		boolean modelDurationAgain = false;
-		int decisionContextSize = 1;
-		boolean averageProx = false;
-		WeightsInit wi = repeatExp ? WeightsInit.INIT_FROM_LIST : WeightsInit.INIT_RANDOM;
-		ActivationFunction actFunc = (mt == ModelType.DNN) ? ActivationFunction.RELU : ActivationFunction.SIGMOID; // TODO C2C: comparator neuron is semilinear (see NNManager) 
-		DecodingAlgorithm decAlg = DecodingAlgorithm.VITERBI;
-
 		// 1. Set rootPath and paths to code and data
 		// a. If repeating an existing experiment or conducting a new one 
 		// rootPath is F:/research/, which contains the dirs data/annotated/ (GT data) and 
@@ -323,7 +317,7 @@ public class UI {
 				// If <rootPath> arg is empty string: OK if pwd is rootPathUser
 				if (rootPath.equals("")) {
 					// http://stackoverflow.com/questions/2837263/how-do-i-get-the-directory-that-the-currently-executing-jar-file-is-in
-					String pwd = pathify(new String[]{new File("").getAbsolutePath()});
+					String pwd = ToolBox.pathify(new String[]{new File("").getAbsolutePath()});
 					if (pwd.equals(rootPathUser)) {
 						rootPath = pwd;
 					}
@@ -337,29 +331,38 @@ public class UI {
 				}
 			}
 		}
-		setRootPath(pathify(new String[]{rootPath}));
+		setRootPath(ToolBox.pathify(new String[]{rootPath}));
 		Runner.setPathsToCodeAndData(rootPath, deployTrainedUserModel);
 
 		// 2. Set dataset(s)
 		Dataset dsTrain, ds;
 		if (!deployTrainedUserModel) {
-			dsTrain = null;
 			ds = new Dataset(datasetID);
+			dsTrain = null;
 		}
 		else {
-			dsTrain = new Dataset(datasetIDTrain);			
-			ds = new Dataset(datasetID);
+			dsTrain = new Dataset(datasetIDTrain);
+			ds = new Dataset(Dataset.isTablatureSet(datasetIDTrain) ? Dataset.USER_TAB : 
+				Dataset.USER);
 			// Set name (now default), pieceNames (now empty list), and numVoices (now 0)
-			if (!userDefinedName.equals("")) {
-				ds.setName(userDefinedName);
+			if (!datasetName.equals("")) {
+				ds.setName(datasetName);
 			}
 			ds.setNumVoices(dsTrain.getNumVoices());
-			ds.addPieceNames(getFileNamesWithExtension(new File(
+			ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
 				ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
 				ds.isTablatureSet() ? ".tbp" : ".mid"));
 		}
 
-		// 3. Set paths
+		// 3. Set paths for storing and retrieving
+		// storePath:              where the output of the model currently run is stored 
+		//                         (empty; files are added) 
+		// pathPredTransFirstPass: where the voice labels (predicted by a unidir model) needed 
+		//                         for a bidir model are stored (not empty; no files are added)
+		// pathTrainedUserModel:   where the weights/modelparameters of a model to reuse are 
+		//                         stored (not empty; no files are added) 
+		// pathStoredNN: 		   
+		// pathStoredMM:           
 		// a. If repeating an existing experiment or conducting a new one
 		// Path format (* = optional)
 		// - Runner.experimentsPath + publication, *experiment, dataset name, voices, model, 
@@ -372,27 +375,29 @@ public class UI {
 		//   Example
 		//   - F:/research/data/models/D-bwd-byrd-int-4vv/
 		String storePath = null;
-		String pathPredTransFirstPass = null;
-		String pathTrainedUserModel = null;
-		String pathStoredNN = null;
-		String pathStoredMM = null;
+		String pathPredTransFirstPass = null; // null when not using bidir model
+		String pathTrainedUserModel = null; // null when not deploying trained user model
+		String pathStoredNN = null; // where the weights of the model to reuse are stored (not empty; no files are added); null when not using ensemble model
+		String pathStoredMM = null; // null when not using ensemble model
 		if (!deployTrainedUserModel) {
-			String datasetVoices = 
-				pathify(new String[]{ds.getName(), ds.getNumVoices() + Runner.voices});
-			storePath = 
-				!trainUserModel ? pathify(new String[]{Runner.experimentsPath, 
-				expName, datasetVoices, m.toString(), pm.getStringRep(), hyperParams}) 
-				: pathify(new String[]{Runner.modelsPath, 
+			storePath = !trainUserModel ? 
+				ToolBox.pathify(new String[]{Runner.experimentsPath, 
+				expDir, ds.getName(), ds.getNumVoices() + Runner.voices, 
+				m.toString(), pm.getStringRep(), hyperparams}) 
+				: 
+				ToolBox.pathify(new String[]{Runner.modelsPath, 
 				m.toString() + "-" + pm.getStringRep() + "-" + ds.getDatasetID()});
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
-				pathPredTransFirstPass = pathify(new String[]{Runner.experimentsPath, 
-					expNameFirstPass, datasetVoices, mFirstPass.toString(), pmFirstPass.getStringRep()});
+				pathPredTransFirstPass = 
+					ToolBox.pathify(new String[]{Runner.experimentsPath, expDirFirstPass});
 			}
-			if (mt == ModelType.ENS) {
-				pathStoredNN = pathify(new String[]{Runner.experimentsPath, 
-					expNameFirstPass, datasetVoices, Model.N.toString(), pm.getStringRep()});
-				pathStoredMM = pathify(new String[]{Runner.experimentsPath, 
-					expNameFirstPass, datasetVoices, m.getMelodyModel().toString()}); 
+			if (m.getModelType() == ModelType.ENS) {
+				pathStoredNN = ToolBox.pathify(new String[]{Runner.experimentsPath, 
+					expDirFirstPass, ds.getName(), ds.getNumVoices() + Runner.voices, 
+					Model.N.toString(), pm.getStringRep()});
+				pathStoredMM = ToolBox.pathify(new String[]{Runner.experimentsPath, 
+					expDirFirstPass, ds.getName(), ds.getNumVoices() + Runner.voices, 
+					m.getMelodyModel().toString()}); 
 			}
 		}
 		// b. If deploying a trained model
@@ -405,55 +410,55 @@ public class UI {
 		//   Example
 		//   - F:/research/models/D_B-fwd-byrd-int-4vv/
 		else {
-			// Steps (i) and (ii): create user models
+			storePath = ToolBox.pathify(new String[]{Runner.outPath, modelID});
+			pathTrainedUserModel = ToolBox.pathify(new String[]{Runner.modelsPath, modelID});
+			if (modelIDFirstPass != null) {
+				pathPredTransFirstPass = ToolBox.pathify(new String[]{Runner.outPath, modelIDFirstPass});
+			}
+			
+			// Steps (i) and (ii): train user models
 			// step (i)  : train best-performing unidir model on complete dataset
 			// step (ii) : train best-performing bidir model on complete dataset, using
-			//             the labels predicted in (i)
-			// Steps (iii) and (iv): deploy user models
+			//             the labels predicted with CV
+			// Steps (iii) and (iv): deploy trained user models
 			// step (iii) : apply the trained unidir model from (i) to new piece(s)
 			// step (iv)  : apply the trained bidir model from (ii), using the labels 
 			//              predicted in (iii)
-			storePath = pathify(new String[]{Runner.outPath, modelID});
-			pathTrainedUserModel = pathify(new String[]{Runner.modelsPath, modelID});
-			if (m.getDecisionContext() == DecisionContext.BIDIR) {
-				pathPredTransFirstPass = pathify(new String[]{Runner.outPath, modelIDFirstPass});
-			}
-
-			System.out.println("storePath              = " + storePath); // user/out/D_B-fwd-byrd-int-4vv/
-			System.out.println("pathPredTransFirstPass = " + pathPredTransFirstPass); // user/out/D-bwd-byrd-int-4vv
-			System.out.println("pathTrainedUserModel   = " + pathTrainedUserModel); // models/D_B-fwd-byrd-int-4vv/
-			System.exit(0);
+//			System.out.println("storePath              = " + storePath); // user/out/D_B-fwd-byrd-int-4vv/
+//			System.out.println("pathPredTransFirstPass = " + pathPredTransFirstPass); // user/out/D-bwd-byrd-int-4vv
+//			System.out.println("pathTrainedUserModel   = " + pathTrainedUserModel); // models/D_B-fwd-byrd-int-4vv/
+//			System.exit(0);
 		}
 
 		// 4. Set model parameters  
 		// The order in which items are added to a LinkedHashMap is the order in which they
 		// are returned, and also in which they are printed in performance.txt
+		// In EvaluationManager.paramsNotPrinted is specified which one are not printed 
 		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
 		if (!deployTrainedUserModel) {
-			// a. Settings (model)
+			ModelType mt = m.getModelType();
+
+			// a. Settings (model - own concepts)
 			modelParams.put(Runner.MODEL, (double) m.getIntRep());
+			modelParams.put(Runner.MODELLING_APPROACH, (double) m.getModellingApproach().getIntRep());
 			modelParams.put(Runner.FEAT_VEC, (m == Model.H || mt == ModelType.MM) ? null : (double) fv.getIntRep());
 			modelParams.put(Runner.PROC_MODE, (double) pm.getIntRep());
 			modelParams.put(Runner.SNU, (double) ToolBox.toInt(ds.isTablatureSet()));
 			modelParams.put(Runner.ESTIMATE_ENTRIES, (double) ToolBox.toInt(estimateEntries));
+			modelParams.put(Runner.MODEL_DURATION_AGAIN, (double) ToolBox.toInt(modelDurationAgain));
 //			modelParams.put(Runner.CONFIG, (m == Model.H) ? (double) matrixConfiguration : null);
 			modelParams.put(Runner.CONFIG, (m == Model.H) ? (double) config.getIntRep() : null);
 //			modelParams.put(Runner.UNIFORM_TPM, (m == Model.H) ? (double) ToolBox.toInt(uniformTPM) : null);
 //			modelParams.put(Runner.UNIFORM_ISM, (m == Model.H) ? (double) ToolBox.toInt(uniformISM) : null);
-			modelParams.put(Runner.SLICE_IND_ENC_SINGLE_DIGIT, (mt == ModelType.MM || mt == ModelType.ENS) ? (double) sliceIndEncoding : null);	
-			// b. Settings (ML)
-			modelParams.put(NNManager.ACT_FUNCTION, (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS) ? (double) actFunc.getIntRep() : null);
-			modelParams.put(Runner.DECODING_ALG, (m == Model.H) ? (double) decAlg.getIntRep() : null);
+			modelParams.put(Runner.SLICE_IND_ENC_SINGLE_DIGIT, (mt == ModelType.MM || mt == ModelType.ENS) ? (double) ToolBox.encodeListOfIntegers(MelodyFeatureGenerator.getSliceIndices(mmfs)) : null);	
+			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
+			// b. Settings (ML - existing concepts)
+			modelParams.put(NNManager.ACT_FUNCTION, (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS) ? (double) activationFunc.getIntRep() : null);
+			modelParams.put(Runner.DECODING_ALG, (m == Model.H) ? (double) decodingAlg.getIntRep() : null);
 			modelParams.put(Runner.SEED, (double) seed);
-			// c. Non-tuned hyperparameters 
-			modelParams.put(Runner.VALIDATION_PERC, (double) validationPercentage);
-			modelParams.put(Runner.DECISION_CONTEXT_SIZE, (double) decisionContextSize);
-			modelParams.put(Runner.META_CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) maxMetaCycles : null);
-			modelParams.put(NNManager.CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) cycles : null);
-			modelParams.put(Runner.EPOCHS, (mt == ModelType.DNN) ? (double) epochs : null);
-			modelParams.put(Runner.LEARNING_RATE, (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS) ? learningRate : null);
-			modelParams.put(Runner.DEV_THRESHOLD, (ds.isTablatureSet() && (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS)) ? deviationThreshold : null);
-			// d. Tuned hyperparameters
+			modelParams.put(Runner.WEIGHTS_INIT, (double) weightsInit.getIntRep());
+			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(useCV));
+			// c. Tuned hyperparameters
 			modelParams.put(NNManager.REGULARISATION_PARAMETER, (mt == ModelType.NN || mt == ModelType.ENS) ? lambda : null);
 			modelParams.put(Runner.KEEP_PROB, (mt == ModelType.DNN) ? keepProbability : null);
 			modelParams.put(Runner.C, (m == Model.LR || m == Model.LR_CL || m == Model.LSVC_CL) ? C : null);
@@ -464,30 +469,24 @@ public class UI {
 			modelParams.put(Runner.N_NGH, (m == Model.kNN || m == Model.kNN_CL) ? (double) neighbours : null);
 			modelParams.put(Runner.N_EST, (m == Model.RF || m == Model.RF_CL) ? (double) trees : null);
 			modelParams.put(Runner.N, (mt == ModelType.MM) ? (double) n : null);
-			modelParams.put(Runner.NS_ENC_SINGLE_DIGIT, (mt == ModelType.ENS) ? (double) nsEncoding : null);
-			// e. Other (not printed -- see EvaluationManager.paramsNotPrinted)
-			modelParams.put(Runner.MODELLING_APPROACH, (double) ma.getIntRep());
-			modelParams.put(Runner.WEIGHTS_INIT, (double) wi.getIntRep());
-			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(useCV));
-			modelParams.put(Runner.MODEL_DURATION_AGAIN, (double) ToolBox.toInt(modelDurationAgain));
-			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
-			// TODO move the four below out of modelParams (bc they are not real params) and give them as arg to Runner.runExperiment()?
-			modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, (double) ToolBox.toInt(deployTrainedUserModel));
-			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
-			modelParams.put(Runner.VERBOSE, (double) ToolBox.toInt(verbose));
-			modelParams.put(Runner.SKIP_TRAINING, (double) ToolBox.toInt(skipTraining));
+			modelParams.put(Runner.NS_ENC_SINGLE_DIGIT, (mt == ModelType.ENS) ? (double) ToolBox.encodeListOfIntegers(ns) : null);
+			// d. Non-tuned hyperparameters 
+			modelParams.put(Runner.VALIDATION_PERC, (double) validationPercentage);
+			modelParams.put(Runner.DECISION_CONTEXT_SIZE, (double) decisionContextSize);
+			modelParams.put(Runner.META_CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) maxMetaCycles : null);
+			modelParams.put(NNManager.CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) cycles : null);
+			modelParams.put(Runner.EPOCHS, (mt == ModelType.DNN) ? (double) epochs : null);
+			modelParams.put(Runner.LEARNING_RATE, (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS) ? learningRate : null);
+			modelParams.put(Runner.DEV_THRESHOLD, (ds.isTablatureSet() && (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS)) ? deviationThreshold : null);
 		}
 		else {
 			modelParams = 
 				ToolBox.getStoredObjectBinary(new LinkedHashMap<String, Double>(), 
 				new File(pathTrainedUserModel + Runner.modelParameters + ".ser"));
-			modelParams.put(Runner.TRAIN_USER_MODEL, (double) ToolBox.toInt(trainUserModel));
-			modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, (double) ToolBox.toInt(deployTrainedUserModel));
-			if (m.getDecisionContext() == DecisionContext.BIDIR) {
-				modelParams.put(Runner.MODEL, (double) m.getIntRep());
-				modelParams.put(Runner.PROC_MODE, (double) pm.getIntRep());
-			}
-
+			// Reset necessary settings
+			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(false));
+			modelParams.put(Runner.WEIGHTS_INIT, (double) WeightsInit.INIT_FROM_LIST.getIntRep());
+			
 			for (Entry<String, Double> e : modelParams.entrySet()) {
 //				System.out.println("key  : " + e.getKey());
 //				System.out.println("value: " + e.getValue());
@@ -524,73 +523,25 @@ public class UI {
 		}
 
 		// 6. Run experiment
-		Transcription.setMaximumNumberOfVoices(maxNumVoices);
+		Model mdl = 
+			!deployTrainedUserModel ? m : Runner.ALL_MODELS[modelParams.get(Runner.MODEL).intValue()];
+		Transcription.setMaximumNumberOfVoices( 
+			(mdl.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4);
 		MelodyPredictor.setMelModelType(MelModelType.SIMPLE_LM);
-		MelodyPredictor.setTermType(m.getKylmModelType());
+		MelodyPredictor.setTermType(mdl.getKylmModelType());
 		EvaluationManager.setMetricsUsed(metricsUsed);
 		System.out.println("storePath              = " + storePath);
-		System.out.println("pathFirstPassPredTrans = " + pathPredTransFirstPass);
+		System.out.println("pathPredTransFirstPass = " + pathPredTransFirstPass);
 		System.out.println("pathTrainedUserModel   = " + pathTrainedUserModel);
 		System.out.println("pathStoredNN           = " + pathStoredNN);
 		System.out.println("pathStoredMM           = " + pathStoredMM);
-		System.exit(0);
-		Runner.setPaths(new String[]{storePath, pathPredTransFirstPass,/*pathStoredNN,*/ pathStoredMM});
+//		System.exit(0);
+		Runner.setPaths(new String[]{storePath, pathPredTransFirstPass, pathTrainedUserModel, 
+			pathStoredNN, pathStoredMM});
 		Runner.setModelParams(modelParams);
-		Runner.setDataset(ds); // still unpopulated; this is done in Runner.runExperiment()
+		Runner.setDataset(ds);
 		Runner.setDatasetTrain(dsTrain);
-		Runner.runExperiment();
+		Runner.runExperiment(trainUserModel, skipTraining, deployTrainedUserModel, verbose);
 	}
-
-
-	private static void setRootPath(String arg) {
-		rootPath = arg;
-	}
-
-
-	public static String getRootPath() {
-		return rootPath; 
-	}
-
-
-	/**
-	 * Returns a list containing the names of all files with the given extension in 
-	 * the given folder.
-	 * 
-	 * @param f The folder
-	 * @param e The extension
-	 * @return
-	 */
-	 public static List<String> getFileNamesWithExtension(File f, String e) {
-		if (!e.startsWith(".")) {
-			throw new RuntimeException("ERROR: The extension must start with a dot.");
-		}
-
-		List<String> fileNames = new ArrayList<String>();
-		for (String s : f.list()) {
-			if (s.endsWith(e)) {
-				fileNames.add(s.substring(0, s.indexOf(e)));
-			}
-		}
-		return fileNames;
-	}
-
-
-	public static String pathify(String[] dirs) {
-		String path = "";
-		for (int i = 0; i < dirs.length; i++) {
-			String s = dirs[i];
-			path = path.concat(s);
-			if (!s.endsWith("/")) {
-				path = path.concat("/");
-			}
-		}
-		if (path.contains("//")) {
-			path = path.replace("//", "/");
-		}
-		if (path.contains("\\")) {
-			path = path.replace("\\", "/");
-		}
-		return path;
-	} 
 
 }

@@ -8701,8 +8701,23 @@ public class FeatureGeneratorTest extends TestCase {
 	public void testGetBackwardsMapping() {
 		Tablature tablature = new Tablature(encodingTestpiece1, false);
 			
-		List<Integer> expected = Arrays.asList(new Integer[]{35, 36, 37, 38, 34, 33, 32, 31, 30, 29, 25, 26, 27, 28, 
-			23, 24, 19, 20, 21, 22, 14, 15, 16, 17, 18, 13, 9, 10, 11, 12, 8, 4, 5, 6, 7, 0, 1, 2, 3});
+		List<Integer> expected = Arrays.asList(new Integer[]{
+			35, 36, 37, 38, 
+			34, 
+			33, 
+			32, 
+			31, 
+			30, 
+			29, 
+			25, 26, 27, 28, 
+			23, 24, 
+			19, 20, 21, 22, 
+			14, 15, 16, 17, 18, 
+			13, 
+			9, 10, 11, 12, 
+			8, 
+			4, 5, 6, 7, 
+			0, 1, 2, 3});
 
 		List<Integer> chordSizes = tablature.getNumberOfNotesPerChord();
 		List<Integer> actual = FeatureGenerator.getBackwardsMapping(chordSizes);
@@ -8717,8 +8732,23 @@ public class FeatureGeneratorTest extends TestCase {
 	public void testGetBackwardsMappingNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1, null);
 
-		List<Integer> expected = Arrays.asList(new Integer[]{36, 37, 38, 39, 35, 34, 33, 32, 31, 30, 26, 27, 28, 29, 
-			24, 25, 20, 21, 22, 23, 15, 16, 17, 18, 19, 14, 9, 10, 11, 12, 13, 8, 4, 5, 6, 7, 0, 1, 2, 3});
+		List<Integer> expected = Arrays.asList(new Integer[]{
+			36, 37, 38, 39, 
+			35, 
+			34, 
+			33, 
+			32, 
+			31, 
+			30, 
+			26, 27, 28, 29, 
+			24, 25, 
+			20, 21, 22, 23, 
+			15, 16, 17, 18, 19, 
+			14, 
+			9, 10, 11, 12, 13, 
+			8, 
+			4, 5, 6, 7, 
+			0, 1, 2, 3});
 
 		List<Integer> chordSizes = transcription.getNumberOfNewNotesPerChord();
 		List<Integer> actual = FeatureGenerator.getBackwardsMapping(chordSizes);

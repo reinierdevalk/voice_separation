@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +145,7 @@ public class Dataset implements Serializable {
 	}
 
 
-	public void populateDataset(String datasetVersion, String[] altPaths, boolean appliedToNewData) {
+	public void populateDataset(String datasetVersion, String[] altPaths, boolean deployTrainedUserModel) {
 		boolean isTablatureCase = isTablatureSet();
 		boolean isTabAsNonTab = isTabAsNonTabSet();
 
@@ -158,16 +157,16 @@ public class Dataset implements Serializable {
 			argMidiPath = Runner.midiPath;
 			argTabMidiPath = Runner.midiPath;
 			//argTabMidiPath;
-			if (!appliedToNewData) {
+			if (!deployTrainedUserModel) {
 				String numVoices = getNumVoices() + Runner.voices + "/";
-				argEncodingsPath += UI.pathify(new String[]{getName(), numVoices});
-				argTabMidiPath += UI.pathify(new String[]{getName(), numVoices});
-				argMidiPath += UI.pathify(new String[]{getName(), datasetVersion, numVoices});
+				argEncodingsPath += ToolBox.pathify(new String[]{getName(), numVoices});
+				argTabMidiPath += ToolBox.pathify(new String[]{getName(), numVoices});
+				argMidiPath += ToolBox.pathify(new String[]{getName(), datasetVersion, numVoices});
 			}
 			else {
 				// Ensure that paths end with slash
-				argEncodingsPath = UI.pathify(new String[]{argEncodingsPath});
-				argMidiPath = UI.pathify(new String[]{argMidiPath});
+				argEncodingsPath = ToolBox.pathify(new String[]{argEncodingsPath});
+				argMidiPath = ToolBox.pathify(new String[]{argMidiPath});
 			}
 		}
 		else {
@@ -186,7 +185,9 @@ public class Dataset implements Serializable {
 			Transcription currTranscription = null;
 			if (isTablatureCase) {
 				encodingFile = new File(argEncodingsPath + currPieceName + ".tbp");
-				midiFile = new File(argTabMidiPath + currPieceName + ".mid");
+				if (!deployTrainedUserModel) {
+					midiFile = new File(argTabMidiPath + currPieceName + ".mid");
+				}
 				currTablature = new Tablature(encodingFile, true);
 			}
 			else {
@@ -196,7 +197,7 @@ public class Dataset implements Serializable {
 				}
 			}
 			currTranscription = 
-				!appliedToNewData ? new Transcription(midiFile, encodingFile) : null;
+				!deployTrainedUserModel ? new Transcription(midiFile, encodingFile) : null;
 //			if (isTabAsNonTab) {
 //				int currInterval = 0;
 //				if (currentPieceName.equals("ochsenkun-1558-absolon_fili-shorter")) {
@@ -216,7 +217,7 @@ public class Dataset implements Serializable {
 				isTablatureCase ? currTablature.getLargestTablatureChord() :
 				currTranscription.getLargestTranscriptionChord();
 			int currNumVoices =
-				!appliedToNewData ? currTranscription.getNumberOfVoices() : 
+				!deployTrainedUserModel ? currTranscription.getNumberOfVoices() : 
 				currLargestChordSize; // TODO this assumption might not always hold true
 
 			// Add to lists
@@ -789,7 +790,7 @@ public class Dataset implements Serializable {
 	
 	
 	private static final String DATASET_ID = "dataset ID";
-	private static DatasetID[] ALL_DATASET_IDS = new DatasetID[Runner.ARR_SIZE];
+	private static DatasetID[] ALL_DATASET_IDS = new DatasetID[50];
 	public enum DatasetID {
 		TAB_INT_3VV("tab-int-3vv", 0, true, false, getTabInt3vv()),
 		TAB_INT_4VV("tab-int-4vv", 1, true, false, getTabInt4vv()),  

@@ -232,7 +232,7 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
+//		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 		
 		// ds
@@ -818,7 +818,7 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
+//		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 
 		// ds
@@ -1423,7 +1423,7 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
+//		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 
 		// ds
@@ -1765,7 +1765,7 @@ public class TestManagerTest extends TestCase {
 //		modelParameters.put(Runner.MODEL_BIDIR, 0.0);
 		modelParameters.put(Runner.MODEL_DURATION_AGAIN, 0.0);
 //		modelParameters.put(Runner.GIVE_FIRST, 0.0);
-		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
+//		modelParameters.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
 		Runner.setModelParams(modelParameters);
 
 		// ds

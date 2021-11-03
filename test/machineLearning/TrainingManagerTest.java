@@ -425,6 +425,85 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	public void testReintegrateVldData() {
+		List<double[]> expected = new ArrayList<>();
+		expected.add(new double[]{0}); expected.add(new double[]{1});
+		expected.add(new double[]{2}); expected.add(new double[]{3});
+		expected.add(new double[]{4}); expected.add(new double[]{5});
+		expected.add(new double[]{6}); expected.add(new double[]{7});
+		expected.add(new double[]{8}); expected.add(new double[]{9});
+		expected.add(new double[]{10}); expected.add(new double[]{11});
+		expected.add(new double[]{12}); expected.add(new double[]{13});
+		expected.add(new double[]{14}); expected.add(new double[]{15});
+		expected.add(new double[]{16}); expected.add(new double[]{17});
+		expected.add(new double[]{18}); expected.add(new double[]{19});
+		expected.add(new double[]{20});
+		
+		// valPerc = 6 (last data point is trn and the next would also be trn)
+		List<double[]> trn6 = new ArrayList<>();
+		trn6.add(new double[]{1}); trn6.add(new double[]{2}); trn6.add(new double[]{3}); 
+			trn6.add(new double[]{4}); trn6.add(new double[]{5}); 
+		trn6.add(new double[]{7}); trn6.add(new double[]{8}); trn6.add(new double[]{9}); 
+			trn6.add(new double[]{10}); trn6.add(new double[]{11}); 
+		trn6.add(new double[]{13}); trn6.add(new double[]{14}); trn6.add(new double[]{15}); 
+			trn6.add(new double[]{16}); trn6.add(new double[]{17}); 
+		trn6.add(new double[]{19}); trn6.add(new double[]{20});
+		List<double[]> vld6 = new ArrayList<>();
+		vld6.add(new double[]{0});
+		vld6.add(new double[]{6});
+		vld6.add(new double[]{12});
+		vld6.add(new double[]{18});
+		// valPerc = 3 (last data point is trn and the next would be vld)
+		List<double[]> trn3 = new ArrayList<>();
+		trn3.add(new double[]{1}); trn3.add(new double[]{2});
+		trn3.add(new double[]{4}); trn3.add(new double[]{5});
+		trn3.add(new double[]{7}); trn3.add(new double[]{8});
+		trn3.add(new double[]{10}); trn3.add(new double[]{11});
+		trn3.add(new double[]{13}); trn3.add(new double[]{14});
+		trn3.add(new double[]{16}); trn3.add(new double[]{17});
+		trn3.add(new double[]{19}); trn3.add(new double[]{20});
+		List<double[]> vld3 = new ArrayList<>();
+		vld3.add(new double[]{0});
+		vld3.add(new double[]{3});
+		vld3.add(new double[]{6});
+		vld3.add(new double[]{9});
+		vld3.add(new double[]{12});
+		vld3.add(new double[]{15});
+		vld3.add(new double[]{18});
+		// valPerc = 5 (last data point is vld and the next would be trn)
+		List<double[]> trn5 = new ArrayList<>();
+		trn5.add(new double[]{1}); trn5.add(new double[]{2}); trn5.add(new double[]{3}); 
+			trn5.add(new double[]{4});
+		trn5.add(new double[]{6}); trn5.add(new double[]{7}); trn5.add(new double[]{8}); 
+			trn5.add(new double[]{9});
+		trn5.add(new double[]{11}); trn5.add(new double[]{12}); trn5.add(new double[]{13}); 
+			trn5.add(new double[]{14});
+		trn5.add(new double[]{16}); trn5.add(new double[]{17}); trn5.add(new double[]{18}); 
+			trn5.add(new double[]{19});		
+		List<double[]> vld5 = new ArrayList<>();
+		vld5.add(new double[]{0});
+		vld5.add(new double[]{5});
+		vld5.add(new double[]{10});
+		vld5.add(new double[]{15});
+		vld5.add(new double[]{20});
+
+		List<List<double[]>> actuals = new ArrayList<>();
+		actuals.add(TrainingManager.reintegrateVldData(trn6, vld6, 6));
+		actuals.add(TrainingManager.reintegrateVldData(trn3, vld3, 3));
+		actuals.add(TrainingManager.reintegrateVldData(trn5, vld5, 5));
+
+		for (List<double[]> actual : actuals) {
+			assertEquals(expected.size(), actual.size());
+			for (int i = 0; i < expected.size(); i++) {
+				assertEquals(expected.get(i).length, actual.get(i).length);
+				for (int j = 0; j < expected.get(i).length; j++) {
+					assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				}
+			}
+		}
+	}
+
+
 	public void testSmoothenOutputs() {
 		List<double[]> outputs = new ArrayList<double[]>();
 		outputs.add(new double[]{0.1, 0.2, 0.0, 0.4, 0.5});

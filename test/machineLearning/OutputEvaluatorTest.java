@@ -35,9 +35,10 @@ public class OutputEvaluatorTest extends TestCase {
 
 	public void testDeterminePredictedVoices() {
 		OutputEvaluator.ignoreExceptionForTest = true;
-		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
-		modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
-		Runner.setModelParams(modelParams);
+//		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
+//		modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
+//		Runner.setDeployTrainedUserModel(false);
+//		Runner.setModelParams(modelParams);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		// a. N2N
@@ -280,9 +281,9 @@ public class OutputEvaluatorTest extends TestCase {
 
 	public void testInterpretNetworkOutput() {
 		OutputEvaluator.ignoreExceptionForTest = true;
-		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
-		modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
-		Runner.setModelParams(modelParams);
+//		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
+//		modelParams.put(Runner.DEPLOY_TRAINED_USER_MODEL, 0.0);
+//		Runner.setModelParams(modelParams);
 		
 		List<List<List<Integer>>> expected = new ArrayList<List<List<Integer>>>();
 		// 1. When CoDs are not allowed

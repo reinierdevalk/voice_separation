@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import data.Dataset;
 import machineLearning.NNManager.ActivationFunction;
 import python.PythonInterface;
@@ -63,18 +65,19 @@ public class TrainingManager {
 	public void prepareTraining(String start) {		
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
+		boolean trainUserModel = Runner.getTrainUserModel();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
 		String[] paths = Runner.getPaths();
+		String storePath = paths[0];
+		String pathPredTransFirstPass = paths[1];
 		Dataset dataset = Runner.getDataset();
 		int datasetSize = dataset.getNumPieces();		
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext();
-		int maxMetaCycles = -1;
-		if (mt != ModelType.DNN) { // 07.08.2019
-			maxMetaCycles = modelParameters.get(Runner.META_CYCLES).intValue();
-		}
+		int maxMetaCycles = 
+			mt != ModelType.DNN ? modelParameters.get(Runner.META_CYCLES).intValue() : -1;
 
 		classificationErrorsAllFolds = new ArrayList<>();
 		classificationErrorsValAllFolds = new ArrayList<>();
@@ -85,17 +88,15 @@ public class TrainingManager {
 		List<String> pieceNames = dataset.getPieceNames();
 		for (int i = 0; i < datasetSize; i++) {
 			String currPieceName = pieceNames.get(i);
-			Tablature currTab = dataset.getAllTablatures().get(i);
+//			System.out.println(currPieceName);
+			Tablature currTab = 
+				dataset.isTablatureSet() ? dataset.getAllTablatures().get(i) : null; 
 			Transcription currTranscr = dataset.getAllTranscriptions().get(i);
-			
-			if (currTab != null) { // 07.97.2019
-				numNotesTotal += currTab.getNumberOfNotes();
-			}
-			else {
-				numNotesTotal += currTranscr.getNumberOfNotes();
-			}
+
+			numNotesTotal += currTab != null ? currTab.getNumberOfNotes() :
+				currTranscr.getNumberOfNotes();
 			piecesTotal += 1;
-			
+
 			TablatureTranscriptionPair currTabTransPair = null;
 			TablatureTranscriptionPair currTabTransPairRev = null;
 			TablatureTranscriptionPair currTabTransPairDeorn = null;
@@ -153,9 +154,7 @@ public class TrainingManager {
 					currTabTransPairRevDeorn = 
 						new TablatureTranscriptionPair(currTabRevDeorn, currTranscrRevDeorn);
 				}
-				
 			}
-			
 			if (dc == DecisionContext.BIDIR) {
 				Transcription predTranscr = null;
 				if (m == Model.B_STAR || m == Model.B_PRIME_STAR) {
@@ -165,10 +164,11 @@ public class TrainingManager {
 					int testPieceIndex = datasetSize - i;
 					predTranscr = 
 						ToolBox.getStoredObjectBinary(new Transcription(), 
-						new File(paths[1] + Runner.output + "fold_" +
+						new File(pathPredTransFirstPass + Runner.output + "fold_" +
 						ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex)) + "-" + 
 						currPieceName + ".ser"));
-					System.out.println(paths[1]);
+					System.out.println("i = " + i);
+					System.out.println(pathPredTransFirstPass);
 					System.out.println(Runner.output + "fold_" +
 						ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex)) + "-" + 
 						currPieceName + ".ser");
@@ -201,7 +201,7 @@ public class TrainingManager {
 			highestNumVoicesAssumed = Transcription.MAXIMUM_NUMBER_OF_VOICES;
 			boolean useFullSizeMapping = false;
 			chordDictionary = generateChordDictionary(trainingPieces);
-			ToolBox.storeListOfListsAsCSVFile(chordDictionary, new File(paths[0] + Runner.chordDict + ".csv"));
+			ToolBox.storeListOfListsAsCSVFile(chordDictionary, new File(storePath + Runner.chordDict + ".csv"));
 //			ToolBox.storeObjectBinary(chordDictionary, new File(paths[0] + Runner.chordDict + ".ser"));
 			mappingDictionary = generateMappingDictionary(trainingPieces, highestNumVoicesAssumed);
 			if (useFullSizeMapping) { 
@@ -214,7 +214,7 @@ public class TrainingManager {
 					}
 				}
 			}
-			ToolBox.storeListOfListsAsCSVFile(mappingDictionary, new File(paths[0] + Runner.mappingDict + ".csv"));
+			ToolBox.storeListOfListsAsCSVFile(mappingDictionary, new File(storePath + Runner.mappingDict + ".csv"));
 //			ToolBox.storeObjectBinary(mappingDictionary, new File(paths[0] + Runner.mappingDict + ".ser"));
 		}
 
@@ -246,12 +246,12 @@ public class TrainingManager {
 			String.valueOf(ToolBox.getTimeDiffPrecise(start, ToolBox.getTimeStampPrecise()));
 		if (!useCV) {
 			String startFoldTr = ToolBox.getTimeStampPrecise();
-			startTrainingProcess(0, trainingPieces, paths, new String[]{trPreProcTime, startFoldTr});
+			startTrainingProcess(0, trainingPieces, -1, paths, new String[]{trPreProcTime, startFoldTr});
 		}
 		else {
 			for (int k = 1; k <= datasetSize; k++) {
 				String startFoldTr = ToolBox.getTimeStampPrecise();
-				System.out.println("   fold = " + k);
+				System.out.println("fold = " + k);
 				// Add foldstring to paths
 				String[] currPaths = new String[paths.length];
 				for (int i = 0; i < paths.length; i++) {
@@ -273,7 +273,7 @@ public class TrainingManager {
 					valPieceIndex = (( (augmentFactor*datasetSize)-(augmentFactor*k)-augmentFactor) 
 						+ (augmentFactor*datasetSize)) % (augmentFactor*datasetSize);
 				}
-				System.out.println("testPieceIndex = " + testPieceIndex);
+//				System.out.println("testPieceIndex = " + testPieceIndex);
 				List<TablatureTranscriptionPair> pairsCurrentFold = new ArrayList<TablatureTranscriptionPair>();
 //				List<Integer> testPieceIndices = new ArrayList<>();
 //				for (int i = 0; i < augmentFactor; i++) {
@@ -288,13 +288,11 @@ public class TrainingManager {
 						pairsCurrentFold.add(trainingPieces.get(l));
 					} // <-- remove the if to fake non-cross-validation
 				}
-				startTrainingProcess(k, pairsCurrentFold, currPaths, 
+				startTrainingProcess(k, pairsCurrentFold, testPieceIndex, currPaths, 
 					new String[]{trPreProcTime, startFoldTr});
 			}
 		}
 
-		boolean trainUserModel = 
-			ToolBox.toBoolean(modelParameters.get(Runner.TRAIN_USER_MODEL).intValue());
 		if (!trainUserModel) {
 			List<List<Double>> classErrPerMetaCyclePerFold = new ArrayList<>();
 			List<List<Double>> classErrValPerMetaCyclePerFold = new ArrayList<>();
@@ -334,20 +332,21 @@ public class TrainingManager {
 	/**
 	 * 
 	 * @param fold Fold number when using cross-validation; 0 when not.
+	 * @param testPieceIndex 
 	 * @param trainingPieces
 	 * @param argPaths
 	 * @param times 
 	 */
 	private void startTrainingProcess(int fold, List<TablatureTranscriptionPair> trainingPieces, 
-		String[] argPaths, String[] times) {
-
+		int testPieceIndex, String[] argPaths, String[] times) {
 		long trPreProcTime = (long) Integer.parseInt(times[0]);
 		String start = times[1];
 
 		Map<String, Double> modelParameters = Runner.getModelParams();		
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
-		int highestNumberOfVoices =	Runner.getHighestNumVoicesTraining();
+		int highestNumberOfVoices =	
+			Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
 		int valPerc = modelParameters.get(Runner.VALIDATION_PERC).intValue();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
@@ -361,42 +360,17 @@ public class TrainingManager {
 		boolean modelDuration = m.getModelDuration();
 		DecisionContext dc = m.getDecisionContext();
 		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
-		boolean verbose = 
-			ToolBox.toBoolean(modelParameters.get(Runner.VERBOSE).intValue());
-		List<Integer> sliceIndices = null;
-		if (mt == ModelType.MM || mt == ModelType.ENS) {
-			sliceIndices = 
-				ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
-		}
-		List<Integer> ns = null;
-		if (mt == ModelType.ENS) {		
-			ns = ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
-		}
-//		Set<Entry<String, Double>> paramSet = modelParameters.entrySet();
-//		for (Entry<String, Double> e : paramSet) {
-//			System.out.println("key = " + e.getKey() + "; value = " + e.getValue());	
-//		}
+		boolean verbose = Runner.getVerbose();
+		List<Integer> sliceIndices = 
+			(mt == ModelType.MM || mt == ModelType.ENS) ? ToolBox.decodeListOfIntegers(
+			modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1) : null;
+		List<Integer> ns = 
+			mt == ModelType.ENS ? ToolBox.decodeListOfIntegers(
+			modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1) : null;
 
-		String storePath = null;
-		String pathNN = null;
-		String pathMM = null;
-//		String pathComb = null;
-		if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER) {
-//			pathNN = argPaths[0];
-//			storePath = pathNN;
-			storePath = argPaths[0];
-		}
-		else if (mt == ModelType.MM) {
-//			pathMM = argPaths[0];
-			storePath = argPaths[0];
-		}
-		else if (mt == ModelType.ENS) {
-//			pathComb = argPaths[0];
-			storePath = argPaths[0];
-			pathNN = argPaths[1];
-			pathMM = argPaths[2];
-//			storePath = pathComb;
-		}
+		String storePath = argPaths[0];
+		String pathStoredNN = argPaths[3];
+		String pathStoredMM = argPaths[4];
 
 		// 1. Initialise the superlists representing the entire training set
 		// a. For N2N
@@ -429,15 +403,16 @@ public class TrainingManager {
 
 		// 2. Fill the superlists (NN, MM, OTHER, and ENS case only)
 		List<Integer> pieceSizes = new ArrayList<>();
+		List<List<Double>> allYFwdBeforeVldSplit = new ArrayList<>();
 		if (ma != ModellingApproach.HMM) {
 			for (int i = 0; i < trainingPieces.size(); i++) {			
 				// 1. Make current tablature and transcription
-				Tablature currTab = trainingPieces.get(i).getTablature(); // null for non-tab
+				Tablature currTab = trainingPieces.get(i).getTablature();
 				Transcription currTrans = trainingPieces.get(i).getTranscription();
-				Transcription currTransGT = null;
-				if (dc == DecisionContext.BIDIR) {
-					currTransGT = trainingPieces.get(i).getSecondTranscription();
-				}
+				Transcription currTransGT = 
+					dc == DecisionContext.BIDIR ? 
+					trainingPieces.get(i).getSecondTranscription() : null;		
+
 				if (currTab != null) {
 					pieceSizes.add(currTab.getNumberOfNotes());
 				}
@@ -445,21 +420,19 @@ public class TrainingManager {
 					pieceSizes.add(currTrans.getNumberOfNotes());
 				}
 				
-				System.out.println("i = " + i);
-				System.out.println("   piece = " + currTrans.getPieceName());
 				int indexInAll = dataset.getPieceNames().indexOf(currTrans.getPieceName());
-				System.out.println("indexInAll = " + indexInAll);
+				if (verbose) System.out.println("i = " + i);
+				if (verbose) System.out.println("piece = " + currTab.getPieceName());
+				if (verbose) System.out.println("piece = " + currTrans.getPieceName());
+				if (verbose) System.out.println("size  = " + pieceSizes.get(pieceSizes.size()-1));
 				if (augment) { // TODO is indexInAll not simply i?
 					indexInAll = indexInAll*augmentFactor;
 					// Augmented piece
 					if (i % augmentFactor != 0) {
 						indexInAll += (i % augmentFactor); 
-					}	
-//					if (i % 2 == 1) {	
-//						indexInAll++;
-//					}
+					}
 				}
-				System.out.println("indexInAll = " + indexInAll);
+				if (verbose) System.out.println("indexInAll = " + indexInAll);
 
 				// 2. Get additional information
 				// NB: When using the unidir model, currTrans, currVoiceLabels, currDurLabels, and 
@@ -467,7 +440,7 @@ public class TrainingManager {
 				// currTransGT, currVoiceLabelsGT, currDurLabelsGT, and currVoicesCoDNotesGT are 
 				// GT. When using the bidir model, the EDU info is the same for the predicted and
 				// for the GT transcription, so no GT version is needed
-				System.out.println("   ... determining additional training information ...");
+				if (verbose) System.out.println("   ... determining additional training information ...");
 				Integer[][] currBTP = null;
 				Integer[][] currBNP = null;
 				List<Integer[]> currMeterInfo = null;
@@ -510,7 +483,7 @@ public class TrainingManager {
 				// 3. Fill superlists
 				// a. N2N-specific superlists
 				if (ma == ModellingApproach.N2N) {
-					System.out.println("   ... calculating the labels ...");
+					if (verbose) System.out.println("   ... calculating the labels ...");
 					// 1. Make labels, feature vectors, and melody feature vectors
 					// Labels
 					// NB: When using the unidir model, currLabels is GT; when using the bidir
@@ -580,7 +553,7 @@ public class TrainingManager {
 					// Feature vectors
 					List<List<Double>> currNoteFeatures = null;
 					if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER) {
-						System.out.println("   ... calculating the feature vectors ...");
+						if (verbose) System.out.println("   ... calculating the feature vectors ...");
 						// Retrieve or calculate and set in per-piece list
 						if (noteFeaturesPerPiece.get(indexInAll) != null) {
 							currNoteFeatures = noteFeaturesPerPiece.get(indexInAll);
@@ -588,20 +561,22 @@ public class TrainingManager {
 						else {
 							// NB: When using the bwd model, the features will be ordered accordingly; this is done inside
 							// generateAllNoteFeatureVectors(), so all arguments can remain in their original (fwd) order
-							// TODO make single call to generateAllNoteFeatureVector() that decides which one to call
+							// and the features will be returned in bwd order
+							// TODO make single call to generateAllNoteFeatureVectors() that decides which one to call
 							// based on given featVec
 							if (dc == DecisionContext.UNIDIR) {
 								currNoteFeatures =
-									FeatureGenerator.generateAllNoteFeatureVectors(modelParameters, 
+									FeatureGenerator.generateAllNoteFeatureVectors(
+									modelParameters, 
 									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels, 
-									currMeterInfo, currChordSizes);		
+									currMeterInfo, currChordSizes);
 							}
 							else {
 								currNoteFeatures = 
 									FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
 									modelParameters,
-									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels, 
-									currMeterInfo, currChordSizes, modelDuration, decisionContextSize);
+									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels,
+									currMeterInfo, currChordSizes/*, modelDuration, decisionContextSize*/);
 							}
 							noteFeaturesPerPiece.set(indexInAll, currNoteFeatures);
 						}
@@ -615,13 +590,13 @@ public class TrainingManager {
 								dupl++;
 							}
 						}
-						System.out.println("duplicates = " + dupl);
-						System.out.println("uniques    = " + alreadyAdded.size());
+						if (verbose) System.out.println("       duplicates = " + dupl);
+						if (verbose) System.out.println("       uniques    = " + alreadyAdded.size());
 					}
 					// Melody feature vectors
 					List<List<List<String>>> currMFVs = null;
 					if (mt == ModelType.MM) {					
-						System.out.println("   ... calculating the melody feature vectors ...");
+						if (verbose) System.out.println("   ... calculating the melody feature vectors ...");
 						// Retrieve or calculate and set in per-piece list
 						if (MFVsPerPiece.get(indexInAll) != null) {
 							currMFVs = MFVsPerPiece.get(indexInAll);
@@ -651,7 +626,7 @@ public class TrainingManager {
 					// NB: The reordering must be done after the feature calculation, as 
 					// featureGenerator.generateAllNoteFeatureVectors() takes the lists in fwd order
 					if (pm == ProcessingMode.BWD) {
-						System.out.println("   ... setting lists in backward order ...");
+						if (verbose) System.out.println("   ... setting lists in backward order ...");
 						List<Integer> currBackwardsMapping;
 						// Retrieve or calculate and set in per-piece list
 						if (backwardsMappingPerPiece.get(indexInAll) != null) {
@@ -667,7 +642,9 @@ public class TrainingManager {
 						for (int index : currBackwardsMapping) {
 							currLabelsBwd.add(currLabels.get(index));
 						}
+						allYFwdBeforeVldSplit.addAll(new ArrayList<>(currLabels));
 						currLabels = currLabelsBwd;
+
 						// currLabelsGT
 						if (dc == DecisionContext.BIDIR) {
 							List<List<Double>> currLabelsGTBwd = new ArrayList<List<Double>>(); 
@@ -709,7 +686,7 @@ public class TrainingManager {
 					}
 
 					// 3. Add all lists to the superlists
-					System.out.println("   ... creating the training superlists ... ");
+					if (verbose) System.out.println("   ... creating the training superlists ... ");
 					// Features
 					if (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.OTHER) {
 						allNoteFeatures.addAll(currNoteFeatures);
@@ -753,11 +730,11 @@ public class TrainingManager {
 				// b. C2C-specific superlists
 				if (ma == ModellingApproach.C2C) {
 					// 1. Determine the chord voice labels (each label is a List<List<Double>>) 
-					System.out.println("   ... calculating the labels ...");
+					if (verbose) System.out.println("   ... calculating the labels ...");
 					List<List<List<Double>>> currChordVoiceLabels = currTrans.getChordVoiceLabels();
 
 					// 2. Determine the possible voice assignments
-					System.out.println("   ... calculating the feature vectors ...");
+					if (verbose) System.out.println("   ... calculating the feature vectors ...");
 					List<List<List<Integer>>> currPossibleVoiceAssignmentsAllChords;	
 					// Retrieve or calculate and set in per-piece list
 					if (possibleVoiceAssignmentsAllChordsPerPiece.get(indexInAll) != null) {
@@ -785,7 +762,7 @@ public class TrainingManager {
 					}
 
 					// 4. Add all lists to the superlists
-					System.out.println("   ... creating the training superlists ... ");
+					if (verbose) System.out.println("   ... creating the training superlists ... ");
 					allChordFeatures.addAll(currentChordFeatures);
 					allChordVoiceLabels.addAll(currChordVoiceLabels);
 					allVoiceAssignmentPossibilities.addAll(currPossibleVoiceAssignmentsAllChords);
@@ -796,7 +773,7 @@ public class TrainingManager {
 				}
 			} // end for-loop over training pieces
 		}
-		System.out.println(pieceSizes + " = total of " + ToolBox.sumListInteger(pieceSizes));
+		if (verbose) System.out.println(pieceSizes + " = total of " + ToolBox.sumListInteger(pieceSizes));
 
 		// 3. From the superlists, create trainingData, validationData, and groundTruths
 		List<List<List<Double>>> trainingData = null;
@@ -838,8 +815,8 @@ public class TrainingManager {
 			// allVoicesCoDNotes (if modelDuration)
 			// allEDUInfo (if !isTablatureCase)
 			// allChordSizes
+
 //			tabwords.removeIf(t -> t == null);
-			// ########
 
 			// Get the start and end indices in the training set of the individual pieces
 			List<Integer[]> indivPieceInds = new ArrayList<>();
@@ -848,11 +825,11 @@ public class TrainingManager {
 				indivPieceInds.add(new Integer[]{startInd, startInd + (pieceSizes.get(i) - 1)});
 				startInd += pieceSizes.get(i);
 			}
-			System.out.println("indivPieceInds before deduplication:");
+			if (verbose) System.out.println("indivPieceInds before deduplication:");
 			for (Integer[] in : indivPieceInds) {
-				System.out.println(Arrays.toString(in));	
+				if (verbose) System.out.println(Arrays.toString(in));	
 			}
-			
+
 			// Get the duplicate counts, duplicate indices, and examples to remove per piece
 //			List<Object> dedupInfo = getDeduplicationInfo(allNoteFeatures, indivPieceInds);
 //			Integer[] counts = (Integer[]) dedupInfo.get(0);
@@ -895,8 +872,6 @@ public class TrainingManager {
 				for (Integer[] in : indivPieceInds) {
 					System.out.println(Arrays.toString(in));	
 				}
-//				System.exit(0);	
-				// ########
 			}
 			
 			// Split lists into training and validation parts (which remain empty if valPerc == 0) 
@@ -911,27 +886,22 @@ public class TrainingManager {
 			List<List<List<Double>>> vlSets = createTrainAndValSet(voiceLabelsForGTs, valPerc, indivPieceInds);
 			voiceLabelsForGTs = vlSets.get(0);
 			voiceLabelsForGTsVal = vlSets.get(1);
-			if (modelDuration && dc == DecisionContext.UNIDIR) { // 26.01.2020
-//			if (modelDuration) {
+			if (modelDuration && dc == DecisionContext.UNIDIR) {
 				List<List<List<Double>>> dlSets = createTrainAndValSet(durLabelsForGTs, valPerc, indivPieceInds);
 				durLabelsForGTs = dlSets.get(0);
 				durLabelsForGTsVal = dlSets.get(1);
 			}
 			// For training and validation data
-//			System.out.println("numNotesTotal = " + numNotesTotal);
-//			System.out.println("piecesTotal = " + piecesTotal);
-			System.out.println("++++++++++++++ BEFORE features = " + allNoteFeatures.size());			
+			int before = allNoteFeatures.size();
 			List<List<List<Double>>> nfSets = createTrainAndValSet(allNoteFeatures, valPerc, indivPieceInds);
 			allNoteFeatures = nfSets.get(0);
-			System.out.println("++++++++++++++ AFTER features = " + allNoteFeatures.size());
 			allNoteFeaturesVal = nfSets.get(1);
-			System.out.println("++++++++++++++ AFTER features val = " + allNoteFeaturesVal.size());
+			if (verbose) System.out.println("       validation set of " + (before - allNoteFeatures.size()) + 
+				" data points created" );
 
-//			System.exit(0);
 			List<List<List<Double>>> lblSets = createTrainAndValSet(allLabels, valPerc, indivPieceInds);
 			allLabels = lblSets.get(0);
 			allLabelsVal = lblSets.get(1);
-
 			// Other
 			if (modelDuration) {
 				List<List<Integer[]>> vcnSets = createTrainAndValSet(allVoicesCoDNotes, valPerc, indivPieceInds);
@@ -979,13 +949,13 @@ public class TrainingManager {
 							// TODO alternative: add average over all MM outputs
 							for (int j = 0; j < sliceIndices.size(); j++) {
 								int n = -1; // TODO this is a dummy value; see down below how it should be done (search for currEnd) 									
-								pathMM = pathMM.concat("/n=" + n + "/" + "fold_" + 
+								pathStoredMM = pathStoredMM.concat("/n=" + n + "/" + "fold_" + 
 									ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + "/");
 								String model = Runner.melodyModel + "-" +
 									MelodyPredictor.getSliceIndexString(sliceIndices.get(j)) + "-";
 								List<double[]> currAllMMOutp = 
 									ToolBox.getStoredObjectBinary(new ArrayList<double[]>(), 
-									new File(pathMM + model + Runner.outputMM + "-" + 
+									new File(pathStoredMM + model + Runner.outputMM + "-" + 
 									Runner.train + ".ser"));
 								// Add the i-th output of the j-th MM
 								for (double d : currAllMMOutp.get(i)) {
@@ -1007,8 +977,8 @@ public class TrainingManager {
 						FeatureGenerator.scaleSetOfSetsOfFeatureVectors(allChordFeatures, 
 						minAndMax, ma);
 				}
-				ToolBox.storeObjectBinary(minAndMax, new File(storePath //pathNN
-					+ Runner.minMaxFeatVals + ".ser"));
+				ToolBox.storeObjectBinary(minAndMax, 
+					new File(storePath + Runner.minMaxFeatVals + ".ser"));
 
 				// Create the training and validation data
 				if (ma == ModellingApproach.N2N) {
@@ -1064,7 +1034,7 @@ public class TrainingManager {
 						new Integer[]{numFeatures, numHiddenNeurons, numOutputNeurons};
 					System.out.println("network layer sizes (input-hidden-output): " + Arrays.toString(layerSizes));
 					List<List<List<Integer>>> trainingResults = 
-						train(layerSizes, storePath, //pathNN, 
+						train(layerSizes, storePath, 
 						trainingData, groundTruths, 
 						validationData, groundTruthsVal, allEDUInfo, allEDUInfoVal, 
 						allVoiceAssignmentPossibilities);
@@ -1076,11 +1046,9 @@ public class TrainingManager {
 				}
 				if (mt == ModelType.DNN || mt == ModelType.OTHER) {		
 					// Store features and labels
-					storeData(storePath, //pathNN, 
-						Runner.train + ".csv", trainingData);
+					storeData(storePath, Runner.train + ".csv", trainingData);
 					if (valPerc != 0) {
-						storeData(storePath, //pathNN, 
-							Runner.validation + ".csv", validationData);
+						storeData(storePath, Runner.validation + ".csv", validationData);
 					}
 
 					// Train
@@ -1095,12 +1063,13 @@ public class TrainingManager {
 							Runner.scriptPythonPath + Runner.scriptScikit, 
 							m.name(), 
 							"train", 
-							storePath, //pathNN, 
+							storePath,			
 							Runner.fvExt, 
 							Runner.clExt, 
 							Runner.outpExt, 
 							Runner.getOtherParam(modelParameters)};
 					}
+
 					// For TensorFlow
 					WeightsInit wi = Runner.ALL_WEIGHTS_INIT[modelParameters.get(Runner.WEIGHTS_INIT).intValue()];
 					String extensions = Runner.fvExt + "," + Runner.lblExt + "," + Runner.outpExt;
@@ -1114,31 +1083,32 @@ public class TrainingManager {
 						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue() + "," + 
 						"seed=" + modelParameters.get(Runner.SEED).intValue() + "," + 
 						"validation percentage=" + modelParameters.get(Runner.VALIDATION_PERC).intValue() + "," +
-						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
+//						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
+						"user model=" + ToolBox.toInt(Runner.getTrainUserModel());
 					cmd = new String[]{
 						"python", 
 						Runner.scriptPythonPath + Runner.scriptTensorFlow, 
 						m.name(), 
 						Runner.train, 
-						storePath, //pathNN, 
-						extensions, 
+						storePath,
+						"null",
+						extensions,
+						Runner.getDeployTrainedUserModel() ? "true" : "false", 
 						paramsAndHyperparams,
 						Boolean.toString((wi == WeightsInit.INIT_FROM_LIST))};
 					System.out.println("cmd = " + Arrays.toString(cmd));
-//					try {
-					PythonInterface.applyModel(cmd);
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
+					// Run train_test_tensorflow.py as a script
+//					PythonInterface.applyModel(cmd);
 
 					// Set networkOutputs, predictedVoices, and assignmentErrors
 					String[][] outpCsv = 
-						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(storePath //pathNN 
-						+ Runner.outpExt + Runner.train + ".csv")));
+						ToolBox.retrieveCSVTable(ToolBox.readTextFile(
+						new File(storePath + Runner.outpExt + Runner.train + ".csv")));
 					List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 					if (smoothen) {
 						predictedOutputs = smoothenOutput(predictedOutputs, 0.000001);
 					}
+
 					networkOutputs = predictedOutputs;
 					predictedVoices = 
 						OutputEvaluator.determinePredictedVoices(modelParameters, 
@@ -1146,9 +1116,138 @@ public class TrainingManager {
 					assignmentErrors = 
 						ErrorCalculator.calculateAssignmentErrors(predictedVoices, 
 						groundTruths.get(0), null, null, allEDUInfo);
+
+					// If there is validation data: reconstruct combined trn and vld outputs
+					if (valPerc != 0) {
+						List<double[]> predictedOutputsComb = new ArrayList<>();
+						// Integrate vld output into trn output
+						String[][] outpVldCsv = 
+							ToolBox.retrieveCSVTable(ToolBox.readTextFile(
+							new File(storePath + Runner.outpExt + Runner.validation + ".csv")));
+						List<double[]> predictedOutputsVld = ToolBox.convertCSVTable(outpVldCsv);
+						List<double[]> predictedOutputsCombined = 
+							reintegrateVldData(predictedOutputs, predictedOutputsVld, valPerc);
+						// Split into individual pieces
+						List<List<double[]>> predOutCombPerPiece = new ArrayList<>();
+						int from = 0;
+						for (int size : pieceSizes) {
+							predOutCombPerPiece.add(
+								predictedOutputsCombined.subList(from, from + size));
+							from += size;
+						}
+						// If bwd processing: reverse bwd mapping
+						if (pm == ProcessingMode.BWD) {
+							List<List<Integer>> bwdMapCurrFold = new ArrayList<>(backwardsMappingPerPiece);
+							// Remove testPiece from list
+							bwdMapCurrFold.remove(testPieceIndex);
+							// Reorder each element of predOutCombPerPiece according to bwdMapCurrFold
+							List<List<double[]>> reordered = new ArrayList<>(); 
+							for (int j = 0; j < predOutCombPerPiece.size(); j++) {
+								reordered.add(ToolBox.reorderByIndex(
+									predOutCombPerPiece.get(j), bwdMapCurrFold.get(j)));
+							}
+							predOutCombPerPiece = reordered;
+						}
+						// Flatten	
+						for (List<double[]> l : predOutCombPerPiece) {
+							predictedOutputsComb.addAll(l);
+						}
+						// TODO save predictedOutputsComb as labels
+
+						// CHECK
+						String[][] yTrnCsv = 
+							ToolBox.retrieveCSVTable(ToolBox.readTextFile(
+							new File(storePath + Runner.lblExt + Runner.train + ".csv")));
+						List<double[]> yTrn = ToolBox.convertCSVTable(yTrnCsv);
+						String[][] yVldCsv = 
+							ToolBox.retrieveCSVTable(ToolBox.readTextFile(
+							new File(storePath + Runner.lblExt + Runner.validation + ".csv")));
+						List<double[]> yVld = ToolBox.convertCSVTable(yVldCsv);
+
+						// Check integration and reordering: calculate the accuracy of
+						// predOutComb (out-trn with out-vld integrated) on the original 
+						// y (i.e., in fwd order, before splitting into trn and vld). This 
+						// accuracy should be the weighted sum of the trn acc (adapted; see 
+						// below) and the vld acc (both of which are known at this point):
+						//
+						// (num(trn) + num(vld)) / (den(trn) + den(vld))
+						// 
+						// NB: TensorFlow does not take into account SNU notes when calculating
+						// the vld acc, and only looks at the highest value in the output. SNU
+						// notes are only correct if this highest value is at the same index 
+						// as the first (highest) 1.0 in the label. When iterating over the 
+						// integrated list, it is not directly known if an example is from the 
+						// trn or the vld set; thus, any SNU must be treated as it is in the 
+						// vld set, and the known trn acc must be adapted accordingly
+						//
+						// Calculate adapted trn acc
+						int misassignmentsTrn = assignmentErrors.get(ErrorCalculator.INCORRECT_VOICE).size();
+						// Overlooked, superfluous, and half: incorrect if highest in 
+						// predictedOutputs is not at the same index as first 1.0 in labels
+						for (int i = ErrorCalculator.OVERLOOKED_VOICE; i <= ErrorCalculator.HALF_VOICE; i++) {
+							for (int ind : assignmentErrors.get(i)) {
+								List<Double> pred =
+									Arrays.asList(ArrayUtils.toObject(predictedOutputs.get(ind)));
+								List<Double> y = 
+									Arrays.asList(ArrayUtils.toObject(yTrn.get(ind)));
+								if (pred.indexOf(Collections.max(pred)) != y.indexOf(1.0)) {
+									misassignmentsTrn++;
+								}
+							}
+						}
+						Rational adaptedTrnAcc = 
+							new Rational(yTrn.size() - misassignmentsTrn, yTrn.size());
+						System.out.println("trnAcc (adapted) = " + adaptedTrnAcc);
+						// Calculate vld acc
+						// HIER
+						int misassignmentsVld = 0;
+						if (predictedOutputsVld.size() != yVld.size()) {
+							System.out.println("Error: different list sizes.");
+							System.exit(0);
+						}
+						for (int j = 0; j < predictedOutputsVld.size(); j++) {
+							List<Double> pred = Arrays.asList(ArrayUtils.toObject(predictedOutputsVld.get(j)));
+							List<Double> y = Arrays.asList(ArrayUtils.toObject(yVld.get(j)));
+							if (pred.indexOf(Collections.max(pred)) != y.indexOf(1.0)) {
+								misassignmentsVld++;
+							}
+						}
+						Rational vldAcc =
+							new Rational(yVld.size() - misassignmentsVld, yVld.size());
+						System.out.println("vldAcc           = " + vldAcc);
+						Rational expectedCombAcc =
+							new Rational(adaptedTrnAcc.getNumer() + vldAcc.getNumer(),
+							adaptedTrnAcc.getDenom() + vldAcc.getDenom());
+						// Calculate combined acc
+						int misassignmentsComb = 0;
+						if (predictedOutputsComb.size() != allYFwdBeforeVldSplit.size()) {
+							System.out.println("Error: different list sizes.");
+							System.exit(0);
+						}
+						for (int j = 0; j < predictedOutputsComb.size(); j++) {
+							List<Double> pred = 
+								Arrays.asList(ArrayUtils.toObject(predictedOutputsComb.get(j)));
+							List<Double> y = allYFwdBeforeVldSplit.get(j);
+							if (pred.indexOf(Collections.max(pred)) != y.indexOf(1.0)) {
+								misassignmentsComb++;
+							}
+						}
+						Rational combAcc =
+							new Rational(allYFwdBeforeVldSplit.size() - misassignmentsComb, 
+							allYFwdBeforeVldSplit.size());
+						System.out.println("combAcc          = " + combAcc);
+						// Assert equality of expected and calculated combined accuracies
+						if (!expectedCombAcc.equals(combAcc)) {
+							System.out.println("Error: accuracies are not the same.");
+						}
+						else {
+							System.out.println("Accuracies are the same!");
+						}
+						System.exit(0);
+					}
 				}
 				// Set remaining output variables
-				if (mt == ModelType.NN) { // 07.08.2019
+				if (mt == ModelType.NN) {
 					allClassErrs = allClassificationErrors;
 					allClassErrsVal = allClassificationErrorsVal;
 					String res = "TRAIN and VALIDATION ERRORS fold " + fold + "\r\n";
@@ -1157,8 +1256,7 @@ public class TrainingManager {
 					}
 					System.out.println(res);
 				}
-//				System.exit(0);
-				
+
 				netwErr = smallestNetworkError;
 				if (ma == ModellingApproach.N2N) {
 					ntwOutputsForCE = networkOutputs;
@@ -1175,8 +1273,8 @@ public class TrainingManager {
 					outputs.add(null);
 					outputs.add(null);
 					outputs.set(Runner.TRAIN, networkOutputs);
-					ToolBox.storeObjectBinary(outputs, new File(storePath //pathNN 
-						+ Runner.outputs + ".ser"));
+					ToolBox.storeObjectBinary(outputs, new File(
+						storePath + Runner.outputs + ".ser"));
 				}
 			}
 			// ENS case (where there is no actual training): determine output variables
@@ -1186,7 +1284,7 @@ public class TrainingManager {
 				// NN
 				List<double[]> originalNetworkOutputs =
 					ToolBox.getStoredObjectBinary(new ArrayList<List<double[]>>(), 
-					new File(pathNN + Runner.outputs + ".ser")).get(Runner.TRAIN);
+					new File(pathStoredNN + Runner.outputs + ".ser")).get(Runner.TRAIN);
 				// MM
 				for (int i = 0; i < sliceIndices.size(); i++) {
 					String model = Runner.melodyModel + "-" +
@@ -1195,11 +1293,11 @@ public class TrainingManager {
 						String currEnd = 
 							"/n=" + ns.get(nInd) + "/" + "fold_" +
 							ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + "/";
-						pathMM = pathMM.concat(currEnd);
+						pathStoredMM = pathStoredMM.concat(currEnd);
 						List<double[]> currAllMMOutp =
 							ToolBox.getStoredObjectBinary(new ArrayList<double[]>(), 
-							new File(pathMM + model + Runner.outputMM + "-" + Runner.train + ".ser"));
-						pathMM = pathMM.substring(0, pathMM.indexOf(currEnd)); 
+							new File(pathStoredMM + model + Runner.outputMM + "-" + Runner.train + ".ser"));
+						pathStoredMM = pathStoredMM.substring(0, pathStoredMM.indexOf(currEnd)); 
 						// Determine index. Example:
 						// Four sliceIndices (MMs), five ns
 						// sI = 0, nInd = 0 -> index = 0*5 + 0 = 0
@@ -1312,25 +1410,24 @@ public class TrainingManager {
 		}
 		// b. HHM case (training is creation of ISM, OPM, and TPM)
 		if (ma == ModellingApproach.HMM) {
-			String path = argPaths[0];
 			// ISM
 			Integer[] currISM = generateInitialStateMatrix(trainingPieces,
 				mappingDictionary, highestNumVoicesAssumed);
 			Integer[][] currISMWrapped = new Integer[1][currISM.length];
 			currISMWrapped[0] = currISM;
-			ToolBox.storeMatrixAsCSVFile(currISMWrapped, new File(path + Runner.ISM + ".csv"));
+			ToolBox.storeMatrixAsCSVFile(currISMWrapped, new File(storePath + Runner.ISM + ".csv"));
 //			ToolBox.storeObjectBinary(currISM, new File(path + Runner.ISM + ".ser"));				
 
 			// OPM
 			Integer[][] currOPM = generateObservationProbabilityMatrix(trainingPieces, 
 				chordDictionary, mappingDictionary, highestNumVoicesAssumed);
-			ToolBox.storeMatrixAsCSVFile(currOPM, new File(path + Runner.OPM + ".csv"));
+			ToolBox.storeMatrixAsCSVFile(currOPM, new File(storePath + Runner.OPM + ".csv"));
 //			ToolBox.storeObjectBinary(currOPM, new File(path + Runner.OPM + ".ser"));
 
 			// TPM
 			Integer[][] currTPM = generateTransitionProbabilityMatrix(trainingPieces, 
 				mappingDictionary, highestNumVoicesAssumed);
-			ToolBox.storeMatrixAsCSVFile(currTPM, new File(path + Runner.TPM + ".csv")); 
+			ToolBox.storeMatrixAsCSVFile(currTPM, new File(storePath + Runner.TPM + ".csv")); 
 //			ToolBox.storeObjectBinary(currTPM, new File(path + Runner.TPM + ".ser"));
 			
 			// Create empty csv table
@@ -1349,8 +1446,8 @@ public class TrainingManager {
 					new MelodyPredictor(MelodyPredictor.getMelModelType(), 
 					MelodyPredictor.getTermType(), modelParameters.get(Runner.N).intValue(), currSI);
 				mp.trainModel(allMFVs);
-				mp.saveModel(new File(storePath + //pathMM + 
-					Runner.melodyModel + "-" +
+				mp.saveModel(new File(
+					storePath + Runner.melodyModel + "-" +
 					MelodyPredictor.getSliceIndexString(currSI) + ".ser"));
 				
 				// Gather the MM outputs for the training set
@@ -1387,15 +1484,12 @@ public class TrainingManager {
 				String model = 
 					Runner.melodyModel + "-" + 
 					MelodyPredictor.getSliceIndexString(sliceIndices.get(i)) + "-";
-				ToolBox.storeObjectBinary(evalNum, 
-					new File(storePath + //pathMM + 
-					model + Runner.evalMM + "-" + Runner.train + ".ser"));
-				ToolBox.storeTextFile(evalString,	
-					new File(storePath + //pathMM + 
-					model + Runner.evalMM + "-" + Runner.train + ".txt"));
-				ToolBox.storeObjectBinary(currMMOutp, 
-					new File(storePath + //pathMM + 
-					model + Runner.outputMM + "-" + Runner.train + ".ser"));
+				ToolBox.storeObjectBinary(evalNum, new File(
+					storePath + model + Runner.evalMM + "-" + Runner.train + ".ser"));
+				ToolBox.storeTextFile(evalString, new File(
+					storePath + model + Runner.evalMM + "-" + Runner.train + ".txt"));
+				ToolBox.storeObjectBinary(currMMOutp, new File(
+					storePath + model + Runner.outputMM + "-" + Runner.train + ".ser"));
 			}
 		}
 
@@ -1411,7 +1505,7 @@ public class TrainingManager {
 				t[1+Runner.TRAIN][indToUpdate] = String.valueOf(totalTime);
 			}
 			ToolBox.storeTextFile(ToolBox.createCSVTableString(t), 
-				new File(argPaths[0] + s + ".csv"));
+				new File(storePath + s + ".csv"));
 			s = Runner.perfDur;
 		}
 		Runner.addToPerfCsvFilesStoreTimes(ToolBox.getTimeDiffPrecise(end, 
@@ -1860,7 +1954,7 @@ public class TrainingManager {
 	 * @return A list containing as element 0 the pruned original list, and as element 1 the 
 	 * 		   new list
 	 */
-	private static List<List<List<Double>>> createTrainandValSetOLD(List<List<Double>> data, int perc) {
+	private static List<List<List<Double>>> createTrainAndValSetOLD(List<List<Double>> data, int perc) {
 		
 		int n = (int) Math.round(100.0/perc);
 		
@@ -1958,6 +2052,60 @@ public class TrainingManager {
 			val = new ArrayList<T>();
 		}
 		return Arrays.asList(prunedOrig, val);
+	}
+
+
+	/**
+	 * Reintegrates the vld data back into the training data using the given validation 
+	 * percentage. 
+	 * 
+	 * @param trn
+	 * @param vld
+	 * @param valPerc
+	 * @return
+	 */
+	// TESTED
+	static List<double[]> reintegrateVldData(List<double[]> trn, List<double[]> vld, int valPerc) {	
+		// If valPerc is n, every n-th data point (starting at the first) is taken from the 
+		// original trn data and added to the vld data. There are three scenarios (example 
+		// for n = 5)
+		// a. The last data point is a trn data point and the next would also be a trn data point
+		//	  --> the split trn list has the same size as the vld list (3 and 3)
+		//    full: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+		//    trn:	[   1, 2, 3, 4,    6, 7, 8, 9,     11, 12, 13]
+		//    vld:  [0,             5,             10,           ]
+		// b. The last data point is a trn data point and the next would be a vld data point
+		//    --> the split trn list has the same size as the vld list (3 and 3)
+		//    full: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+		//    trn:	[   1, 2, 3, 4,    6, 7, 8, 9,     11, 12, 13, 14]
+		//    vld:  [0,             5,             10,               ]
+		// c. The last data point is a vld data point and the next would be a trn data point
+		//    --> the split trn list has one element less than the vld list (3 and 4)
+		//    full: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+		//    trn:	[   1, 2, 3, 4,    6, 7, 8, 9,     11, 12, 13, 14,   ]
+		//    vld:  [0,             5,             10,                 15]
+		List<double[]> reintegrated = new ArrayList<>();
+
+		// Split trn up into data point groups of size valPerc - 1
+		List<List<double[]>> trnSplit = new ArrayList<>();
+		List<double[]> curr = new ArrayList<>();
+		for (int i = 0; i < trn.size(); i++) {
+			curr.add(trn.get(i));
+			if (curr.size() == valPerc - 1 || i == trn.size() - 1) {
+				trnSplit.add(curr);
+				curr = new ArrayList<>();
+			}
+		}
+
+		// Insert trn group after each vld data point
+		for (int i = 0; i < vld.size(); i++) {
+			reintegrated.add(vld.get(i));
+			// Only if there is an element at index i in trnSplit (exception: c. above)
+			if (i < trnSplit.size()) {
+				reintegrated.addAll(trnSplit.get(i));
+			}
+		}
+		return reintegrated;
 	}
 
 
@@ -2123,41 +2271,43 @@ public class TrainingManager {
 	 * @param ext 
 	 * @param data Contains two elements: <br>
 	 * 			   (1) at index 0: the feature vectors <br>
-	 * 			   (2) at index 1: the ground truth labels <br>
-	 * 			   NB: element (2) is not added when applying the model to new data.
+	 * 			   (2) at index 1: the ground truth labels (or <code>null</code> when 
+	 * 							   employing a trained user model)
 	 */
 	public static void storeData(String path, String ext, List<List<List<Double>>> data) {
 		// Store features, labels, and classes as csv files 
 		for (int ind = 0; ind < data.size(); ind++) {
-			List<List<Double>> curr = data.get(ind); 
-			int numEx = curr.size();
-			int vectorSize = curr.get(0).size();
-			String[][] csvTbl = new String[numEx][vectorSize];
-//			String[][] csvTblCl = new String[1][numEx];
-			for (int i = 0; i < numEx; i++) {
-				// fv or label
-				List<Double> currFvOrLbl = curr.get(i);
-				String[] currRow = new String[vectorSize];
-				for (int j = 0; j < currFvOrLbl.size(); j++) {
-					currRow[j] = "" + currFvOrLbl.get(j);
+			List<List<Double>> curr = data.get(ind);
+			if (curr != null) {
+				int numEx = curr.size();
+				int vectorSize = curr.get(0).size();
+				String[][] csvTbl = new String[numEx][vectorSize];
+//				String[][] csvTblCl = new String[1][numEx];
+				for (int i = 0; i < numEx; i++) {
+					// fv or label
+					List<Double> currFvOrLbl = curr.get(i);
+					String[] currRow = new String[vectorSize];
+					for (int j = 0; j < currFvOrLbl.size(); j++) {
+						currRow[j] = "" + currFvOrLbl.get(j);
+					}
+					csvTbl[i] = currRow;
+					// class ISMIR 2017
+//					if (ind == 1) {	
+//						csvTblCl[0][i] = 
+//							"" + DataConverter.convertIntoListOfVoices(currFvOrLbl).get(0); // TODO account for SNUs
+//					}
 				}
-				csvTbl[i] = currRow;
-				// class ISMIR 2017
-//				if (ind == 1) {	
-//					csvTblCl[0][i] = 
-//						"" + DataConverter.convertIntoListOfVoices(currFvOrLbl).get(0); // TODO account for SNUs
-//				}
-			}
-			if (ind == 0) {
-				ToolBox.storeTextFile(ToolBox.createCSVTableString(csvTbl), 
-					new File(path + Runner.fvExt + ext));
-			}
-			if (ind == 1) {
-				ToolBox.storeTextFile(ToolBox.createCSVTableString(csvTbl), 
-					new File(path + Runner.lblExt + ext));
-//				// ISMIR 2017
-//				ToolBox.storeTextFile(ToolBox.createCSVTableString(csvTblCl), 
-//					new File(path + Runner.clExt + ext));
+				if (ind == 0) {
+					ToolBox.storeTextFile(ToolBox.createCSVTableString(csvTbl), 
+						new File(path + Runner.fvExt + ext));
+				}
+				if (ind == 1) {
+					ToolBox.storeTextFile(ToolBox.createCSVTableString(csvTbl), 
+						new File(path + Runner.lblExt + ext));
+//					// ISMIR 2017
+//					ToolBox.storeTextFile(ToolBox.createCSVTableString(csvTblCl), 
+//						new File(path + Runner.clExt + ext));
+				}
 			}
 		}
 	}

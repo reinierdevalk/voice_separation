@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
-import data.Dataset.DatasetID;
 import featureExtraction.FeatureGenerator;
 import machineLearning.EvaluationManager;
 import machineLearning.MelodyPredictor;
@@ -18,7 +17,6 @@ import machineLearning.TestManager;
 import machineLearning.TrainingManager;
 import n_grams.KylmModel;
 import tools.ToolBox;
-import ui.Runner.ModellingApproach;
 
 public class Runner {
 
@@ -115,7 +113,11 @@ public class Runner {
 	public static boolean ignoreAppl = false;
 	public static boolean storeNetworkOutputs = true;
 	public static boolean textify = true;
-
+	
+	private static boolean trainUserModel;
+	private static boolean deployTrainedUserModel;
+	private static boolean verbose;
+	
 	// Keys
 	// Enums
 	public static final String MODELLING_APPROACH = "modelling approach";
@@ -161,26 +163,73 @@ public class Runner {
 	// booleans
 	public static final String SNU = "single-note unisons";
 	public static final String CROSS_VAL = "cross validation";
-	public static final String TRAIN_USER_MODEL = "train user model";
-	public static final String DEPLOY_TRAINED_USER_MODEL = "deploy trained user model";
+///	public static final String TRAIN_USER_MODEL = "train user model";
+///	public static final String DEPLOY_TRAINED_USER_MODEL = "deploy trained user model";
 //	public static final String TAB_AS_NON_TAB = "tablature as non-tablature";
 	public static final String ESTIMATE_ENTRIES = "voice entry estimation";
 	public static final String MODEL_DURATION_AGAIN = "model duration again";
 	public static final String AVERAGE_PROX = "average proximities";
 //	public static final String USE_VALIDATION_SET = "use validation set";
-	public static final String VERBOSE = "verbose";
-	public static final String SKIP_TRAINING = "skip training";
 
 	// Enum lists
-	public static final int ARR_SIZE = 50; // TODO 
-	public static ModellingApproach[] ALL_MODELLING_APPROACHES = new ModellingApproach[ARR_SIZE];
-	public static Model[] ALL_MODELS = new Model[ARR_SIZE];
-	private static ModelType[] ALL_MODEL_TYPES = new ModelType[ARR_SIZE];
-	public static Implementation[] ALL_IMPLEMENTATIONS = new Implementation[ARR_SIZE];
-	public static ProcessingMode[] ALL_PROC_MODES = new ProcessingMode[ARR_SIZE];
-	public static FeatureVector[] ALL_FEATURE_VECTORS = new FeatureVector[ARR_SIZE];
-	private static DecisionContext[] ALL_DECISION_CONTEXTS = new DecisionContext[ARR_SIZE]; 
-	public static WeightsInit[] ALL_WEIGHTS_INIT = new WeightsInit[ARR_SIZE];
+	public static ModellingApproach[] ALL_MODELLING_APPROACHES = new ModellingApproach[ModellingApproach.values().length];
+	static {
+		Arrays.asList(ModellingApproach.values()).forEach(ma -> ALL_MODELLING_APPROACHES[ma.getIntRep()] = ma);
+	}
+	public static Model[] ALL_MODELS = new Model[Model.values().length];
+	static {
+		for (Model m : Model.values()) {
+			ALL_MODELS[m.getIntRep()] = m; 
+		}
+	}
+	private static ModelType[] ALL_MODEL_TYPES = new ModelType[ModelType.values().length];
+	static {
+		for (ModelType mt : ModelType.values()) {
+			ALL_MODEL_TYPES[mt.getIntRep()] = mt; 
+		}
+	}
+	public static Implementation[] ALL_IMPLEMENTATIONS = new Implementation[Implementation.values().length];
+	static {
+		for (Implementation i : Implementation.values()) {
+			ALL_IMPLEMENTATIONS[i.getIntRep()] = i;
+		}
+	}
+	public static ProcessingMode[] ALL_PROC_MODES = new ProcessingMode[ProcessingMode.values().length];
+	static {
+		for (ProcessingMode pm : ProcessingMode.values()) {
+			ALL_PROC_MODES[pm.getIntRep()] = pm;
+		}
+	}
+	public static Configuration[] ALL_CONFIGS = new Configuration[Configuration.values().length];	
+	static {
+		for (Configuration c : Configuration.values()) {
+			ALL_CONFIGS[c.getIntRep()] = c;
+		}
+	}
+	public static FeatureVector[] ALL_FEATURE_VECTORS = new FeatureVector[FeatureVector.values().length];
+	static {
+		for (FeatureVector fv : FeatureVector.values()) {
+			ALL_FEATURE_VECTORS[fv.getIntRep()] = fv;
+		}
+	}
+	private static DecisionContext[] ALL_DECISION_CONTEXTS = new DecisionContext[DecisionContext.values().length]; 
+	static {
+		for (DecisionContext dc : DecisionContext.values()) {
+			ALL_DECISION_CONTEXTS[dc.getIntRep()] = dc;
+		}
+	}
+	public static WeightsInit[] ALL_WEIGHTS_INIT = new WeightsInit[WeightsInit.values().length];
+	static {
+		for (WeightsInit wi : WeightsInit.values()) {
+			ALL_WEIGHTS_INIT[wi.getIntRep()] = wi;
+		}
+	}
+	public static DecodingAlgorithm[] ALL_DECODING_ALGS = new DecodingAlgorithm[DecodingAlgorithm.values().length];
+	static {
+		for (DecodingAlgorithm da : DecodingAlgorithm.values()) {
+			ALL_DECODING_ALGS[da.getIntRep()] = da;
+		}
+	}
 	
 	public static enum ModellingApproach {
 		N2N("MA1", 0), C2C("MA2", 1), HMM("MA3", 2), OTHER("OTHER", 3);
@@ -190,9 +239,9 @@ public class Runner {
 		ModellingApproach(String s, int i) {
 			this.stringRep = s;
 			this.intRep = i;
-			ALL_MODELLING_APPROACHES[i] = this;
+//			ALL_MODELLING_APPROACHES[i] = this;
 		}
-		
+
 		@Override
 	    public String toString() {
 	        return getStringRep();
@@ -255,7 +304,8 @@ public class Runner {
 //			this.type = mt;
 //			ALL_MODELS[i] = this;
 //		}
-		
+
+
 		@Override
 	    public String toString() {
 	        return getStringRep();
@@ -268,7 +318,7 @@ public class Runner {
 			this.decisionContext = dc;
 			this.modelDuration = md;
 			this.modellingApproach = ma;
-			ALL_MODELS[i] = this;
+//			ALL_MODELS[i] = this;
 		}
 
 		Model(String s, int i, ModelType mt, KylmModel.Type kmt, ModellingApproach ma) {
@@ -277,7 +327,7 @@ public class Runner {
 			this.type = mt;
 			this.kmType = kmt;
 			this.modellingApproach = ma;
-			ALL_MODELS[i] = this;
+//			ALL_MODELS[i] = this;
 		}
 
 		Model(String s, int i, ModelType mt, Model mm, KylmModel.Type kmt, ModellingApproach ma) {
@@ -287,7 +337,7 @@ public class Runner {
 			this.melodyModel = mm;
 			this.kmType = kmt;
 			this.modellingApproach = ma;
-			ALL_MODELS[i] = this;
+//			ALL_MODELS[i] = this;
 		}
 
 		public int getIntRep() {
@@ -332,7 +382,7 @@ public class Runner {
 		ModelType(String s, int i) {
 			this.stringRep = s;
 			this.intRep = i;
-			ALL_MODEL_TYPES[i] = this;
+//			ALL_MODEL_TYPES[i] = this;
 		}
 		
 		@Override
@@ -360,7 +410,7 @@ public class Runner {
 		Implementation(String s, int i) {
 			this.stringRep = s;
 			this.intRep = i;
-			ALL_IMPLEMENTATIONS[i] = this;
+//			ALL_IMPLEMENTATIONS[i] = this;
 		}
 		
 		@Override
@@ -386,7 +436,7 @@ public class Runner {
 		ProcessingMode(String s, int i) {
 			this.asString = s;
 			this.intRep = i;
-			ALL_PROC_MODES[i] = this;
+//			ALL_PROC_MODES[i] = this;
 		}
 		
 		@Override
@@ -402,9 +452,8 @@ public class Runner {
 			return intRep;
 		}
 	};
-	
-	
-	public static Configuration[] ALL_CONFIGS = new Configuration[10];
+
+
 	public static enum Configuration {
 		ONE("1", true, true, 0), 
 		TWO("2", true, false, 1), 
@@ -420,7 +469,7 @@ public class Runner {
 			this.uniformTPM = unifTPM;
 			this.uniformISM = unifISM;
 			this.intRep = i;
-			ALL_CONFIGS[i] = this;
+//			ALL_CONFIGS[i] = this;
 		}
 
 		@Override
@@ -493,7 +542,7 @@ public class Runner {
 		FeatureVector(String s, int i) {
 			this.intRep = i;
 			this.stringRep = s;
-			ALL_FEATURE_VECTORS[i] = this;
+//			ALL_FEATURE_VECTORS[i] = this;
 		}
 		
 		@Override
@@ -518,7 +567,7 @@ public class Runner {
 		DecisionContext(String s, int i) {
 			this.stringRep = s;
 			this.intRep = i;
-			ALL_DECISION_CONTEXTS[i] = this;
+//			ALL_DECISION_CONTEXTS[i] = this;
 		}
 		
 		@Override
@@ -544,7 +593,7 @@ public class Runner {
 		WeightsInit(String s, int i) {
 			this.stringRep = s;
 			this.intRep = i;
-			ALL_WEIGHTS_INIT[i] = this;
+//			ALL_WEIGHTS_INIT[i] = this;
 		}
 		
 		@Override
@@ -560,8 +609,8 @@ public class Runner {
 			return intRep;
 		}
 	};
-	
-	public static DecodingAlgorithm[] ALL_DEC_ALG = new DecodingAlgorithm[10]; 
+
+
 	public static enum DecodingAlgorithm {
 		VITERBI("vit", 0); 
 		
@@ -570,7 +619,7 @@ public class Runner {
 		DecodingAlgorithm(String s, int i) {
 			this.stringRep = s;
 			this.intRep = i;
-			ALL_DEC_ALG[i] = this;
+//			ALL_DEC_ALG[i] = this;
 		}
 		
 		@Override
@@ -598,7 +647,7 @@ public class Runner {
 		keys.put(DECISION_CONTEXT, ALL_DECISION_CONTEXTS);
 //		if (mt != ModelType.OTHER) {
 		keys.put(NNManager.ACT_FUNCTION, NNManager.ALL_ACT_FUNCT);
-		keys.put(DECODING_ALG, ALL_DEC_ALG);
+		keys.put(DECODING_ALG, ALL_DECODING_ALGS);
 		keys.put(CONFIG, ALL_CONFIGS);
 //		}
 		keys.put(WEIGHTS_INIT, ALL_WEIGHTS_INIT);
@@ -612,10 +661,10 @@ public class Runner {
 		keys.add(SNU);
 		keys.add(CROSS_VAL);
 		keys.add(MODEL_DURATION_AGAIN);
-		keys.add(TRAIN_USER_MODEL);
+//		keys.add(TRAIN_USER_MODEL);
 //		keys.add(TAB_AS_NON_TAB);
 //		keys.add(GIVE_FIRST);
-		keys.add(DEPLOY_TRAINED_USER_MODEL);
+//		keys.add(DEPLOY_TRAINED_USER_MODEL);
 		keys.add(ESTIMATE_ENTRIES);
 		keys.add(UNIFORM_TPM);
 		keys.add(UNIFORM_ISM);
@@ -652,8 +701,8 @@ public class Runner {
 		keys.add(KEEP_PROB);
 		return keys;
 	}
-	
-	
+
+
 	public static void setModelParams(Map<String, Double> arg) {
 		modelParams = arg;
 	}
@@ -661,7 +710,7 @@ public class Runner {
 	public static Map<String, Double> getModelParams() {
 		return modelParams;
 	}
-	
+
 	public static void setPaths(String[] arg) {
 		paths = arg;
 	}
@@ -685,10 +734,35 @@ public class Runner {
 	public static Dataset getDatasetTrain() {
 		return datasetTrain;
 	}
+
+	private static void setDeployTrainedUserModel(boolean arg) {
+		deployTrainedUserModel = arg;
+	}
+
+	public static boolean getDeployTrainedUserModel() {
+		return deployTrainedUserModel; 
+	}
+
+	private static void setTrainUserModel(boolean arg) {
+		trainUserModel = arg;
+	}
 	
-	public static int getHighestNumVoicesTraining() {
+	public static boolean getTrainUserModel() {
+		return trainUserModel;
+	}
+
+	public static void setVerbose(boolean arg) {
+		verbose = arg;
+	}
+
+	public static boolean getVerbose() {
+		return verbose;
+	}
+
+	public static int getHighestNumVoicesTraining(boolean deployTrainedUserModel) {
 		int highestNumVoices = getDataset().getHighestNumVoices();
-		if (ToolBox.toBoolean(modelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue())) {
+		if (deployTrainedUserModel) {
+//		if (ToolBox.toBoolean(modelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue())) {
 			highestNumVoices = getDatasetTrain().getNumVoices();
 		}
 		return highestNumVoices;
@@ -697,30 +771,30 @@ public class Runner {
 
 	public static void setPathsToCodeAndData(String argRootDir, boolean appliedToNewData) throws IOException {
 		if (!appliedToNewData) {
-			String codePath = UI.pathify(new String[]{argRootDir, "software/code/eclipse/"});
-			scriptPythonPath = UI.pathify(new String[]{codePath, "voice_separation/py/"});
-			scriptMatlabPath = UI.pathify(new String[]{codePath, "voice_separation/m/"});
+			String codePath = ToolBox.pathify(new String[]{argRootDir, "software/code/eclipse/"});
+			scriptPythonPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
+			scriptMatlabPath = ToolBox.pathify(new String[]{codePath, "voice_separation/m/"});
 			//
-			String dataPath = UI.pathify(new String[]{argRootDir, "data/"});
-			encodingsPath = UI.pathify(new String[]{dataPath, "annotated/encodings/"});
-			midiPath = UI.pathify(new String[]{dataPath, "annotated/MIDI/"});
-			storedDatasetsPath = UI.pathify(new String[]{dataPath, "datasets/"});
-			modelsPath = UI.pathify(new String[]{dataPath, "models/"});
+			String dataPath = ToolBox.pathify(new String[]{argRootDir, "data/"});
+			encodingsPath = ToolBox.pathify(new String[]{dataPath, "annotated/encodings/"});
+			midiPath = ToolBox.pathify(new String[]{dataPath, "annotated/MIDI/"});
+			storedDatasetsPath = ToolBox.pathify(new String[]{dataPath, "datasets/"});
+			modelsPath = ToolBox.pathify(new String[]{dataPath, "models/"});
 			//
-			experimentsPath = UI.pathify(new String[]{argRootDir, "experiments/"});
+			experimentsPath = ToolBox.pathify(new String[]{argRootDir, "experiments/"});
 		}
 		else {
 			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
-			String codePath = UI.pathify(new String[]{
+			String codePath = ToolBox.pathify(new String[]{
 				new File(argRootDir).getCanonicalFile().getParent(), "software/code/eclipse/"});
-			scriptPythonPath = UI.pathify(new String[]{codePath, "voice_separation/py/"});
+			scriptPythonPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
 			//
-			String userPath = UI.pathify(new String[]{argRootDir, "user/"});
-			encodingsPath = UI.pathify(new String[]{userPath, "in/encodings/"});
-			midiPath = UI.pathify(new String[]{userPath, "in/MIDI/"});
-			outPath = UI.pathify(new String[]{userPath, "out/"});
+			String userPath = ToolBox.pathify(new String[]{argRootDir, "user/"});
+			encodingsPath = ToolBox.pathify(new String[]{userPath, "in/encodings/"});
+			midiPath = ToolBox.pathify(new String[]{userPath, "in/MIDI/"});
+			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
 			//
-			modelsPath = UI.pathify(new String[]{argRootDir, "models/"});
+			modelsPath = ToolBox.pathify(new String[]{argRootDir, "models/"});
 		}
 	}
 
@@ -752,31 +826,37 @@ public class Runner {
 		perfCsvFilesStoreTimes.add(l);
 	}
 
-	public static void runExperiment() {
+	public static void runExperiment(boolean trainUserModel, boolean skipTraining, 
+		boolean deployTrainedUserModel, boolean verbose) {
 
 		String startPreProc = ToolBox.getTimeStampPrecise();
+		
+		setDeployTrainedUserModel(deployTrainedUserModel);
+		setTrainUserModel(trainUserModel);
+		setVerbose(verbose);
+		
 		
 		String[] argPaths = getPaths();
 		Map<String, Double> argModelParams = getModelParams();
 		ModellingApproach ma = 
 			ALL_MODELLING_APPROACHES[argModelParams.get(MODELLING_APPROACH).intValue()];	
-		boolean applToNewData = ToolBox.toBoolean(argModelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue());
-		boolean skipTraining = ToolBox.toBoolean(argModelParams.get(SKIP_TRAINING).intValue());
+//		boolean deployTrainedUserModel = ToolBox.toBoolean(argModelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue());
+//		boolean skipTraining = ToolBox.toBoolean(argModelParams.get(SKIP_TRAINING).intValue());
 		Model m = ALL_MODELS[argModelParams.get(MODEL).intValue()]; 
 		boolean modelDuration = m.getModelDuration();
 		ModelType mt = m.getModelType();
 
-		if (applToNewData) {
+		if (deployTrainedUserModel) {
 			System.out.println("\nstarting halcyon.");
 		}
 
 		// Populate and reset dataset
 		System.out.println("\ncreating the dataset.");
 		Dataset ds = getDataset();
-		if (!applToNewData) {
+		if (!deployTrainedUserModel) {
 			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {
-				ds.populateDataset("thesis", null, applToNewData);
+				ds.populateDataset("thesis", null, deployTrainedUserModel);
 				ToolBox.storeObjectBinary(ds, datasetFile);
 			}
 			else {
@@ -784,23 +864,23 @@ public class Runner {
 			}
 		}
 		else {
-			ds.populateDataset(null, null, applToNewData);
-			System.out.println(ds.getDatasetID());
-			System.out.println(ds.getName());
-			System.out.println(ds.getPieceNames());
-			System.out.println(ds.getNumPieces());
-			System.out.println(ds.getNumVoices());
-			System.out.println(ds.isTablatureSet());
-			System.out.println(ds.isTabAsNonTabSet());
-			System.out.println(ds.getLargestChordSize());
-			System.out.println(ds.getHighestNumVoices());
-			System.out.println(ds.getAllEncodingFiles());
-			System.out.println(ds.getAllMidiFiles());
-			System.out.println(ds.getAllTablatures());
-			System.out.println(ds.getAllTranscriptions());
-			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
-			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
-			System.exit(0);
+			ds.populateDataset(null, null, deployTrainedUserModel);
+//			System.out.println(ds.getDatasetID());
+//			System.out.println(ds.getName());
+//			System.out.println(ds.getPieceNames());
+//			System.out.println(ds.getNumPieces());
+//			System.out.println(ds.getNumVoices());
+//			System.out.println(ds.isTablatureSet());
+//			System.out.println(ds.isTabAsNonTabSet());
+//			System.out.println(ds.getLargestChordSize());
+//			System.out.println(ds.getHighestNumVoices());
+//			System.out.println(ds.getAllEncodingFiles());
+//			System.out.println(ds.getAllMidiFiles());
+//			System.out.println(ds.getAllTablatures());
+//			System.out.println(ds.getAllTranscriptions());
+//			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
+//			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
+//			System.exit(0);
 		}
 		setDataset(ds);
 
@@ -868,7 +948,7 @@ public class Runner {
 		// If only the NN, a combined model, or the HMM is trained and tested
 		else {
 			boolean isTablatureCase = ds.isTablatureSet();
-			String path = argPaths[0];
+			String storePath = argPaths[0];
 			
 			// Determine scaling settings
 			FeatureGenerator.determineScalingSettings(ma, isTablatureCase); // TODO fix hardcoded nums
@@ -877,7 +957,7 @@ public class Runner {
 //			String lmbdAsString = ToolBox.convertToStringNoTrailingZeros(lmbd);
 //			double HLSize = argModelParams.get(HIDDEN_LAYER_FACTOR);
 			List<Integer[]> indicesOfFirstPieceOfTestSets = null;	
-			if (applToNewData) { // TODO
+			if (deployTrainedUserModel) { // TODO
 				indicesOfFirstPieceOfTestSets = new ArrayList<Integer[]>();
 				List<String> imi = null; //new Dataset(DatasetID.IMI_SHORTER).makePieceNames();
 				List<String> free = null; // new Dataset(DatasetID.FREE_MORE).makePieceNames();
@@ -907,7 +987,7 @@ public class Runner {
 			String startTr = ToolBox.getTimeStampPrecise();
 //			String startTraining = "";
 //			String endTraining = "";
-			if (!applToNewData) {
+			if (!deployTrainedUserModel) {
 //				startTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");
@@ -917,18 +997,20 @@ public class Runner {
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}
-			if (ToolBox.toBoolean(argModelParams.get(TRAIN_USER_MODEL).intValue())) {
+			if (trainUserModel) {
+//			if (ToolBox.toBoolean(argModelParams.get(TRAIN_USER_MODEL).intValue())) {
 				ToolBox.storeTextFile(EvaluationManager.getDataAndParamsInfo(Runner.TRAIN, -1),
-					new File(path + modelParameters + ".txt"));
-				ToolBox.storeObjectBinary(modelParams, new File(path + modelParameters + ".ser"));
+					new File(storePath + modelParameters + ".txt"));
+				ToolBox.storeObjectBinary(modelParams, new File(storePath + modelParameters + ".ser"));
 				System.exit(0);
 			}
+//			System.exit(0);
 
 			// 2. Evaluate
 			String startTe = ToolBox.getTimeStampPrecise();
 //			String startEval = ToolBox.getTimeStamp();
 //			System.out.println("### 3. startEval = " + startEval);
-			if (!applToNewData) {
+			if (!deployTrainedUserModel) {
 				System.out.println("\nstarting the evaluation.");
 			}
 			else {
@@ -943,7 +1025,7 @@ public class Runner {
 			// 3. Calculate overall performance and store
 			String startPostProc = ToolBox.getTimeStampPrecise();
 //			System.out.println("### 5. startPost = " + startPost);
-			if (!applToNewData) {
+			if (!deployTrainedUserModel) {
 				System.out.println("\n>> calculating the overall performance");
 				// Create the csv table(s)
 				String[] times = new String[]{null, ToolBox.getTimeStamp()};
@@ -965,7 +1047,7 @@ public class Runner {
 					
 					String[][] csvTable = 
 						EvaluationManager.createCSVTableAllFolds(ds.getNumPieces(), 
-						path, isForDur, new long[]{
+						storePath, isForDur, new long[]{
 							ToolBox.getTimeDiffPrecise(startPreProc, endPreProc),
 //							preProcDeltas.get(TRAIN),
 //							preProcDeltas.get(TEST),
@@ -994,7 +1076,7 @@ public class Runner {
 					csvTables = newCsvTables;
 				}
 	
-				ToolBox.storeObjectBinary(modelParams, new File(path + modelParameters + ".ser"));
+				ToolBox.storeObjectBinary(modelParams, new File(storePath + modelParameters + ".ser"));
 				// Store the csv table(s)
 				// NB The time this takes is not included in the total runtime
 				int indToUpdate = 
@@ -1008,7 +1090,7 @@ public class Runner {
 						t[t.length-1][indToUpdate] = String.valueOf(totalTime);
 					}
 					ToolBox.storeTextFile(ToolBox.createCSVTableString(t), 
-						new File(path + s + ".csv"));
+						new File(storePath + s + ".csv"));
 					s = Runner.perfDur;
 				}
 				Runner.addToPerfCsvFilesStoreTimes(ToolBox.getTimeDiffPrecise(endPostProc, 
@@ -1043,7 +1125,7 @@ public class Runner {
 					EvaluationManager.getPerformanceInfo(csvTables, null, ds.getNumPieces(), 
 					null, /*null,*/ indicesOfFirstPieceOfTestSets);
 				String rec = dataAndParams.concat("\r\n").concat(results);
-				ToolBox.storeTextFile(rec, new File(path + overallPerf + ".txt"));
+				ToolBox.storeTextFile(rec, new File(storePath + overallPerf + ".txt"));
 			}
 			// Store info
 			else {

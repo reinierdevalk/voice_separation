@@ -23,7 +23,14 @@ import ui.Runner;
  *
  */
 public class PythonInterface {
-	
+
+	private static Process pr;
+	private static Reader bfr;
+	private static Writer bfw;
+	private static String cr = "\r\n";
+	static boolean printOutiPythonTerminalOutput = true;
+
+
 	public static void main(String[] args) throws IOException {
 //		String[] cmd = new String[4];
 //		String pythonScriptPath = "C:/Users/Reinier/Desktop/ISMIR2017/test.py";
@@ -31,16 +38,22 @@ public class PythonInterface {
 //		cmd[1] = pythonScriptPath;
 //		cmd[2] = "hoi";
 //		cmd[3] = "hallo";
-//		applyModel(cmd);
-				
+//		applyModel(cmd);				
 		System.exit(0);
+
+		File script = new File(Runner.scriptPythonPath);
+		List<String> ls = PythonInterface.scriptToString(script, "def create_neural_network");
+		for (String s : ls) {
+			System.out.println(s);
+		}
+
 		test();
 //		initPython(null);
 //		callPython(null);
 //		exitPython();
 	}
 	
-	public static void test() { // throws IOException {
+	public static void test() {
 		try {
 			// Create runtime to execute external command
 			Runtime rt = Runtime.getRuntime();		
@@ -93,14 +106,73 @@ public class PythonInterface {
 			t.printStackTrace();
 		}
 	}
-	
 
-	public static Process pr;
-	public static Reader bfr;
-	public static Writer bfw;
-	private static String cr = "\r\n";
-	
-	public static void init(String[] cmd) { // throws IOException {
+
+	/**
+	 * Following the given command, runs train_test_tensorflow as a script (train 
+	 * and test mode).
+	 *    
+	 * @param args
+	 * @throws IOException
+	 */
+	public static double[] applyModel(String[] cmd) {
+		double[] outp = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		try {
+			// Create runtime to execute external command
+			Runtime rt = Runtime.getRuntime();
+			Process pr = rt.exec(cmd);
+			
+			// Retrieve output from Python script
+			BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			String line = "";
+			while((line = bfr.readLine()) != null) {
+				System.out.println(line);
+				String s = "model output = ";
+				if (line.startsWith(s)) {
+					System.out.println(line);
+					String output = line.substring(s.length());
+					String[] indiv = output.split(",");
+					for (int i = 0; i < indiv.length; i++) {
+						outp[i] = Double.parseDouble(indiv[i]);
+					}
+				}
+			}
+			String arrAsStr = "               ";
+			for (double d : outp) {
+				arrAsStr += d + ",";
+			}
+//			System.out.println(arrAsStr);
+			
+			// Retrieve error (if any) from Python script. See Listing 4.3 at 
+			// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html
+//			InputStream stderr = pr.getErrorStream();
+//			InputStreamReader isr = new InputStreamReader(stderr);
+			BufferedReader br = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+			line = null;
+			boolean errorFound = false;
+			while ( (line = br.readLine()) != null) {
+				errorFound = true;
+				System.out.println(line);
+			}
+			if (errorFound) { 
+				int exitVal = pr.waitFor();
+				System.out.println("Process exitValue: " + exitVal);
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return outp;
+	}
+
+
+	/**
+	 * Following the given command, uses train_test_tensorflow as a module and runs
+	 * create_neural_network() (application mode). To be called in conjunction with 
+	 * (before) predict() (or predictNoLoading()).
+	 * 
+	 * @param cmd
+	 */
+	public static void init(String[] cmd) {
 		// For scikit
 		String path = cmd[0];
 		String model = cmd[1];
@@ -116,19 +188,23 @@ public class PythonInterface {
 			pr = rt.exec("ipython");
 
 			// Reader reads from terminal answer
-			// problem with reader: we don't know when it stops
+			// Problem with reader: we don't know when it stops
 			bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			// Stop reading after 'In [1]: ' 
-			int c = -1;
-			char prePrev = '#';
-			char prev = '#';
-			while ((c = bfr.read()) != -1) {
-				System.out.print((char)c);
-				if (c == ' ' && prev == ':' && prePrev == ']') {
-					break;
+			
+			boolean isNeeded = false;
+			if (isNeeded) {
+				// Stop reading after 'In [1]: ' 
+				int c = -1;
+				char prePrev = '#';
+				char prev = '#';
+				while ((c = bfr.read()) != -1) {
+					System.out.print((char)c);
+					if (c == ' ' && prev == ':' && prePrev == ']') {
+						break;
+					}
+					prePrev = prev;
+					prev = (char)c;
 				}
-				prePrev = prev;
-				prev = (char)c;
 			}
 			
 			// Writer writes to terminal (i.e., to process)
@@ -210,169 +286,35 @@ public class PythonInterface {
 			cmdStr += variables;
 //			cmdStr += defCreateNeuralNetwork;
 			cmdStr += call;
+			cmdStr += "print('#')" + cr;
+
+			System.out.println(cmdStr);
+			bfw.write(cmdStr);
+			bfw.flush(); // needed to execute the above commands
 			
-			System.out.println();
-//			System.out.println(cmdStr);
-			bfw.write(cmdStr);		
+			// Show print statements in the code (not done be default because the script
+			// is used as a module)
+			int c = -1;	
+			while((c = bfr.read()) != '#') {
+				if (printOutiPythonTerminalOutput) {
+					System.out.print((char)c);
+				}
+			}
+			
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 	}
-
-
-	public static List<String> scriptToString(File script, String marker) {
-		String content = ToolBox.readTextFile(script);
-		
-		// Get function
-		int startFunction = content.indexOf(marker);
-		int endFunction = content.indexOf("# fed", startFunction);
-		String function = content.substring(startFunction, endFunction);
-		
-		// Cut out docstring
-		String ds = "\"\"\"";
-		int startDocstring = function.indexOf(ds);
-		int endDocstring = function.indexOf(ds, startDocstring + 1) + ds.length();
-		String toReplace = function.substring(startDocstring, endDocstring);
-		function = function.replace(toReplace, "");
-		
-		// Remove all comments and empty lines
-		String[] functionSplit = function.split("\r\n");
-		List<String> functionClean = new ArrayList<String>();
-		for (String s : functionSplit) {
-			String sTrimmed = s.trim();
-			if ((!sTrimmed.startsWith("#")) && (!sTrimmed.isEmpty())) {
-				functionClean.add(s);
-			}
-		}
-		return functionClean;
-	}
+	
 	
 	/**
-	 * Writes the given function from the given master script as a separate script.
-	 *  
-	 * @param masterScript
-	 * @param functionName
+	 * Following the given command, uses train_test_tensorflow as a module and runs
+	 * run_neural_network() (application mode). To be called in conjunction with (after)
+	 * init().
+	 * 
+	 * @param cmd
 	 */
-	public static void functionToScript(File masterScript, String functionName, String path) {
-		String content = ToolBox.readTextFile(masterScript);
-		
-		// Get function
-		int startFunction = content.indexOf(functionName);
-		int endFunction = content.indexOf("# fed", startFunction);
-		String function = content.substring(startFunction, endFunction);
-		
-		// Get args
-		String def = function.substring(0, function.indexOf(":"));
-		String allArgs = def.substring(def.indexOf("(")+1, def.indexOf(")"));
-		// https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
-		String[] args = allArgs.trim().split("\\s*,\\s*");	
-		String argv = "";
-		
-		for (String s : args) {
-			argv += s;
-			if (s.equals(args[args.length-1])) {
-				argv += " = argv" + "\r\n" + "\r\n";
-			}
-			else {
-				argv += ", ";
-			}
-		}
-		
-		ToolBox.storeTextFile(argv + function, new File(path));
-		
-//		// Cut out docstring
-//		String ds = "\"\"\"";
-//		int startDocstring = function.indexOf(ds);
-//		int endDocstring = function.indexOf(ds, startDocstring + 1) + ds.length();
-//		String toReplace = function.substring(startDocstring, endDocstring);
-//		function = function.replace(toReplace, "");
-		
-//		// Remove all comments and empty lines
-//		String[] functionSplit = function.split("\r\n");
-//		List<String> functionClean = new ArrayList<String>();
-//		for (String s : functionSplit) {
-//			String sTrimmed = s.trim();
-//			if ((!sTrimmed.startsWith("#")) && (!sTrimmed.isEmpty())) {
-//				functionClean.add(s);
-//			}
-//		}
-	}
-
-
-	public static double[] predictNoLoading(String argFv) { // throws IOException {
-		double[] output = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
-		
-//		String path = cmd[0]; // path
-//		String argFv = cmd[1]; // String rep of fv
-//		String outpExt = cmd[2]; // Runner.outpExt + "appl.csv"
-		try {					
-			String cmdStr = 
-//				"print('loading features and applying model')" + cr +
-//				"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + cr +
-				"arg_fv = '" + argFv + "'" + cr + 
-				"X_list = [float(s.strip()) for s in arg_fv.split(',')]" + cr +
-//				"print(X_list)" + cr +
-				"X = np.array(X_list)" + cr +
-				"X = X.reshape(1, -1)" + cr +
-				"classes = m.predict(X)" + cr +
-				"probs = m.predict_proba(X)" + cr +
-				"max_num_voices = 5" + cr +
-				"num_cols_to_add = max_num_voices - len(probs[0])" + cr + 
-				"num_ex = len(probs)" + cr +
-				"z = np.zeros((num_ex, num_cols_to_add), dtype=probs.dtype)" + cr +
-				"probs = np.append(probs, z, axis=1)" + cr +
-//				"print(X)" + cr +
-//				"print(classes)" + cr +
-//				"print(probs)" + cr +
-//				"print('saving model output')" + cr +
-				"output = ','.join([str(p) for p in probs[0]])" + cr +
-				"print('@' + output + '@')" + cr +
-//				"df_probs = pd.DataFrame(probs)" + cr +
-//				"df_probs.to_csv('" + path + outpExt + "', header=False, index=False)" + cr +			
-				"print('#')" + cr
-			;
-			bfw.write(cmdStr);
-			bfw.flush(); // needed to execute the above commands
-							
-			int c = -1;
-			String outp = "";
-			char prev = '#';
-			boolean addToOutp = false;
-			while((c = PythonInterface.bfr.read()) != '#') {
-//				System.out.print((char)c);
-				// If previous char is begin marker: start adding
-				if (prev == '@') {
-					addToOutp = true;
-				}
-				// If char is end marker: stop adding
-				if (c == '@' && addToOutp) {
-					addToOutp = false;
-					// Prevent further adding by resetting prev
-					prev = '#';
-				}
-				else {
-					prev = (char) c;
-				}
-				if (addToOutp) {
-					outp += (char)c;
-				}
-			}
-			
-			String[] indiv = outp.split(",");
-			for (int i = 0; i < indiv.length; i++) {
-				output[i] = Double.parseDouble(indiv[i]);
-			}
-//			System.out.println(cmdStr);
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return output;
-	}
-
-
-	public static void predict(String[] cmd) { // throws IOException {
+	public static void predict(String[] cmd) {
 		// For scikit
 		String path = cmd[0]; // path
 		String mdl = cmd[1]; 
@@ -470,9 +412,15 @@ public class PythonInterface {
 			
 			bfw.write(cmdStr);
 			bfw.flush(); // needed to execute the above commands
+			
+			// Show print statements in the code (not done be default because the script
+			// is used as a module)
 			int c = -1;
 			while((c = PythonInterface.bfr.read()) != '#') {
-//				System.out.print((char)c); // To print out iPython terminal output
+				// Comment out as this method is called for each note
+				if (printOutiPythonTerminalOutput) {
+//					System.out.print((char)c);
+				}
 			}
 			
 		} catch (IOException e) {
@@ -480,8 +428,160 @@ public class PythonInterface {
 			e.printStackTrace();
 		}
 	}
+
+
+	public static double[] predictNoLoading(String argFv) {
+		double[] output = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		
+//		String path = cmd[0]; // path
+//		String argFv = cmd[1]; // String rep of fv
+//		String outpExt = cmd[2]; // Runner.outpExt + "appl.csv"
+		try {					
+			String cmdStr = 
+//				"print('loading features and applying model')" + cr +
+//				"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + cr +
+				"arg_fv = '" + argFv + "'" + cr + 
+				"X_list = [float(s.strip()) for s in arg_fv.split(',')]" + cr +
+//				"print(X_list)" + cr +
+				"X = np.array(X_list)" + cr +
+				"X = X.reshape(1, -1)" + cr +
+				"classes = m.predict(X)" + cr +
+				"probs = m.predict_proba(X)" + cr +
+				"max_num_voices = 5" + cr +
+				"num_cols_to_add = max_num_voices - len(probs[0])" + cr + 
+				"num_ex = len(probs)" + cr +
+				"z = np.zeros((num_ex, num_cols_to_add), dtype=probs.dtype)" + cr +
+				"probs = np.append(probs, z, axis=1)" + cr +
+//				"print(X)" + cr +
+//				"print(classes)" + cr +
+//				"print(probs)" + cr +
+//				"print('saving model output')" + cr +
+				"output = ','.join([str(p) for p in probs[0]])" + cr +
+				"print('@' + output + '@')" + cr +
+//				"df_probs = pd.DataFrame(probs)" + cr +
+//				"df_probs.to_csv('" + path + outpExt + "', header=False, index=False)" + cr +			
+				"print('#')" + cr
+			;
+			bfw.write(cmdStr);
+			bfw.flush(); // needed to execute the above commands
+							
+			int c = -1;
+			String outp = "";
+			char prev = '#';
+			boolean addToOutp = false;
+			while((c = PythonInterface.bfr.read()) != '#') {
+//				System.out.print((char)c);
+				// If previous char is begin marker: start adding
+				if (prev == '@') {
+					addToOutp = true;
+				}
+				// If char is end marker: stop adding
+				if (c == '@' && addToOutp) {
+					addToOutp = false;
+					// Prevent further adding by resetting prev
+					prev = '#';
+				}
+				else {
+					prev = (char) c;
+				}
+				if (addToOutp) {
+					outp += (char)c;
+				}
+			}
+			
+			String[] indiv = outp.split(",");
+			for (int i = 0; i < indiv.length; i++) {
+				output[i] = Double.parseDouble(indiv[i]);
+			}
+//			System.out.println(cmdStr);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return output;
+	}
+
+
+	private static List<String> scriptToString(File script, String marker) {
+		String content = ToolBox.readTextFile(script);
+		
+		// Get function
+		int startFunction = content.indexOf(marker);
+		int endFunction = content.indexOf("# fed", startFunction);
+		String function = content.substring(startFunction, endFunction);
+		
+		// Cut out docstring
+		String ds = "\"\"\"";
+		int startDocstring = function.indexOf(ds);
+		int endDocstring = function.indexOf(ds, startDocstring + 1) + ds.length();
+		String toReplace = function.substring(startDocstring, endDocstring);
+		function = function.replace(toReplace, "");
+		
+		// Remove all comments and empty lines
+		String[] functionSplit = function.split("\r\n");
+		List<String> functionClean = new ArrayList<String>();
+		for (String s : functionSplit) {
+			String sTrimmed = s.trim();
+			if ((!sTrimmed.startsWith("#")) && (!sTrimmed.isEmpty())) {
+				functionClean.add(s);
+			}
+		}
+		return functionClean;
+	}
 	
-	
+	/**
+	 * Writes the given function from the given master script as a separate script.
+	 *  
+	 * @param masterScript
+	 * @param functionName
+	 */
+	private static void functionToScript(File masterScript, String functionName, String path) {
+		String content = ToolBox.readTextFile(masterScript);
+		
+		// Get function
+		int startFunction = content.indexOf(functionName);
+		int endFunction = content.indexOf("# fed", startFunction);
+		String function = content.substring(startFunction, endFunction);
+		
+		// Get args
+		String def = function.substring(0, function.indexOf(":"));
+		String allArgs = def.substring(def.indexOf("(")+1, def.indexOf(")"));
+		// https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
+		String[] args = allArgs.trim().split("\\s*,\\s*");	
+		String argv = "";
+		
+		for (String s : args) {
+			argv += s;
+			if (s.equals(args[args.length-1])) {
+				argv += " = argv" + "\r\n" + "\r\n";
+			}
+			else {
+				argv += ", ";
+			}
+		}
+		
+		ToolBox.storeTextFile(argv + function, new File(path));
+		
+//		// Cut out docstring
+//		String ds = "\"\"\"";
+//		int startDocstring = function.indexOf(ds);
+//		int endDocstring = function.indexOf(ds, startDocstring + 1) + ds.length();
+//		String toReplace = function.substring(startDocstring, endDocstring);
+//		function = function.replace(toReplace, "");
+		
+//		// Remove all comments and empty lines
+//		String[] functionSplit = function.split("\r\n");
+//		List<String> functionClean = new ArrayList<String>();
+//		for (String s : functionSplit) {
+//			String sTrimmed = s.trim();
+//			if ((!sTrimmed.startsWith("#")) && (!sTrimmed.isEmpty())) {
+//				functionClean.add(s);
+//			}
+//		}
+	}
+
+
 	private static void initPython(String[] cmd) { // throws IOException {
 		String path = cmd[0];
 		String model = cmd[1];
@@ -641,62 +741,5 @@ public class PythonInterface {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	/**
-	* @param args
-	* @throws IOException
-	*/
-	public static double[] applyModel(String[] cmd) { // throws IOException {
-		double[] outp = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
-		try {
-			// Create runtime to execute external command
-			Runtime rt = Runtime.getRuntime();
-			Process pr = rt.exec(cmd);
-			
-			// Retrieve output from Python script
-			BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			String line = "";
-//			double[] outp = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
-			while((line = bfr.readLine()) != null) {
-				System.out.println(line);
-				String s = "model output = ";
-				if (line.startsWith(s)) {
-					System.out.println(line);
-					String output = line.substring(s.length());
-					String[] indiv = output.split(",");
-					for (int i = 0; i < indiv.length; i++) {
-						outp[i] = Double.parseDouble(indiv[i]);
-					}
-				}
-			}
-			String arrAsStr = "               ";
-			for (double d : outp) {
-				arrAsStr += d + ",";
-			}
-			System.out.println(arrAsStr);
-			
-			// Retrieve error (if any) from Python script. See Listing 4.3 at 
-			// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html
-//			InputStream stderr = pr.getErrorStream();
-//			InputStreamReader isr = new InputStreamReader(stderr);
-			BufferedReader br = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-			line = null;
-//			System.out.println("<ERROR>");
-			boolean errorFound = false;
-			while ( (line = br.readLine()) != null) {
-				errorFound = true;
-				System.out.println(line);
-			}
-//			System.out.println("</ERROR>");
-			if (errorFound) { 
-				int exitVal = pr.waitFor();
-				System.out.println("Process exitValue: " + exitVal);
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-		return outp;
-	}
-	
+
 }
