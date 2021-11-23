@@ -1004,7 +1004,7 @@ public class Runner {
 				ToolBox.storeObjectBinary(modelParams, new File(storePath + modelParameters + ".ser"));
 				System.exit(0);
 			}
-//			System.exit(0);
+			System.exit(0);
 
 			// 2. Evaluate
 			String startTe = ToolBox.getTimeStampPrecise();

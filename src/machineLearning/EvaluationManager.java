@@ -18,7 +18,6 @@ import de.uos.fmt.musitech.utility.math.Rational;
 import representations.Transcription;
 import tools.ToolBox;
 import ui.Runner;
-import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
 import ui.Runner.Model;
 import ui.Runner.ModelType;

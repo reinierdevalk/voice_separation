@@ -605,7 +605,7 @@ public class TestManager {
 					!deployTrainedUserModel ? groundTruthTranscription.getPiece().getHarmonyTrack() :
 					new SortedContainer<Marker>();
 
-				Transcription predictedTranscr =
+				Transcription predictedTranscr = hier
 					new Transcription(testPieceName,	
 //					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
 					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 

@@ -88,8 +88,8 @@ public class UI {
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
 			datasetID = Dataset.BYRD_INT_4VV;
-			m = Model.D;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd
+			m = Model.D_B;
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
 			expDir = "byrd/"; // publication + experiment (if applicable)
 			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";

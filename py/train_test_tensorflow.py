@@ -389,7 +389,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 						# https://datascience-enthusiast.com/DL/Tensorflow_Tutorial.html
 						softmaxes_val = sess.run([softm2, pred_class2], feed_dict={x: x_val, keep_prob: 1.0})[0]
 						np.savetxt(fold_path + 'out-vld.csv', softmaxes_val, delimiter=',')
-						np.savetxt(fold_path + 'acc-vld.csv', [acc_val], delimiter=',')
+#						np.savetxt(fold_path + 'acc-vld.csv', [acc_val], delimiter=',')
 
 #						for i in range(10):
 #							print(softmaxes_trn[i])
@@ -398,6 +398,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 #						np.savetxt(fold_path + 'best_epoch.txt', 'highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch), delimiter="", fmt="%s")
 						with open(fold_path + 'best_epoch.txt', 'w') as text_file:
 							text_file.write('highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch))
+						np.savetxt(fold_path + 'best_epoch.csv', [[int(epoch), acc_val]], delimiter=',')
 
 		# Added 06.12.2021 for Byrd presentation
 		if user_model:
