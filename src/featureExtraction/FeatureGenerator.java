@@ -2702,7 +2702,7 @@ public class FeatureGenerator {
 	 * If there is no previous Note in the given NotationVoice, relative pitch and inter-onset interval are set to 0.0
 	 * and -1.0, respectively.
 	 *       
-	 * @param basicTabSymbolProperties      
+	 * @param btp      
 	 * @param notationVoice
 	 * @param note
 	 * @return
@@ -3715,7 +3715,6 @@ public class FeatureGenerator {
 	 *     
 	 * @param basicTabSymbolProperties Must be <code>null</code> in the non-tablature case
 	 * @param basicNoteProperties Must be <code>null</code> in the tablature case
-	 * @param meterInfo
 	 * @param noteIndex
 	 * 
 	 * @return
