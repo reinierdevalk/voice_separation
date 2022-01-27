@@ -18,6 +18,7 @@ import machineLearning.MelodyPredictor;
 import machineLearning.MelodyPredictor.MelModelType;
 import machineLearning.NNManager;
 import machineLearning.NNManager.ActivationFunction;
+import paths.Paths;
 import representations.Transcription;
 import tools.ToolBox;
 import ui.Runner.Configuration;
@@ -32,8 +33,8 @@ import ui.Runner.WeightsInit;
 
 public class UI {
 
-	private static String rootPath = "F:/research/";
-	private static String rootPathUser = "F:/research/data/";
+	private static String rootPath = Paths.getRootPath();
+	private static String rootPathUser = Paths.getRootPathUser();
 
 	// Runner settings
 	private static boolean deployTrainedUserModel, skipTraining, trainUserModel, verbose;
