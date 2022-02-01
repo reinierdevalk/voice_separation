@@ -243,8 +243,8 @@ public class TestManagerTest extends TestCase {
 		// basicTabSymbolProperties and meterInfo
 		testManager.tablature = 
 			new Tablature(new File(Runner.encodingsPath + "test/" + "test_resolve_conflicts.tbp"), false);
-			testManager.basicTabSymbolProperties = testManager.tablature.getBasicTabSymbolProperties();
-			testManager.meterInfo = testManager.tablature.getMeterInfo();
+		testManager.basicTabSymbolProperties = testManager.tablature.getBasicTabSymbolProperties();
+		testManager.meterInfo = testManager.tablature.getMeterInfo();
 
 		// Pre-set the necessary lists with dummy values
 		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {
@@ -253,14 +253,14 @@ public class TestManagerTest extends TestCase {
 			testManager.allVoicesCoDNotes.add(null);
 		}
 
-		// allMetricPositions
-		testManager.allMetricPositions = new ArrayList<Rational[]>();
-		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {
-			Rational currMetricTime = 
-				new Rational(testManager.basicTabSymbolProperties[i][Tablature.ONSET_TIME],
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
-			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, testManager.tablature.getMeterInfo()));
-		}
+//		// allMetricPositions
+//		testManager.allMetricPositions = new ArrayList<Rational[]>();
+//		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {
+//			Rational currMetricTime = 
+//				new Rational(testManager.basicTabSymbolProperties[i][Tablature.ONSET_TIME],
+//				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, testManager.tablature.getMeterInfo()));
+//		}
 
 		// allNetworkOutputs
 		double[] eighth = new double[Transcription.DURATION_LABEL_SIZE];
@@ -839,14 +839,14 @@ public class TestManagerTest extends TestCase {
 			testManager.allVoicesCoDNotes.add(null);
 		}
 
-		// allMetricPositions (fwd)
-		testManager.allMetricPositions = new ArrayList<Rational[]>();
-		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {
-			Rational currMetricTime = 
-				new Rational(testManager.basicTabSymbolProperties[i][Tablature.ONSET_TIME],
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
-			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, testManager.tablature.getMeterInfo()));
-		}
+//		// allMetricPositions (fwd)
+//		testManager.allMetricPositions = new ArrayList<Rational[]>();
+//		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {
+//			Rational currMetricTime = 
+//				new Rational(testManager.basicTabSymbolProperties[i][Tablature.ONSET_TIME],
+//				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, testManager.tablature.getMeterInfo()));
+//		}
 
 		// allNetworkOutputs (bwd)
 		double[] eighth = new double[Transcription.DURATION_LABEL_SIZE];
@@ -1435,23 +1435,23 @@ public class TestManagerTest extends TestCase {
 		testManager.groundTruthTranscription = 
 			new Transcription(new File(Runner.midiPath + "test/" + "test_resolve_conflicts_non_tab.mid"), null);
 		testManager.basicNoteProperties = testManager.groundTruthTranscription.getBasicNoteProperties();
-//		testManager.meterInfo = testManager.tablature.getMeterInfo();
+		testManager.meterInfo = testManager.groundTruthTranscription.getMeterInfo();
 
 		// Pre-set the necessary lists with dummy values
 		for (int i = 0; i < testManager.basicNoteProperties.length; i++) {
 			testManager.allVoiceLabels.add(null);
 		}
 
-		// allMetricPositions
-		testManager.allMetricPositions = new ArrayList<Rational[]>();
-		for (int i = 0; i < testManager.basicNoteProperties.length; i++) {
-			Rational currMetricTime = 
-				new Rational(testManager.basicNoteProperties[i][Transcription.ONSET_TIME_NUMER],
-				testManager.basicNoteProperties[i][Transcription.ONSET_TIME_DENOM]);
-//			metricTimes.add(currMetricTime);
-			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, 
-				testManager.groundTruthTranscription.getMeterInfo()));
-		}
+//		// allMetricPositions
+//		testManager.allMetricPositions = new ArrayList<Rational[]>();
+//		for (int i = 0; i < testManager.basicNoteProperties.length; i++) {
+//			Rational currMetricTime = 
+//				new Rational(testManager.basicNoteProperties[i][Transcription.ONSET_TIME_NUMER],
+//				testManager.basicNoteProperties[i][Transcription.ONSET_TIME_DENOM]);
+////			metricTimes.add(currMetricTime);
+//			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, 
+//				testManager.groundTruthTranscription.getMeterInfo()));
+//		}
 
 		// allNetworkOutputs
 		List<double[]> allNetworkOutputs = new ArrayList<double[]>();
@@ -1777,23 +1777,24 @@ public class TestManagerTest extends TestCase {
 		testManager.groundTruthTranscription = 
 			new Transcription(new File(Runner.midiPath+ "test/" + "test_resolve_conflicts_non_tab.mid"), null);
 		testManager.basicNoteProperties = testManager.groundTruthTranscription.getBasicNoteProperties();
-
+		testManager.meterInfo = testManager.groundTruthTranscription.getMeterInfo();
+		
 		// Pre-set the necessary lists with dummy values
 		for (int i = 0; i < testManager.basicNoteProperties.length; i++) {
 			testManager.allVoiceLabels.add(null);
 		}
 
-		// allMetricPositions (fwd)
-//		List<Rational> metricTimes = new ArrayList<Rational>();
-		testManager.allMetricPositions = new ArrayList<Rational[]>();
-		for (int i = 0; i < testManager.basicNoteProperties.length; i++) {
-			Rational currMetricTime = 
-				new Rational(testManager.basicNoteProperties[i][Transcription.ONSET_TIME_NUMER],
-				testManager.basicNoteProperties[i][Transcription.ONSET_TIME_DENOM]);
-//			metricTimes.add(currMetricTime);
-			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, 
-				testManager.groundTruthTranscription.getMeterInfo()));
-		}
+//		// allMetricPositions (fwd)
+////		List<Rational> metricTimes = new ArrayList<Rational>();
+//		testManager.allMetricPositions = new ArrayList<Rational[]>();
+//		for (int i = 0; i < testManager.basicNoteProperties.length; i++) {
+//			Rational currMetricTime = 
+//				new Rational(testManager.basicNoteProperties[i][Transcription.ONSET_TIME_NUMER],
+//				testManager.basicNoteProperties[i][Transcription.ONSET_TIME_DENOM]);
+////			metricTimes.add(currMetricTime);
+//			testManager.allMetricPositions.add(Tablature.getMetricPosition(currMetricTime, 
+//				testManager.groundTruthTranscription.getMeterInfo()));
+//		}
 
 		// allNetworkOutputs (bwd)
 		List<double[]> allNetworkOutputs = new ArrayList<double[]>();

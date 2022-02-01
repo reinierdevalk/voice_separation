@@ -56,7 +56,7 @@ public class TestManager {
 	Integer[][] basicTabSymbolProperties; // tab / N2N and C2C
 	Integer[][] basicNoteProperties; // non-tab / N2N and C2C
 	List<Integer[]> meterInfo; // tab and non-tab / N2N and C2C	
-	List<Rational[]> allMetricPositions; // tab and non-tab / N2N and C2C
+//	 List<Rational[]> allMetricPositions; // tab and non-tab / N2N and C2C
 	private List<Integer> chordSizes; // tab and non-tab / N2N
 	List<Integer> backwardsMapping; // tab and non-tab / N2N and C2C (but not used in C2C)
 	// c. GT/voice-related (always derived from groundTruthTranscription)
@@ -313,10 +313,15 @@ public class TestManager {
 
 		// Non-voice-related information (derived from tablature or groundTruthTranscription)
 		// a. tab
+		List<Rational[]> allMetricPositions = new ArrayList<>();
 		if (isTablatureCase) {
 			basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 			meterInfo = tablature.getMeterInfo();
-			allMetricPositions = tablature.getAllMetricPositions();
+			for (int j = 0; j < basicTabSymbolProperties.length; j++) {
+				allMetricPositions.add(Tablature.getMetricPosition(
+					getMetricTime(j, isTablatureCase), meterInfo));
+			}
+//			allMetricPositions = tablature.getAllMetricPositions();
 			// When using the bwd model, chordSizes must be set in reverse order. This must be 
 			// done *after* the feature generation, as generateAllNoteFeatureVectors() takes the 
 			// list in fwd order as argument
@@ -340,7 +345,11 @@ public class TestManager {
 			}
 			basicNoteProperties = groundTruthTranscription.getBasicNoteProperties();
 			meterInfo = groundTruthTranscription.getMeterInfo();
-			allMetricPositions = groundTruthTranscription.getAllMetricPositions();
+			for (int j = 0; j < basicNoteProperties.length; j++) {
+				allMetricPositions.add(Tablature.getMetricPosition(
+					getMetricTime(j, isTablatureCase), meterInfo));
+			}
+//			allMetricPositions = groundTruthTranscription.getAllMetricPositions();
 			// When using the bwd model, chordSizes must be set in reverse order. This must be 
 			// done *after* the feature generation, as generateAllNoteFeatureVectors() takes the 
 			// list in fwd order as argument
@@ -1181,7 +1190,8 @@ public class TestManager {
 //							groundTruthTranscription.getPiece().getHarmonyTrack());
 
 						List<List<Double>> dl = !isTablatureCase ? null : 
-							tablature.getMinimumDurationLabels(); // TODO or predicted durations
+//							tablature.getMinimumDurationLabels();
+							groundTruthTranscription.getMinimumDurationLabels(); // TODO or predicted durations?
 						List<List<Integer>> voiceEntryInfo = 
 							groundTruthTranscription.determineVoiceEntriesHIGHLEVEL(
 							basicTabSymbolProperties, dl, basicNoteProperties, 
@@ -3445,7 +3455,8 @@ public class TestManager {
 //				voiceEntryInfo =
 //					groundTruthTranscription.getImitativeVoiceEntries(highestNumVoicesTraining, 3);
 				List<List<Double>> dl = !isTablatureCase ? null : 
-					tablature.getMinimumDurationLabels(); // TODO or predicted durations
+//					tablature.getMinimumDurationLabels();
+					groundTruthTranscription.getMinimumDurationLabels(); // TODO or predicted durations?
 				voiceEntryInfo = groundTruthTranscription.determineVoiceEntriesHIGHLEVEL(
 					basicTabSymbolProperties, dl, basicNoteProperties, highestNumVoicesTraining, nForVEEH);
 			}
@@ -4068,15 +4079,10 @@ public class TestManager {
 
 		ProcessingMode pm = 
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
-//		Implementation ipm = 
-//			Runner.ALL_IMPLEMENTATIONS[modelParameters.get(Runner.IMPLEMENTATION).intValue()];		
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
-//		boolean giveFirst = 
-//			ToolBox.toBoolean(modelParameters.get(Runner.GIVE_FIRST).intValue());
 		int highestNumVoicesTraining = 
 			Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
-//			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
 		
 		boolean allowCoD = ToolBox.toBoolean(modelParameters.get(Runner.SNU).intValue());
 		double deviationThreshold = -1-0;
@@ -4303,7 +4309,10 @@ public class TestManager {
 					//dndeze1
 					if (firstPredictedVoicePrevious == firstPredictedVoice) {
 						// 0. Get the metric position and the index in the chord of the previous note
-						String metPosPrevious = ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious)); 
+						Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);	
+						String metPosPrevious = 
+							ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+//							ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 						int indexInChordPrevious = -1;
 						if (isTablatureCase) {
 							indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM]; 
@@ -4446,7 +4455,10 @@ public class TestManager {
 												}
 											}
 											// Set metPosNext and indexInChordNext 
-											metPosNext = ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
+											mt = getMetricTime(noteIndexNext, isTablatureCase);
+											metPosNext = 
+												ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+//												ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
 											indexInChordNext = basicTabSymbolProperties[j][Tablature.NOTE_SEQ_NUM];
 											break;
 										}
@@ -4697,7 +4709,10 @@ public class TestManager {
 								// If secondPredictedVoicePrevious is the same as firstPredictedVoice
 								if (secondPredictedVoicePrevious == firstPredictedVoice) {
 									// 0. Get the metric position and the index in the chord of the previous note
-									String metPosPrevious = ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
+									Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
+									String metPosPrevious = 
+										ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+//										ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 									int indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM];  	  	
 	
 									// a. For sustained previous notes (which only exist when modelling duration using the fwd model)
@@ -4835,7 +4850,10 @@ public class TestManager {
 															}
 														}
 														// Set metPosNext and indexInChordNext 
-														metPosNext = ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
+														mt = getMetricTime(noteIndexNext, isTablatureCase);
+														metPosNext = 
+															ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+//															ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
 														indexInChordNext = basicTabSymbolProperties[j][Tablature.NOTE_SEQ_NUM];
 														break;
 													}
@@ -5000,7 +5018,10 @@ public class TestManager {
 							}
 
 							// 0. Get the metric position and the index in the chord of the previous note
-							String metPosPrevious = ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
+							Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
+							String metPosPrevious = 
+								ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+//								ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 							int indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM];  	
 							// 1. Add index to conflictIndices
 							if (!conflictIndices.get(0).contains(noteIndexBwd)) {
@@ -5283,6 +5304,19 @@ public class TestManager {
 				allPredictedDurations.add(DataConverter.convertIntoDuration(predictedDurationLabel));
 				allDurationLabels.set(noteIndex, predictedDurationLabel); // NIEUW
 			}
+		}
+	}
+
+
+	private Rational getMetricTime(int index, boolean tablatureCase) {
+		if (tablatureCase) {
+			return new Rational(
+				basicTabSymbolProperties[index][Tablature.ONSET_TIME], Tablature.SRV_DEN);
+		}
+		else {
+			return new Rational(
+				basicNoteProperties[index][Transcription.ONSET_TIME_NUMER], 
+				basicNoteProperties[index][Transcription.ONSET_TIME_DENOM]);	
 		}
 	}
 
