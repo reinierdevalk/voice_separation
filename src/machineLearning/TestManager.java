@@ -34,6 +34,7 @@ import featureExtraction.FeatureGeneratorChord;
 import machineLearning.NNManager.ActivationFunction;
 import python.PythonInterface;
 import representations.Tablature;
+import representations.Timeline;
 import representations.Transcription;
 import tools.ToolBox;
 import ui.Runner;
@@ -316,9 +317,9 @@ public class TestManager {
 		List<Rational[]> allMetricPositions = new ArrayList<>();
 		if (isTablatureCase) {
 			basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-			meterInfo = tablature.getMeterInfo();
+			meterInfo = tablature.getTimeline().getMeterInfo();
 			for (int j = 0; j < basicTabSymbolProperties.length; j++) {
-				allMetricPositions.add(Tablature.getMetricPosition(
+				allMetricPositions.add(Timeline.getMetricPosition(
 					getMetricTime(j, isTablatureCase), meterInfo));
 			}
 //			allMetricPositions = tablature.getAllMetricPositions();
@@ -346,7 +347,7 @@ public class TestManager {
 			basicNoteProperties = groundTruthTranscription.getBasicNoteProperties();
 			meterInfo = groundTruthTranscription.getMeterInfo();
 			for (int j = 0; j < basicNoteProperties.length; j++) {
-				allMetricPositions.add(Tablature.getMetricPosition(
+				allMetricPositions.add(Timeline.getMetricPosition(
 					getMetricTime(j, isTablatureCase), meterInfo));
 			}
 //			allMetricPositions = groundTruthTranscription.getAllMetricPositions();
@@ -1352,8 +1353,7 @@ public class TestManager {
 					boolean LSTM = false;
 					if (LSTM) {
 						List<Integer[]> mi = groundTruthTranscription.getMeterInfo(); 
-						String meter = mi.get(0)[Transcription.MI_NUM] + "/" + 
-							mi.get(0)[Transcription.MI_DEN];
+						String meter = mi.get(0)[Timeline.MI_NUM] + "/" + mi.get(0)[Timeline.MI_DEN];
 						boolean doLastNNotesThing = false;
 						if (doLastNNotesThing) {
 							int n = 5;
@@ -4311,7 +4311,7 @@ public class TestManager {
 						// 0. Get the metric position and the index in the chord of the previous note
 						Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);	
 						String metPosPrevious = 
-							ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+							ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
 //							ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 						int indexInChordPrevious = -1;
 						if (isTablatureCase) {
@@ -4457,7 +4457,7 @@ public class TestManager {
 											// Set metPosNext and indexInChordNext 
 											mt = getMetricTime(noteIndexNext, isTablatureCase);
 											metPosNext = 
-												ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+												ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
 //												ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
 											indexInChordNext = basicTabSymbolProperties[j][Tablature.NOTE_SEQ_NUM];
 											break;
@@ -4711,7 +4711,7 @@ public class TestManager {
 									// 0. Get the metric position and the index in the chord of the previous note
 									Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
 									String metPosPrevious = 
-										ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+										ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
 //										ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 									int indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM];  	  	
 	
@@ -4852,7 +4852,7 @@ public class TestManager {
 														// Set metPosNext and indexInChordNext 
 														mt = getMetricTime(noteIndexNext, isTablatureCase);
 														metPosNext = 
-															ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+															ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
 //															ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
 														indexInChordNext = basicTabSymbolProperties[j][Tablature.NOTE_SEQ_NUM];
 														break;
@@ -5020,7 +5020,7 @@ public class TestManager {
 							// 0. Get the metric position and the index in the chord of the previous note
 							Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
 							String metPosPrevious = 
-								ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(mt, meterInfo));
+								ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
 //								ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 							int indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM];  	
 							// 1. Add index to conflictIndices
@@ -5155,7 +5155,7 @@ public class TestManager {
 									int pitch = basicTabSymbolProperties[i][Tablature.PITCH];
 									Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],
 										Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
-									metPoss.add(ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(onset, meterInfo)));
+									metPoss.add(ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(onset, meterInfo)));
 									indicesInChord.add(basicTabSymbolProperties[i][Tablature.NOTE_SEQ_NUM]);
 									// If i != noteIndex, get the duration from allPredictedDurations
 									if (i != noteIndex) {  

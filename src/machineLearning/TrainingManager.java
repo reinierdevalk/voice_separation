@@ -146,7 +146,8 @@ public class TrainingManager {
 						
 					// Reversed
 					System.out.println("R E V E R S I N G");
-					Tablature currTabRev = Tablature.reverse(currTab);
+					Tablature currTabRev = currTab.reverse();
+//					Tablature currTabRev = Tablature.reverse(currTab);
 					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
 					System.out.println("undapted: " + currTranscr.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
@@ -163,7 +164,8 @@ public class TrainingManager {
 		
 					// Reversed and deornamented
 					System.out.println("R E V E R S E  + D E O R N A M E N T");
-					Tablature currTabRevDeorn = Tablature.reverse(currTabDeorn);
+					Tablature currTabRevDeorn = currTabDeorn.reverse();
+//					Tablature currTabRevDeorn = Tablature.reverse(currTabDeorn);
 					Transcription currTranscrRevDeorn = 
 						Transcription.reverse(currTranscrDeorn, currTabDeorn);
 
@@ -256,7 +258,7 @@ public class TrainingManager {
 			List<Integer> currChordSizes = 
 				isTablatureCase ? currTab.getNumberOfNotesPerChord() : currTransGT.getNumberOfNewNotesPerChord();
 			List<Integer[]> currMeterInfo = 
-				isTablatureCase ? currTab.getMeterInfo() : currTransGT.getMeterInfo();
+				isTablatureCase ? currTab.getTimeline().getMeterInfo() : currTransGT.getMeterInfo();
 			// Voice information is different for currTrans and currTransGT, and must be 
 			// taken from the former
 			List<List<Double>> currVoiceLabels = null;
@@ -742,7 +744,7 @@ public class TrainingManager {
 				List<Integer[]> currVoicesCoDNotesGT = null;
 				if (isTablatureCase) {
 					currBTP = currTab.getBasicTabSymbolProperties();
-					currMeterInfo = currTab.getMeterInfo();
+					currMeterInfo = currTab.getTimeline().getMeterInfo();
 					currChordSizes = currTab.getNumberOfNotesPerChord();
 					if (modelDuration) { 
 						currDurLabels = currTrans.getDurationLabels();

@@ -13,6 +13,7 @@ import de.uos.fmt.musitech.data.structure.container.NoteSequence;
 import de.uos.fmt.musitech.utility.math.Rational;
 import machineLearning.MelodyPredictor;
 import representations.Tablature;
+import representations.Timeline;
 import representations.Transcription;
 import tbp.RhythmSymbol;
 import tools.ToolBox;
@@ -147,7 +148,7 @@ public class FeatureGenerator {
 			// 6. The metric position of the note within the bar		  
 			Rational metricTime = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
 				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());	
-			Rational[] metricPosition = Tablature.getMetricPosition(metricTime, meterInfo);
+			Rational[] metricPosition = Timeline.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
 			// 7-24. The onset time proximity, the pitch proximity and course information for the next NUM_NEXT_CHORDS chords
@@ -182,7 +183,7 @@ public class FeatureGenerator {
 			// 3. The metric position of the note within the bar
 			Rational metricTime = new Rational(bnp[noteIndex][Transcription.ONSET_TIME_NUMER],
 				bnp[noteIndex][Transcription.ONSET_TIME_DENOM]);	
-			Rational[] metricPosition = Tablature.getMetricPosition(metricTime, meterInfo);
+			Rational[] metricPosition = Timeline.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR_NON_TAB] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
 			// 4-15. The onset time proximity and the pitch proximity information for the next NUM_NEXT_CHORDS chords

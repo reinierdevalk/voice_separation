@@ -1344,7 +1344,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  // Calculate actual 
 	  List<List<Double>> actual = new ArrayList<List<Double>>();
 	  Integer[][] btp = tablature.getBasicTabSymbolProperties();
-	  List<Integer[]> meterInfo = tablature.getMeterInfo();
+	  List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 	  int lowestNoteIndex = 0;
 	  for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
 		 	actual.add(FeatureGeneratorChord.getNoteSpecificFeaturesChord(btp, null, 
@@ -1473,7 +1473,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
-		List<Integer[]> meterInfo = tablature.getMeterInfo();
+		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 		int lowestNoteIndex = 0;
 		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getChordLevelFeaturesChord(btp, null,
@@ -1711,7 +1711,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
-		List<Integer[]> meterInfo = tablature.getMeterInfo(); 
+		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo(); 
 		actual.add(featureGeneratorChord.generateChordFeatureVector(btp, null, transcription, meterInfo, 4,
 			getVoiceAssignments().get(1)));
 		actual.add(featureGeneratorChord.generateChordFeatureVector(btp, null, transcription, meterInfo, 23,
@@ -1844,7 +1844,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
-		List<Integer[]> meterInfo = tablature.getMeterInfo(); 
+		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo(); 
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(btp, null, transcription, meterInfo, 4,
 			getVoiceAssignments().get(1)));
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(btp, null, transcription, meterInfo, 23,
