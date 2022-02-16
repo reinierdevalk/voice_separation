@@ -142,7 +142,7 @@ public class TrainingManager {
 			if (dc == DecisionContext.UNIDIR) {
 				currTabTransPair = new TablatureTranscriptionPair(currTab, currTranscr);
 				if (augment) {
-					System.out.println("augmenting " + currTab.getPieceName());
+					System.out.println("augmenting " + currTab.getPiecename());
 						
 					// Reversed
 					System.out.println("R E V E R S I N G");
@@ -712,7 +712,7 @@ public class TrainingManager {
 				
 				int indexInAll = dataset.getPieceNames().indexOf(currTrans.getPieceName());
 				if (verbose) System.out.println("i = " + i);
-				if (verbose) System.out.println("piece = " + currTab.getPieceName());
+				if (verbose) System.out.println("piece = " + currTab.getPiecename());
 				if (verbose) System.out.println("piece = " + currTrans.getPieceName());
 				if (verbose) System.out.println("size  = " + pieceSizes.get(pieceSizes.size()-1));
 				if (augment) { // TODO is indexInAll not simply i?

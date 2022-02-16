@@ -62,7 +62,7 @@ public class TablatureTranscriptionPair {
 	
 	public String getPieceName() {
 		if (tablature != null) {
-			return tablature.getPieceName();
+			return tablature.getPiecename();
 		}
 		else {
 			return transcription.getPieceName();
