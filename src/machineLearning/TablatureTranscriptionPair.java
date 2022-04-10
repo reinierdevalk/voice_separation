@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import imports.MIDIImport;
 import representations.Tablature;
 import representations.Transcription;
+import tbp.Encoding;
 
 public class TablatureTranscriptionPair {
 	Tablature tablature;
@@ -43,7 +45,7 @@ public class TablatureTranscriptionPair {
 	 * @param midiFilesFolder
 	 */
 	public TablatureTranscriptionPair(String pieceName, String tabEncodingsFolder, String midiFilesFolder) {
-		File encodingFile = new File(tabEncodingsFolder + pieceName + ".tbp");
+		File encodingFile = new File(tabEncodingsFolder + pieceName + Encoding.EXTENSION);
 		File midiFile = new File(midiFilesFolder + pieceName);
 		tablature = new Tablature(encodingFile, true);
 		transcription = new Transcription(midiFile, encodingFile);
@@ -81,12 +83,12 @@ public class TablatureTranscriptionPair {
 		List<TablatureTranscriptionPair> allPairs = new ArrayList<TablatureTranscriptionPair>();
 		for (String pieceName : pieceNames) {    
 			File encodingFile = null;
-			File midiFile = new File(midiFilesFolder + pieceName + ".mid");
+			File midiFile = new File(midiFilesFolder + pieceName + MIDIImport.EXTENSION);
 			Tablature tab = null;
 
 			// a. In the tablature case
 			if (isTablatureCase) {
-				encodingFile =	new File(tabEncodingsFolder + pieceName + ".tbp");
+				encodingFile =	new File(tabEncodingsFolder + pieceName + Encoding.EXTENSION);
 //				new File(ExperimentRunner.pathPrefix + ExperimentRunner.encodingsPath + pieceName + ".txt");				
 //				new File(ExperimentRunner.pathPrefix + ExperimentRunner.tabMidiPath + pieceName);
 

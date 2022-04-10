@@ -901,7 +901,7 @@ public class FeatureGeneratorChord {
 			pitchProxAndCourse = new double[11 * numNextChords];
 			chordSize = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
 			onsetTime = new Rational(btp[lowestNoteIndex][Tablature.ONSET_TIME], 
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+				Tablature.SRV_DEN);
 			chordSeqNum = btp[lowestNoteIndex][Tablature.CHORD_SEQ_NUM];
 			numChords = btp[btp.length - 1][Tablature.CHORD_SEQ_NUM] + 1;
 		}
@@ -929,7 +929,7 @@ public class FeatureGeneratorChord {
 					int arrayIndex = (i-1) * 11;  		  	
 					// Set inter-onset time proximity and increment arrayIndex
 					Rational currOnsetTime = new Rational(btp[currLowestNoteIndex][Tablature.ONSET_TIME], 
-						Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+						Tablature.SRV_DEN);
 					pitchProxAndCourse[arrayIndex] = 1.0 / ((currOnsetTime.toDouble() - onsetTime.toDouble()) + 1);
 					arrayIndex++;
 					// Set pitches and courses and increment arrayIndex
@@ -1633,7 +1633,7 @@ public class FeatureGeneratorChord {
 		  // 1. Minimum duration
 //		  sharedOnsetFeaturesChord.add(basicNoteFeaturesFirstOnset[MIN_DURATION]);
 		  double minDuration = 
-		  	(double) basicTabSymbolProperties[lowestNoteIndex][Tablature.MIN_DURATION] / Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom();
+		  	(double) basicTabSymbolProperties[lowestNoteIndex][Tablature.MIN_DURATION] / Tablature.SRV_DEN;
 		  sharedOnsetFeaturesChord.add((double) minDuration);		  
 		  // 2. Range
 		  sharedOnsetFeaturesChord.add(getRangeOfChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex));

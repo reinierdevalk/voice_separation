@@ -8,8 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import imports.MIDIImport;
 import representations.Tablature;
 import representations.Transcription;
+import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
@@ -184,16 +186,16 @@ public class Dataset implements Serializable {
 			Tablature currTablature = null;
 			Transcription currTranscription = null;
 			if (isTablatureCase) {
-				encodingFile = new File(argEncodingsPath + currPieceName + ".tbp");
+				encodingFile = new File(argEncodingsPath + currPieceName + Encoding.EXTENSION);
 				if (!deployTrainedUserModel) {
-					midiFile = new File(argTabMidiPath + currPieceName + ".mid");
+					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.EXTENSION);
 				}
 				currTablature = new Tablature(encodingFile, true);
 			}
 			else {
-				midiFile = new File(argMidiPath + currPieceName + ".mid");
+				midiFile = new File(argMidiPath + currPieceName + MIDIImport.EXTENSION);
 				if (isTabAsNonTab) {
-					midiFile = new File(argTabMidiPath + currPieceName + ".mid");
+					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.EXTENSION);
 				}
 			}
 			currTranscription = 

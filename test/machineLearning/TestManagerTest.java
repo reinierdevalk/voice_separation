@@ -141,8 +141,7 @@ public class TestManagerTest extends TestCase {
 		// a. For type (i) and (ii) conflicts 
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			Rational currentMetricTime = 
-				new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],	
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+				new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],	Tablature.SRV_DEN);
 			List<Integer> currentPredictedVoices = DataConverter.convertIntoListOfVoices(voiceLabels.get(i));
 			actual.add(TestManager.getMaximumDuration(currentMetricTime, nextMetricTimes.get(i), transcription, 
 				currentPredictedVoices));
@@ -150,8 +149,7 @@ public class TestManagerTest extends TestCase {
 		// b. For type (iv) conflicts
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			Rational currentMetricTime = 
-				new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],	
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+				new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],	Tablature.SRV_DEN);
 			List<Integer> currentPredictedVoices = DataConverter.convertIntoListOfVoices(voiceLabels.get(i));
 			actual.add(TestManager.getMaximumDuration(currentMetricTime, null, transcription, currentPredictedVoices));
 		}

@@ -146,7 +146,8 @@ public class TrainingManager {
 						
 					// Reversed
 					System.out.println("R E V E R S I N G");
-					Tablature currTabRev = currTab.reverse();
+					Tablature currTabRev = new Tablature(currTab); 
+					currTabRev.reverse(); // TODO check if this changes currTab too
 //					Tablature currTabRev = Tablature.reverse(currTab);
 					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
@@ -158,13 +159,17 @@ public class TrainingManager {
 						
 					// Deornamented
 					System.out.println("D E O R N A M E N T I N G");
-					Tablature currTabDeorn = Tablature.deornament(currTab, ornThresh);
+					Tablature currTabDeorn = new Tablature(currTab);
+					currTabDeorn.deornament(ornThresh); // TODO check if this changes currTab too
+//					Tablature currTabDeorn = Tablature.deornament(currTab, ornThresh);
 					Transcription currTranscrDeorn = 
 						Transcription.deornament(currTranscr, currTab, ornThresh);
 		
 					// Reversed and deornamented
 					System.out.println("R E V E R S E  + D E O R N A M E N T");
-					Tablature currTabRevDeorn = currTabDeorn.reverse();
+					Tablature currTabRevDeorn = new Tablature(currTabDeorn);
+					currTabRevDeorn.reverse(); // TODO check if this changes currTab too
+//					Tablature currTabRevDeorn = currTabDeorn.reverse();
 //					Tablature currTabRevDeorn = Tablature.reverse(currTabDeorn);
 					Transcription currTranscrRevDeorn = 
 						Transcription.reverse(currTranscrDeorn, currTabDeorn);

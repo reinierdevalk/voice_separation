@@ -15,6 +15,7 @@ import featureExtraction.FeatureGenerator.Direction;
 import junit.framework.TestCase;
 import representations.Tablature;
 import representations.Transcription;
+import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
@@ -54,7 +55,7 @@ public class FeatureGeneratorTest extends TestCase {
 	public void bla() { // TODO wat is dit? Test gen voice labels B model?
 		String pieceName = "Barbetta 1582 - Il nest plaisir";
 		File midiFile = new File(Runner.midiPath + "4vv/" + pieceName);
-		File encodingFile = new File(Runner.encodingsPath + "4vv/" + pieceName + ".tbp");
+		File encodingFile = new File(Runner.encodingsPath + "4vv/" + pieceName + Encoding.EXTENSION);
 		
 		Tablature tab = new Tablature(encodingFile, true); 
 		Transcription gtTrans = new Transcription(midiFile, encodingFile);

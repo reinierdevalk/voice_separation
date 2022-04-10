@@ -31,11 +31,12 @@ import de.uos.fmt.musitech.utility.math.Rational;
 import exports.MIDIExport;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
+import imports.MIDIImport;
 import machineLearning.NNManager.ActivationFunction;
 import python.PythonInterface;
 import representations.Tablature;
-import representations.Timeline;
 import representations.Transcription;
+import structure.Timeline;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.Configuration;
@@ -673,8 +674,8 @@ public class TestManager {
 //				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
-				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + ".mid");
-				Transcription t = new Transcription(new File(expPath + ".mid"), null);
+				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + MIDIImport.EXTENSION);
+				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION), null);
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
@@ -2571,7 +2572,7 @@ public class TestManager {
 			allVoiceLabels.set(noteIndex, DataConverter.convertIntoVoiceLabel(voice));
 			if (modelDuration) { 
 				int d = -1; // TODO figure out duration now that there is no network output
-				Rational dAsRat = new Rational(d, Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+				Rational dAsRat = new Rational(d, Tablature.SRV_DEN);
 				Rational[] dur = new Rational[]{dAsRat}; 
 				allPredictedDurations.add(dur);
 				allDurationLabels.set(noteIndex, 
@@ -4140,7 +4141,7 @@ public class TestManager {
 			if (isTablatureCase) { 
 				indexInChord = basicTabSymbolProperties[noteIndex][Tablature.NOTE_SEQ_NUM];
 				metricTime = new Rational(basicTabSymbolProperties[noteIndex][Tablature.ONSET_TIME], 
-					Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+					Tablature.SRV_DEN);
 				offsetTime = metricTime.add(predictedDuration);
 			}
 			// b. In the non-tablature case
@@ -4216,7 +4217,7 @@ public class TestManager {
 					Rational onsetNext = null; 
 					if (isTablatureCase) {
 						onsetNext = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],
-							Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+							Tablature.SRV_DEN);
 					}
 					else {
 						onsetNext = new Rational(basicNoteProperties[i][Transcription.ONSET_TIME_NUMER],
@@ -4351,7 +4352,7 @@ public class TestManager {
 								// Determine the maximum duration and the pitch of the note at noteIndexPrevious. Because this note 
 								// is followed by at least one note (the note at noteIndex), maxDurPrevious can never be null
 								Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME],	
-									Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+									Tablature.SRV_DEN);
 								Rational maxDurPrevious = 
 									getMaximumDuration(metricTimePrevious, metricTime, newTranscription, predictedVoicesPrevious);
 	
@@ -4382,7 +4383,7 @@ public class TestManager {
 
 								// 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 								int maxDurAsInt = 
-								  	maxDurPrevious.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDurPrevious.getDenom());
+								  	maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
 								predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 								allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 								predictedDurationPrevious = maxDurPrevious;
@@ -4444,7 +4445,7 @@ public class TestManager {
 									for (int j = 0; j < basicTabSymbolProperties.length; j++) { 
 										int p = basicTabSymbolProperties[j][Tablature.PITCH];
 										Rational met = new Rational(basicTabSymbolProperties[j][Tablature.ONSET_TIME], 
-											Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+											Tablature.SRV_DEN);
 										if (p == pitchNext && met.equals(metricTimeNext)) {
 											int noteIndexNext = j;
 											// Determine the bwd counterpart of noteIndexNext and set noteIndexBwdNext to it
@@ -4481,7 +4482,7 @@ public class TestManager {
 									
 									// 4. Redetermine predictedDurationLabel and offsetTime
 									Rational maxDur = metricTimeNext.sub(metricTime);
-									int maxDurAsInt = maxDur.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+									int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
 									predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 									predictedDuration = maxDur;
 									predictedDuration.reduce();
@@ -4744,7 +4745,7 @@ public class TestManager {
 											// is followed by at least one note (the note at noteIndex), maxDurPrevious can never be null
 											Rational metricTimePrevious = 
 												new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME],	
-												Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+												Tablature.SRV_DEN);
 											Rational maxDurPrevious = 
 												getMaximumDuration(metricTimePrevious, metricTime, newTranscription, predictedVoicesPrevious);
 		
@@ -4773,7 +4774,7 @@ public class TestManager {
 
 											// 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 											int maxDurAsInt = 
-												maxDurPrevious.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDurPrevious.getDenom());
+												maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
 											predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 											allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 											predictedDurationPrevious = maxDurPrevious;	
@@ -4839,7 +4840,7 @@ public class TestManager {
 													int p = basicTabSymbolProperties[j][Tablature.PITCH];
 													Rational met = 
 														new Rational(basicTabSymbolProperties[j][Tablature.ONSET_TIME], 
-														Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+														Tablature.SRV_DEN);
 													if (p == pitchNext && met.equals(metricTimeNext)) {
 														int noteIndexNext = j;
 														// Determine the bwd counterpart of noteIndexNext and set noteIndexBwdNext to it
@@ -4876,7 +4877,7 @@ public class TestManager {
 												
 												// 4. Redetermine predictedDurationLabel and offsetTime
 												Rational maxDur = metricTimeNext.sub(metricTime);
-												int maxDurAsInt = maxDur.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+												int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
 												predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 												predictedDuration = maxDur;
 												predictedDuration.reduce();
@@ -4907,7 +4908,7 @@ public class TestManager {
 										// 2. Remove the Note from the Transcription 
 										int pitchPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.PITCH];
 										Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME], 
-											Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+											Tablature.SRV_DEN);
 										newTranscription.removeNote(pitchPrevious, secondPredictedVoicePrevious, metricTimePrevious);      
 										// 3. Record conflict and add to conflictsRecord
 //										conflictsRecord = conflictsRecord.concat(getConflictText("(ii)", noteIndexBwd, metPos, indexInChord,
@@ -5082,7 +5083,7 @@ public class TestManager {
 									indicesOfExceeded.add(i + j);
 								}
 								onsetTimeNextChord = 
-									new Rational(btp[Tablature.ONSET_TIME], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+									new Rational(btp[Tablature.ONSET_TIME], Tablature.SRV_DEN);
 //								metPosNextChord = 
 //									ToolBox.getMetricPositionAsString(Tablature.getMetricPosition(onsetTimeNextChord, meterInfo));
 								break;
@@ -5111,7 +5112,7 @@ public class TestManager {
 						List<Integer> indicesOfExceeding = new ArrayList<Integer>();
 						for (int i : allIndices) {
 							Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME], 
-						    	Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+						    	Tablature.SRV_DEN);
 							Rational duration = null;
 							// If i != noteIndex, get the duration from allPredictedDurations 
 							if (i != noteIndex) {
@@ -5154,7 +5155,7 @@ public class TestManager {
 									// 0. Get the pitch and onset of the note; also add to Lists
 									int pitch = basicTabSymbolProperties[i][Tablature.PITCH];
 									Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],
-										Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+										Tablature.SRV_DEN);
 									metPoss.add(ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(onset, meterInfo)));
 									indicesInChord.add(basicTabSymbolProperties[i][Tablature.NOTE_SEQ_NUM]);
 									// If i != noteIndex, get the duration from allPredictedDurations
@@ -5202,7 +5203,7 @@ public class TestManager {
 										durationsAdapted.add(maxDur);
 	
 										// 2. Reset allDurationLabels, allPredictedDurations, and allNotes 
-										int maxDurAsInt = maxDur.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+										int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
 										List<Double> predictedDurationLabelAdapted = Transcription.createDurationLabel(maxDurAsInt);
 										allDurationLabels.set(i, predictedDurationLabelAdapted);
 										if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
@@ -5219,7 +5220,7 @@ public class TestManager {
 									if (i == noteIndex) {
 										// Adapt predictedDurationLabel and predictedDuration
 										Rational maxDur = onsetTimeNextChord.sub(onset);
-										int maxDurAsInt = maxDur.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+										int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
 										predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 										predictedDuration = maxDur;
 										predictedDuration.reduce();
@@ -5437,7 +5438,7 @@ public class TestManager {
 //      if (isTablatureCase) { 
 //      	indexInChord = basicTabSymbolProperties[noteIndex][Tablature.NOTE_SEQ_NUM];
 //      	metricTime = new Rational(basicTabSymbolProperties[noteIndex][Tablature.ONSET_TIME], 
-//    	  	Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//    	  	Tablature.SRV_DEN);
 //      }
 //      // b. In the non-tablature case
 //      else {
@@ -5535,7 +5536,7 @@ public class TestManager {
 //       		    // DIT NU
 ////       				List<Double> predictedDurationLabelPrevious = allDurationLabels.get(noteIndexPrevious);
 ////       				Rational predictedDurationPrevious = new Rational((predictedDurationLabelPrevious.indexOf(1.0) + 1),
-////       					Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+////       					Tablature.SRV_DEN);
 ////       				predictedDurationPrevious.reduce();
 //       				//
 //       				List<Double> predictedDurationLabelPrevious = allDurationLabels.get(noteIndexPrevious);
@@ -5553,7 +5554,7 @@ public class TestManager {
 //       		    // Determine the maximum duration and the pitch of the note at noteIndexPrevious. Because this note is 
 //       				// followed by at least one note (the note at noteIndex), maxDurPrevious can never be null
 //       				Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME],	
-//          	    Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//          	    Tablature.SRV_DEN);
 //       				Rational maxDurPrevious = 
 //       					getMaximumDuration(metricTimePrevious, metricTime, newTranscription, predictedVoicesPrevious);
 //       				
@@ -5609,7 +5610,7 @@ public class TestManager {
 //   	   	      // 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 ////   	   	      predictedDurationLabelPrevious = Transcription.createDurationLabel(minDurPrevious);
 //   	   	      int maxDurAsInt = 
-//   	   	      	maxDurPrevious.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDurPrevious.getDenom());
+//   	   	      	maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
 //   	   	      predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 //   	   	      allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 //   	   	      predictedDurationPrevious = maxDurPrevious;
@@ -5724,7 +5725,7 @@ public class TestManager {
 //             				// DIT NU
 ////             				List<Double> predictedDurationLabelPrevious = allDurationLabels.get(noteIndexPrevious);
 ////             				Rational predictedDurationPrevious = new Rational((predictedDurationLabelPrevious.indexOf(1.0) + 1),
-////             					Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+////             					Tablature.SRV_DEN);
 ////             				predictedDurationPrevious.reduce();
 //             				//
 //             				List<Double> predictedDurationLabelPrevious = allDurationLabels.get(noteIndexPrevious);
@@ -5740,14 +5741,14 @@ public class TestManager {
 //             		    // Determine the maximum duration and the pitch of the note at noteIndexPrevious. Because this note 
 //             				// is followed by at least one note (the note at noteIndex), maxDurPrevious can never be null
 //             				Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME],	
-//                	    Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//                	    Tablature.SRV_DEN);
 //             				Rational maxDurPrevious = 
 //             					getMaximumDuration(metricTimePrevious, metricTime, newTranscription, predictedVoicesPrevious);
 //             				
 //  //           				// 2. Reset the Note's duration in Transcription
 //  //         	  	    // Determine the maximum duration of the note at noteIndexPrevious
 //  //         				  Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME],	
-//  //          	     	  Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//  //          	     	  Tablature.SRV_DEN);
 //  //         				  List<Rational> metricTimesNext = getMaximumDuration(metricTimePrevious, newTranscription, 
 //  //         					  predictedVoicesPrevious);
 //  //         				  // Because the note at noteIndexPrevious is followed by at least one note (the note at noteIndex), 
@@ -5800,7 +5801,7 @@ public class TestManager {
 //         	   	      // 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 //  //       	   	      predictedDurationLabelPrevious = Transcription.createDurationLabel(minDurPrevious);
 //                		int maxDurAsInt = 
-//           	   	      maxDurPrevious.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDurPrevious.getDenom());
+//           	   	      maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
 //           	   	    predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 //           	   	    allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 //           	   	    predictedDurationPrevious = maxDurPrevious;	
@@ -5828,7 +5829,7 @@ public class TestManager {
 //           	  	  	// 2. Remove the Note from the Transcription 
 //           	  	  	int pitchPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.PITCH];
 //           	  	  	Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME], 
-//           	  	  		Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//           	  	  		Tablature.SRV_DEN);
 //            	  	  newTranscription.removeNote(pitchPrevious, secondPredictedVoicePrevious, metricTimePrevious);      
 //            	  	  // 3. Record conflict and add to conflictsRecord
 //  //          	  	  String conflictText = getConflictText("(ii)", noteIndexBwd, metPos, indexInChord, noteIndexPreviousBwd, 
@@ -6093,7 +6094,7 @@ public class TestManager {
 //                    	for (int j = 0; j < basicTabSymbolProperties.length; j++) { 
 //            	    			int p = basicTabSymbolProperties[j][Tablature.PITCH];
 //            	    			Rational mt = new Rational(basicTabSymbolProperties[j][Tablature.ONSET_TIME], 
-//           	  	    			Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//           	  	    			Tablature.SRV_DEN);
 //            	    			if (p == currentPitchNext && mt.equals(currentMetricTimeNext)) {
 //            	    				int noteIndexNext = j;
 //            	  	    		// Determine the bwd counterpart of noteIndex and add to noteIndicesBwdNext
@@ -6151,7 +6152,7 @@ public class TestManager {
 ////                	for (int j = 0; j < basicTabSymbolProperties.length; j++) { 
 ////        	    			int p = basicTabSymbolProperties[j][Tablature.PITCH];
 ////        	    			Rational mt = new Rational(basicTabSymbolProperties[j][Tablature.ONSET_TIME], 
-////       	  	    			Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+////       	  	    			Tablature.SRV_DEN);
 ////        	    			if (p == currentPitchNext && mt.equals(currentMetricTimeNext)) {
 ////        	    				int noteIndexNext = j;
 ////        	  	    		// Determine the bwd counterpart of noteIndex and add to noteIndicesBwdNext
@@ -6199,14 +6200,14 @@ public class TestManager {
 //     	   	      noteIndexBwd + " adapted; ");
 //         	    
 //         	  	// 4. Redetermine predictedDurationLabel
-//         	  	int maxDurAsInt = maxDur.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+//         	  	int maxDurAsInt = maxDur.getNumer() *	(Tablature.SRV_DEN / maxDur.getDenom());
 ////       	  		int maxDurAsInt = basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION];
 //       	  		predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 ////       	  		predictedDurationLabel = 
 ////       	  			Transcription.createDurationLabel(basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION]);
 //       	  		predictedDuration = maxDur;
 ////       	  		predictedDuration =
-////       	     		new Rational((predictedDurationLabel.indexOf(1.0) + 1),	Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+////       	     		new Rational((predictedDurationLabel.indexOf(1.0) + 1),	Tablature.SRV_DEN);
 //       	  		predictedDuration.reduce();
 //         	  	// Add new predicted duration to conflictsRecords
 ////           		conflictsRecord = conflictsRecord.concat("new predicted duration for note " + noteIndexBwd + ": " + 
@@ -6217,7 +6218,7 @@ public class TestManager {
 //           // 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 //// 	   	      predictedDurationLabelPrevious = Transcription.createDurationLabel(minDurPrevious);
 ////        		int maxDurAsInt = 
-////   	   	      maxDurPrevious.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDurPrevious.getDenom());
+////   	   	      maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
 ////   	   	    predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 ////     				predictedDurationPrevious = maxDurPrevious;	
 //// 	   	      predictedDurationPrevious.reduce();
@@ -6249,7 +6250,7 @@ public class TestManager {
 //      	    for (Integer[] btp : basicTabSymbolProperties) {
 //      	    	if (btp[Tablature.CHORD_SEQ_NUM] == chordIndex + 1) {
 //      	    		sizeNextChord = btp[Tablature.CHORD_SIZE_AS_NUM_ONSETS];
-//      	    		onsetTimeNextChord = new Rational(btp[Tablature.ONSET_TIME], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//      	    		onsetTimeNextChord = new Rational(btp[Tablature.ONSET_TIME], Tablature.SRV_DEN);
 //      	    		metPosNextChord = 
 //      	    			AuxiliaryTool.getMetricPositionAsString(Tablature.getMetricPosition(onsetTimeNextChord, meterInfo));
 //      	    		break;
@@ -6277,7 +6278,7 @@ public class TestManager {
 //   	  	    List<Integer> indicesOfExceeding = new ArrayList<Integer>();
 //   	  	    for (int i : allIndices) {
 //   	  	    	Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME], 
-//     	  	    	Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//     	  	    	Tablature.SRV_DEN);
 //   	  	    	Rational duration = null;
 //   	  	    	// If i != noteIndex, get the duration from allPredictedDurations 
 //   	  	    	if (i != noteIndex) {
@@ -6312,7 +6313,7 @@ public class TestManager {
 //     	  	      // 0. Get the pitch and onset of the note; also add to Lists
 //     	  	    	int pitch = basicTabSymbolProperties[i][Tablature.PITCH];
 //    	  	    	Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],
-//    	  	    		Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//    	  	    		Tablature.SRV_DEN);
 //    	  	    	metPoss.add(AuxiliaryTool.getMetricPositionAsString(Tablature.getMetricPosition(onset, meterInfo)));
 //    	  	    	indicesInChord.add(basicTabSymbolProperties[i][Tablature.NOTE_SEQ_NUM]);
 //    	  	      // If i != noteIndex, get the duration from allPredictedDurations
@@ -6354,7 +6355,7 @@ public class TestManager {
 //  	  	    			durationsAdapted.add(maxDur);
 //  	  	    			
 //  	  	    		  // 2. Reset allDurationLabels, allPredictedDurations, and allNotes 
-//     	  	    	  int maxDurAsInt =	maxDur.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+//     	  	    	  int maxDurAsInt =	maxDur.getNumer() *	(Tablature.SRV_DEN / maxDur.getDenom());
 //       	   	      List<Double> predictedDurationLabelAdapted = Transcription.createDurationLabel(maxDurAsInt);
 //       	   	      allDurationLabels.set(i, predictedDurationLabelAdapted);
 //         	  	  	allPredictedDurations.set(i, new Rational[]{maxDur});
@@ -6369,7 +6370,7 @@ public class TestManager {
 //	  	    			if (i == noteIndex) {
 //	  	    				// Adapt predictedDurationLabel and predictedDuration
 //	  	    				Rational maxDur = onsetTimeNextChord.sub(onset);
-//	  	    				int maxDurAsInt =	maxDur.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDur.getDenom());
+//	  	    				int maxDurAsInt =	maxDur.getNumer() *	(Tablature.SRV_DEN / maxDur.getDenom());
 //           	  		predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 //           	  		predictedDuration = maxDur;
 //           	  		predictedDuration.reduce();
@@ -6415,7 +6416,7 @@ public class TestManager {
 ////      					// determining last
 ////      					int pitch = basicTabSymbolProperties[noteIndex][Tablature.PITCH];
 ////                Rational metricDuration = new Rational(basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION], 
-////             	    Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());	
+////             	    Tablature.SRV_DEN);	
 ////     	  	    	Note currentNote = Transcription.createNote(pitch, metricTime, metricDuration);
 ////     	  	      // Find the last Note before metricTime in nv 
 ////     	  	    	Note last = featureGenerator.getPreviousNoteInVoice(nv, currentNote);
@@ -6430,7 +6431,7 @@ public class TestManager {
 ////       	  	    	for (int j = 0; j < basicTabSymbolProperties.length; j++) {
 ////       	  	    		int p = basicTabSymbolProperties[j][Tablature.PITCH];
 ////       	  	    		Rational mt = new Rational(basicTabSymbolProperties[j][Tablature.ONSET_TIME], 
-////       	  	    			Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+////       	  	    			Tablature.SRV_DEN); 
 ////       	  	    		if (p == pitchLast &&	mt.equals(metricTimeLast)) {
 ////       	  	    			noteIndexLast = j;
 ////       	  	    			// Add to noteIndicesLast, metPosLast, and indicesInChordLast
@@ -6463,7 +6464,7 @@ public class TestManager {
 ////       	   	              	  	    		
 ////       	  	    	// DIT NU
 //////       	  	    	Rational predictedDurationLast = new Rational(allDurationLabels.get(index).indexOf(1.0) + 1, 
-//////       	   	      	Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//////       	   	      	Tablature.SRV_DEN);
 //////       	  	    	System.out.println("KLERE");
 //////       	  	    	System.out.println(indexBwd);
 ////       	  	    	
@@ -6477,7 +6478,7 @@ public class TestManager {
 ////       	   	      
 ////       	   	      // 4. Reset allDurationLabels, allPredictedDurations, and allNotes 
 ////       	  	    	int maxDurLastAsInt = 
-////       	   	      	maxDurLast.getNumer() *	(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / maxDurLast.getDenom());
+////       	   	      	maxDurLast.getNumer() *	(Tablature.SRV_DEN / maxDurLast.getDenom());
 ////       	   	      List<Double> predictedDurationLabelLastAdapted = Transcription.createDurationLabel(maxDurLastAsInt);
 ////       	   	      allDurationLabels.set(noteIndexLast, predictedDurationLabelLastAdapted);
 ////         	  	  	allPredictedDurations.set(noteIndexLast, new Rational[]{predictedDurationLastAdapted});
@@ -8305,7 +8306,7 @@ public class TestManager {
 //allVoiceLabels.set(noteIndex, DataConverter.convertIntoVoiceLabel(voice));
 //if (modelDuration) { 
 //	int d = -1; // TODO figure out duration now that there is no network output
-//	Rational dAsRat = new Rational(d, Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+//	Rational dAsRat = new Rational(d, Tablature.SRV_DEN);
 //	Rational[] dur = new Rational[]{dAsRat}; 
 //	allPredictedDurations.add(dur);
 //	allDurationLabels.set(noteIndex, 

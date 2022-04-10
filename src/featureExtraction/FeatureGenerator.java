@@ -13,8 +13,8 @@ import de.uos.fmt.musitech.data.structure.container.NoteSequence;
 import de.uos.fmt.musitech.utility.math.Rational;
 import machineLearning.MelodyPredictor;
 import representations.Tablature;
-import representations.Timeline;
 import representations.Transcription;
+import structure.Timeline;
 import tbp.RhythmSymbol;
 import tools.ToolBox;
 import ui.Runner;
@@ -135,19 +135,19 @@ public class FeatureGenerator {
 			basicNoteFeatures[FRET] = btp[noteIndex][Tablature.FRET];
 			// 3. The minimum duration (in whole notes) of the note 
 			basicNoteFeatures[MIN_DURATION] = 
-				(double) btp[noteIndex][Tablature.MIN_DURATION] / Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom();
+				(double) btp[noteIndex][Tablature.MIN_DURATION] / Tablature.SRV_DEN;
 			// 4. The maximum duration (in whole notes) of the note
 			basicNoteFeatures[MAX_DURATION] = 
-				(double) btp[noteIndex][Tablature.MAX_DURATION] / Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom();
+				(double) btp[noteIndex][Tablature.MAX_DURATION] / Tablature.SRV_DEN;
 			// 5. Whether the note has ornamentation characteristics, yes or no
 			basicNoteFeatures[IS_ORNAMENTATION] = 0.0;
 			if (btp[noteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS] == 1 && 
-				btp[noteIndex][Tablature.MIN_DURATION] < RhythmSymbol.semiminim.getDuration()) {
+				btp[noteIndex][Tablature.MIN_DURATION] < RhythmSymbol.SEMIMINIM.getDuration()) {
 				basicNoteFeatures[IS_ORNAMENTATION]= 1.0;
 			}
 			// 6. The metric position of the note within the bar		  
 			Rational metricTime = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());	
+				Tablature.SRV_DEN);	
 			Rational[] metricPosition = Timeline.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
@@ -246,7 +246,7 @@ public class FeatureGenerator {
 			pitchCurrentNote = btp[noteIndex][Tablature.PITCH];
 			courseCurrentNote = btp[noteIndex][Tablature.COURSE];
 			onsetTimeCurrentNote = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
-				Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+				Tablature.SRV_DEN);
 			chordSeqNumCurrentNote = btp[noteIndex][Tablature.CHORD_SEQ_NUM];
 			numNotes = btp.length;
 			numChords = btp[numNotes - 1][Tablature.CHORD_SEQ_NUM] + 1;
@@ -291,7 +291,7 @@ public class FeatureGenerator {
 					for (int j = lowestNoteIndexNextChord; j <= highestNoteIndexNextChord; j++) {
 						List<Double> currentRepresentation = new ArrayList<Double>();
 						currentRepresentation.add((double) btp[j][Tablature.ONSET_TIME] / 
-							Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+							Tablature.SRV_DEN);
 						currentRepresentation.add((double) btp[j][Tablature.PITCH]);
 						currentRepresentation.add((double) btp[j][Tablature.COURSE]);
 						currentNextChord.add(currentRepresentation);
@@ -914,7 +914,7 @@ public class FeatureGenerator {
 				if (previousNote != null) {
 					int pitchPreviousNote = previousNote.getMidiPitch();
 					int onsetTimePreviousNote = 
-						previousNote.getMetricTime().mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
+						previousNote.getMetricTime().mul(Tablature.SRV_DEN).getNumer();
 
 					// 1. Search in btp for the TabSymbol with the same pitch and onset time as previousNote
 					// NB: In the case of a unison there are two such TabSymbols. In order not to overlook the lower one, stop 
@@ -1611,11 +1611,11 @@ public class FeatureGenerator {
 			if (direction == Direction.LEFT) {
 				// 1. Determine offsetOnsetTimeExcl
 				int gridXPreviousNote = 
-					onsetTimePreviousNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
+					onsetTimePreviousNote.mul(Tablature.SRV_DEN).getNumer();
 				Rational minDurPreviousNote = null;
 				for (Integer[] b : btp) {
 					if (b[Tablature.ONSET_TIME] == gridXPreviousNote) {
-						minDurPreviousNote = new Rational(b[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+						minDurPreviousNote = new Rational(b[Tablature.MIN_DURATION], Tablature.SRV_DEN); 
 						break;
 					}
 				}
@@ -1633,12 +1633,12 @@ public class FeatureGenerator {
 			else {
 				// 1. Determine offsetOnsetTimeExcl
 				int gridXCurrentNote = 
-					onsetTimeCurrentNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
+					onsetTimeCurrentNote.mul(Tablature.SRV_DEN).getNumer();
 				Rational minDurCurrentNote = null;
 				for (Integer[] b : btp) {
 					if (b[Tablature.ONSET_TIME] == gridXCurrentNote) {
 						minDurCurrentNote = 
-							new Rational(b[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+							new Rational(b[Tablature.MIN_DURATION], Tablature.SRV_DEN); 
 						break;
 					}
 				}
@@ -1754,7 +1754,7 @@ public class FeatureGenerator {
 //				if ((direction == Direction.LEFT && modelDuration) || direction == Direction.BOTH) {
 //				if (!modelBackward && modelDuration) {
 				Rational onsetTimeCurrentNote = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
-					Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+					Tablature.SRV_DEN);
 				List<Integer> indicesOfSustainedNotes = 
 					Transcription.getIndicesOfSustainedPreviousNotes(btp, 
 					durationLabels, bnp, noteIndex);
@@ -1766,7 +1766,7 @@ public class FeatureGenerator {
 					if (Collections.frequency(currentVoiceLabel, 1.0) > 1) {	
 						// Determine the onset time and offset time(s) of the CoDNotes
 						Rational onsetTimeCoDNote =	new Rational(btp[currentIndex][Tablature.ONSET_TIME],
-							Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+							Tablature.SRV_DEN);
 						List<Double> durationLabelCoDNote = durationLabels.get(currentIndex);
 						Rational[] durationsCoDNote = 
 							DataConverter.convertIntoDuration(durationLabelCoDNote);
@@ -3748,16 +3748,16 @@ public class FeatureGenerator {
 		  basicNoteFeatures[2] = basicTabSymbolProperties[noteIndex][Tablature.FRET];
 		  // 3. The minimum duration (in whole notes) of the note 
 		  basicNoteFeatures[3] = 
-		  	(double) basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION] / Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom();		  
+		  	(double) basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION] / Tablature.SRV_DEN;		  
 		  // 4. The maximum duration (in whole notes) of the note
 		  basicNoteFeatures[4] = 
-		  	(double) basicTabSymbolProperties[noteIndex][Tablature.MAX_DURATION] / Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom();
+		  	(double) basicTabSymbolProperties[noteIndex][Tablature.MAX_DURATION] / Tablature.SRV_DEN;
 		  // 5. The size of the chord containing the note
 		  basicNoteFeatures[5] = basicTabSymbolProperties[noteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
 		  // 6. Whether the note has ornamentation characteristics, yes or no
 		  basicNoteFeatures[6] = 0.0;
 		  if (basicTabSymbolProperties[noteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS] == 1 && 
-		    basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION] < RhythmSymbol.semiminim.getDuration()) {
+		    basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION] < RhythmSymbol.SEMIMINIM.getDuration()) {
 		    basicNoteFeatures[6]= 1.0;
 		  }
 		  // 7. Whether the note is produced by plucking an open course, yes or no
@@ -4190,14 +4190,14 @@ public class FeatureGenerator {
 				// NB: The 32nd is the smallest rhythmic value in the tablature case, so onsetTimePreviousNote will always
 				// be a multiple of 1/32. Multiplying it by 32 and then getting the numerator thus gives the gridX value 
  		  int gridXPositionPreviousNote = 
- 		  	onsetTimePreviousNote.mul(Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()).getNumer();
+ 		  	onsetTimePreviousNote.mul(Tablature.SRV_DEN).getNumer();
  		  // (ii) Find the tablature note with gridXPositionPreviousNote and determine the minimum duration
  		  // (as a Rational) of previousNote
  		  Rational minimumDurationPreviousNote = null;
  		  for (Integer[] btp : basicTabSymbolProperties) {
 	      	if (btp[Tablature.ONSET_TIME] == gridXPositionPreviousNote) {
 	      		minimumDurationPreviousNote = 
-	      			new Rational(btp[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+	      			new Rational(btp[Tablature.MIN_DURATION], Tablature.SRV_DEN); 
 	      		break;
 	  	   	}
 		    }
@@ -4818,7 +4818,7 @@ public class FeatureGenerator {
 	private double isOnGridOfEights(Integer[][] basicTabSymbolProperties, int noteIndex) {
 		
 		int onsetTime = basicTabSymbolProperties[noteIndex][Tablature.ONSET_TIME];
-		Rational metricTime = new Rational(onsetTime, Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom());
+		Rational metricTime = new Rational(onsetTime, Tablature.SRV_DEN);
 		
 		// 1. If the note is at the position of the second, fourth, sixth, or eighth 32nd note within a beat, 
 		// the numerator of metricTime will be odd (i.e., numerator modulo 2 != 0)

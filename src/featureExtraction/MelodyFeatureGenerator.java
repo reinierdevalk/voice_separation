@@ -138,12 +138,12 @@ public class MelodyFeatureGenerator {
 				// a. In the tablature case
 				if (basicTabSymbolProperties != null) {
 					int currentMetricTimeAsInt = 
-						currentMetricTime.getNumer() * (Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom() / currentMetricTime.getDenom());
+						currentMetricTime.getNumer() * (Tablature.SRV_DEN / currentMetricTime.getDenom());
 					// Find the minimum duration of the note that has currentMetricTimeAsInt and currentPitch as btp
 					for (Integer[] currentBtp : basicTabSymbolProperties) {
 						if (currentBtp[Tablature.ONSET_TIME] == currentMetricTimeAsInt &&	currentBtp[Tablature.PITCH] == currentPitch) {
 							Rational minDuration = 
-								new Rational(currentBtp[Tablature.MIN_DURATION], Tablature.SMALLEST_RHYTHMIC_VALUE.getDenom()); 
+								new Rational(currentBtp[Tablature.MIN_DURATION], Tablature.SRV_DEN); 
 							current.add(minDuration.toDouble());
 						}
 					}

@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import data.Dataset;
 import featureExtraction.MelodyFeatureGenerator;
 import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
+import imports.MIDIImport;
 import machineLearning.EvaluationManager;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.MelodyPredictor;
@@ -20,6 +21,7 @@ import machineLearning.NNManager;
 import machineLearning.NNManager.ActivationFunction;
 import paths.Paths;
 import representations.Transcription;
+import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
@@ -352,7 +354,7 @@ public class UI {
 			ds.setNumVoices(dsTrain.getNumVoices());
 			ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
 				ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
-				ds.isTablatureSet() ? ".tbp" : ".mid"));
+				ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION));
 		}
 
 		// 3. Set paths for storing and retrieving
