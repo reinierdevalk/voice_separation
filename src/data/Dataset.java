@@ -41,28 +41,28 @@ public class Dataset implements Serializable {
 	// - non-tablature datasets have neither in their name
 	// - if the number of voices <n> is known, the name must end with "-<n>vv"
 	// a. Tablature datasets
-	public static final String TAB_INT_3VV = "tab-int-3vv"; // TODO thesis-int
-	public static final String TAB_INT_4VV = "tab-int-4vv";
-	public static final String TAB_INT_5VV = "tab-int-5vv";
+	public static final String TAB_INT_3VV = "thesis-int-3vv"; // TODO thesis-int
+	public static final String TAB_INT_4VV = "thesis-int-4vv";
+	public static final String TAB_INT_5VV = "thesis-int-5vv";
 	public static final String JOSQUIN_INT_4VV = "josquin-int-4vv";	
 	public static final String BYRD_INT_4VV = "byrd-int-4vv";
-	public static final String TAB_INT_IMI_4VV = "tab-int-imi-4vv";
-	public static final String TAB_INT_IMI_SHORT_4VV = "tab-int-imi_short-4vv";
-	public static final String TAB_INT_SEMI_4VV = "tab-int-semi-4vv";
-	public static final String TAB_INT_FREE_4VV = "tab-int-free-4vv";
-	public static final String TAB_INT_FREE_MORE_4VV = "tab-int-free_more-4vv";
+	public static final String TAB_INT_IMI_4VV = "thesis-int-imi-4vv";
+	public static final String TAB_INT_IMI_SHORT_4VV = "thesis-int-imi_short-4vv";
+	public static final String TAB_INT_SEMI_4VV = "thesis-int-semi-4vv";
+	public static final String TAB_INT_FREE_4VV = "thesis-int-free-4vv";
+	public static final String TAB_INT_FREE_MORE_4VV = "thesis-int-free_more-4vv";
 	public static final String TEST_TAB = "test-tab";	
 	public static final String USER_TAB = "user-tab";
 	// b. Tab-as-non-tab datasets
-	public static final String TAB_INT_ANT_3VV = "tab-int_ANT-3vv";
-	public static final String TAB_INT_ANT_4VV = "tab-int_ANT-4vv";
-	public static final String TAB_INT_ANT_5VV = "tab-int_ANT-5vv";
+	public static final String TAB_INT_ANT_3VV = "thesis-int_ANT-3vv";
+	public static final String TAB_INT_ANT_4VV = "thesis";
+	public static final String TAB_INT_ANT_5VV = "thesis-int_ANT-5vv";
 	public static final String BYRD_INT_ANT_4VV = "byrd-int_ANT-4vv";
-	public static final String TAB_INT_IMI_ANT_4VV = "tab-int-imi_ANT-4vv";
-	public static final String TAB_INT_IMI_SHORT_ANT_4VV = "tab-int-imi_short_ANT-4vv";
-	public static final String TAB_INT_SEMI_ANT_4VV = "tab-int-semi_ANT-4vv";
-	public static final String TAB_INT_FREE_ANT_4VV = "tab-int-free_ANT-4vv";
-	public static final String TAB_INT_FREE_MORE_ANT_4VV = "tab-int-free_more_ANT-4vv";
+	public static final String TAB_INT_IMI_ANT_4VV = "thesis-int-imi_ANT-4vv";
+	public static final String TAB_INT_IMI_SHORT_ANT_4VV = "thesis-int-imi_short_ANT-4vv";
+	public static final String TAB_INT_SEMI_ANT_4VV = "thesis-int-semi_ANT-4vv";
+	public static final String TAB_INT_FREE_ANT_4VV = "thesis-int-free_ANT-4vv";
+	public static final String TAB_INT_FREE_MORE_ANT_4VV = "thesis-int-free_more_ANT-4vv";
 	// c. Non-tablature datasets
 	public static final String BACH_INV_2VV = "bach-inv-2vv";
 	public static final String BACH_INV_3VV = "bach-inv-3vv";
@@ -794,13 +794,13 @@ public class Dataset implements Serializable {
 	private static final String DATASET_ID = "dataset ID";
 	private static DatasetID[] ALL_DATASET_IDS = new DatasetID[50];
 	public enum DatasetID {
-		TAB_INT_3VV("tab-int-3vv", 0, true, false, getTabInt3vv()),
-		TAB_INT_4VV("tab-int-4vv", 1, true, false, getTabInt4vv()),  
-		TAB_INT_5VV("tab-int-5vv", 2, true, false, getTabInt5vv()), 
+		TAB_INT_3VV("thesis-int-3vv", 0, true, false, getTabInt3vv()),
+		TAB_INT_4VV("thesis-int-4vv", 1, true, false, getTabInt4vv()),  
+		TAB_INT_5VV("thesis-int-5vv", 2, true, false, getTabInt5vv()), 
 		
-		TAB_INT_ANT_3VV("tab-int_ANT-3vv", 3, false, true, getTabInt3vv()),
-		TAB_INT_ANT_4VV("tab-int_ANT-4vv", 4, false, true, getTabInt4vv()),
-		TAB_INT_ANT_5VV("tab-int_ANT-5vv", 5, false, true, getTabInt5vv()),
+		TAB_INT_ANT_3VV("thesis-int_ANT-3vv", 3, false, true, getTabInt3vv()),
+		TAB_INT_ANT_4VV("thesis-int_ANT-4vv", 4, false, true, getTabInt4vv()),
+		TAB_INT_ANT_5VV("thesis-int_ANT-5vv", 5, false, true, getTabInt5vv()),
 		
 		BACH_WTC_2VV("bach-WTC-2vv", 6, false, false, getBachWTC2vv()), 
 		BACH_WTC_3VV("bach-WTC-3vv", 7, false, false, getBachWTC3vv()), 
@@ -809,17 +809,17 @@ public class Dataset implements Serializable {
 		BACH_INV_2VV("bach-inv-2vv", 10, false, false, getBachInv2vv()), 
 		BACH_INV_3VV("bach-inv-3vv", 11, false, false, getBachInv3vv()),
 		
-		TAB_INT_IMI_4VV("tab-int-imi-4vv", 12, true, false, null), 
-		TAB_INT_IMI_SHORT_4VV("tab-int-imi_short-4vv", 13, true, false, null), 
-		TAB_INT_SEMI_4VV("tab-int-semi-4vv", 14, true, false, null), 
-		TAB_INT_FREE_4VV("tab-int-free-4vv", 15, true, false, null), 
-		TAB_INT_FREE_MORE_4VV("tab-int-free_more-4vv", 16, true, false, null), 
+		TAB_INT_IMI_4VV("thesis-int-imi-4vv", 12, true, false, null), 
+		TAB_INT_IMI_SHORT_4VV("thesis-int-imi_short-4vv", 13, true, false, null), 
+		TAB_INT_SEMI_4VV("thesis-int-semi-4vv", 14, true, false, null), 
+		TAB_INT_FREE_4VV("thesis-int-free-4vv", 15, true, false, null), 
+		TAB_INT_FREE_MORE_4VV("thesis-int-free_more-4vv", 16, true, false, null), 
 		
-		TAB_INT_IMI_ANT_4VV("tab-int-imi_ANT-4vv", 17, false, true, null), 
-		TAB_INT_IMI_SHORT_ANT_4VV("tab-int-imi_short_ANT-4vv", 18, false, true, null),
-		TAB_INT_SEMI_ANT_4VV("tab-int-semi_ANT-4vv", 19, false, true, null),
-		TAB_INT_FREE_ANT_4VV("tab-int-free_ANT-4vv", 20, false, true, null),
-		TAB_INT_FREE_MORE_ANT_4VV("tab-int-free_more_ANT-4vv", 21, false, true, null),
+		TAB_INT_IMI_ANT_4VV("thesis-int-imi_ANT-4vv", 17, false, true, null), 
+		TAB_INT_IMI_SHORT_ANT_4VV("thesis-int-imi_short_ANT-4vv", 18, false, true, null),
+		TAB_INT_SEMI_ANT_4VV("thesis-int-semi_ANT-4vv", 19, false, true, null),
+		TAB_INT_FREE_ANT_4VV("thesis-int-free_ANT-4vv", 20, false, true, null),
+		TAB_INT_FREE_MORE_ANT_4VV("thesis-int-free_more_ANT-4vv", 21, false, true, null),
 		
 		TAB_TEST("tab-test", 22, true, false, getTest()),
 		TEST("test", 23, false, false, getTest()),
