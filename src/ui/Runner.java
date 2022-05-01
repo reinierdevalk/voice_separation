@@ -16,7 +16,7 @@ import machineLearning.NNManager;
 import machineLearning.TestManager;
 import machineLearning.TrainingManager;
 import n_grams.KylmModel;
-import paths.Paths;
+import path.Path;
 import tools.ToolBox;
 
 public class Runner {
@@ -776,9 +776,9 @@ public class Runner {
 			scriptPythonPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
 			scriptMatlabPath = ToolBox.pathify(new String[]{codePath, "voice_separation/m/"});
 			//
-			String dataPath = ToolBox.pathify(new String[]{argRootDir, Paths.getDataDir()});
-			encodingsPath = ToolBox.pathify(new String[]{dataPath, Paths.getEncodingsPath()});
-			midiPath = ToolBox.pathify(new String[]{dataPath, Paths.getMIDIPath()});
+			String dataPath = ToolBox.pathify(new String[]{argRootDir, Path.getDataDir()});
+			encodingsPath = ToolBox.pathify(new String[]{dataPath, Path.getEncodingsPath()});
+			midiPath = ToolBox.pathify(new String[]{dataPath, Path.getMIDIPath()});
 			storedDatasetsPath = ToolBox.pathify(new String[]{dataPath, "datasets/"});
 			modelsPath = ToolBox.pathify(new String[]{dataPath, "models/"});
 			//
