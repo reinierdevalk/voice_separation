@@ -340,6 +340,16 @@ public class EvaluationManager {
 				ErrorCalculator.calculateAccuracy(assignmentErrors, isTablatureCase, true);
 		}
 		
+		
+//		System.out.println("allPredictedVoices:");
+//		System.out.println(allPredictedVoices);
+//		System.out.println("groundTruthVoiceLabels:");
+//		System.out.println(groundTruthVoiceLabels);
+//		System.out.println("equalDurationUnisonsInfo:");
+//		System.out.println(equalDurationUnisonsInfo);
+//		System.out.println("highestNumberOfVoices:");
+//		System.out.println(highestNumberOfVoices);
+		
 		// Added 28.01.2020 to print prc and rcl per voice for tablature (only in test/app mode)
 		List<ErrorFraction[]> prf = 
 			ErrorCalculator.calculatePrecisionRecallF1PerVoice(allPredictedVoices, 

@@ -9,7 +9,7 @@ train = 0
 test = 1
 appl = 2
 
-seed=-1 # seed=0 used for all experiments ISMIR 2018 paper 
+seed = 0 # seed=0 used for all experiments ISMIR 2018 paper 
 
 # When the script is used as a script (train and test mode)
 if len(argv) > 1:
@@ -31,13 +31,14 @@ if len(argv) > 1:
 	"""
 
 	print('as a script')
-
-	print('mdl', mdl)
-	print('arg_mode', arg_mode)
-	print('arg_store_path', arg_store_path)
-	print('arg_exts', arg_exts)
-	print('arg_params', arg_params)
-	print('arg_stored_weights', arg_stored_weights)
+	print('mdl:', mdl)
+	print('arg_mode:', arg_mode)
+	print('arg_store_path:', arg_store_path)
+	print('arg_path_trained_user_model:', arg_path_trained_user_model)
+	print('arg_exts:', arg_exts)
+	print('arg_user_model:', arg_user_model)
+	print('arg_params:', arg_params)
+	print('arg_stored_weights:', arg_stored_weights)
 	print()
 
 	nums_tst = []
@@ -60,11 +61,19 @@ if len(argv) > 1:
 		lbl_ext = exts[1] + 'app.csv'
 		out_ext = exts[2] + 'app.csv'
 
+#	use_stored_weights = False
+#	if arg_stored_weights.casefold() == 'true':
+#		use_stored_weights = True 
 	use_stored_weights = True if arg_stored_weights.casefold() == 'true' else False
 	user_model = True if arg_user_model.casefold() == 'true' else False
 
 	# fold_path is the path where the stored features and labels are retrieved from
 	fold_path = arg_store_path
+
+	print('fold_path:', fold_path)
+
+#	num_features = len(genfromtxt(fold_path + fv_ext, delimiter=',')[0])
+#	num_classes = len(genfromtxt(fold_path + lbl_ext, delimiter=',')[0])
 
 	# parameters and hyperparameters
 	params = [s.strip() for s in arg_params.split(',')]
@@ -76,7 +85,7 @@ if len(argv) > 1:
 		else:
 			param_dict[nameVal[0]] = int(nameVal[1])
 
-	num_HL 		= param_dict['hidden layers']
+	num_HL 		= param_dict['hidden layers'] #int(float(arg_param))
 	IL_size 	= param_dict['input layer size']
 	HL_size 	= param_dict['hidden layer size']
 	OL_size 	= param_dict['output layer size']
@@ -85,10 +94,22 @@ if len(argv) > 1:
 	epochs 		= param_dict['epochs'] # one epoch is one fwd-bwd propagation
 	seed 		= param_dict['seed']
 	val_perc	= param_dict['validation percentage']
+#	user_model	= param_dict['user model']
 	
+#	user_model	= True if param_dict['user model'] == 1 else False
+
+	print('param_dict:')
+	for item in param_dict.items():
+		print(item)
+	print()
+
+#	num_nodes_HL = [num_features, num_features, num_features, num_features]                                  
+#	layer_sizes = [num_features]
 	layer_sizes = [IL_size]
 	for i in range(num_HL):
+#		layer_sizes.append(num_nodes_HL[i])
 		layer_sizes.append(HL_size)
+#	layer_sizes.append(num_classes)
 	layer_sizes.append(OL_size)
 
 # When the script is used as a module (application mode)
@@ -113,10 +134,14 @@ if mode == train:
 		y_val = genfromtxt(fold_path + exts[1] + 'vld.csv', delimiter=',')
 	batch_size = len(x_train)  
 elif mode == test:
-	x_test  = genfromtxt(fold_path + fv_ext, delimiter=',')
+	x_test = genfromtxt(fold_path + fv_ext, delimiter=',')
 	if not user_model:
-		y_test  = genfromtxt(fold_path + lbl_ext, delimiter=',') # currently not used in Python code
+		y_test = genfromtxt(fold_path + lbl_ext, delimiter=',') # currently not used in Python code
 	use_stored_weights = True
+#elif mode == appl:
+#	x_appl  = genfromtxt(fold_path + fv_ext, delimiter=',')
+#	y_appl  = genfromtxt(fold_path + lbl_ext, delimiter=',')
+#	use_stored_weights = True
 
 if mode == train or mode == test:
 	x = tf.placeholder('float', [None, IL_size])
@@ -136,8 +161,7 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, weights_path):
 			 					use_stored_weights == False or True, respectively)
 	"""
 
-	print('create_neural_network() called in mode', mode)
-	
+	print('==========>> create_neural_network() called in mode', mode)
 
 	# hidden and output layers
 	num_layers = len(layer_sizes) - 1
@@ -149,7 +173,7 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, weights_path):
 	# Initialise the weights
 	# (a) Create new weights and biases
 	if not use_stored_weights:
-		print('use_stored_weights =', use_stored_weights)
+		print('initialise weights randomly')
 		for i in range(num_layers):            
 			# layer l has dimensions (|l-1|, |l|) for weights and (|l|) for biases
 			w_name = 'W' + str(i+1)
@@ -170,7 +194,7 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, weights_path):
 
 	# (b) Restore existing weights and biases
 	else:
-		print('use_stored_weights = ', use_stored_weights)
+		print('initialise existing weights')
 		for i in range(num_layers):
 			# prepare variable
 			w_name = 'W' + str(i+1)
@@ -193,7 +217,7 @@ def create_neural_network(layer_sizes, use_stored_weights, mode, weights_path):
 		# END OF SESSION
 
 	wb = {'weights': weights, 'biases': biases}
-	
+	print()
 	return wb
 # fed
 
@@ -213,6 +237,9 @@ def evaluate_neural_network(data, keep_prob, num_layers, weights, biases):
 
 #	print(sess.run(weights['W1']))
 #	print(sess.run(biases['b1']))
+
+	print('==========>> evaluate_neural_network() called in mode', mode)
+	print()
 
 	# calculate linear and relu outputs for the hidden layers
 	a_prev = data
@@ -240,7 +267,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 		keep_prob				the dropout keep probability placeholder
 		lrn_rate 				the learning rate
 		kp 						the dropout keep probability value
-		epoch 					the number of epochs to train for
+		epochs 					the number of epochs to train for
 		layer_sizes				the sizes of the input, hidden, and output layers
 		use_stored_weights		whether or not to initialise the network with stored weights
 		mode 					the evaluation mode: train, test, or application
@@ -251,7 +278,10 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 		*args 					the weights and biases dictionary (only when mode is application)
 	"""
 
-	print('run_neural_network() called in mode', mode)
+	print('==========>> run_neural_network() called in mode', mode)
+
+	byrd = False
+
 #	prediction = create_neural_network(x, layer_sizes, use_stored_weights, mode) # train and test
 
 	# train, test, application
@@ -260,92 +290,200 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 		weights_biases = create_neural_network(layer_sizes, use_stored_weights, mode, fold_path)
 	elif mode == appl:
 		weights_biases = args[0]
+#	print('initial weights:')
+#	print('W1', sess.run(weights_biases['weights']['W1'][0]))
 
+	# prediction(_val), softm(_val), and pred_class(_val) are Tensors
 	prediction = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, weights_biases['weights'], weights_biases['biases'])
+#	print('initial prediction train:')
+#	print(sess.run(prediction, feed_dict={x: x_train, keep_prob: 1.0}))
+	softm = tf.nn.softmax(prediction) # used for softmaxes_trn, softmaxes_tst, and softmaxes_app
+	pred_class = tf.argmax(softm)     # used for softmaxes_trn, softmaxes_tst, and softmaxes_app
 
-	softm = tf.nn.softmax(prediction)
-	pred_class = tf.argmax(softm)
-
-	# train and test
 	if mode == train or mode == test:
+		# cost and optimizer must be declared here because of global variable initialisation (see below)
 		if mode == train:
+			# cost is a Tensor; optimizer is an Operation
 			cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
 			optimizer = tf.train.AdamOptimizer(learning_rate=lrn_rate).minimize(cost)
 		
+		# correct and accuracy are Tensors
+		# mode == train: accuracy used for val data
+		# mode == test: accuracy used for test data 
 		correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
 		accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
 		# initialise all global variables that have not been initialised yet (e.g., variables for Adam)
+#		with tf.Session() as sess:
+#		sess.run(tf.global_variables_initializer())
 		# see Salvador Dali's answer at 
 		# https://stackoverflow.com/questions/35164529/in-tensorflow-is-there-any-way-to-just-initialize-uninitialised-variables
 		global_vars = tf.global_variables()
 		is_not_initialized = sess.run([tf.is_variable_initialized(var) for var in global_vars])
 		not_initialized_vars = [v for (v, f) in zip(global_vars, is_not_initialized) if not f]
+		print('uninitialised variables:', [str(i.name) for i in not_initialized_vars])
 		if len(not_initialized_vars):
 			sess.run(tf.variables_initializer(not_initialized_vars))
 		print('uninitialised variables:', sess.run(tf.report_uninitialized_variables()))
 
-	# train
 	if mode == train:
+		# prediction_val, softm_val, and pred_class_val are only used for calculating softmaxes_val
+		# they are not used in ISMIR 2018
+		prediction_val = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, weights_biases['weights'], weights_biases['biases'])
+		softm_val = tf.nn.softmax(prediction_val)
+		pred_class_val = tf.argmax(softm_val)
+
+		# To calculate trn acc; not used in ISMIR 2018
+		# Added 17.05.2022
+		if byrd:
+			prediction_trn = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, weights_biases['weights'], weights_biases['biases'])
+			correct_trn = tf.equal(tf.argmax(prediction_trn, 1), tf.argmax(y, 1))
+			accuracy_trn = tf.reduce_mean(tf.cast(correct_trn, 'float'))
+
 		costs = []
 		accs_tr = []
 		accs_val = []
 		best_acc = 0.0
+#		print('weights should still be the same:')
+#		print('W1', sess.run(weights_biases['weights']['W1'][0]))
+#		print('prediction train should still be the same:')
+#		print(sess.run(prediction, feed_dict={x: x_train, keep_prob: 1.0}))
 		for epoch in range(epochs):
 			epoch_loss = 0
 			for _ in range(int(len(x_train)/batch_size)):
-				_, c = sess.run([optimizer, cost], feed_dict = {x: x_train, y: y_train, keep_prob: kp})
+#				new_sets = make_validation_set(x_train, y_train, 20)
+#				x_train_new = new_sets['x-tr-new']
+#				y_train_new = new_sets['y-tr-new']
+#				x_val = new_sets['x-val']
+#				y_val = new_sets['y-val']
+				# epoch_x and epoch_y are numpy.ndarray
+				epoch_x, epoch_y = x_train, y_train 
+#				epoch_x, epoch_y = x_train_new, y_train_new
+				_, c = sess.run([optimizer, cost], feed_dict = {x: epoch_x, y: epoch_y, keep_prob: kp}) # JEO
 				epoch_loss += c
 
+#			print('epoch', epoch)
+#			print('prediction train should be different now because the weights have been updated:')
+#			print(sess.run(prediction, feed_dict={x: x_train, keep_prob: 1.0}))
+#			print('weights should be different now because they have been updated:')
+#			print('W1', sess.run(weights_biases['weights']['W1'][0]))
 			if epoch % 10 == 0:
-				acc_tr = accuracy.eval({x:x_train, y:y_train, keep_prob: kp})
+#				print('epoch', epoch)
+#				print('epoch', epoch, 'completed out of', epochs, '; loss =', epoch_loss)
+				if byrd: 
+					acc_tr = accuracy_trn.eval({x: x_train, y: y_train, keep_prob: kp}) ## HIERO
+#					acc_tr = accuracy.eval({x: x_train, y: y_train, keep_prob: kp}) ## HIERO
+					accs_tr.append(acc_tr) ## HIERO
+					print('acc_trn', acc_tr)
 				if val_perc != 0:
-					acc_val = accuracy.eval({x:x_val, y:y_val, keep_prob: 1.0})
+					acc_val = accuracy.eval({x: x_val, y: y_val, keep_prob: 1.0})
+					accs_val.append(acc_val) ## HIERO
+					print('epoch: ', epoch, 'acc_val:', acc_val)
+
 #				corrrr = correct.eval({x:x_val, y:y_val, keep_prob: 1.0});
 				
 				costs.append(epoch_loss)
-				accs_tr.append(acc_tr)
-				if val_perc != 0:
-					accs_val.append(acc_val)
+#				if byrd:
+#					accs_tr.append(acc_tr) ## HIERO
+#				if val_perc != 0:
+#					accs_val.append(acc_val) ## HIERO
 
+#				dothis = False
+#				if dothis:
+#					softmaxes_val = sess.run([softm, pred_class], feed_dict={x: x_val, keep_prob: 1.0})[0] # JEO
+#					incorr = 0
+#					for i in range(len(softmaxes_val)):
+#						curr_sm = softmaxes_val[i]
+#						curr_lbl = y_val[i]
+#						if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#						print(i)
+#						print(curr_sm)
+#						print('pred class = ' + str(np.argmax(curr_sm)))
+#						print(curr_lbl)
+#						print('corr class = ' + str(np.argmax(curr_lbl)))
+#							incorr += 1
+#
+#					print('incorr: ', incorr)
+#					num_ex = len(x_val)
+#					acc_val = (num_ex-incorr)/num_ex
+#
+#					print('volgens mij, acc val = ' + str((num_ex - incorr)/num_ex)) #, 'volgens tf, acc tr =' + str(acc_tr))
+				
 				saver = tf.train.Saver()
 				if not user_model:
 					if acc_val > best_acc:
+#						print('best acc val is now', acc_val, '(epoch =', epoch, ')')#), 'best acc trn is now', acc_tr)
 						best_acc = acc_val
 						save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
+
 						# save the model output
 						# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
-						softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
+						softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0] # JEO xx
 						np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=',')
 
-						for i in range(10):
-							print(softmaxes_trn[i])
+#						for i in range(10):
+#							print(softmaxes_trn[i])
+#						print("-------------------------------")
 
-						# HERE! if I add this, softmaxes_trn changes. why?
-						# https://datascience-enthusiast.com/DL/Tensorflow_Tutorial.html
-						softmaxes_val = sess.run([softm, pred_class], feed_dict={x: x_val, keep_prob: 1.0})[0]
-						np.savetxt(fold_path + 'out-val.csv', softmaxes_val, delimiter=',')
-						np.savetxt(fold_path + 'acc-val.csv', [acc_val], delimiter=',')
-						print("-------------------------------")
-						for i in range(10):
-							print(softmaxes_trn[i])
+						# if I add this, softmaxes_trn changes (above and below). why?
+						# https://datascience-enthusiast.com/DL/Tensorflow_Tutorial.html 
+						softmaxes_val = sess.run([softm_val, pred_class_val], feed_dict={x: x_val, keep_prob: 1.0})[0]
+						np.savetxt(fold_path + 'out-vld.csv', softmaxes_val, delimiter=',')
+						if epoch == 0 or epoch == 10 or epoch == 20:
+							print('MANUAL CHECK')
+							incorr = 0
+							for i in range(len(softmaxes_val)):
+								curr_sm = softmaxes_val[i]
+								curr_lbl = y_val[i]
+								if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#									print(i, curr_sm, curr_lbl)
+									incorr += 1
+							print('incorr:', incorr)
+							num_ex = len(x_val)
+							print(' num ex', num_ex)
+							acc_manual = (num_ex - incorr)/num_ex
+							print('acc_manual', acc_manual)
+							np.savetxt(fold_path + 'out-vld-epoch_' + str(epoch) + '.csv', softmaxes_val, delimiter=',')
+#						np.savetxt(fold_path + 'acc-vld.csv', [acc_val], delimiter=',')
+
+#						for i in range(10):
+#							print(softmaxes_trn[i])
+#						print("-------------------------------")
 
 #						np.savetxt(fold_path + 'best_epoch.txt', 'highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch), delimiter="", fmt="%s")
 						with open(fold_path + 'best_epoch.txt', 'w') as text_file:
 							text_file.write('highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch))
+						np.savetxt(fold_path + 'best_epoch.csv', [[int(epoch), acc_val]], delimiter=',')
 
 		# Added 06.12.2021 for Byrd presentation
 		if user_model:
 			save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
 			# Save the model output
 			# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
-			softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
+			softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0] # JEO
 			np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=',')
 
-		print('accs_tr')
-		print(accs_tr)
-		print('accs_val')
-		print(accs_val)
+#		print('accs_tr')
+#		print(accs_tr)
+#		print('accs_val')
+#		print(accs_val)
+
+		# save the weights
+#		saver = tf.train.Saver()    
+#		save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
+
+#		# save the model output
+#		# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
+#		softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train_new, keep_prob: kp})[0]
+#		np.savetxt(fold_path + 'out_trn.csv', softmaxes_trn, delimiter=",")
+
+		# plot the cost
+#		print('accuracy train:', accuracy.eval({x:x_train, y:y_train, keep_prob: kp}))
+#		plt.plot(np.squeeze(costs))
+#		plt.ylabel('cost')
+#		plt.xlabel('epochs (/10)')
+#		plt.title('learning rate =' + str(lrn_rate))
+#		plt.show()
 
 		# plot the tr and val accuracy
 		plotOrNot = True
@@ -364,7 +502,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 
 	# test
 	if mode == test:
-		softmaxes_tst = sess.run([softm, pred_class], feed_dict={x: x_test, keep_prob: 1.0})[0]
+		softmaxes_tst = sess.run([softm, pred_class], feed_dict={x: x_test, keep_prob: 1.0})[0] # JEO NO
 		np.savetxt(fold_path + out_ext, softmaxes_tst, delimiter=',')
  
 		dothis = False
@@ -400,7 +538,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 #		x_appl = np.array(list_from_string)
 		# reshape necessary to get required shape (1, 33)
 		x_appl = x_appl.reshape(1, -1)
-		softmaxes_app = sess.run([softm, pred_class], feed_dict={x: x_appl, keep_prob: 1.0})[0]
+		softmaxes_app = sess.run([softm, pred_class], feed_dict={x: x_appl, keep_prob: 1.0})[0] # JEO NO
 		np.savetxt(fold_path + out_ext, softmaxes_app, delimiter=',')
 
 #	this is very slow: https://stackoverflow.com/questions/49041001/why-is-this-tensorflow-code-so-slow 
@@ -420,7 +558,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 
 def make_validation_set(x_tr, y_tr, perc):
 	"""
-	Takes every nth exmaple from the training set and puts it into a validation set. n is determined by the given 
+	Takes every nth example from the training set and puts it into a validation set. n is determined by the given 
 	percentage: n = 100/perc  
 
 	Arguments:
@@ -452,11 +590,12 @@ def make_validation_set(x_tr, y_tr, perc):
 # https://stackoverflow.com/questions/44660572/function-scopes-with-tensorflow-sessions
 sess = tf.InteractiveSession() 
 
-# Set seed to ensure deterministic dropout;
+# Set seed to ensure deterministic dropout
 # see https://stackoverflow.com/questions/49175704/tensorflow-reproducing-results-when-using-dropout
 tf.set_random_seed(seed)
 
 if mode == train or mode == test:
+	print('==========>> start')
 	run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, fold_path)
 #elif mode == appl:
 #	weights_biases = create_neural_network(layer_sizes, use_stored_weights, mode, fold_path)

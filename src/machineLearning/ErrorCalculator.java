@@ -599,6 +599,10 @@ public class ErrorCalculator {
 
 		Rational numF1 = (prc.toRational()).mul(rcl.toRational()).mul(2);
 		Rational denF1 = prc.toRational().add(rcl.toRational());
+//		System.out.println(prc);
+//		System.out.println(rcl);
+//		System.out.println(numF1);
+//		System.out.println(denF1);
 		Rational f1AsRational = numF1.div(denF1);
 		ErrorFraction f1 = new ErrorFraction(f1AsRational.getNumer(), f1AsRational.getDenom());
 

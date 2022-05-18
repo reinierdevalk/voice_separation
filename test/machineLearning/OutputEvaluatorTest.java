@@ -133,7 +133,7 @@ public class OutputEvaluatorTest extends TestCase {
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
 			getTestOutputs(), null));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(Dataset.TAB_INT_4VV)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(Dataset.THESIS_INT_4VV)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
 			getTestOutputs(), null));
 		// C2C
@@ -144,7 +144,7 @@ public class OutputEvaluatorTest extends TestCase {
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsNoCoD));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(Dataset.TAB_INT_4VV)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(Dataset.THESIS_INT_4VV)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
 			testMappingsCoD));
 

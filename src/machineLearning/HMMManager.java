@@ -30,7 +30,7 @@ public class HMMManager {
 		// a. Choose dataset
 //		DatasetID id = DatasetID.TAB_INT_3VV;
 //		String id = DatasetID.INT_3vv; 
-		String id = Dataset.TAB_INT_4VV; 
+		String id = Dataset.THESIS_INT_4VV; 
 //		String id = DatasetID.WTC_3VV;
 //		String id = DatasetID.WTC_4VV;
 		Dataset ds = new Dataset(id);

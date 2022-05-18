@@ -258,12 +258,12 @@ public class TrainingManager {
 			Transcription currTransGT = 
 				dc == DecisionContext.BIDIR ? currTabTransPair.getSecondTranscription() : null;
 			// Non-voice information is the same for currTrans and currTransGT, and can be
-			// taken from the latter
-			Integer[][] currBNP = isTablatureCase ? null : currTransGT.getBasicNoteProperties();;	
+			// taken from both
+			Integer[][] currBNP = isTablatureCase ? null : currTrans.getBasicNoteProperties(); // was currTransGT.getBasicNoteProperties() 06.05	
 			List<Integer> currChordSizes = 
-				isTablatureCase ? currTab.getNumberOfNotesPerChord() : currTransGT.getNumberOfNewNotesPerChord();
+				isTablatureCase ? currTab.getNumberOfNotesPerChord() : currTrans.getNumberOfNewNotesPerChord(); // was currTransGT.getNumberOfNewNotesPerChord() 06.05	
 			List<Integer[]> currMeterInfo = 
-				isTablatureCase ? currTab.getTimeline().getMeterInfo() : currTransGT.getMeterInfo();
+				isTablatureCase ? currTab.getTimeline().getMeterInfo() : currTrans.getMeterInfo(); // was currTransGT.getMeterInfo() 06.05	
 			// Voice information is different for currTrans and currTransGT, and must be 
 			// taken from the former
 			List<List<Double>> currVoiceLabels = null;

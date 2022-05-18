@@ -90,11 +90,11 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.BYRD_INT_4VV;
-			m = Model.D_B;
+			datasetID = Dataset.BACH_WTC_5VV;
+			m = Model.D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
-			expDir = "byrd/"; // publication + experiment (if applicable)
+			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
 			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
 			//
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
@@ -102,7 +102,7 @@ public class UI {
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
 //			config = Configuration.FOUR; // cnf 4; "4-data_TPM-data_ISM/"; // WAS "4. Output (with prior probability matrix)"
 			//
-			hyperparams = "";
+			hyperparams = "HL=2/HLS=66/KP=0.875-no_heur/";
 //			hyperparams = "cnf=" + config.getStringRep(); // "HLS=" + hiddenLayerSize; "KP=" + keepProbability;
 //			hyperparams = "HLF=1.0/lmb=0.001/";
 //			hyperparams = "eps=0.05/";
@@ -127,14 +127,14 @@ public class UI {
 			// Hyperparameters
 			// a. Tuned hyperparameters
 			// Shallow network
-			lambda = 0.00001; // regularisation parameter  
+			lambda = 0.001; // regularisation parameter  
 			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;
-			hiddenLayers = 1;
+			hiddenLayers = 2;
 			hiddenLayerSize = 66;
-			double alpha = 0.003; // learning rate (1.0 in shallow network case)
+			double alpha = 0.01; // learning rate (1.0 in shallow network case)
 			// MM
 			n = 2;
 			// ENS
@@ -155,8 +155,8 @@ public class UI {
 			epochs = 600;
 			// General
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
-			deviationThreshold = 0.0; // 0.05;
-			validationPercentage = (m.getModelType() == ModelType.DNN) ? 10 : 0; // 20 : 0;
+			deviationThreshold = 0.05; // 0.05;
+			validationPercentage = (m.getModelType() == ModelType.DNN) ? 20 : 0; // 10 : 0;
 			if (trainUserModel) {
 				validationPercentage = 0;
 			}
@@ -489,12 +489,11 @@ public class UI {
 			// Reset necessary settings
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(false));
 			modelParams.put(Runner.WEIGHTS_INIT, (double) WeightsInit.INIT_FROM_LIST.getIntRep());
-			
-			for (Entry<String, Double> e : modelParams.entrySet()) {
-//				System.out.println("key  : " + e.getKey());
-//				System.out.println("value: " + e.getValue());
-			}
 		}
+		
+//		for (Entry<String, Double> e : modelParams.entrySet()) {
+//			System.out.println(e.getKey() + ": " + e.getValue());
+//		}
 
 		// 5. Set metrics
 		List<Metric> metricsUsed = new ArrayList<Metric>();

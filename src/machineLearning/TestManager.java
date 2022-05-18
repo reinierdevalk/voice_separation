@@ -616,7 +616,7 @@ public class TestManager {
 					!deployTrainedUserModel ? groundTruthTranscription.getPiece().getHarmonyTrack() :
 					new SortedContainer<Marker>();
 
-				Transcription predictedTranscr = hier
+				Transcription predictedTranscr = // hier
 					new Transcription(testPieceName,	
 //					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
 					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 
@@ -676,7 +676,7 @@ public class TestManager {
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + MIDIImport.EXTENSION);
 				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION), null);
-				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
+				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfo();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
 //					MEIExport.exportMEIFile(
@@ -2386,6 +2386,7 @@ public class TestManager {
 			currentNetworkOutput = networkManager.evalNetwork(currentNoteFeatureVector);
 		}
 		else if (mt == ModelType.DNN || mt == ModelType.OTHER){
+//jo			System.out.println("noteIndex = " + noteIndex );
 			if (noteIndex % 50 == 0) {
 				System.out.println("processing note " + noteIndex);
 			}
@@ -2401,6 +2402,7 @@ public class TestManager {
 
 			boolean storeFiles = true;
 			if (storeFiles) {
+//jo				System.out.println("hier 1");
 				// Add feature vector to data
 				List<List<List<Double>>> data = new ArrayList<List<List<Double>>>();
 				List<List<Double>> fvWrapped = new ArrayList<List<Double>>();
@@ -2433,15 +2435,16 @@ public class TestManager {
 				// - the weights are stored at or retrieved from
 				// - the outputs and additional information (.txt files, figures) are stored at
 				// - the stored features are retrieved from
+//jo				System.out.println("hier 2");
 				PythonInterface.predict(new String[]{
 					path, m.name(), fv, Runner.application
 				});
-
+//jo				System.out.println("hier 3");
 				// Retrieve the model output
 				String[][] outpCsv = 
 					ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(path + 
 					Runner.outpExt + "app.csv")));
-					
+//jo				System.out.println("hier 4");
 				List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 //				System.out.println(Arrays.toString(predictedOutputs.get(0)));
 				
@@ -2461,6 +2464,7 @@ public class TestManager {
 				// get all voices so far from newTranscription
 				// let trained LSTM predict next note for each
 				// see for which voice the note is most likely
+//jo			System.out.println("TERING");
 			}
 			else {
 				// For scikit
@@ -2590,7 +2594,7 @@ public class TestManager {
 		}
 //		}
 		// HIER EINDE1
-		
+//jo	System.out.println("we made it");
 		if (mt == ModelType.DNN || mt == ModelType.OTHER){
 			return fvAndPredLbl;
 		}

@@ -277,7 +277,9 @@ public class PythonInterface {
 //				defCreateNeuralNetwork += s + cr;
 //			}
 			String call = 
-				"weights_biases = train_test_tensorflow.create_neural_network(layer_sizes, " + 
+				"weights_biases = " + 
+				Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py")) + 
+				".create_neural_network(layer_sizes, " + 
 				"use_stored_weights, mode, fold_path)" + cr
 //				"print(type(weights_biases['weights']['W1']))" + cr +
 //				"print(type(weights_biases['biases']['b1']))" + cr
@@ -395,13 +397,14 @@ public class PythonInterface {
 			
 			String call =
 				"sess = tf.InteractiveSession()" + cr +
-				"tf.set_random_seed(" + Runner.getModelParams().get(Runner.SEED).intValue() + ")" + cr +
-//				"tf.set_random_seed(0)" + cr +
+//				"tf.set_random_seed(" + Runner.getModelParams().get(Runner.SEED).intValue() + ")" + cr + // VANDAAG
+				"tf.set_random_seed(0)" + cr + // VANDAAG
 				"lrn_rate = 0" + cr +
 				"kp = 0.0" + cr +
 				"epochs = 0" + cr +
 				"arg_fold_path = " + "'" + argPath + "'" + cr +
-				"train_test_tensorflow.run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, arg_fold_path, weights_biases)" + cr +
+				Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py")) + 
+				".run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, arg_fold_path, weights_biases)" + cr +
 				"sess.close()" + cr
 			;
 			cmdStr += placeholders; 
