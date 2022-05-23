@@ -11,8 +11,6 @@ appl = 2
 
 seed = 0 # seed=0 used for all experiments ISMIR 2018 paper 
 
-ismir2018 = True
-
 # When the script is used as a script (train and test mode)
 if len(argv) > 1:
 	script, mdl, arg_mode, arg_store_path, arg_path_trained_user_model, arg_exts, arg_user_model, arg_params, arg_stored_weights = argv
@@ -282,36 +280,42 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 
 	print('==========>> run_neural_network() called in mode', mode)
 
-	weights_biases = {} # Dictionary containing two Dicionaries (keys: 'weights', 'biases')
-						# of Variables (keys: 'W1', 'b1', ...); see create_neural_network().
+	byrd = False
+
+#	prediction = create_neural_network(x, layer_sizes, use_stored_weights, mode) # train and test
+
+	# train, test, application
+	weights_biases = {}
 	if mode == train or mode == test:
 		weights_biases = create_neural_network(layer_sizes, use_stored_weights, mode, fold_path)
 	elif mode == appl:
 		weights_biases = args[0]
-#	print('(1) initial weights W1:')
+#	print('initial weights:')
 #	print('W1', sess.run(weights_biases['weights']['W1'][0]))
 
-	# To calculate predictions (linear output from NN's output layer) and softmaxes (trn, tst, app)
-	prediction = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1,
-										 weights_biases['weights'], weights_biases['biases']) # Tensor
-	softm = tf.nn.softmax(prediction) # Tensor
-	pred_class = tf.argmax(softm) # Tensor
+	# prediction(_val), softm(_val), and pred_class(_val) are Tensors
+	prediction = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, weights_biases['weights'], weights_biases['biases'])
+#	print('initial prediction train:')
+#	print(sess.run(prediction, feed_dict={x: x_train, keep_prob: 1.0}))
+	softm = tf.nn.softmax(prediction) # used for softmaxes_trn, softmaxes_tst, and softmaxes_app
+	pred_class = tf.argmax(softm)     # used for softmaxes_trn, softmaxes_tst, and softmaxes_app
 
 	if mode == train or mode == test:
-		# To calculate accuracy (trn, tst)
-		correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1)) # Tensor
-		accuracy = tf.reduce_mean(tf.cast(correct, 'float')) # Tensor
-		
+		# cost and optimizer must be declared here because of global variable initialisation (see below)
 		if mode == train:
-#			# To calculate accuracy (trn)
-#			correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1)) # Tensor
-#			accuracy = tf.reduce_mean(tf.cast(correct, 'float')) # Tensor
+			# cost is a Tensor; optimizer is an Operation
+			cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+			optimizer = tf.train.AdamOptimizer(learning_rate=lrn_rate).minimize(cost)
+		
+		# correct and accuracy are Tensors
+		# mode == train: accuracy used for val data
+		# mode == test: accuracy used for test data 
+		correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
+		accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
 
-			# Declare cost and optimizer here: optimizer has global variables that must be initialised (see below)
-			cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y)) # Tensor
-			optimizer = tf.train.AdamOptimizer(learning_rate=lrn_rate).minimize(cost) # Operation
-
-		# Initialise all global variables that have not been initialised yet (e.g., variables for Adam)
+		# initialise all global variables that have not been initialised yet (e.g., variables for Adam)
+#		with tf.Session() as sess:
+#		sess.run(tf.global_variables_initializer())
 		# see Salvador Dali's answer at 
 		# https://stackoverflow.com/questions/35164529/in-tensorflow-is-there-any-way-to-just-initialize-uninitialised-variables
 		global_vars = tf.global_variables()
@@ -322,112 +326,212 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 			sess.run(tf.variables_initializer(not_initialized_vars))
 		print('uninitialised variables:', sess.run(tf.report_uninitialized_variables()))
 
-		saver = tf.train.Saver()
-
 	if mode == train:
-		if val_perc != 0:
-			# To calculate predictions (linear output from NN's output layer) and softmaxes (vld)
-			prediction_val = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, 
-													 weights_biases['weights'], weights_biases['biases']) # Tensor
-			softm_val = tf.nn.softmax(prediction_val) # Tensor
-			pred_class_val = tf.argmax(softm_val) # Tensor
+		# prediction_val, softm_val, and pred_class_val are only used for calculating softmaxes_val
+		# they are not used in ISMIR 2018
 
-			# To calculate accuracy (vld)
-			correct_val = tf.equal(tf.argmax(prediction_val, 1), tf.argmax(y, 1)) # Tensor
-			accuracy_val = tf.reduce_mean(tf.cast(correct_val, 'float')) # Tensor
+		prediction_val = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, weights_biases['weights'], weights_biases['biases'])
+		softm_val = tf.nn.softmax(prediction_val)
+		pred_class_val = tf.argmax(softm_val)
 
-		total_cost = []
-		accs_trn = []
+		correct_val = tf.equal(tf.argmax(prediction_val, 1), tf.argmax(y, 1))
+		accuracy_val = tf.reduce_mean(tf.cast(correct_val, 'float'))
+
+		# To calculate trn acc; not used in ISMIR 2018
+		# Added 17.05.2022
+#		if byrd:
+#			prediction_trn = evaluate_neural_network(x, keep_prob, len(layer_sizes) - 1, weights_biases['weights'], weights_biases['biases'])
+#			correct_trn = tf.equal(tf.argmax(prediction_trn, 1), tf.argmax(y, 1))
+#			accuracy_trn = tf.reduce_mean(tf.cast(correct_trn, 'float'))
+
+		costs = []
+		accs_tr = []
 		accs_val = []
 		best_acc = 0.0
-#		print('(2) weights W1 before training (should be the same as (1))')
+#		print('weights should still be the same:')
 #		print('W1', sess.run(weights_biases['weights']['W1'][0]))
+#		print('prediction train should still be the same:')
+#		print(sess.run(prediction, feed_dict={x: x_train, keep_prob: 1.0}))
 		for epoch in range(epochs):
+			print('epoch', epoch)
 			epoch_loss = 0
 			for _ in range(int(len(x_train)/batch_size)):
-				epoch_x, epoch_y = x_train, y_train # np.ndarray
-				_, c, acc_trn, sm_trn = sess.run([optimizer, cost, accuracy, softm], 
-												 feed_dict = {x: epoch_x, y: epoch_y, keep_prob: kp})
+#				new_sets = make_validation_set(x_train, y_train, 20)
+#				x_train_new = new_sets['x-tr-new']
+#				y_train_new = new_sets['y-tr-new']
+#				x_val = new_sets['x-val']
+#				y_val = new_sets['y-val']
+				# epoch_x and epoch_y are numpy.ndarray
+				epoch_x, epoch_y = x_train, y_train 
+#				epoch_x, epoch_y = x_train_new, y_train_new
+				_, c, acc_trn, sm_trn = sess.run([optimizer, cost, accuracy, softm], feed_dict = {x: epoch_x, y: epoch_y, keep_prob: kp}) # JEO
 				epoch_loss += c
+#				acc_val = accuracy_val.eval({x: x_val, y: y_val, keep_prob: 1.0})
+#				sm_val = softm_val.eval({x: x_val, keep_prob: 1.0})
 
-				if epoch == 10 or epoch == 20:
-					print('MANUAL CHECK TRAIN')
-					print('acc_trn   :', acc_trn)
-					check_accuracy(x_train, y_train, sm_trn)
+#				acc_val, sm_val = sess.run([accuracy, softm], feed_dict={x: x_val, y: y_val, keep_prob: 1.0}) # VRD
+#				acc_val, sm_val = sess.run([accuracy_val, softm_val], feed_dict={x: x_val, y: y_val, keep_prob: 1.0}) # VRD
 
-			print('epoch', str(epoch) + '/' + str(epochs), 'completed; loss =', epoch_loss)		
-#			print('(3) updated weights W1 after one training epoch (should be different from (2))')
+#				print('acc_val  :', acc_val)
+####				acc_val2, sm_v2 = sess.run([accuracy, softm], feed_dict={x: x_val, y: y_val, keep_prob: 1.0}) 	
+####				acc_val3 = accuracy.eval({x: x_val, y: y_val, keep_prob: 1.0})
+
+####				print('acc_val   :', acc_val)
+####				print('acc_val2  :', acc_val2)
+####				print('acc_val3  :', acc_val3)
+
+####				if epoch == 10 or epoch == 20:
+####					print('MANUAL CHECKKKKK')
+####					incorr = 0
+####					for i in range(len(sm_v)):
+####						curr_sm = sm_v[i]
+####						curr_lbl = y_val[i]
+####						if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#####							print(i, curr_sm, curr_lbl)
+####							incorr += 1
+####					print('incorr:', incorr)
+####					num_ex = len(x_val)
+####					print('num ex', num_ex)
+####					acc_manual = (num_ex - incorr)/num_ex
+####					print('acc_manual', acc_manual)
+####					np.savetxt(fold_path + 'sm-trn-epoch_' + str(epoch) + '.csv', sm, delimiter=',')
+
+
+#			print('prediction train should be different now because the weights have been updated:')
+#			print(sess.run(prediction, feed_dict={x: x_train, keep_prob: 1.0}))
+#			print('weights should be different now because they have been updated:')
 #			print('W1', sess.run(weights_biases['weights']['W1'][0]))
-			total_cost.append(epoch_loss)
-			accs_trn.append(acc_trn)
-
-			# Check acc_val every tenth epoch
-			if not user_model and epoch % 10 == 0:
+			if epoch % 10 == 0:
+#				print('epoch', epoch, 'completed out of', epochs, '; loss =', epoch_loss)
+#				if byrd: 
+#					acc_tr = accuracy_trn.eval({x: x_train, y: y_train, keep_prob: kp}) ## HIERO
+#					acc_tr = accuracy.eval({x: x_train, y: y_train, keep_prob: kp}) ## HIERO
+#					accs_tr.append(acc_tr) ## HIERO
+#					print('acc_trn', acc_tr)
 				if val_perc != 0:
-					if ismir2018:
-						# This is incorrect: sess.run() should not be run again (see loop over the mini 
-						# batches) on accuracy and softm, which are for calculating trn results, but on 
-						# accuracy_val and softm_val. Rerunning leads to unwanted changes in tensor calculations
-						# NB: for the ISMIR paper, sm_val is not calculated
-						acc_val, sm_val = sess.run([accuracy, softm],
-											   		feed_dict={x: x_val, y: y_val, keep_prob: 1.0})
-					else:
-						acc_val, sm_val = sess.run([accuracy_val, softm_val],
-											   		feed_dict={x: x_val, y: y_val, keep_prob: 1.0})
-						# eval() is alternative for sess.run(), but must be done for each variable individually 	
-#						acc_val = accuracy_val.eval({x: x_val, y: y_val, keep_prob: 1.0})
-#						sm_val = softm_val.eval({x: x_val, keep_prob: 1.0})
+#					acc_val = accuracy.eval({x: x_val, y: y_val, keep_prob: 1.0}) # why can't this be accuracy_val.eval? changes value of acc_val
+#					sm_val = softm_val.eval({x: x_val, keep_prob: 1.0}) # why can't this be softm.eval? changes value of acc_val
 
-					accs_val.append(acc_val)
+#					acc_val, sm_val = sess.run([accuracy, softm], feed_dict={x: x_val, y: y_val, keep_prob: 1.0}) # VRD
+#					acc_val, sm_val = sess.run([accuracy_val, softm_val], feed_dict={x: x_val, y: y_val, keep_prob: 1.0}) # VRD
 
-					if epoch == 10 or epoch == 20:
-						print('MANUAL CHECK VALIDATION')
-						print('acc_val   :', acc_val)
-						check_accuracy(x_val, y_val, sm_val)
+					acc_val = accuracy_val.eval({x: x_val, y: y_val, keep_prob: 1.0})
+					sm_val = softm_val.eval({x: x_val, keep_prob: 1.0})
+					
+					print('acc_val  :', acc_val)
+					print('EEUWIGE TERING')
+					incorr = 0
+					for i in range(len(sm_val)):
+						curr_sm = sm_val[i]
+						curr_lbl = y_val[i]
+						if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#							print(i, curr_sm, curr_lbl)
+							incorr += 1
+					print('incorr:', incorr)
+					num_ex = len(x_val)
+					print(' num ex', num_ex)
+					acc_manual = (num_ex - incorr)/num_ex
+					print('acc_manual', acc_manual)
 
+					accs_val.append(acc_val) ## HIERO
+					accs_tr.append(acc_trn)
+
+#				corrrr = correct.eval({x:x_val, y:y_val, keep_prob: 1.0});
+				
+				costs.append(epoch_loss)
+
+				saver = tf.train.Saver()
+				if not user_model:
 					if acc_val > best_acc:
+#						print('best acc val is now', acc_val, '(epoch =', epoch, ')')#), 'best acc trn is now', acc_tr)
 						best_acc = acc_val
-						
-						# Save weights
 						save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
 
-						# Save softmax output
-						if ismir2018:
-							# This is incorrect: sess.run() should not be run again (see loop over the mini 
-							# batches) on softm. Rerunning leads to unwanted changes in tensor calculations 
-							softmaxes_trn = sess.run([softm, pred_class], 
-													 feed_dict={x: x_train, keep_prob: kp})[0]
+						# save the model output
+						# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
+						doThis = False
+						if doThis:
+							softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0] # JEO xx
 							np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=',')
-						else:
-							np.savetxt(fold_path + out_ext, sm_trn, delimiter=',')
-						np.savetxt(fold_path + 'out-vld.csv', sm_val, delimiter=',')
+							if epoch == 0 or epoch == 10 or epoch == 20:
+								print('MANUAL CHECK TRAIN')
+								incorr = 0
+								for i in range(len(softmaxes_trn)):
+									curr_sm = softmaxes_trn[i]
+									curr_lbl = y_train[i]
+									if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#										print(i, curr_sm, curr_lbl)
+										incorr += 1
+								print('incorr:', incorr)
+								num_ex = len(x_train)
+								print(' num ex', num_ex)
+								acc_manual = (num_ex - incorr)/num_ex
+								print('acc_manual', acc_manual)
+								np.savetxt(fold_path + 'out-trn-epoch_' + str(epoch) + '.csv', softmaxes_trn, delimiter=',')
 
-						# Save epoch
+							# https://datascience-enthusiast.com/DL/Tensorflow_Tutorial.html 
+####							softmaxes_val = sess.run([softm_val, pred_class_val], feed_dict={x: x_val, keep_prob: 1.0})[0]
+####							np.savetxt(fold_path + 'out-vld.csv', softmaxes_val, delimiter=',')
+####							if epoch == 0 or epoch == 10 or epoch == 570:
+####								print('MANUAL CHECK VAL')
+####								incorr = 0
+####								for i in range(len(softmaxes_val)):
+####									curr_sm = softmaxes_val[i]
+####									curr_lbl = y_val[i]
+####									if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#####										print(i, curr_sm, curr_lbl)
+####										incorr += 1
+####								print('incorr:', incorr)
+####								num_ex = len(x_val)
+####								print(' num ex', num_ex)
+####								acc_manual = (num_ex - incorr)/num_ex
+####								print('acc_manual', acc_manual)
+####								np.savetxt(fold_path + 'out-vld-epoch_' + str(epoch) + '.csv', softmaxes_val, delimiter=',')
+#####							np.savetxt(fold_path + 'acc-vld.csv', [acc_val], delimiter=',')
+
+#						for i in range(10):
+#							print(softmaxes_trn[i])
+#						print("-------------------------------")
+
+#						np.savetxt(fold_path + 'best_epoch.txt', 'highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch), delimiter="", fmt="%s")
 						with open(fold_path + 'best_epoch.txt', 'w') as text_file:
-							text_file.write('highest accuracy on the validation set (' + 
-											str(best_acc) + ') in epoch ' + str(epoch))
+							text_file.write('highest accuracy on the validation set (' + str(best_acc) + ') in epoch ' + str(epoch))
 						np.savetxt(fold_path + 'best_epoch.csv', [[int(epoch), acc_val]], delimiter=',')
 
 		# Added 06.12.2021 for Byrd presentation
 		if user_model:
 			save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
-			# Save softmax output
-#			softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0]
-#			np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=',')
-			np.savetxt(fold_path + out_ext, sm_trn, delimiter=',')
+			# Save the model output
+			# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
+			softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train, keep_prob: kp})[0] # JEO
+			np.savetxt(fold_path + out_ext, softmaxes_trn, delimiter=',')
 
+#		print('accs_tr')
+#		print(accs_tr)
+#		print('accs_val')
+#		print(accs_val)
 
-#		# plot the cost
-#		plt.plot(np.squeeze(total_cost))
+		# save the weights
+#		saver = tf.train.Saver()    
+#		save_path = saver.save(sess, fold_path + 'weights/' + 'trained.ckpt')
+
+#		# save the model output
+#		# see https://stackoverflow.com/questions/6081008/dump-a-numpy-array-into-a-csv-file
+#		softmaxes_trn = sess.run([softm, pred_class], feed_dict={x: x_train_new, keep_prob: kp})[0]
+#		np.savetxt(fold_path + 'out_trn.csv', softmaxes_trn, delimiter=",")
+
+		# plot the cost
+#		print('accuracy train:', accuracy.eval({x:x_train, y:y_train, keep_prob: kp}))
+#		plt.plot(np.squeeze(costs))
 #		plt.ylabel('cost')
 #		plt.xlabel('epochs (/10)')
-#		plt.title('cost =' + str(lrn_rate))
+#		plt.title('learning rate =' + str(lrn_rate))
 #		plt.show()
 
-		# Plot the tr and val accuracy
+		# plot the tr and val accuracy
 		plotOrNot = True
 		if plotOrNot:
-			plt.plot(np.squeeze(accs_trn))
+			plt.plot(np.squeeze(accs_tr))
 			plt.plot(np.squeeze(accs_val))
 			plt.ylabel('acc')
 			plt.xlabel('epochs (/10)')
@@ -439,23 +543,35 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 #			plt.show()
 			plt.savefig(fold_path + 'trn_and_val_acc.png')
 
+	# test
 	if mode == test:
-		acc_tst, sm_tst = sess.run([accuracy, softm], feed_dict={x: x_test, y: y_test, keep_prob: 1.0})
-#		sm_tst = sess.run([softm, pred_class], feed_dict={x: x_test, keep_prob: 1.0})[0]
-		np.savetxt(fold_path + out_ext, sm_tst, delimiter=',')
+		softmaxes_tst = sess.run([softm, pred_class], feed_dict={x: x_test, keep_prob: 1.0})[0] # JEO NO
+		np.savetxt(fold_path + out_ext, softmaxes_tst, delimiter=',')
  
-		print('MANUAL CHECK TEST')
-		print('acc_tst   :', acc_tst)
-		check_accuracy(x_test, y_test, sm_tst)
+		dothis = False
+		if dothis:
+			incorr = 0
+			for i in range(len(softmaxes_tst)):
+				curr_sm = softmaxes_tst[i]
+				curr_lbl = y_test[i]
+				if np.argmax(curr_sm) != np.argmax(curr_lbl):
+#				print(i)
+#				print(curr_sm)
+#				print('pred class = ' + str(np.argmax(curr_sm)))
+#				print(curr_lbl)
+#				print('corr class = ' + str(np.argmax(curr_lbl)))
+					incorr += 1
 
-#		num_ex = len(x_test)
-#		incorr = 0
-#		for i in range(len(sm_tst)):
-#			if np.argmax(sm_tst[i]) != np.argmax(y_test[i]):
-#				incorr += 1
-#		print('incorr; num_ex:', incorr, num_ex)
-#		print('acc_tst   :', acc_tst)
-#		print('acc_manual:', (num_ex - incorr)/num_ex)
+			print('incorr: ', incorr)
+			num_ex = len(x_test)
+			print('acc = ' + str(num_ex - incorr) + '/' + str(num_ex) + ' = ' + str((num_ex - incorr)/num_ex))
+
+			nums_tst.append(num_ex - incorr)
+			dens_tst.append(num_ex)
+
+			print('accuracy test :', accuracy.eval({x:x_test, y:y_test, keep_prob: 1.0})) 
+#		output = sess.run(prediction,feed_dict={x: x_test})
+	# END OF SESSION
 
 	if mode == appl:
 		# Features loaded from file
@@ -463,10 +579,10 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 		# Features given as argument		
 #		list_from_string = [float(s.strip()) for s in feature_vector.split(',')]
 #		x_appl = np.array(list_from_string)
-		# Reshape necessary to get required shape (1, 33)
+		# reshape necessary to get required shape (1, 33)
 		x_appl = x_appl.reshape(1, -1)
-		sm_app = sess.run([softm, pred_class], feed_dict={x: x_appl, keep_prob: 1.0})[0]
-		np.savetxt(fold_path + out_ext, sm_app, delimiter=',')
+		softmaxes_app = sess.run([softm, pred_class], feed_dict={x: x_appl, keep_prob: 1.0})[0] # JEO NO
+		np.savetxt(fold_path + out_ext, softmaxes_app, delimiter=',')
 
 #	this is very slow: https://stackoverflow.com/questions/49041001/why-is-this-tensorflow-code-so-slow 
 #	output = sess.run(prediction,feed_dict={x: x_test})
@@ -480,17 +596,7 @@ def run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stor
 #			incorr += 1    
 #	print('acc = ' + str(incorr) + '/' + str(len(x_test)) + ' = ' + str(incorr/len(x_test)))
 
-
-def check_accuracy(x, y, sm):
-	if len(x) != len(sm):
-		exit()
-	num_ex = len(x)
-	incorr = 0
-	for i in range(len(sm)):
-		if np.argmax(sm[i]) != np.argmax(y[i]):
-			incorr += 1
-	print('acc manual:', (num_ex - incorr)/num_ex)
-	print('incorr; num_ex:', incorr, num_ex)
+# fed
 
 
 def make_validation_set(x_tr, y_tr, perc):
