@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import data.Dataset;
 import featureExtraction.MelodyFeatureGenerator;
@@ -46,7 +45,7 @@ public class UI {
 	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, C, 
 		learningRate, deviationThreshold;
 	private static int hiddenLayers, hiddenLayerSize, n, neighbours, trees, cycles, 
-		maxMetaCycles, decisionContextSize, epochs, validationPercentage, seed;
+		maxMetaCycles, decisionContextSize, epochs, miniBatchSize, validationPercentage, seed;
 	private static Model m;
 	private static ProcessingMode pm;
 	private static FeatureVector fv;
@@ -155,7 +154,8 @@ public class UI {
 			epochs = 600;
 			// General
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
-			deviationThreshold = 0.05; // 0.05;
+			deviationThreshold = 0.05;
+			miniBatchSize = -1;
 			validationPercentage = (m.getModelType() == ModelType.DNN) ? 20 : 0; // 10 : 0;
 			if (trainUserModel) {
 				validationPercentage = 0;
@@ -455,6 +455,7 @@ public class UI {
 //			modelParams.put(Runner.UNIFORM_ISM, (m == Model.H) ? (double) ToolBox.toInt(uniformISM) : null);
 			modelParams.put(Runner.SLICE_IND_ENC_SINGLE_DIGIT, (mt == ModelType.MM || mt == ModelType.ENS) ? (double) ToolBox.encodeListOfIntegers(MelodyFeatureGenerator.getSliceIndices(mmfs)) : null);	
 			modelParams.put(Runner.AVERAGE_PROX, (double) ToolBox.toInt(averageProx));
+			modelParams.put(Runner.ISMIR_2018, (double) ToolBox.toInt(expDir.equals("ISMIR-2018")));
 			// b. Settings (ML - existing concepts)
 			modelParams.put(NNManager.ACT_FUNCTION, (mt == ModelType.NN || mt == ModelType.DNN || mt == ModelType.ENS) ? (double) activationFunc.getIntRep() : null);
 			modelParams.put(Runner.DECODING_ALG, (m == Model.H) ? (double) decodingAlg.getIntRep() : null);
@@ -473,7 +474,8 @@ public class UI {
 			modelParams.put(Runner.N_EST, (m == Model.RF || m == Model.RF_CL) ? (double) trees : null);
 			modelParams.put(Runner.N, (mt == ModelType.MM) ? (double) n : null);
 			modelParams.put(Runner.NS_ENC_SINGLE_DIGIT, (mt == ModelType.ENS) ? (double) ToolBox.encodeListOfIntegers(ns) : null);
-			// d. Non-tuned hyperparameters 
+			// d. Non-tuned hyperparameters
+			modelParams.put(Runner.MINI_BATCH_SIZE, (double) miniBatchSize);
 			modelParams.put(Runner.VALIDATION_PERC, (double) validationPercentage);
 			modelParams.put(Runner.DECISION_CONTEXT_SIZE, (double) decisionContextSize);
 			modelParams.put(Runner.META_CYCLES, (mt == ModelType.NN || mt == ModelType.ENS) ? (double) maxMetaCycles : null);

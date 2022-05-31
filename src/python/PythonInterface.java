@@ -3,17 +3,26 @@ package python;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 import representations.Transcription;
 import tools.ToolBox;
 import ui.Runner;
+import ui.Runner.DecisionContext;
+import ui.Runner.Model;
+import ui.Runner.ModelType;
+import ui.Runner.WeightsInit;
 
 /**
  * See https://norwied.wordpress.com/2012/03/28/call-python-script-from-java-app/
@@ -108,83 +117,120 @@ public class PythonInterface {
 	}
 
 
-	/**
-	 * Following the given command, runs train_test_tensorflow as a script (train 
-	 * and test mode).
-	 *    
-	 * @param args
-	 * @throws IOException
-	 */
-	public static double[] applyModel(String[] cmd) {
-		double[] outp = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
-		try {
-			// Create runtime to execute external command
-			Runtime rt = Runtime.getRuntime();
-			Process pr = rt.exec(cmd);
-			
-			// Retrieve output from Python script
-			BufferedReader bfr = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-			String line = "";
-			while((line = bfr.readLine()) != null) {
-				System.out.println(line);
-				String s = "model output = ";
-				if (line.startsWith(s)) {
-					System.out.println(line);
-					String output = line.substring(s.length());
-					String[] indiv = output.split(",");
-					for (int i = 0; i < indiv.length; i++) {
-						outp[i] = Double.parseDouble(indiv[i]);
-					}
-				}
-			}
-			String arrAsStr = "               ";
-			for (double d : outp) {
-				arrAsStr += d + ",";
-			}
-//			System.out.println(arrAsStr);
-			
-			// Retrieve error (if any) from Python script. See Listing 4.3 at 
-			// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html
-//			InputStream stderr = pr.getErrorStream();
-//			InputStreamReader isr = new InputStreamReader(stderr);
-			BufferedReader br = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
-			line = null;
-			boolean errorFound = false;
-			while ( (line = br.readLine()) != null) {
-				errorFound = true;
-				System.out.println(line);
-			}
-			if (errorFound) { 
-				int exitVal = pr.waitFor();
-				System.out.println("Process exitValue: " + exitVal);
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-		return outp;
+	public static List<String> getArgumentStrings(int mode, Map<String, Double> modelParameters, int numFeatures, 
+		int numTrainingExamples, String storePath, String pathTrainedUserModel) {
+
+		WeightsInit wi = Runner.ALL_WEIGHTS_INIT[modelParameters.get(Runner.WEIGHTS_INIT).intValue()];
+		int mbSize = modelParameters.get(Runner.MINI_BATCH_SIZE).intValue();
+		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
+		DecisionContext dc = m.getDecisionContext();
+		boolean trn = mode == Runner.TRAIN; 
+		String hyperparams = String.join(",", Arrays.asList(
+			"ismir_2018=" + Boolean.toString(ToolBox.toBoolean(modelParameters.get(Runner.ISMIR_2018).intValue())),
+			"use_stored_weights=" + (trn ? Boolean.toString(wi == WeightsInit.INIT_FROM_LIST) : "true"),
+			"user_model=" + Boolean.toString(Runner.getDeployTrainedUserModel()),
+			"layer_sizes=" + 
+				"[" + numFeatures + " " + 
+				(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 
+				" ").repeat(modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue()) + 
+				Transcription.MAXIMUM_NUMBER_OF_VOICES + "]",
+			"val_perc=" + (trn ? modelParameters.get(Runner.VALIDATION_PERC).intValue() : "-1"),
+			"mini_batch_size=" + (trn ? (mbSize == -1 ? numTrainingExamples : mbSize) : "-1"),
+			"epochs=" + (trn ? modelParameters.get(Runner.EPOCHS).intValue() : "-1"), 
+			"seed=" + modelParameters.get(Runner.SEED).intValue(),
+			"lrn_rate=" + (trn ? modelParameters.get(Runner.LEARNING_RATE) : "-1"),
+			"kp=" + (trn ? modelParameters.get(Runner.KEEP_PROB) : "1.0")));
+
+		String extensionEnd = 
+			trn ? Runner.train : 
+			(mode == Runner.TEST ? (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) : 
+			Runner.application); 
+		String pathsExtensions = String.join(",", Arrays.asList(
+			"store_path=" + storePath,
+			"path_trained_user_model=" + (pathTrainedUserModel != null ? pathTrainedUserModel : ""),
+			"fv_ext=" + Runner.fvExt + extensionEnd + ".csv", 
+			"lbl_ext=" + Runner.lblExt + extensionEnd + ".csv", 
+			"out_ext=" + Runner.outpExt + extensionEnd + ".csv"));
+
+		return Arrays.asList(new String[]{hyperparams, pathsExtensions});
 	}
 
 
 	/**
-	 * Following the given command, uses train_test_tensorflow as a module and runs
-	 * create_neural_network() (application mode). To be called in conjunction with 
-	 * (before) predict() (or predictNoLoading()).
+	 * Runs the code in a Python module (.py file) as a script, i.e., calls its main() method. 
+	 * Used in train and test mode.
+	 *    
+	 * @param cmd
+	 * @throws IOException
+	 */
+	public static void applyModel(String[] cmd) {
+//		double[] outp = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		try {
+			// Create Runtime to interface with the environment the Java application is running in
+			Runtime rt = Runtime.getRuntime();
+			// Execute command to start Process
+			Process pr = rt.exec(cmd);
+
+			// Show print() output from Python module in console
+			BufferedReader outputReader = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+			String line = null;
+			while((line = outputReader.readLine()) != null) {
+				System.out.println(line);
+//				String s = "model output = ";
+//				if (line.startsWith(s)) {
+//					System.out.println(line);
+//					String output = line.substring(s.length());
+//					String[] indiv = output.split(",");
+//					for (int i = 0; i < indiv.length; i++) {
+//						outp[i] = Double.parseDouble(indiv[i]);
+//					}
+//				}
+			}
+//			String arrAsStr = "               ";
+//			for (double d : outp) {
+//				arrAsStr += d + ",";
+//			}
+//			System.out.println(arrAsStr);
+			
+			// Show any error from Python module in console. See Listing 4.3 at 
+			// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html
+			BufferedReader errorReader = new BufferedReader(new InputStreamReader(pr.getErrorStream()));
+			line = null;
+			while ((line = errorReader.readLine()) != null) {
+				System.out.println(line);
+			}
+			int exitVal = pr.waitFor();
+			System.out.println("Process exitValue: " + exitVal);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+//		return outp;
+	}
+
+
+	/**
+	 * Runs the code in a Python module (.py file) in an interactive session, i.e., calls its
+	 * individual methods directly. Used in application mode.
+	 * 
+	 * To be called in conjunction with (before) predict() or predictNoLoading().
 	 * 
 	 * @param cmd
 	 */
-	public static void init(String[] cmd) {
-		// For scikit
-		String path = cmd[0];
-		String model = cmd[1];
-		String ext = cmd[2];
+	public static void init(String[] s) {
 		// For TensorFlow
-		String argPath = cmd[0];
-		String argModel = cmd[1];
-		String argParams = cmd[2];
-		String mode = Runner.application;
+		String argPath = s[0];
+		String argScript = s[1];
+//		String argModel = s[1];
+		String hyperparamsStr = s[2];
+//		String mode = Runner.application;
+		String pathsExtensionsStr = s[3];
+		
+		String scriptName = argScript.substring(0, argScript.indexOf(".py"));
+		
 		try {
-			// Create runtime to execute external command
+			// Create Runtime to interface with the environment the Java application is running in
 			Runtime rt = Runtime.getRuntime();		
+			// Execute command to start Process
 			pr = rt.exec("ipython");
 
 			// Reader reads from terminal answer
@@ -210,12 +256,15 @@ public class PythonInterface {
 			// Writer writes to terminal (i.e., to process)
 			bfw = new BufferedWriter(new OutputStreamWriter(pr.getOutputStream()));
 			
-			String cmdStr = "";
+			String cmds = "";
 			boolean isScikit = false;
 			// For scikit
 			if (isScikit) {
+				String path = s[0];
+				String model = s[1];
+				String ext = s[2];
 				// Import modules
-				cmdStr =
+				cmds =
 //					"print('importing modules')" +	
 					"import os" + cr +
 					"from stat import *" + cr +
@@ -230,71 +279,128 @@ public class PythonInterface {
 //					"print('loading the model')",
 					;
 				// Initialise model
-				cmdStr += "m = joblib.load('" + path + model + ".pkl')" + cr;
+				cmds += "m = joblib.load('" + path + model + ".pkl')" + cr;
 			}
 			
 			// For TensorFlow
-			// Set imports and variables
-			String cdDir = Runner.scriptPythonPath;
-//			String cdDir = "C:Users/Reinier/Dropbox/";
-			String imports =
-				"cd " + cdDir  + cr +
-				"from sys import argv" + cr +
-				"import tensorflow as tf" + cr +
-				"import numpy as np" + cr +
-				"from numpy import genfromtxt" + cr +
-				"import " + Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py")) + cr
-			;
-			String variables =
-				"mode = " + Runner.APPL + cr + 
-//				"fv_ext = '" + Runner.fvExt + mode + ".csv'" + cr + 
-//				"lbl_ext = '" + Runner.lblExt + mode + ".csv'" + cr +
-//				"out_ext = '" + Runner.outpExt + mode + ".csv'" + cr +
-				"use_stored_weights = True" + cr +
-				"fold_path = '" + argPath + "'" + cr +
-//				"num_features = len(genfromtxt(fold_path + fv_ext, delimiter=','))" + cr + 
-//				"num_classes = len(genfromtxt(fold_path + lbl_ext, delimiter=','))" + cr +	
-				"params = [s.strip() for s in '" + argParams + "'.split(',')]" + cr +
-				"param_dict = {}" + cr +
-				// This can be a one-liner because there are no double parameters
-				"for item in params: param_dict[item.strip().split('=')[0]] = int(item.strip().split('=')[1]) " + cr +				
-				"num_HL = param_dict['hidden layers']" + cr +
-				"IL_size = param_dict['input layer size']" + cr +
-				"HL_size = param_dict['hidden layer size']" + cr +
-				"OL_size = param_dict['output layer size']" + cr +			
-//				"num_HL =  int(float(" + arg_param + "))" + cr + 
-//				"num_nodes_HL = [num_features, num_features, num_features, num_features]" + cr +
-//				"layer_sizes = [num_features]" + cr + 
-//				"for i in range(num_HL): layer_sizes.append(num_nodes_HL[i])" + cr +
-//				"layer_sizes.append(num_classes)" + cr
-				"layer_sizes = [IL_size]" + cr +
-				"for i in range(num_HL): layer_sizes.append(HL_size)" + cr +
-				"layer_sizes.append(OL_size)" + cr
-			;
+//			// cd to script directory
+//			String cdDir = "cd " + Runner.scriptPythonPath + cr;
+//			// Set imports; copy those needed from Runner.scriptTensorFlow
+//			String imports = 
+//				"from sys import argv" + cr +
+//				"import tensorflow as tf" + cr +
+//				"import numpy as np" + cr +
+//				"from numpy import genfromtxt" + cr +
+//				"import " + scriptName + cr
+//			;
+//			// Set variables
+//			String variables =
+//				"mode = " + Runner.APPL + cr + 
+//				"fold_path = '" + argPath + "'" + cr +
+////				"fv_ext = '" + Runner.fvExt + mode + ".csv'" + cr + 
+////				"lbl_ext = '" + Runner.lblExt + mode + ".csv'" + cr +
+////				"out_ext = '" + Runner.outpExt + mode + ".csv'" + cr +
+//				"use_stored_weights = True" + cr +				
+////				"num_features = len(genfromtxt(fold_path + fv_ext, delimiter=','))" + cr + 
+////				"num_classes = len(genfromtxt(fold_path + lbl_ext, delimiter=','))" + cr +	
+//				"hyperparams = [s.strip() for s in '" + hyperparamsStr + "'.split(',')]" + cr +
+//				"hyperparams = {item.strip().split('=')[0]:(float(item.strip().split('=')[1]) if '.' in item.strip().split('=')[1] else " + 
+//					"int(item.strip().split('=')[1])) for item in hyperparams}" + cr +
+////				"hyperparams = {}" + cr +
+////				// This can be a one-liner because there are no double parameters
+////				"for item in hyperparams: hyperparams[item.strip().split('=')[0]] = int(item.strip().split('=')[1]) " + cr +				
+//				
+//				"num_HL = hyperparams['hidden layers']" + cr +
+//				"IL_size = hyperparams['input layer size']" + cr +
+//				"HL_size = hyperparams['hidden layer size']" + cr +
+//				"OL_size = hyperparams['output layer size']" + cr +			
+////				"num_HL =  int(float(" + arg_param + "))" + cr + 
+////				"num_nodes_HL = [num_features, num_features, num_features, num_features]" + cr +
+////				"layer_sizes = [num_features]" + cr + 
+////				"for i in range(num_HL): layer_sizes.append(num_nodes_HL[i])" + cr +
+////				"layer_sizes.append(num_classes)" + cr
+//				"layer_sizes = [IL_size] + [HL_size] * num_HL + [OL_size]" + cr
+////				"layer_sizes = [IL_size]" + cr +
+////				"for i in range(num_HL): layer_sizes.append(HL_size)" + cr +
+////				"layer_sizes.append(OL_size)" + cr
+//			;
 			// Create and call the model
 //			String defCreateNeuralNetwork = "";
 //			for (String s : scriptToString(new File(Runner.scriptPath), "def create_neural_network")) {
 //				defCreateNeuralNetwork += s + cr;
 //			}
-			String call = 
-				"weights_biases = " + 
-				Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py")) + 
-				".create_neural_network(layer_sizes, " + 
-				"use_stored_weights, mode, fold_path)" + cr
+			
+			
+			List<String> commands = new ArrayList<>();
+			// cd to script directory
+			commands.add("cd " + argPath);
+			// Get imports from script
+			String imports = "";
+			try (BufferedReader br = new BufferedReader(new FileReader(new File(argPath + argScript)))) {
+			    String line;
+			    while ((line = br.readLine()) != null) {
+			       if (line.startsWith("import") || line.startsWith("from")) {
+			    	   imports += line + cr;
+			       }
+			       else {
+			    	   imports += "import " + scriptName + cr;
+			    	   break;
+			       }
+			    }
+			}
+			commands.add(imports);
+//			commands.add("global sess");
+//			commands.add("sess = tf.Session()");
+			// Mimic train_test_tensorflow.main()
+			commands.add("tf.reset_default_graph()");
+			commands.add(
+				"mode, paths_extensions, hyperparams, data, placeholders = " + 
+				scriptName + ".parse_argument_strings(" + 
+				"'" + Runner.application + "'" + ", " +  
+				"'" + hyperparamsStr + "'" + ", " + 
+				"'" + pathsExtensionsStr + "'" + ")");
+//			commands.add("sess = tf.InteractiveSession()");
+//			commands.add("tf.set_random_seed(hyperparams['seed'])");
+//			commands.add("with tf.Session() as sess:");
+			commands.add("tf.set_random_seed(hyperparams['seed'])");
+			commands.add(scriptName + ".start_sess()");
+			commands.add( //add here as non-global session and pass into function
+//				"with tf.Session() as sess: weights_biases = " +
+				"weights_biases = " +	
+				scriptName + ".create_neural_network(" + 
+				"mode, " +
+				"hyperparams['layer_sizes'], " + 
+				"hyperparams['use_stored_weights'], " +
+//				"paths_extensions['store_path'], " + "sess)");
+				"paths_extensions['store_path'])");
+
+			// WAS VOOR 25.5
+//			String call = 
+//				"weights_biases = " + 
+//				scriptName + ".create_neural_network(layer_sizes, use_stored_weights, mode, fold_path, sess)" + cr
 //				"print(type(weights_biases['weights']['W1']))" + cr +
 //				"print(type(weights_biases['biases']['b1']))" + cr
-			;
-			cmdStr += imports; 
-			cmdStr += variables;
-//			cmdStr += defCreateNeuralNetwork;
-			cmdStr += call;
-			cmdStr += "print('#')" + cr;
-
-			System.out.println(cmdStr);
-			bfw.write(cmdStr);
+//			;
+//			
+//			cmds += cdDir;
+//			cmds += imports; // 25.5 commented out
+//			cmds += variables; // 25.5 commented out
+////			cmds += defCreateNeuralNetwork;
+//			cmds += call;
+//			cmds += "print('#')" + cr;
+			
+			cmds += String.join(cr, commands) + cr;
+			System.out.println("---------------------");
+			System.out.println(cmds);
+			System.out.println("---------------------");
+			cmds += "print('#')" + cr; // Necessary for while below
+//			System.exit(0);
+			
+			System.out.println(cmds);
+			bfw.write(cmds);
 			bfw.flush(); // needed to execute the above commands
 			
-			// Show print statements in the code (not done be default because the script
+			// Show print statements in the code (not done by default because the script
 			// is used as a module)
 			int c = -1;	
 			while((c = bfr.read()) != '#') {
@@ -317,21 +423,21 @@ public class PythonInterface {
 	 * @param cmd
 	 */
 	public static void predict(String[] cmd) {
-		// For scikit
-		String path = cmd[0]; // path
-		String mdl = cmd[1]; 
-		String fvExt = cmd[2]; // Runner.fvExt + "appl.csv"
-		String outpExt = cmd[3]; // Runner.outpExt + "appl.csv"
-		// For TensorFlow
-		String argPath = cmd[0];
-		String argMdl = cmd[1];
-		String argFv = cmd[2];
-		String mode = cmd[3];
+//		String argPath = cmd[0];
+//		String argMdl = cmd[1];
+//		String argFv = cmd[2];
+//		String mode = cmd[3];
+		String scriptName = cmd[0].substring(0, cmd[0].indexOf(".py"));
+		                    
 		try {
 			String cmdStr = "";
 			boolean isScikit = false;
 			// For scikit
 			if (isScikit) {
+				String path = cmd[0]; // path
+				String mdl = cmd[1]; 
+				String fvExt = cmd[2]; // Runner.fvExt + "appl.csv"
+				String outpExt = cmd[3]; // Runner.outpExt + "appl.csv"
 				cmdStr = 
 //					"print('loading features and applying model')" + cr +
 					"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + cr +
@@ -368,23 +474,23 @@ public class PythonInterface {
 				;
 			}
 			// For TensorFlow
-			String placeholders =
-//				"tf.reset_default_graph()" + cr + 
-				// Load features from file
-//				"x_appl = genfromtxt('" + argPath + Runner.fvExt + mode +  ".csv', delimiter=',')" + cr +
-//				"x_appl = x_appl.reshape(1, -1)" + cr +
-//				"print(x_appl.shape)" + cr +
-//				"print(x_appl)" + cr +
-//				// Features string is argument to method
-//				"arg_fv = '" + argFv + "'" + cr + 
-//				"print(arg_fv)" + cr +
-//				"list_from_string = [float(s.strip()) for s in arg_fv.split(',')]" + cr +
-//				"x_appl = np.array(list_from_string)" + cr +
-				"x = tf.placeholder('float', [None, IL_size])" + cr +
-	//			"print(x)" + cr + 
-				"y = tf.placeholder('float')" + cr +
-				"keep_prob = tf.placeholder('float')" + cr 
-			; 
+//			String placeholders =
+////				"tf.reset_default_graph()" + cr + 
+//				// Load features from file
+////				"x_appl = genfromtxt('" + argPath + Runner.fvExt + mode +  ".csv', delimiter=',')" + cr +
+////				"x_appl = x_appl.reshape(1, -1)" + cr +
+////				"print(x_appl.shape)" + cr +
+////				"print(x_appl)" + cr +
+////				// Features string is argument to method
+////				"arg_fv = '" + argFv + "'" + cr + 
+////				"print(arg_fv)" + cr +
+////				"list_from_string = [float(s.strip()) for s in arg_fv.split(',')]" + cr +
+////				"x_appl = np.array(list_from_string)" + cr +
+//				"x = tf.placeholder('float', [None, IL_size])" + cr +
+////			"print(x)" + cr + 
+//				"y = tf.placeholder('float')" + cr +
+//				"keep_prob = tf.placeholder('float')" + cr 
+//			; 
 //			String defEvaluateNeuralNetwork = "";
 //			for (String s : scriptToString(new File(Runner.scriptPath), "def evaluate_neural_network")) {
 //				defEvaluateNeuralNetwork += s + cr;
@@ -395,19 +501,28 @@ public class PythonInterface {
 //			}
 			//
 			
-			String call =
-				"sess = tf.InteractiveSession()" + cr +
-//				"tf.set_random_seed(" + Runner.getModelParams().get(Runner.SEED).intValue() + ")" + cr + // VANDAAG
-				"tf.set_random_seed(0)" + cr + // VANDAAG
-				"lrn_rate = 0" + cr +
-				"kp = 0.0" + cr +
-				"epochs = 0" + cr +
-				"arg_fold_path = " + "'" + argPath + "'" + cr +
-				Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py")) + 
-				".run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, arg_fold_path, weights_biases)" + cr +
-				"sess.close()" + cr
-			;
-			cmdStr += placeholders; 
+			// WAS VOOR 25.5
+//			String call =
+//				"sess = tf.InteractiveSession()" + cr +
+////				"tf.set_random_seed(" + Runner.getModelParams().get(Runner.SEED).intValue() + ")" + cr + // VANDAAG
+//				"tf.set_random_seed(0)" + cr + // VANDAAG
+//				"lrn_rate = 0" + cr +
+//				"kp = 0.0" + cr +
+//				"epochs = 0" + cr +
+//				"arg_fold_path = " + "'" + argPath + "'" + cr +
+//				scriptName + 
+//				".run_neural_network(x, keep_prob, lrn_rate, kp, epochs, layer_sizes, use_stored_weights, mode, arg_fold_path, weights_biases)" + cr +
+//				"sess.close()" + cr
+//			;
+
+			// IS NU NA 25.5
+			String call = 
+//				"sess = tf.InteractiveSession()" + cr +
+//				"tf.set_random_seed(hyperparams['seed'])" + cr +
+				scriptName + ".run_neural_network(mode, placeholders, data, hyperparams, paths_extensions, weights_biases)" + cr ; 
+//				+ "sess.close()" + cr;
+
+//			cmdStr += placeholders; // 25.5 
 //			cmdStr += defEvaluateNeuralNetwork;
 //			cmdStr += defRunNeuralNetwork;
 			cmdStr += call;
@@ -422,7 +537,7 @@ public class PythonInterface {
 			while((c = PythonInterface.bfr.read()) != '#') {
 				// Comment out as this method is called for each note
 				if (printOutiPythonTerminalOutput) {
-//					System.out.print((char)c);
+					System.out.print((char)c);
 				}
 			}
 			

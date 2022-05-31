@@ -75,6 +75,7 @@ public class EvaluationManager {
 			Runner.CROSS_VAL, 
 			Runner.MODEL_DURATION_AGAIN,
 			Runner.AVERAGE_PROX,
+			Runner.ISMIR_2018
 //			Runner.DEPLOY_TRAINED_USER_MODEL,
 //			Runner.TRAIN_USER_MODEL,
 //			Runner.VERBOSE,

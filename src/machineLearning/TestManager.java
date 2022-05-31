@@ -1299,46 +1299,47 @@ public class TestManager {
 //					System.exit(0);
 					TrainingManager.storeData(storePath, 
 						(dc == DecisionContext.UNIDIR ? Runner.test : 
-						Runner.application) + ".csv", data); //kultur
+						Runner.application) + ".csv", data);
 
-					boolean doThis = true;
-					if (doThis) {
 					// Apply the model
+					String[] cmd;
 					boolean isScikit = false;
 					// For scikit
 					if (isScikit) {
-						String[] cmd = new String[]{
+						cmd = new String[]{
 							"python", Runner.scriptPythonPath, m.name(), "test", storePath, //pathStoredNN, 
 							Runner.fvExt, Runner.clExt, Runner.outpExt,
 							Runner.getOtherParam(modelParameters)};
 					}
 					// For TensorFlow
-					String extensions = Runner.fvExt + "," + Runner.lblExt + "," + Runner.outpExt;
-//					int param = modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue();
-					String paramsAndHyperparams = 
-						"hidden layers=" + modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue() + "," +
-						"input layer size=" + noteFeatures.get(0).size() + "," +
-						"hidden layer size=" + modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + "," +
-						"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES + "," +
-						"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
-						"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
-						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue() + "," +
-						"seed=" + modelParameters.get(Runner.SEED).intValue() + "," + 
-						"validation percentage=" + modelParameters.get(Runner.VALIDATION_PERC).intValue() + "," +
-//						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
-						"user model=" + ToolBox.toInt(Runner.getTrainUserModel());
-					String[] cmd = new String[]{
-						"python", 
-						Runner.scriptPythonPath + Runner.scriptTensorFlow, 
-						m.name(), 
+					List<String> argStrings = 
+						PythonInterface.getArgumentStrings(Runner.TEST, modelParameters, 
+						noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
+//					String hyperparams = String.join(",", Arrays.asList(
+//						"use_stored_weights=True",
+//						"user_model=" + Boolean.toString(Runner.getDeployTrainedUserModel()),
+//						"layer_sizes=" + "[" + noteFeatures.get(0).size() + " " + 
+//							(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 
+//							" ").repeat(modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue()) + 
+//							Transcription.MAXIMUM_NUMBER_OF_VOICES + "]",
+//						"val_perc=-1",
+//						"mini_batch_size=-1",
+//						"epochs=-1",
+//						"seed=" + modelParameters.get(Runner.SEED).intValue(),
+//						"lrn_rate=-1",
+//						"kp=1.0"));
+//					String pathsExtensions = String.join(",", Arrays.asList(
+//						"store_path=" + storePath,
+//						"path_trained_user_model=" + (pathTrainedUserModel != null ? pathTrainedUserModel : ""),
+//						"fv_ext=" + Runner.fvExt + (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) + ".csv", 
+//						"lbl_ext=" + Runner.lblExt + (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) + ".csv", 
+//						"out_ext=" + Runner.outpExt + (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) + ".csv"));
+					cmd = new String[]{
+						"python", Runner.scriptPythonPath + Runner.scriptTensorFlow, 
 						Runner.test,
-						storePath,
-						pathTrainedUserModel != null ? pathTrainedUserModel : "null",
-						extensions,
-						Runner.getDeployTrainedUserModel() ? "true" : "false", 
-						paramsAndHyperparams, 
-						"true"};
-					System.out.println(Arrays.toString(cmd));
+						argStrings.get(0),
+						argStrings.get(1)};
+					System.out.println("cmd = " + Arrays.toString(cmd));
 					// Run train_test_tensorflow.py as a script
 					PythonInterface.applyModel(cmd);
 
@@ -1347,8 +1348,8 @@ public class TestManager {
 						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(storePath + //pathStoredNN + 
 						Runner.outpExt + 
 						(dc == DecisionContext.UNIDIR ? Runner.test : Runner.application) +
-						".csv"))); // kultur
-					
+						".csv")));
+
 					List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 					
 					boolean LSTM = false;
@@ -1389,7 +1390,6 @@ public class TestManager {
 //					}
 					
 					allNetworkOutputs = predictedOutputs;
-					} // doThis
 				}
 			}
 			else if (ma == ModellingApproach.C2C) {
@@ -2246,8 +2246,7 @@ public class TestManager {
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
-//			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
-		
+
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
 //		List<Integer> ns = 
@@ -2262,9 +2261,6 @@ public class TestManager {
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
 		ProcessingMode pm = 
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
-//		Implementation im = 
-//			Runner.ALL_IMPLEMENTATIONS[modelParameters.get(Runner.IMPLEMENTATION).intValue()];	
-//		int highestNumVoicesTraining = modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue();
 		int highestNumVoicesTraining = Runner.getHighestNumVoicesTraining(deployTrainedUserModel);
 		FeatureVector featVec = 
 			Runner.ALL_FEATURE_VECTORS[modelParameters.get(Runner.FEAT_VEC).intValue()];
@@ -2402,7 +2398,6 @@ public class TestManager {
 
 			boolean storeFiles = true;
 			if (storeFiles) {
-//jo				System.out.println("hier 1");
 				// Add feature vector to data
 				List<List<List<Double>>> data = new ArrayList<List<List<Double>>>();
 				List<List<Double>> fvWrapped = new ArrayList<List<Double>>();
@@ -2427,7 +2422,6 @@ public class TestManager {
 						Runner.outpExt + "app.csv"
 					});
 				}
-
 				// For TensorFlow
 				String fvAsStr = currentNoteFeatureVector.toString();
 				String fv = fvAsStr.substring(1, fvAsStr.length()-1);
@@ -2435,16 +2429,14 @@ public class TestManager {
 				// - the weights are stored at or retrieved from
 				// - the outputs and additional information (.txt files, figures) are stored at
 				// - the stored features are retrieved from
-//jo				System.out.println("hier 2");
 				PythonInterface.predict(new String[]{
-					path, m.name(), fv, Runner.application
+//					path, m.name(), fv, Runner.application
+					Runner.scriptTensorFlow
 				});
-//jo				System.out.println("hier 3");
 				// Retrieve the model output
 				String[][] outpCsv = 
 					ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(path + 
 					Runner.outpExt + "app.csv")));
-//jo				System.out.println("hier 4");
 				List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
 //				System.out.println(Arrays.toString(predictedOutputs.get(0)));
 				
@@ -3427,30 +3419,31 @@ public class TestManager {
 			if (mt == ModelType.DNN || mt == ModelType.OTHER) {
 				boolean isScikit = false;
 				// For scikit
+				String[] s;
 				if (isScikit) {
-					String[] s = new String[]{storePath, //pathStoredNN, 
-						m.name(), Runner.fvExt + "app.csv"};
+					s = new String[]{storePath, /*pathStoredNN,*/ m.name(), Runner.fvExt + "app.csv"};
 				}
 				// For TensorFlow
 //				int param = modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue();
-				// TODO fix retrieving number of features
-				int numFeat = minAndMaxFeatureValues[0].length;
+				int numFeat = minAndMaxFeatureValues[0].length; // TODO find nicer way
 //				if (m.getDecisionContext() == DecisionContext.BIDIR && applToNewData) {
 //					numFeat = 61; // zondag
 //				}
-				String paramsAndHyperparams = 
-					"hidden layers=" + modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue() + "," +
-					"input layer size=" + numFeat + "," +
-					"hidden layer size=" + modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + "," +
-					"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES;
-//					"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
-//					"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
-//					"epochs=" + modelParameters.get(Runner.EPOCHS).intValue();
-				// The first element of s is the path where the weights are stored at or retrieved from
-				String[] s = new String[]{!deployTrainedUserModel ? storePath : pathTrainedUserModel, //pathStoredNN, 
-					m.name(), paramsAndHyperparams};
-				System.out.println("cmdStr = " + Arrays.toString(s));
+//				String paramsAndHyperparams = 
+//					"hidden layers=" + modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue() + "," +
+//					"input layer size=" + numFeat + "," +
+//					"hidden layer size=" + modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + "," +
+//					"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES;
+//				// The first element of s is the path where the weights are stored at or retrieved from
+//				String[] s = new String[]{!deployTrainedUserModel ? storePath : pathTrainedUserModel, //pathStoredNN, 
+//					m.name(), paramsAndHyperparams};
 				// Calls create_neural_network(), which restores the weights stored
+				List<String> argStrings = 
+					PythonInterface.getArgumentStrings(Runner.APPL, modelParameters, 
+					numFeat /*noteFeatures.get(0).size()*/, -1, storePath, pathTrainedUserModel);
+				s = new String[]{Runner.scriptPythonPath, Runner.scriptTensorFlow, 
+					argStrings.get(0), argStrings.get(1)};
+				System.out.println("cmdStr = " + Arrays.toString(s));
 				PythonInterface.init(s);
 			}
 //			allNetworkOutputs = new ArrayList<double[]>();

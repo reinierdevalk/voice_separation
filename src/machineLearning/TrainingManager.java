@@ -1220,7 +1220,16 @@ public class TrainingManager {
 			// the chords sizes must be decreased with each note that is moved to the validation set
 			List<List<Integer>> csSets = createTrainAndValSet(allChordSizes, valPerc, null);
 			allChordSizes = csSets.get(0); // TODO not correct when validation set is used (but only used in EvaluationManager.getOutputDetails() to display chord index)
-			allChordSizesVal = csSets.get(1); 
+			allChordSizesVal = csSets.get(1);
+			
+//			System.out.println(voiceLabelsForGTs.size());
+//			System.out.println(durLabelsForGTs.size());
+//			System.out.println(allNoteFeatures.size());
+//			System.out.println(allLabels.size());
+//			System.out.println(allVoicesCoDNotes.size());
+//			System.out.println(allEDUInfo.size());
+//			System.out.println(allChordSizes.size());
+//			System.exit(0);
 
 			// Create ground truths
 			groundTruths.add(voiceLabelsForGTs);
@@ -1373,31 +1382,35 @@ public class TrainingManager {
 					}
 
 					// For TensorFlow
-					WeightsInit wi = Runner.ALL_WEIGHTS_INIT[modelParameters.get(Runner.WEIGHTS_INIT).intValue()];
-					String extensions = Runner.fvExt + "," + Runner.lblExt + "," + Runner.outpExt;
-					String paramsAndHyperparams = 
-						"hidden layers=" + modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue() + "," +
-						"input layer size=" + numFeatures + "," +
-						"hidden layer size=" + modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + "," +
-						"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES + "," +
-						"learning rate=" + modelParameters.get(Runner.LEARNING_RATE) + "," +
-						"keep probability=" + modelParameters.get(Runner.KEEP_PROB) + "," +
-						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue() + "," + 
-						"seed=" + modelParameters.get(Runner.SEED).intValue() + "," + 
-						"validation percentage=" + modelParameters.get(Runner.VALIDATION_PERC).intValue() + "," +
-//						"user model=" + modelParameters.get(Runner.TRAIN_USER_MODEL).intValue();
-						"user model=" + ToolBox.toInt(Runner.getTrainUserModel());
+					List<String> argStrings = 
+						PythonInterface.getArgumentStrings(Runner.TRAIN, modelParameters, 
+						numFeatures, allNoteFeatures.size(), storePath, null);
+//					WeightsInit wi = Runner.ALL_WEIGHTS_INIT[modelParameters.get(Runner.WEIGHTS_INIT).intValue()];
+//					int mbSize = modelParameters.get(Runner.MINI_BATCH_SIZE).intValue(); 
+//					String hyperparams = String.join(",", Arrays.asList(
+//						"use_stored_weights=" + Boolean.toString(wi == WeightsInit.INIT_FROM_LIST),
+//						"user_model=" + Boolean.toString(Runner.getDeployTrainedUserModel()),
+//						"layer_sizes=" + "[" + numFeatures + " " + 
+//							(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 
+//							" ").repeat(modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue()) + 
+//							Transcription.MAXIMUM_NUMBER_OF_VOICES + "]",
+//						"val_perc=" + valPerc,
+//						"mini_batch_size=" + (mbSize == -1 ? allNoteFeatures.size() : mbSize),
+//						"epochs=" + modelParameters.get(Runner.EPOCHS).intValue(), 
+//						"seed=" + modelParameters.get(Runner.SEED).intValue(),
+//						"lrn_rate=" + modelParameters.get(Runner.LEARNING_RATE),
+//						"kp=" + modelParameters.get(Runner.KEEP_PROB)));			
+//					String pathsExtensions = String.join(",", Arrays.asList(
+//						"store_path=" + storePath,
+//						"path_trained_user_model=" + "",
+//						"fv_ext=" + Runner.fvExt + Runner.train + ".csv", 
+//						"lbl_ext=" + Runner.lblExt + Runner.train + ".csv", 
+//						"out_ext=" + Runner.outpExt + Runner.train + ".csv"));
 					cmd = new String[]{
-						"python", 
-						Runner.scriptPythonPath + Runner.scriptTensorFlow, 
-						m.name(), 
+						"python", Runner.scriptPythonPath + Runner.scriptTensorFlow, 
 						Runner.train, 
-						storePath,
-						"null",
-						extensions,
-						Runner.getDeployTrainedUserModel() ? "true" : "false", 
-						paramsAndHyperparams,
-						Boolean.toString((wi == WeightsInit.INIT_FROM_LIST))};
+						argStrings.get(0), 
+						argStrings.get(1)};
 					System.out.println("cmd = " + Arrays.toString(cmd));
 					// Run train_test_tensorflow.py as a script
 					PythonInterface.applyModel(cmd);

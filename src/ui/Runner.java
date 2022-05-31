@@ -129,6 +129,7 @@ public class Runner {
 	private static final String DECISION_CONTEXT = "decision context";
 	public static final String WEIGHTS_INIT = "weights initialisation";
 	// ints
+	public static final String MINI_BATCH_SIZE = "mini batch";
 	public static final String VALIDATION_PERC = "validation percentage";
 	public static final String SEED = "seed";
 	public static final String DECISION_CONTEXT_SIZE = "decision context size";
@@ -170,6 +171,7 @@ public class Runner {
 	public static final String ESTIMATE_ENTRIES = "voice entry estimation";
 	public static final String MODEL_DURATION_AGAIN = "model duration again";
 	public static final String AVERAGE_PROX = "average proximities";
+	public static final String ISMIR_2018 = "ISMIR 2018";
 //	public static final String USE_VALIDATION_SET = "use validation set";
 
 	// Enum lists
