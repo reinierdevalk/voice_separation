@@ -48,8 +48,8 @@ public class Runner {
 	//
 	public static String output = "out/";
 	//
-	public static String scriptScikit = "train_and_test_models.py";
-	public static String scriptTensorFlow = "train_test_tensorflow.py";
+	public static String scriptScikit = "model_scikit.py";
+	public static String scriptTensorFlow = "model_tensorflow.py";
 
 	// Naming conventions
 	// Abbreviate all metrics and self-defined names/terms, using 

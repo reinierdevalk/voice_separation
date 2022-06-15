@@ -33,7 +33,7 @@ def create_neural_network(mode, layer_sizes, use_stored_weights, weights_path):
 	"""
 
 	if verbose:
-		print('train_test_tensorflow.create_neural_network() called')
+		print('model_tensorflow.create_neural_network() called')
 
 	num_layers = len(layer_sizes) - 1
 	weights = {}
@@ -99,7 +99,7 @@ def evaluate_neural_network(data, keep_prob, num_layers, seed, weights, biases):
 	"""
 
 	if verbose:
-		print('train_test_tensorflow.evaluate_neural_network() called')
+		print('model_tensorflow.evaluate_neural_network() called')
 
 	# Calculate linear and ReLU outputs for the hidden layers
 	a_prev = data
@@ -114,7 +114,7 @@ def evaluate_neural_network(data, keep_prob, num_layers, seed, weights, biases):
 	return z_o
 
 
-def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_paths_extensions, *args): # sess, *args):
+def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_paths_extensions, **kwargs):
 	"""
 	Runs the neural network.
 
@@ -123,17 +123,23 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 		arg_placeholders		the placeholders dictionary
 		arg_data				the data dictionary
 		arg_hyperparams 		the hyperparams dictionary
-		arg_paths_extensions 	the paths and extensions dictionary, containing
-								- store_path, i.e., the path where 
+		arg_paths_extensions 	the paths and extensions dictionary, with at keys
+								- 'store_path': the store path, i.e., the path where 
 								  - the weights are stored at or retrieved from
 								  - the outputs and additional information (.txt files, figures) are stored at
 								  - the stored features are retrieved from (only when mode is application)
-								- path_trained_user_model, i.e., ...  
-		*args 					the weights and biases dictionary (only when mode is application)
+								- 'path_trained_user_model': the path to the trained model, i.e., ...  
+		*kwargs 				the kwargs dictionary (only when mode is application), with at keys 
+		                        - 'weights_biases': the weights and biases dictionary, with at keys
+		                           - 'weights': the weights dictionary, with at keys 'W1', 'W2', ... the weights 
+		                                        Variables (see create_neural_network()) 
+		                           - 'biases':  the biases dictionary, with at keys 'b1', 'b2', ... the biases 
+		                                        Variables (see create_neural_network()) 
+		                        - 'feature_vector': the feature vector, a list of floats 
 	"""
 
 	if verbose:
-		print('train_test_tensorflow.run_neural_network() called')
+		print('model_tensorflow.run_neural_network() called')
 
 	# Placeholders
 	x, y = arg_placeholders['x'], arg_placeholders['y'] 
@@ -156,12 +162,13 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 								   arg_paths_extensions['out_ext'], 
 								   arg_paths_extensions['fv_ext'])
 
-	weights_biases = {} # Dictionary containing two Dictionaries (keys: 'weights', 'biases')
-						# of Variables (keys: 'W1', 'b1', ...). See create_neural_network().
+	weights_biases = {}
 	if mode == train or mode == test:
 		weights_biases = create_neural_network(mode, layer_sizes, use_stored_weights, store_path)
 	elif mode == appl:
-		weights_biases = args[0]
+#		weights_biases = args[0]
+		weights_biases = kwargs['weights_biases']
+
 #	print('(1) initial weights W1:')
 #	print('W1', sess.run(weights_biases['weights']['W1'][0]))
 
@@ -294,13 +301,6 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 			# Save softmaxes
 			np.savetxt(store_path + out_ext, sm_trn, delimiter=',')
 
-		# Plot the cost
-#		plt.plot(np.squeeze(total_cost))
-#		plt.ylabel('cost')
-#		plt.xlabel('epochs (/10)')
-#		plt.title('cost =' + str(lrn_rate))
-#		plt.show()
-
 		# Plot the trn and vld accuracy
 		if plot_or_not:
 			plt.plot(np.squeeze(accs_trn))
@@ -311,8 +311,7 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 			ax.set_prop_cycle('color', ['red', 'green'])
 #			plt.gca().set_prop_cycle(['red', 'green'])
 			plt.title('accuracy on training and validation set')
-			plt.legend(['tr', 'val'], loc='lower right')
-#			plt.show()
+			plt.legend(['trn', 'vld'], loc='lower right')
 			plt.savefig(store_path + 'trn_and_val_acc.png')
 
 	if mode == test:
@@ -325,15 +324,27 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 		check_accuracy(x_test, y_test, sm_tst)
 
 	if mode == appl:
-		# Features loaded from file
-		x_appl = genfromtxt(store_path + fv_ext, delimiter=',')
-		# Features given as argument		
-#		list_from_string = [float(s.strip()) for s in feature_vector.split(',')]
-#		x_appl = np.array(list_from_string)
-		# Reshape necessary to get required shape (1, 33)
-		x_appl = x_appl.reshape(1, -1)
-		sm_app = sess.run([softm, pred_class], feed_dict={x: x_appl, keep_prob: 1.0})[0]
-		np.savetxt(store_path + out_ext, sm_app, delimiter=',')
+		load_save_files = False
+		if load_save_files:
+			# Features loaded from file
+			x_appl = genfromtxt(store_path + fv_ext, delimiter=',')
+			# Features given as argument		
+#			list_from_string = [float(s.strip()) for s in feature_vector.split(',')]
+#			x_appl = np.array(list_from_string)
+			# Reshape necessary to get required shape (1, 33)
+			x_appl = x_appl.reshape(1, -1)
+			print(x_appl.shape)
+			sm_app = sess.run([softm, pred_class], feed_dict={x: x_appl, keep_prob: 1.0})[0]
+#			acc_app, sm_app2 = sess.run([accuracy, softm], feed_dict={x: x_app, y: y_app, keep_prob: 1.0})
+			np.savetxt(store_path + out_ext, sm_app, delimiter=',')
+		else:
+			x_app = np.array(kwargs['feature_vector'])
+			# Reshape necessary to get required shape (1, 33)
+			x_app = x_app.reshape(1, -1)
+			sm_app = sess.run(softm, feed_dict={x: x_app, keep_prob: 1.0}) # np.ndarray
+#			np.savetxt(store_path + out_ext, sm_app, delimiter=',')
+			print(sm_app)
+			return sm_app[0]
 
 
 def check_accuracy(x, y, sm):
@@ -346,34 +357,6 @@ def check_accuracy(x, y, sm):
 			incorr += 1
 	print('acc manual:', (num_ex - incorr)/num_ex)
 	print('incorr, num_ex:', incorr, num_ex)
-
-
-def make_validation_set(x_tr, y_tr, perc):
-	"""
-	Takes every nth example from the training set and puts it into a validation set. n is determined by the given 
-	percentage: n = 100/perc  
-
-	Arguments:
-		x_tr					the features
-		y_tr					the labels
-		perc					the percentage of training examples that go into the validation set
-	"""
-
-	x_val, y_val, x_tr_new, y_tr_new = [], [], [], []
-	n = 100/perc
-	for i in range(len(x_tr)):
-		if i % n == 0:
-			x_val.append(x_tr[i])
-			y_val.append(y_tr[i])
-		else:
-			x_tr_new.append(x_tr[i])
-			y_tr_new.append(y_tr[i])
- 
-	arrs = {'x-val': np.array(x_val), 
-			'y-val': np.array(y_val), 
-			'x-tr-new': np.array(x_tr_new), 
-			'y-tr-new': np.array(y_tr_new)}
-	return arrs
 
 
 def parse_argument_strings(mode_str, hyperparams_str, paths_extensions_str):
@@ -449,7 +432,7 @@ def main():
 																					 paths_extensions_str)
 
 	if verbose:
-		print('train_test_tensorflow.main() called in mode', mode)
+		print('model_tensorflow.main() called in mode', mode)
 		print('paths_extensions:')
 		for k, v in paths_extensions.items():
 			print(k, v)
@@ -495,7 +478,7 @@ def old_main():
 		"""
 
 		if verbose:
-			print('train_test_tensorflow.py called as a script')
+			print('model_tensorflow.py called as a script')
 
 		# Extract global variables
 #		mode = {'trn': train, 'tst': test, 'app': appl}[arg_mode]
@@ -539,7 +522,7 @@ def old_main():
 	# b. When this script is used as a module, i.e., imported by iPython or another .py file (app)
 	else:
 		if verbose:
-			print('train_test_tensorflow.py called as a module')
+			print('model_tensorflow.py called as a module')
 #		seed=-1 #'set_me'
 #		script = argv
 #		mode = appl
@@ -598,6 +581,34 @@ def old_main():
 		run_neural_network(x, y, x_train, y_train, x_val, y_val, x_test, y_test, val_perc, keep_prob, lrn_rate, kp, epochs, layer_sizes, mini_batch_size, seed, user_model, use_stored_weights, mode, store_path, out_ext, sess, weights_biases)
 
 	sess.close()
+
+
+def make_validation_set(x_tr, y_tr, perc):
+	"""
+	Takes every nth example from the training set and puts it into a validation set. n is determined by the given 
+	percentage: n = 100/perc  
+
+	Arguments:
+		x_tr					the features
+		y_tr					the labels
+		perc					the percentage of training examples that go into the validation set
+	"""
+
+	x_val, y_val, x_tr_new, y_tr_new = [], [], [], []
+	n = 100/perc
+	for i in range(len(x_tr)):
+		if i % n == 0:
+			x_val.append(x_tr[i])
+			y_val.append(y_tr[i])
+		else:
+			x_tr_new.append(x_tr[i])
+			y_tr_new.append(y_tr[i])
+ 
+	arrs = {'x-val': np.array(x_val), 
+			'y-val': np.array(y_val), 
+			'x-tr-new': np.array(x_tr_new), 
+			'y-tr-new': np.array(y_tr_new)}
+	return arrs
 
 
 if __name__ == '__main__':

@@ -78,7 +78,7 @@ public class UI {
 			
 			// Settings
 			// a. Runner settings
-			skipTraining = false;
+			skipTraining = true;
 			trainUserModel = false;
 			verbose = false;
 			

@@ -1312,36 +1312,19 @@ public class TestManager {
 							Runner.getOtherParam(modelParameters)};
 					}
 					// For TensorFlow
-					List<String> argStrings = 
-						PythonInterface.getArgumentStrings(Runner.TEST, modelParameters, 
-						noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
-//					String hyperparams = String.join(",", Arrays.asList(
-//						"use_stored_weights=True",
-//						"user_model=" + Boolean.toString(Runner.getDeployTrainedUserModel()),
-//						"layer_sizes=" + "[" + noteFeatures.get(0).size() + " " + 
-//							(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 
-//							" ").repeat(modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue()) + 
-//							Transcription.MAXIMUM_NUMBER_OF_VOICES + "]",
-//						"val_perc=-1",
-//						"mini_batch_size=-1",
-//						"epochs=-1",
-//						"seed=" + modelParameters.get(Runner.SEED).intValue(),
-//						"lrn_rate=-1",
-//						"kp=1.0"));
-//					String pathsExtensions = String.join(",", Arrays.asList(
-//						"store_path=" + storePath,
-//						"path_trained_user_model=" + (pathTrainedUserModel != null ? pathTrainedUserModel : ""),
-//						"fv_ext=" + Runner.fvExt + (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) + ".csv", 
-//						"lbl_ext=" + Runner.lblExt + (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) + ".csv", 
-//						"out_ext=" + Runner.outpExt + (dc != DecisionContext.BIDIR ? Runner.test : Runner.application) + ".csv"));
-					cmd = new String[]{
-						"python", Runner.scriptPythonPath + Runner.scriptTensorFlow, 
-						Runner.test,
-						argStrings.get(0),
-						argStrings.get(1)};
+					else {
+						List<String> argStrings = 
+							TrainingManager.getArgumentStrings(Runner.TEST, modelParameters, 
+							noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
+						cmd = new String[]{
+							"python", Runner.scriptPythonPath + Runner.scriptTensorFlow, 
+							Runner.test,
+							argStrings.get(0),
+							argStrings.get(1)};
+					}
 					System.out.println("cmd = " + Arrays.toString(cmd));
-					// Run train_test_tensorflow.py as a script
-					PythonInterface.applyModel(cmd);
+					// Run Python code as a script
+					PythonInterface.runPythonFileAsScript(cmd);
 
 					// Retrieve the model output
 					String[][] outpCsv = 
@@ -2238,9 +2221,9 @@ public class TestManager {
 	 *         as element 1: the predicted label for the note
 	 */
 	private List<List<Double>> predictVoices(String path, double[][] minAndMaxFeatureValues, int noteIndex, 
-		List<List<Integer>> voiceEntryInfo, List<Double> modelWeighting) {
+		List<List<Integer>> voiceEntryInfo, List<Double> modelWeighting, Process pr) {
 
-		List<List<Double>> fvAndPredLbl = new ArrayList<>();
+		List<List<Double>> fvPredLbl = new ArrayList<>();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
@@ -2255,9 +2238,7 @@ public class TestManager {
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext();
 		int decisionContextSize = modelParameters.get(Runner.DECISION_CONTEXT_SIZE).intValue();
-		boolean modelDuration = m.getModelDuration();		
-//		DatasetID di = 
-//			Dataset.ALL_DATASET_IDS[modelParameters.get(Dataset.DATASET_ID).intValue()];
+		boolean modelDuration = m.getModelDuration();
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
 		ProcessingMode pm = 
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
@@ -2382,84 +2363,50 @@ public class TestManager {
 			currentNetworkOutput = networkManager.evalNetwork(currentNoteFeatureVector);
 		}
 		else if (mt == ModelType.DNN || mt == ModelType.OTHER){
-//jo			System.out.println("noteIndex = " + noteIndex );
 			if (noteIndex % 50 == 0) {
 				System.out.println("processing note " + noteIndex);
 			}
-
-			// Apply the model
-//			String[] cmd = new String[]{
-//				"python", Runner.scriptPath, m.name(), "appl", path, 
-//				/*fv,*/ Runner.fvExt, Runner.clExt, Runner.outpExt};
-//			String ext = Runner.fvExt + "_appl.csv";
-
-//			currentNetworkOutput = PythonInterface.applyModel(cmd);
-//			System.out.println(Arrays.toString(currentNetworkOutput));
-
-			boolean storeFiles = true;
-			if (storeFiles) {
-				// Add feature vector to data
-				List<List<List<Double>>> data = new ArrayList<List<List<Double>>>();
-				List<List<Double>> fvWrapped = new ArrayList<List<Double>>();
-				fvWrapped.add(currentNoteFeatureVector);
-				data.add(fvWrapped);
-				// Add label to data
-				if (!deployTrainedUserModel) { // zondag	
-					List<List<Double>> lblWrapped = new ArrayList<List<Double>>();
-					lblWrapped.add(groundTruthVoiceLabels.get(noteIndex));
-					data.add(lblWrapped);
+			currentNetworkOutput = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			String cmds = "";
+			boolean isScikit = false;
+			if (isScikit) {	
+//				String path = s[0];
+				String mdl = m.name(); 
+				String fvExt = Runner.fvExt + "app.csv";
+				String outpExt = Runner.outpExt + "app.csv";
+				cmds = 
+//					"print('loading features and applying model')" + cr +
+					"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + "\r\n" +
+					"X = X.reshape(1, -1)" + "\r\n" +
+					"classes = m.predict(X)" + "\r\n" +
+					"max_num_voices = 5" + "\r\n" +
+					"num_ex = len(classes)" + "\r\n";
+				if (!mdl.endsWith("CL")) {
+					cmds +=
+						"probs = m.predict_proba(X)" + "\r\n" +		
+						"num_cols_to_add = max_num_voices - len(probs[0])" + "\r\n" +
+//						"num_ex = len(probs)" + cr +
+						"z = np.zeros((num_ex, num_cols_to_add), dtype=probs.dtype)" + "\r\n" +
+						"probs = np.append(probs, z, axis=1)" + "\r\n";	
 				}
-				// Store
-				TrainingManager.storeData(path, Runner.application + ".csv", data);
-				fvAndPredLbl.add(currentNoteFeatureVector);
+				else {
+					cmds +=
+						"probs = np.zeros((num_ex, max_num_voices))" + "\r\n" +
+						"for i in range (0, num_ex): probs[i][int(classes[i])] = 1.0" + "\r\n";
+				}	
+				cmds +=
+//					"print(X)" + cr +
+//					"print(classes)" + cr +
+//					"print(probs)" + cr +
+//					"print('saving model output')" + cr +
+					"df_probs = pd.DataFrame(probs)" + "\r\n" +
+					"df_probs.to_csv('" + path + outpExt + "', header=False, index=False)" + "\r\n" +
+//					"df_classes = pd.DataFrame(classes)" + cr + 
+//					"df_classes.to_csv('" + path + "outp_cl_appl.csv', header=False, index=False)" + cr +
+					"print('#')" + "\r\n";
+				
+				PythonInterface.addToIPythonSession(pr, cmds);
 
-				boolean isScikit = false;
-				// For scikit
-				if (isScikit) {
-					PythonInterface.predict(new String[]{
-						path, m.name(), 
-						Runner.fvExt + "app.csv",
-						Runner.outpExt + "app.csv"
-					});
-				}
-				// For TensorFlow
-				String fvAsStr = currentNoteFeatureVector.toString();
-				String fv = fvAsStr.substring(1, fvAsStr.length()-1);
-				// path is the path where
-				// - the weights are stored at or retrieved from
-				// - the outputs and additional information (.txt files, figures) are stored at
-				// - the stored features are retrieved from
-				PythonInterface.predict(new String[]{
-//					path, m.name(), fv, Runner.application
-					Runner.scriptTensorFlow
-				});
-				// Retrieve the model output
-				String[][] outpCsv = 
-					ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(path + 
-					Runner.outpExt + "app.csv")));
-				List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
-//				System.out.println(Arrays.toString(predictedOutputs.get(0)));
-				
-				// +1.0E-6
-//				for (double[] d : predictedOutputs) {
-//					for (int i = 0; i < d.length; i++) {
-//						if (d[i] == 0.0) {
-//							d[i] += 0.000001;
-//						}
-//					}
-//				}
-				currentNetworkOutput = predictedOutputs.get(0);
-				// Arrays.asList() does not work on primitive types, see 
-				// https://stackoverflow.com/questions/5178854/convert-a-double-array-to-double-arraylist
-				fvAndPredLbl.add(DoubleStream.of(currentNetworkOutput).boxed().collect(Collectors.toList()));
-				
-				// get all voices so far from newTranscription
-				// let trained LSTM predict next note for each
-				// see for which voice the note is most likely
-//jo			System.out.println("TERING");
-			}
-			else {
-				// For scikit
 				String asStr = currentNoteFeatureVector.toString();
 				String fv = asStr.substring(1, asStr.length()-1);
 
@@ -2471,8 +2418,91 @@ public class TestManager {
 //						fv = fv.concat(",");
 //					}
 //				}
-
 				currentNetworkOutput = PythonInterface.predictNoLoading(fv);
+			}
+			else {
+				boolean storeFilesTensorFlow = false;
+				if (storeFilesTensorFlow) {
+					// Add feature vector to data
+					List<List<List<Double>>> data = new ArrayList<List<List<Double>>>();
+					List<List<Double>> fvWrapped = new ArrayList<List<Double>>();
+					fvWrapped.add(currentNoteFeatureVector);
+					data.add(fvWrapped);
+					// Add label to data
+					if (!deployTrainedUserModel) {
+						List<List<Double>> lblWrapped = new ArrayList<List<Double>>();
+						lblWrapped.add(groundTruthVoiceLabels.get(noteIndex));
+						data.add(lblWrapped);
+					}
+					// Store
+					// path is the path where
+					// - the weights are stored at or retrieved from
+					// - the outputs and additional information (.txt files, figures) are stored at
+					// - the stored features are retrieved from	
+					TrainingManager.storeData(path, Runner.application + ".csv", data); // HIER STORE
+				}				
+				fvPredLbl.add(currentNoteFeatureVector);
+
+				String fvAsStr = currentNoteFeatureVector.toString();			
+				String scriptName = Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py"));
+				boolean isFinalNote = 
+					isTablatureCase ? noteIndex == basicTabSymbolProperties.length - 1 :
+					noteIndex == basicNoteProperties.length;
+				cmds += 
+//					"sess = tf.InteractiveSession()" + cr +
+//					"tf.set_random_seed(hyperparams['seed'])" + cr +
+					"kwargs = {'weights_biases':weights_biases, 'feature_vector':" + fvAsStr + "}" + "\r\n" +
+					"sm_app = " + scriptName + ".run_neural_network(mode, placeholders, data, hyperparams, " + 
+						"paths_extensions, **kwargs)" + "\r\n" + 
+//					scriptName + ".run_neural_network(mode, placeholders, data, hyperparams, paths_extensions, weights_biases)" + cr ; 
+//					+ "sess.close()" + cr;
+//					"print(sm_app)" + cr +
+					"print('@' + str(sm_app) + '@')" + "\r\n"; // the stringified np.ndarray sm_app is space-separated
+				if (isFinalNote) {
+					cmds += "sess.close()" + "\r\n";
+				}
+				
+				String output = PythonInterface.addToIPythonSession(pr, cmds);
+				String predStr = output.substring(output.indexOf("@[") + 2, output.indexOf("]@")).trim();
+				// Remove any line breaks
+				predStr = predStr.replace("\r\n", "");
+				// Remove any double spaces
+				while (predStr.contains("  ")) {
+					predStr = predStr.replace("  ", " ");
+				}
+				// Fill currentNetworkOutput
+				String[] voiceProb = predStr.split(" ");
+				for (int i = 0; i < voiceProb.length; i++) {
+					currentNetworkOutput[i] = Double.parseDouble(voiceProb[i].trim());
+				}
+//				currentNetworkOutput = PythonInterface.readFromIPythonSession(pr, cmds);
+//				PythonInterface.predict(new String[]{Runner.scriptTensorFlow, fvAsStr}, isFinalNote);
+
+				if (storeFilesTensorFlow) {
+					// Retrieve the model output
+					String[][] outpCsv =
+						ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(path + 
+							Runner.outpExt + "app.csv")));
+					List<double[]> predictedOutputs = ToolBox.convertCSVTable(outpCsv);
+//					System.out.println(Arrays.toString(predictedOutputs.get(0)));
+				
+					// +1.0E-6
+//					for (double[] d : predictedOutputs) {
+//						for (int i = 0; i < d.length; i++) {
+//							if (d[i] == 0.0) {
+//								d[i] += 0.000001;
+//							}
+//						}
+//					}
+					currentNetworkOutput = predictedOutputs.get(0);
+				}
+				// Arrays.asList() does not work on primitive types, see 
+				// https://stackoverflow.com/questions/5178854/convert-a-double-array-to-double-arraylist
+				fvPredLbl.add(DoubleStream.of(currentNetworkOutput).boxed().collect(Collectors.toList()));
+				
+				// get all voices so far from newTranscription
+				// let trained LSTM predict next note for each
+				// see for which voice the note is most likely
 			}
 		}
 			
@@ -2586,9 +2616,8 @@ public class TestManager {
 		}
 //		}
 		// HIER EINDE1
-//jo	System.out.println("we made it");
 		if (mt == ModelType.DNN || mt == ModelType.OTHER){
-			return fvAndPredLbl;
+			return fvPredLbl;
 		}
 		else {
 			return null;
@@ -3274,12 +3303,10 @@ public class TestManager {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
-
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext(); 
 		boolean modelDuration = m.getModelDuration();
-
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
 		ProcessingMode pm = 
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
@@ -3287,7 +3314,6 @@ public class TestManager {
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());		
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
-//			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
 		int highestNumVoicesTraining = Runner.getHighestNumVoicesTraining(deployTrainedUserModel);
 		boolean estimateEntries = 
 			ToolBox.toBoolean(modelParameters.get(Runner.ESTIMATE_ENTRIES).intValue());
@@ -3325,7 +3351,6 @@ public class TestManager {
 //			groundTruthTranscription.getPiece().getMetricalTimeLine().getTimeSignature() : 
 //			null;
 
-		
 //		TimeSignature timeSignature = new TimeSignature((int)ts[0][0], (int) ts[0][1]);
 		KeyMarker keyMarker = new KeyMarker();
 		keyMarker.setMode(Mode.MODE_MINOR); // TODO
@@ -3416,35 +3441,75 @@ public class TestManager {
 		// 1. Assign the notes to voices
 		// a. N2N
 		if (ma == ModellingApproach.N2N) {  
+			Process pr = null;
 			if (mt == ModelType.DNN || mt == ModelType.OTHER) {
 				boolean isScikit = false;
+
+				// Create commands to pass to IPython
+				String cmds = "";
 				// For scikit
-				String[] s;
+//				String[] s;
 				if (isScikit) {
-					s = new String[]{storePath, /*pathStoredNN,*/ m.name(), Runner.fvExt + "app.csv"};
+//					s = new String[]{storePath, /*pathStoredNN,*/ m.name(), Runner.fvExt + "app.csv"};
+					// Get imports
+					cmds += PythonInterface.getImports(new File(Runner.scriptPythonPath + Runner.scriptScikit)) + "\r\n";
+					// Initialise model
+					cmds += "m = joblib.load('" + storePath + m.name() + ".pkl')" + "\r\n";
 				}
 				// For TensorFlow
-//				int param = modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue();
-				int numFeat = minAndMaxFeatureValues[0].length; // TODO find nicer way
-//				if (m.getDecisionContext() == DecisionContext.BIDIR && applToNewData) {
-//					numFeat = 61; // zondag
-//				}
-//				String paramsAndHyperparams = 
-//					"hidden layers=" + modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue() + "," +
-//					"input layer size=" + numFeat + "," +
-//					"hidden layer size=" + modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + "," +
-//					"output layer size=" + Transcription.MAXIMUM_NUMBER_OF_VOICES;
-//				// The first element of s is the path where the weights are stored at or retrieved from
-//				String[] s = new String[]{!deployTrainedUserModel ? storePath : pathTrainedUserModel, //pathStoredNN, 
-//					m.name(), paramsAndHyperparams};
-				// Calls create_neural_network(), which restores the weights stored
-				List<String> argStrings = 
-					PythonInterface.getArgumentStrings(Runner.APPL, modelParameters, 
-					numFeat /*noteFeatures.get(0).size()*/, -1, storePath, pathTrainedUserModel);
-				s = new String[]{Runner.scriptPythonPath, Runner.scriptTensorFlow, 
-					argStrings.get(0), argStrings.get(1)};
-				System.out.println("cmdStr = " + Arrays.toString(s));
-				PythonInterface.init(s);
+				else {
+//					// The first element of s is the path where the weights are stored at or retrieved from
+//					s = new String[]{!deployTrainedUserModel ? storePath : pathTrainedUserModel, //pathStoredNN, 
+//						m.name(), paramsAndHyperparams};
+					int numFeat = minAndMaxFeatureValues[0].length; // TODO find nicer way
+//					if (m.getDecisionContext() == DecisionContext.BIDIR && applToNewData) {
+//						numFeat = 61; // zondag
+//					}
+
+					List<String> argStrings = 
+						TrainingManager.getArgumentStrings(Runner.APPL, modelParameters, 
+						numFeat /*noteFeatures.get(0).size()*/, -1, storePath, pathTrainedUserModel);
+//					s = new String[]{Runner.scriptPythonPath, Runner.scriptTensorFlow, 
+//						argStrings.get(0), argStrings.get(1)};			
+					String argScriptPath = Runner.scriptPythonPath;
+					String argScript = Runner.scriptTensorFlow;
+					String hyperparamsStr = argStrings.get(0);
+					String pathsExtensionsStr = argStrings.get(1);
+					String module = argScript.substring(0, argScript.indexOf(".py"));
+					
+					// cd to script directory
+					cmds += "cd " + argScriptPath + "\r\n";
+					// Get imports
+					cmds += PythonInterface.getImports(new File(argScriptPath + argScript)) + "\r\n";
+					cmds += "import " + module + "\r\n";
+//					cmds += "global sess"  + "\r\n";
+//					cmds += "sess = tf.Session()" + "\r\n";
+					// Mimic relevant part of model-tensorflow.main()
+					cmds += "tf.reset_default_graph()" + "\r\n";
+					cmds += 
+						"mode, paths_extensions, hyperparams, data, placeholders = " + 
+						module + ".parse_argument_strings(" + 
+						"'" + Runner.application + "'" + ", " +  
+						"'" + hyperparamsStr + "'" + ", " + 
+						"'" + pathsExtensionsStr + "'" + ")" + "\r\n" ;
+//					cmds += "sess = tf.InteractiveSession()" + "\r\n";
+//					cmds += "tf.set_random_seed(hyperparams['seed'])" + "\r\n" ;
+//					cmds += "with tf.Session() as sess:" + "\r\n";
+					cmds += "tf.set_random_seed(hyperparams['seed'])" + "\r\n";
+					cmds += module + ".start_sess()" + "\r\n";
+					// Initialise the stored weights 
+					cmds += 
+//						"with tf.Session() as sess: weights_biases = " +
+						"weights_biases = " +	
+						module + ".create_neural_network(" + 
+						"mode, " +
+						"hyperparams['layer_sizes'], " + 
+						"hyperparams['use_stored_weights'], " +
+//						"paths_extensions['store_path'], " + "sess)");
+						"paths_extensions['store_path'])" + "\r\n";			
+				}
+//				System.out.println("cmdStr = " + Arrays.toString(s));
+				pr = PythonInterface.runIPythonSession(cmds);
 			}
 //			allNetworkOutputs = new ArrayList<double[]>();
 			
@@ -3475,7 +3540,7 @@ public class TestManager {
 
 				List<List<Double>> fvAndPredLbl = 
 					predictVoices(storePath, minAndMaxFeatureValues, noteIndex, 
-					voiceEntryInfo, modelWeighting);
+					voiceEntryInfo, modelWeighting, pr);
 				// Add the note to the predicted voices
 				addNote(noteIndex);
 				// Set the adapted voice labels to the Transcription 
@@ -3487,13 +3552,14 @@ public class TestManager {
 				}
 			}
 			if (mt == ModelType.DNN || mt == ModelType.OTHER) {
-				// Overwrite last saved features and model output files with those for
-				// all features and model outputs
+				// Save feature vectors and model output
 				ToolBox.storeListOfListsAsCSVFile(allFv, 
 					new File(storePath, Runner.fvExt + Runner.application + ".csv"));
 				ToolBox.storeListOfListsAsCSVFile(allPredLbl, 
 					new File(storePath, Runner.outpExt + Runner.application + ".csv"));
-				// notes in fold processed; exit Python process
+				// y-app is the same as y-tst and does not have to be stored
+//				ToolBox.storeListOfListsAsCSVFile(groundTruthVoiceLabels,
+//					new File(storePath, Runner.lblExt + Runner.application + ".csv"));
 			}
 
 			// 2. Set class variables for EncogNeuralNetworkManager
