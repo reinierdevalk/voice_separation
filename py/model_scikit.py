@@ -35,9 +35,9 @@ arg_param		the parameter to tune
 
 # Set mode
 train, test = False, False
-if mode == 'train':
+if mode == 'trn':
 	train = True
-elif mode == 'test':
+elif mode == 'tst':
 	test = True
 
 # Set correct extension

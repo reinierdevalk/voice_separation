@@ -658,7 +658,7 @@ public class EvaluationManager {
 					ToolBox.readTextFile(new File(path + "fold_" + foldNum + "/" + 
 					perf + ".csv"));
 				String[][] curr = ToolBox.retrieveCSVTable(csvStr);
-				System.out.println("Fold = " + (j+1));
+				System.out.println("fold = " + (j+1));
 				for (String[] s : curr) {
 					System.out.println(Arrays.toString(s));
 				}

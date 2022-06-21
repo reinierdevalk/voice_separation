@@ -1370,14 +1370,11 @@ public class TrainingManager {
 					if (isScikit) {
 						smoothen = true;
 						cmd = new String[]{
-							"python", 
-							Runner.scriptPythonPath + Runner.scriptScikit, 
+							"python", Runner.scriptPythonPath + Runner.scriptScikit, 
 							m.name(), 
-							"train", 
+							Runner.train, 
 							storePath,			
-							Runner.fvExt, 
-							Runner.clExt, 
-							Runner.outpExt, 
+							Runner.fvExt, Runner.clExt, Runner.outpExt, 
 							Runner.getOtherParam(modelParameters)};
 					}
 					// For TensorFlow
@@ -1391,7 +1388,7 @@ public class TrainingManager {
 							argStrings.get(0), 
 							argStrings.get(1)};
 					}
-					System.out.println("cmd = " + Arrays.toString(cmd));
+//					System.out.println("cmd = " + Arrays.toString(cmd));
 					// Run Python code as a script
 					PythonInterface.runPythonFileAsScript(cmd);
 

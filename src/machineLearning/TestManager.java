@@ -154,7 +154,7 @@ public class TestManager {
 			// For each fold
 			for (int k = 1; k <= datasetSize; k++) {
 				String startFoldTe = ToolBox.getTimeStampPrecise();
-				System.out.println("Fold = " + k);
+				System.out.println("fold = " + k);
 				String[] currentPaths = new String[paths.length];
 				for (int i = 0; i < paths.length; i++) {
 					String s = paths[i];
@@ -1307,7 +1307,10 @@ public class TestManager {
 					// For scikit
 					if (isScikit) {
 						cmd = new String[]{
-							"python", Runner.scriptPythonPath, m.name(), "test", storePath, //pathStoredNN, 
+							"python", Runner.scriptPythonPath + Runner.scriptScikit, 
+							m.name(), 
+							Runner.test, 
+							storePath, //pathStoredNN, 
 							Runner.fvExt, Runner.clExt, Runner.outpExt,
 							Runner.getOtherParam(modelParameters)};
 					}
@@ -1322,7 +1325,7 @@ public class TestManager {
 							argStrings.get(0),
 							argStrings.get(1)};
 					}
-					System.out.println("cmd = " + Arrays.toString(cmd));
+//					System.out.println("cmd = " + Arrays.toString(cmd));
 					// Run Python code as a script
 					PythonInterface.runPythonFileAsScript(cmd);
 
@@ -2367,6 +2370,9 @@ public class TestManager {
 				System.out.println("processing note " + noteIndex);
 			}
 			currentNetworkOutput = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			boolean isFinalNote = 
+				isTablatureCase ? noteIndex == basicTabSymbolProperties.length - 1 :
+				noteIndex == basicNoteProperties.length - 1;
 			String cmds = "";
 			boolean isScikit = false;
 			if (isScikit) {	
@@ -2374,42 +2380,45 @@ public class TestManager {
 				String mdl = m.name(); 
 				String fvExt = Runner.fvExt + "app.csv";
 				String outpExt = Runner.outpExt + "app.csv";
+
+				// TODO implement choice between loading and no-loading approach and merge a. and b. below
+				// a. Loading feature vector from file
 				cmds = 
-//					"print('loading features and applying model')" + cr +
-					"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + "\r\n" +
-					"X = X.reshape(1, -1)" + "\r\n" +
-					"classes = m.predict(X)" + "\r\n" +
-					"max_num_voices = 5" + "\r\n" +
-					"num_ex = len(classes)" + "\r\n";
-				if (!mdl.endsWith("CL")) {
+//					"print('loading features and applying model')" + "\r\n" +
+					"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + "\r\n" + // from script
+					"X = X.reshape(1, -1)" + "\r\n" + // (from script)
+					"classes = m.predict(X)" + "\r\n" + // from script
+					"max_num_voices = 5" + "\r\n" + // from script
+					"num_ex = len(classes)" + "\r\n"; // from script
+				if (!mdl.endsWith("CL")) { // from script
 					cmds +=
-						"probs = m.predict_proba(X)" + "\r\n" +		
-						"num_cols_to_add = max_num_voices - len(probs[0])" + "\r\n" +
-//						"num_ex = len(probs)" + cr +
-						"z = np.zeros((num_ex, num_cols_to_add), dtype=probs.dtype)" + "\r\n" +
-						"probs = np.append(probs, z, axis=1)" + "\r\n";	
+						"probs = m.predict_proba(X)" + "\r\n" + // from script		
+						"num_cols_to_add = max_num_voices - len(probs[0])" + "\r\n" + // from script
+//						"num_ex = len(probs)" + cr + // from script
+ 						"z = np.zeros((num_ex, num_cols_to_add), dtype=probs.dtype)" + "\r\n" + // from script
+						"probs = np.append(probs, z, axis=1)" + "\r\n";	// from script
 				}
-				else {
+				else { // from script
 					cmds +=
-						"probs = np.zeros((num_ex, max_num_voices))" + "\r\n" +
-						"for i in range (0, num_ex): probs[i][int(classes[i])] = 1.0" + "\r\n";
+						"probs = np.zeros((num_ex, max_num_voices))" + "\r\n" + // from script
+						"for i in range (0, num_ex): probs[i][int(classes[i])] = 1.0" + "\r\n"; // from script
 				}	
 				cmds +=
 //					"print(X)" + cr +
 //					"print(classes)" + cr +
 //					"print(probs)" + cr +
 //					"print('saving model output')" + cr +
-					"df_probs = pd.DataFrame(probs)" + "\r\n" +
-					"df_probs.to_csv('" + path + outpExt + "', header=False, index=False)" + "\r\n" +
-//					"df_classes = pd.DataFrame(classes)" + cr + 
-//					"df_classes.to_csv('" + path + "outp_cl_appl.csv', header=False, index=False)" + cr +
-					"print('#')" + "\r\n";
+					"df_probs = pd.DataFrame(probs)" + "\r\n" + // from script
+					"df_probs.to_csv('" + path + outpExt + "', header=False, index=False)" + "\r\n" + // from script
+//					"df_classes = pd.DataFrame(classes)" + cr + // from script 
+//					"df_classes.to_csv('" + path + "outp_cl_appl.csv', header=False, index=False)" + cr + // from script
+//					"print('#')" + "\r\n";
 				
-				PythonInterface.addToIPythonSession(pr, cmds);
+				PythonInterface.addToIPythonSession(pr, cmds, isFinalNote); // TODO remove after merging
 
+				// b. Passing feature vector as String 
 				String asStr = currentNoteFeatureVector.toString();
 				String fv = asStr.substring(1, asStr.length()-1);
-
 //				String fv = ""; 
 //				for (int i = 0; i < currentNoteFeatureVector.size(); i++) {
 //					double d = currentNoteFeatureVector.get(i);
@@ -2418,7 +2427,49 @@ public class TestManager {
 //						fv = fv.concat(",");
 //					}
 //				}
-				currentNetworkOutput = PythonInterface.predictNoLoading(fv);
+
+				// Code below from PythonInterface.predictNoLoading()
+				cmds +=
+//					"print('loading features and applying model')" + cr +
+//					"X = np.loadtxt('" + path + fvExt + "', delimiter=\",\")" + cr +
+					"arg_fv = '" + fv + "'" + "\r\n" + 
+					"X_list = [float(s.strip()) for s in arg_fv.split(',')]" + "\r\n" +
+//					"print(X_list)" + cr +
+					"X = np.array(X_list)" + "\r\n" +
+					"X = X.reshape(1, -1)" + "\r\n" +
+					"classes = m.predict(X)" + "\r\n" +
+					"probs = m.predict_proba(X)" + "\r\n" +
+					"max_num_voices = 5" + "\r\n" +
+					"num_cols_to_add = max_num_voices - len(probs[0])" + "\r\n" + 
+					"num_ex = len(probs)" + "\r\n" +
+					"z = np.zeros((num_ex, num_cols_to_add), dtype=probs.dtype)" + "\r\n" +
+					"probs = np.append(probs, z, axis=1)" + "\r\n" +
+//					"print(X)" + cr +
+//					"print(classes)" + cr +
+//					"print(probs)" + cr +
+//					"print('saving model output')" + cr +
+					"output = ','.join([str(p) for p in probs[0]])" + "\r\n" +
+					"print('@' + output + '@')" + "\r\n";
+//					"df_probs = pd.DataFrame(probs)" + cr +
+//					"df_probs.to_csv('" + path + outpExt + "', header=False, index=False)" + cr +			
+//					"print('#')" + "\r\n";
+				
+				String output = PythonInterface.addToIPythonSession(pr, cmds, isFinalNote);
+				// TODO make method -->
+				String predStr = output.substring(output.indexOf("@[") + 2, output.indexOf("]@")).trim();
+				// Remove any line breaks
+				predStr = predStr.replace("\r\n", "");
+				// Remove any double spaces
+				while (predStr.contains("  ")) {
+					predStr = predStr.replace("  ", " ");
+				}
+				// Fill currentNetworkOutput
+				String[] voiceProb = predStr.split(" ");
+				for (int i = 0; i < voiceProb.length; i++) {
+					currentNetworkOutput[i] = Double.parseDouble(voiceProb[i].trim());
+				}
+				// <--
+//				currentNetworkOutput = PythonInterface.predictNoLoading(fv);
 			}
 			else {
 				boolean storeFilesTensorFlow = false;
@@ -2445,9 +2496,6 @@ public class TestManager {
 
 				String fvAsStr = currentNoteFeatureVector.toString();			
 				String scriptName = Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py"));
-				boolean isFinalNote = 
-					isTablatureCase ? noteIndex == basicTabSymbolProperties.length - 1 :
-					noteIndex == basicNoteProperties.length;
 				cmds += 
 //					"sess = tf.InteractiveSession()" + cr +
 //					"tf.set_random_seed(hyperparams['seed'])" + cr +
@@ -2460,9 +2508,10 @@ public class TestManager {
 					"print('@' + str(sm_app) + '@')" + "\r\n"; // the stringified np.ndarray sm_app is space-separated
 				if (isFinalNote) {
 					cmds += "sess.close()" + "\r\n";
+//					cmds += "exit()" + "\r\n";
 				}
 				
-				String output = PythonInterface.addToIPythonSession(pr, cmds);
+				String output = PythonInterface.addToIPythonSession(pr, cmds, isFinalNote);
 				String predStr = output.substring(output.indexOf("@[") + 2, output.indexOf("]@")).trim();
 				// Remove any line breaks
 				predStr = predStr.replace("\r\n", "");
@@ -3480,7 +3529,7 @@ public class TestManager {
 					// cd to script directory
 					cmds += "cd " + argScriptPath + "\r\n";
 					// Get imports
-					cmds += PythonInterface.getImports(new File(argScriptPath + argScript)) + "\r\n";
+					cmds += PythonInterface.getImports(new File(argScriptPath + argScript));
 					cmds += "import " + module + "\r\n";
 //					cmds += "global sess"  + "\r\n";
 //					cmds += "sess = tf.Session()" + "\r\n";

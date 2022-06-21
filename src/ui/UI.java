@@ -89,7 +89,7 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.BACH_WTC_2VV;
+			datasetID = Dataset.BACH_WTC_5VV;
 			m = Model.D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
