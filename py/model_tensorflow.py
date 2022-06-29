@@ -13,7 +13,7 @@ verbose = True
 plot_or_not = True
 check_accuracies = False
 
-# NOTES
+# notes
 # - eval() is alternative for sess.run(), but is done for each variable individually. Compare (1) with (2), (3) 	
 #   (1) acc_vld, sm_vld = sess.run([accuracy_vld, softm_vld], feed_dict={x: x_vld, y: y_vld, keep_prob: 1.0})
 #	(2) acc_vld = accuracy_vld.eval({x: x_vld, y: y_vld, keep_prob: 1.0})
@@ -93,6 +93,7 @@ def evaluate_neural_network(data, keep_prob, num_layers, seed, weights, biases):
 		data					the features
 		keep_prob				the dropout keep probability placeholder
 		num_layers				the number of hidden and output layers
+		seed 					the seed
 		weights 				the weights
 		biases 					the biases
 	"""
@@ -232,9 +233,6 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 			# sm_trn = sm_trn_comb 
 
 			print('epoch', str(epoch) + '/' + str(epochs), 'completed: loss =', epoch_loss, 'acc =', acc_trn)
-
-#			total_cost.append(epoch_loss)
-#			accs_trn.append(acc_trn)
 
 			# Non-user model (model selection) case: save weights and softmaxes for the current epoch  
 			# if its acc_vld is the highest so far. Check acc_vld every tenth epoch
@@ -423,7 +421,7 @@ def main():
 	# https://stackoverflow.com/questions/49175704/tensorflow-reproducing-results-when-using-dropout
 	tf.set_random_seed(hyperparams['seed'])
 
-	# Start session and run the DNN
+	# Run DNN inside session
 	start_sess()
 	run_neural_network(mode, placeholders, data, hyperparams, paths_extensions)
 	sess.close()

@@ -78,7 +78,7 @@ public class UI {
 			
 			// Settings
 			// a. Runner settings
-			skipTraining = true;
+			skipTraining = false;
 			trainUserModel = false;
 			verbose = false;
 			
@@ -89,7 +89,7 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.BACH_WTC_5VV;
+			datasetID = Dataset.BACH_WTC_3VV;
 			m = Model.D;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
