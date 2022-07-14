@@ -263,6 +263,7 @@ public class TrainingManager {
 			List<Integer> currChordSizes = 
 				isTablatureCase ? currTab.getNumberOfNotesPerChord() : currTrans.getNumberOfNewNotesPerChord(); // was currTransGT.getNumberOfNewNotesPerChord() 06.05	
 			List<Integer[]> currMeterInfo = 
+//				isTablatureCase ? currTab.getTimeline().getMeterInfoOBS() : currTrans.getMeterInfo(); // was currTransGT.getMeterInfo() 06.05	
 				isTablatureCase ? currTab.getTimeline().getMeterInfo() : currTrans.getMeterInfo(); // was currTransGT.getMeterInfo() 06.05	
 			// Voice information is different for currTrans and currTransGT, and must be 
 			// taken from the former
@@ -750,6 +751,7 @@ public class TrainingManager {
 				if (isTablatureCase) {
 					currBTP = currTab.getBasicTabSymbolProperties();
 					currMeterInfo = currTab.getTimeline().getMeterInfo();
+//					currMeterInfo = currTab.getTimeline().getMeterInfoOBS();
 					currChordSizes = currTab.getNumberOfNotesPerChord();
 					if (modelDuration) { 
 						currDurLabels = currTrans.getDurationLabels();

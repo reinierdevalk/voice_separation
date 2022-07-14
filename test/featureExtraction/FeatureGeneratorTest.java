@@ -1527,6 +1527,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		List<double[]> actual = new ArrayList<double[]>();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+//		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			actual.add(FeatureGenerator.getBasicNoteFeatures(basicTabSymbolProperties, null, meterInfo, i));
 		}
@@ -6883,6 +6884,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> voicesCoDNotes = transcription.getVoicesCoDNotes();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+//		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		// a. Fwd model	  
 		// Not modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties,	
@@ -7128,6 +7130,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> voicesCoDNotes = transcription.getVoicesCoDNotes();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+//		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		// a. Fwd model	  
 		// Not modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties,
@@ -7473,6 +7476,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> voicesCoDNotes = transcription.getVoicesCoDNotes();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+//		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		// a. Fwd model	  
 		// Not modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
@@ -8098,6 +8102,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> predVoicesCoDNotes = predTranscription.getVoicesCoDNotes();
 		predVoiceLabels = predTranscription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+//		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		boolean modelDuration = false;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
@@ -8307,6 +8312,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<Integer[]> predVoicesCoDNotes = predictedTranscription.getVoicesCoDNotes();
 		predVoiceLabels = predictedTranscription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+//		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
 			predictedTranscription, note6, predVoiceLabels, meterInfo, 6, 1, false));

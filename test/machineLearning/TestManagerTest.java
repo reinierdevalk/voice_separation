@@ -243,6 +243,7 @@ public class TestManagerTest extends TestCase {
 			new Tablature(new File(Runner.encodingsPath + "test/" + "test_resolve_conflicts.tbp"), false);
 		testManager.basicTabSymbolProperties = testManager.tablature.getBasicTabSymbolProperties();
 		testManager.meterInfo = testManager.tablature.getTimeline().getMeterInfo();
+//		testManager.meterInfo = testManager.tablature.getTimeline().getMeterInfoOBS();
 
 		// Pre-set the necessary lists with dummy values
 		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {
@@ -829,6 +830,7 @@ public class TestManagerTest extends TestCase {
 			new Tablature(new File(Runner.encodingsPath + "test/" + "test_resolve_conflicts.tbp"), false);
 		testManager.basicTabSymbolProperties = testManager.tablature.getBasicTabSymbolProperties();
 		testManager.meterInfo = testManager.tablature.getTimeline().getMeterInfo();
+//		testManager.meterInfo = testManager.tablature.getTimeline().getMeterInfoOBS();
 
 		// Pre-set the necessary lists with dummy values
 		for (int i = 0; i < testManager.basicTabSymbolProperties.length; i++) {

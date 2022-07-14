@@ -319,6 +319,7 @@ public class TestManager {
 		if (isTablatureCase) {
 			basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 			meterInfo = tablature.getTimeline().getMeterInfo();
+//			meterInfo = tablature.getTimeline().getMeterInfoOBS();
 			for (int j = 0; j < basicTabSymbolProperties.length; j++) {
 				allMetricPositions.add(Timeline.getMetricPosition(
 					getMetricTime(j, isTablatureCase), meterInfo));
@@ -677,6 +678,7 @@ public class TestManager {
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + MIDIImport.EXTENSION);
 				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION), null);
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfo();
+//				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
 //					MEIExport.exportMEIFile(
