@@ -15,7 +15,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import data.Dataset;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.NNManager.ActivationFunction;
-import python.PythonInterface;
 import representations.Tablature;
 import representations.Transcription;
 import tools.ToolBox;
@@ -33,6 +32,7 @@ import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.utility.math.Rational;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
+import interfaces.PythonInterface;
 
 public class TrainingManager {
 
