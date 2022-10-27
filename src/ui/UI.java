@@ -89,11 +89,12 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.BACH_WTC_3VV;
-			m = Model.D;
+			datasetID = Dataset.THESIS_INT_3VV;
+			m = Model.N_PRIME;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
-			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
+//			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
+			expDir = "thesis/exp_3.2/"; 
 			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
 			//
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
@@ -101,12 +102,13 @@ public class UI {
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
 //			config = Configuration.FOUR; // cnf 4; "4-data_TPM-data_ISM/"; // WAS "4. Output (with prior probability matrix)"
 			//
-			hyperparams = "HL=2/HLS=66/KP=0.875-no_heur/";
+//			hyperparams = "HL=2/HLS=66/KP=0.875-no_heur/";
 //			hyperparams = "cnf=" + config.getStringRep(); // "HLS=" + hiddenLayerSize; "KP=" + keepProbability;
 //			hyperparams = "HLF=1.0/lmb=0.001/";
 //			hyperparams = "eps=0.05/";
 //			hyperparams = "LR=0.003/HL=1/HLS=66/KP=0.875/";
 //			hyperparams = "final/";
+			hyperparams = "";
 			//
 			mmfs = Arrays.asList(new MelodyModelFeature[]{ // used both for MM and ENS
 				MelodyModelFeature.PITCH,
@@ -126,8 +128,8 @@ public class UI {
 			// Hyperparameters
 			// a. Tuned hyperparameters
 			// Shallow network
-			lambda = 0.001; // regularisation parameter  
-			hiddenLayerFactor = 1.0;
+			lambda = 0.00003; // regularisation parameter  
+			hiddenLayerFactor = 0.5;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;

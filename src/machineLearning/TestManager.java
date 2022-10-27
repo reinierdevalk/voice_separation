@@ -375,7 +375,7 @@ public class TestManager {
 			groundTruthVoiceLabels = groundTruthTranscription.getVoiceLabels();
 		
 			if (!isTablatureCase) {
-				equalDurationUnisonsInfo = groundTruthTranscription.getEqualDurationUnisonsInfo();
+				equalDurationUnisonsInfo = groundTruthTranscription.getVoicesEDU();
 				// When using the bwd model, equalDurationUnisonsInfo must be set in bwd order
 				if (pm == ProcessingMode.BWD) {
 					List<Integer[]> equalDurationUnisonsInfoBwd = new ArrayList<Integer[]>();
@@ -393,7 +393,7 @@ public class TestManager {
 				if (isTablatureCase && modelDuration) {
 					if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
 						groundTruthDurationLabels = groundTruthTranscription.getDurationLabels();
-						groundTruthVoicesCoDNotes = groundTruthTranscription.getVoicesCoDNotes();
+						groundTruthVoicesCoDNotes = groundTruthTranscription.getVoicesSNU();
 					}
 					groundTruthLabels = new ArrayList<List<Double>>();
 					for (int i = 0; i < groundTruthVoiceLabels.size(); i++) {
@@ -913,23 +913,16 @@ public class TestManager {
 	 */
 	// TESTED for both tablature- and non-tablature case
 	public List<List<Integer>> generateObservations() {
-		List<List<Integer>> observations = new ArrayList<List<Integer>>();		
+		List<List<Integer>> observations = new ArrayList<List<Integer>>();
 
-		int numberOfChords = -1;
-		if (tablature != null) {
-			numberOfChords = tablature.getTablatureChords().size();
-		}
-		else {
-			numberOfChords = groundTruthTranscription.getTranscriptionChords().size();
-		}
-		for (int j = 0; j < numberOfChords; j++) {
-			List<Integer> pitchesInChord = null;
-			if (tablature != null) {
-				pitchesInChord = tablature.getPitchesInChord(j);
-			}
-			else {
-				pitchesInChord = groundTruthTranscription.getPitchesInChord(j);
-			}
+		List<List<Note>> chords = groundTruthTranscription.getChords();		
+		int numChords = 
+			tablature != null ? tablature.getTablatureChords().size() : chords.size();
+
+		for (int j = 0; j < numChords; j++) {
+			List<Integer> pitchesInChord =
+				tablature != null ?	tablature.getPitchesInChord(j) : 
+				groundTruthTranscription.getPitchesInChord(chords.get(j));
 			Collections.sort(pitchesInChord);
 			observations.add(pitchesInChord);
 		}
@@ -1219,7 +1212,7 @@ public class TestManager {
 							groundTruthTranscription.getPiece().getHarmonyTrack());
 					}
 							
-					List<Integer[]> predictedVoicesCoDNotes = predictedTranscription.getVoicesCoDNotes();
+					List<Integer[]> predictedVoicesCoDNotes = predictedTranscription.getVoicesSNU();
 					// Determine predictedLabels
 					List<List<Double>> predictedVoiceLabels = predictedTranscription.getVoiceLabels();
 					List<List<Double>> predictedDurationLabels = predictedTranscription.getDurationLabels();
@@ -2183,9 +2176,9 @@ public class TestManager {
 			staff.add(notationVoice);
 		}
 
-		// Set the intial NoteSequence and voice labels
+		// Set the initial NoteSequence and voice labels
 		newTranscription.initialiseNoteSequence();
-		newTranscription.initialiseVoiceLabels();
+		newTranscription.initialiseVoiceLabels(null);
 
 		return newTranscription;
 	}	
@@ -3456,7 +3449,7 @@ public class TestManager {
 					// feature vector calculation) to the predicted values. These predicted values are replaced
 					// one by one during the application process (in resolveConflicts())
 					allDurationLabels = predictedTranscription.getDurationLabels();
-					allVoicesCoDNotes = predictedTranscription.getVoicesCoDNotes();	
+					allVoicesCoDNotes = predictedTranscription.getVoicesSNU();	
 				}
 			}
 			if (mt == ModelType.ENS) {

@@ -758,10 +758,10 @@ public class ErrorCalculatorTest extends TestCase {
 			List<List<Double>> voiceLabels = t.getVoiceLabels();
 			Collections.swap(voiceLabels, 12, 13);      
 			// 3. Set the equalDurationUnisonsInfo for notes 12-13 and 16-17
-			t.getEqualDurationUnisonsInfo().set(12, new Integer[]{1, 0, 13});
-			t.getEqualDurationUnisonsInfo().set(13, new Integer[]{1, 0, 12});
-			t.getEqualDurationUnisonsInfo().set(16, new Integer[]{3, 2, 17});
-			t.getEqualDurationUnisonsInfo().set(17, new Integer[]{3, 2, 16});
+			t.getVoicesEDU().set(12, new Integer[]{1, 0, 13});
+			t.getVoicesEDU().set(13, new Integer[]{1, 0, 12});
+			t.getVoicesEDU().set(16, new Integer[]{3, 2, 17});
+			t.getVoicesEDU().set(17, new Integer[]{3, 2, 16});
 		}
 
 		List<Integer> voice0 = new ArrayList<Integer>(Arrays.asList(new Integer[]{0}));
@@ -998,7 +998,7 @@ public class ErrorCalculatorTest extends TestCase {
 		for (int i = 0; i < transcriptions.size(); i++) {
 			Transcription t = transcriptions.get(i);
 			actual.addAll(ErrorCalculator.getPositivesAndNegativesPerVoice(allPredictedVoices.get(i),
-				t.getVoiceLabels(), t.getEqualDurationUnisonsInfo(), t.getNumberOfVoices()));
+				t.getVoiceLabels(), t.getVoicesEDU(), t.getNumberOfVoices()));
 		}
 
 		assertEquals(expected.size(), actual.size());

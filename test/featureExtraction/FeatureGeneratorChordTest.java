@@ -226,9 +226,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<double[]> actual = new ArrayList<double[]>();
 		Integer[][] bnp = transcription.getBasicNoteProperties();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 			actual.add(featureGeneratorChord.getProximitiesAndCourseInfoAheadChord(null, bnp, lowestNoteIndex, 3));
-			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -386,10 +386,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		Integer[][] bnp = transcription.getBasicNoteProperties();
 		List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
 		int lowestOnsetIndex = 0;
-			for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+			for (int i = 0; i < transcription.getChords().size(); i++) {
 				actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(null, bnp, transcription, 
 					lowestOnsetIndex, voiceAssignments.get(i)));
-				lowestOnsetIndex += transcription.getTranscriptionChords().get(i).size(); 	
+				lowestOnsetIndex += transcription.getChords().get(i).size(); 	
 			}
 
 		assertEquals(expected.size(), actual.size());
@@ -548,8 +548,8 @@ public class FeatureGeneratorChordTest extends TestCase {
     Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
     int highestNumberOfVoices = transcription.getNumberOfVoices();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
-    	List<Note> currentChord = transcription.getTranscriptionChords().get(i);
+    for (int i = 0; i < transcription.getChords().size(); i++) {
+    	List<Note> currentChord = transcription.getChords().get(i);
     	List<List<Double>> currentChordVoiceLabels = 
     		allVoiceLabels.subList(lowestNoteIndex, lowestNoteIndex + currentChord.size());
     	List<Integer> currentVoiceAssignment = 
@@ -1419,10 +1419,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  Integer[][] bnp = transcription.getBasicNoteProperties();
 	  List<Integer[]> meterInfo = transcription.getMeterInfo();
 	  int lowestNoteIndex = 0;
-	  for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+	  for (int i = 0; i < transcription.getChords().size(); i++) {
 		 	actual.add(FeatureGeneratorChord.getNoteSpecificFeaturesChord(null, bnp, 
 		 		/*transcription,*/ meterInfo, lowestNoteIndex));
-		 	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+		 	lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 		  
 		// Assert equality
@@ -1533,10 +1533,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		Integer[][] bnp = transcription.getBasicNoteProperties();
 		List<Integer[]> meterInfo = transcription.getMeterInfo();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getChordLevelFeaturesChord(null, bnp, 
 				/*transcription,*/ meterInfo, lowestNoteIndex));
-			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
 		// Assert equality
@@ -1589,7 +1589,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
-    List<Integer[]> voicesCoDNotes=  transcription.getVoicesCoDNotes();
+    List<Integer[]> voicesCoDNotes=  transcription.getVoicesSNU();
     int lowestNoteIndex = 0;
     for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
  	    actual.add(FeatureGeneratorChord.getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, null, 
@@ -1646,9 +1646,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] bnp = transcription.getBasicNoteProperties();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+    for (int i = 0; i < transcription.getChords().size(); i++) {
  	    actual.add(FeatureGeneratorChord.getVoicesAlreadyOccupied(null, null, null, bnp, transcription, lowestNoteIndex)); 
- 	    lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();  
+ 	    lowestNoteIndex += transcription.getChords().get(i).size();  
     }
 		
 		// Assert equality
@@ -2192,10 +2192,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  int largestChordSizeTraining = transcription.getLargestTranscriptionChord();
 	  Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
 	  int lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
   	 	actual.add(featureGeneratorChord.getIndividualNoteFeaturesChord(null, basicNoteProperties, 
   	 		largestChordSizeTraining, lowestNoteIndex, false));
-  	 	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+  	 	lowestNoteIndex += transcription.getChords().get(i).size();
 	  }
 	    
 	  // Assert equality
@@ -2312,10 +2312,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  int highestNumberOfVoicesTraining = transcription.getNumberOfVoices(); 
 	  List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
     int lowestOnsetIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+    for (int i = 0; i < transcription.getChords().size(); i++) {
  	   	actual.add(featureGeneratorChord.getSharedNoteFeaturesChord(null, basicNoteProperties,	allVoiceLabels,
  	   		largestChordSizeTraining, highestNumberOfVoicesTraining, lowestOnsetIndex));
- 	    lowestOnsetIndex += transcription.getTranscriptionChords().get(i).size();
+ 	    lowestOnsetIndex += transcription.getChords().get(i).size();
  	  }
 
  	  // Assert equality
@@ -2645,10 +2645,10 @@ public class FeatureGeneratorChordTest extends TestCase {
   	Integer[][] bnp = transcription.getBasicNoteProperties();
   	List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
   	int lowestOnsetIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 	  	actual.add(featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(null, bnp, transcription, 
 	  		lowestOnsetIndex, voiceAssignments.get(i)));
-	  	lowestOnsetIndex += transcription.getTranscriptionChords().get(i).size(); 	
+	  	lowestOnsetIndex += transcription.getChords().get(i).size(); 	
 		}
   	
   	// Assert equality
@@ -2698,9 +2698,9 @@ public class FeatureGeneratorChordTest extends TestCase {
     List<Double> actual = new ArrayList<Double>(); 
     Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+    for (int i = 0; i < transcription.getChords().size(); i++) {
  	    actual.add(featureGeneratorChord.getRangeOfChord(null, basicNoteProperties, lowestNoteIndex));
- 	    lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+ 	    lowestNoteIndex += transcription.getChords().get(i).size();
     }
   
    // Assert equality
@@ -2783,10 +2783,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
 		int largestChordSizeTraining = transcription.getLargestTranscriptionChord();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
   	 	actual.add(featureGeneratorChord.getIntervalsInChordMUSCI(null, basicNoteProperties, largestChordSizeTraining, 
   	 		lowestNoteIndex));
-  	 	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+  	 	lowestNoteIndex += transcription.getChords().get(i).size();
   	}
 		
 		// Assert equality
@@ -2999,7 +2999,7 @@ public class FeatureGeneratorChordTest extends TestCase {
     		  
     // Calculate actual
     List<List<Integer>> actual = new ArrayList<List<Integer>>();
-    List<List<Note>> transcriptionChords = transcription.getTranscriptionChords();
+    List<List<Note>> transcriptionChords = transcription.getChords();
     Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
     int lowestNoteIndex = 0;
     for (int i = 0; i < transcriptionChords.size(); i++) {
@@ -3054,7 +3054,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  
     // For each chord: calculate the actual sustained pitches and add them to actual
     List<List<Integer>> actual = new ArrayList<List<Integer>>();
-    List<List<Note>> transcriptionChords = transcription.getTranscriptionChords();
+    List<List<Note>> transcriptionChords = transcription.getChords();
     Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
     List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
     int lowestNoteIndex = 0;
@@ -3086,7 +3086,7 @@ public class FeatureGeneratorChordTest extends TestCase {
     int largestChordSizeTraining = tablature.getLargestTablatureChord();
     int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
   	int lowestNoteIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+    for (int i = 0; i < transcription.getChords().size(); i++) {
     	List<Double> currentExpected = new ArrayList<Double>();
     	List<List<Double>> individual = featureGeneratorChord.getIndividualNoteFeaturesChord(basicTabSymbolProperties,
     		null,	largestChordSizeTraining, lowestNoteIndex, true);
@@ -3097,7 +3097,7 @@ public class FeatureGeneratorChordTest extends TestCase {
       	null, largestChordSizeTraining, highestNumberOfVoicesTraining, lowestNoteIndex);
     	currentExpected.addAll(shared);
     	expected.add(currentExpected);
-    	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();		
+    	lowestNoteIndex += transcription.getChords().get(i).size();		
     }
       	
     // Calculate actual
@@ -3131,7 +3131,7 @@ public class FeatureGeneratorChordTest extends TestCase {
     List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
     int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
   	int lowestNoteIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+    for (int i = 0; i < transcription.getChords().size(); i++) {
     	List<Double> currentExpected = new ArrayList<Double>();
     	List<List<Double>> individual = featureGeneratorChord.getIndividualNoteFeaturesChord(null, basicNoteProperties, 
     		largestChordSizeTraining, lowestNoteIndex, false);
@@ -3142,16 +3142,16 @@ public class FeatureGeneratorChordTest extends TestCase {
       	allVoiceLabels, largestChordSizeTraining, highestNumberOfVoicesTraining, lowestNoteIndex);
     	currentExpected.addAll(shared);
     	expected.add(currentExpected);
-    	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();		
+    	lowestNoteIndex += transcription.getChords().get(i).size();		
     }
       	
     // Calculate actual
   	List<List<Double>> actual = new ArrayList<List<Double>>();
   	lowestNoteIndex = 0;
-    for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+    for (int i = 0; i < transcription.getChords().size(); i++) {
     	actual.add(featureGeneratorChord.generateConstantChordFeatureVector(null, basicNoteProperties,
       		allVoiceLabels, largestChordSizeTraining, highestNumberOfVoicesTraining, lowestNoteIndex, false));
-    	lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+    	lowestNoteIndex += transcription.getChords().get(i).size();
     }
     
     // Assert equality
@@ -3251,14 +3251,14 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 		// For each chord: determine expected
 		List<List<Double>> expected = new ArrayList<List<Double>>(); 
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 			expected.add(new ArrayList<Double>());
 		}
 		Integer[][] bnp = transcription.getBasicNoteProperties();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			List<Integer> currentNewPitchesInChord = Transcription.getPitchesInChord(bnp, 
 				lowestNoteIndex); 
@@ -3310,17 +3310,17 @@ public class FeatureGeneratorChordTest extends TestCase {
 				currentExpected.add((double) v);
 			}
 			expected.set(i, currentExpected);
-			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
 		// For each chord: calculate the actual variable chord feature vector and add it to actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			actual.add(featureGeneratorChord.generateVariableChordFeatureVector(null, bnp, transcription,
 				lowestNoteIndex, highestNumberOfVoicesTraining,	currentVoiceAssignment));
-			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -3414,7 +3414,7 @@ public class FeatureGeneratorChordTest extends TestCase {
  	  int largestChordSizeTraining = transcription.getLargestTranscriptionChord();
  	  int lowestOnsetIndex = 0;
   	// For each chord
- 	  for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+ 	  for (int i = 0; i < transcription.getChords().size(); i++) {
   		List<List<Integer>> currentOrderedVoiceAssignments = allOrderedVoiceAssignments.get(i);
   		List<List<Double>> currentExpectedChord = new ArrayList<List<Double>>();
   		// For each voice assignment
@@ -3443,7 +3443,7 @@ public class FeatureGeneratorChordTest extends TestCase {
   			currentExpectedChord.add(currentExpected);
   		}
       expected.add(currentExpectedChord);
-      lowestOnsetIndex += transcription.getTranscriptionChords().get(i).size();
+      lowestOnsetIndex += transcription.getChords().get(i).size();
   	}
   	
   	// For each chord: calculate the actual complete chord feature vectors 

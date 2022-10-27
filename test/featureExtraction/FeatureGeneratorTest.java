@@ -2951,9 +2951,9 @@ public class FeatureGeneratorTest extends TestCase {
 		List<double[]> actual = new ArrayList<double[]>();
 		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < transcription.getTranscriptionChords().size(); i++) {
+		for (int i = 0; i < transcription.getChords().size(); i++) {
 			actual.add(FeatureGenerator.getIntervalsInChord(null, null, basicNoteProperties, lowestNoteIndex));
-			lowestNoteIndex += transcription.getTranscriptionChords().get(i).size();
+			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
 		// Assert equality
@@ -6031,25 +6031,25 @@ public class FeatureGeneratorTest extends TestCase {
 		// a. Unadapted (longer CoDnote in the upper voice)
 		Tablature tablatureA = new Tablature(encodingTestpiece1, true);
   	Transcription transcriptionA = new Transcription(midiTestpiece1, encodingTestpiece1);
-  	List<Integer[]> voicesCoDNotesA = transcriptionA.getVoicesCoDNotes();
+  	List<Integer[]> voicesCoDNotesA = transcriptionA.getVoicesSNU();
   	List<List<Double>> durationLabelsA = transcriptionA.getDurationLabels();
     // b. Longer CoDNote in the lower voice
   	Tablature tablatureB = new Tablature(encodingTestpiece1, true);
   	Transcription transcriptionB = new Transcription(midiTestpiece1, encodingTestpiece1);
-  	List<Integer[]> voicesCoDNotesB = transcriptionB.getVoicesCoDNotes();
+  	List<Integer[]> voicesCoDNotesB = transcriptionB.getVoicesSNU();
   	voicesCoDNotesB.set(12, new Integer[]{1, 0});
    	List<List<Double>> durationLabelsB = transcriptionB.getDurationLabels();
    	// c. CoDNotes of equal duration (quarter)
   	Tablature tablatureC = new Tablature(encodingTestpiece1, true);
   	Transcription transcriptionC = new Transcription(midiTestpiece1, encodingTestpiece1);
-  	List<Integer[]> voicesCoDNotesC = transcriptionC.getVoicesCoDNotes();
+  	List<Integer[]> voicesCoDNotesC = transcriptionC.getVoicesSNU();
    	List<List<Double>> durationLabelsC = transcriptionC.getDurationLabels();
    	List<Double> durLab12C = Transcription.QUARTER;
    	durationLabelsC.set(12, durLab12C);
     // d. CoDNotes of equal duration (eighth)
   	Tablature tablatureD = new Tablature(encodingTestpiece1, true);
   	Transcription transcriptionD = new Transcription(midiTestpiece1, encodingTestpiece1);
-  	List<Integer[]> voicesCoDNotesD = transcriptionD.getVoicesCoDNotes();
+  	List<Integer[]> voicesCoDNotesD = transcriptionD.getVoicesSNU();
    	List<List<Double>> durationLabelsD = transcriptionD.getDurationLabels();
    	List<Double> durLab12D = Transcription.EIGHTH;
    	durationLabelsD.set(12, durLab12D);
@@ -6881,7 +6881,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
-		List<Integer[]> voicesCoDNotes = transcription.getVoicesCoDNotes();
+		List<Integer[]> voicesCoDNotes = transcription.getVoicesSNU();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
@@ -7127,7 +7127,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
-		List<Integer[]> voicesCoDNotes = transcription.getVoicesCoDNotes();
+		List<Integer[]> voicesCoDNotes = transcription.getVoicesSNU();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
@@ -7473,7 +7473,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
-		List<Integer[]> voicesCoDNotes = transcription.getVoicesCoDNotes();
+		List<Integer[]> voicesCoDNotes = transcription.getVoicesSNU();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
@@ -8099,7 +8099,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 		predDurationLabels = predTranscription.getDurationLabels();
-		List<Integer[]> predVoicesCoDNotes = predTranscription.getVoicesCoDNotes();
+		List<Integer[]> predVoicesCoDNotes = predTranscription.getVoicesSNU();
 		predVoiceLabels = predTranscription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
@@ -8133,7 +8133,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		// Create predicted Lists
 		List<List<Double>> predVoiceLabels = gtTranscription.getVoiceLabels();
-		List<Integer[]> predEDUInfo = gtTranscription.getEqualDurationUnisonsInfo();
+		List<Integer[]> predEDUInfo = gtTranscription.getVoicesEDU();
 		// Chord 0: note 0 goes to voice 4; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 0.0, 1.0}));
 		Collections.swap(predVoiceLabels, 2, 3);
@@ -8309,7 +8309,7 @@ public class FeatureGeneratorTest extends TestCase {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 		predDurationLabels = predictedTranscription.getDurationLabels();
-		List<Integer[]> predVoicesCoDNotes = predictedTranscription.getVoicesCoDNotes();
+		List<Integer[]> predVoicesCoDNotes = predictedTranscription.getVoicesSNU();
 		predVoiceLabels = predictedTranscription.getVoiceLabels();
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
@@ -8335,7 +8335,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		// Create predicted Lists
 		List<List<Double>> predVoiceLabels = gtTranscription.getVoiceLabels();
-		List<Integer[]> predEDUInfo = gtTranscription.getEqualDurationUnisonsInfo();
+		List<Integer[]> predEDUInfo = gtTranscription.getVoicesEDU();
 		// Chord 0: note 0 goes to voice 4; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 0.0, 1.0}));
 		Collections.swap(predVoiceLabels, 2, 3);

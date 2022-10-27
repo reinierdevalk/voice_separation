@@ -8,6 +8,7 @@ import java.util.List;
 
 import data.Dataset;
 import data.Dataset.DatasetID;
+import de.uos.fmt.musitech.data.structure.Note;
 import representations.Tablature;
 import representations.Transcription;
 import tools.ToolBox;
@@ -217,13 +218,14 @@ public class HMMManager {
 			Transcription currTrans = currTestPiece.getTranscription();
 			List<List<Integer>> testData = new ArrayList<List<Integer>>();
 			int numberOfChords = -1;
+			List<List<Note>> chords = currTrans.getChords();
 			// a. In the tablature case
 			if (currTestPiece.getTablature() != null) {
 				numberOfChords = currTab.getTablatureChords().size();
 			}
 			// b. In the non-tablature case
 			else {
-				numberOfChords = currTrans.getTranscriptionChords().size();
+				numberOfChords = chords.size();
 			}
 			for (int j = 0; j < numberOfChords; j++) {
 				List<Integer> pitchesInChord = null;
@@ -233,7 +235,8 @@ public class HMMManager {
 				}
 				// b. In the non-tablature case
 				else {
-					pitchesInChord = currTrans.getPitchesInChord(j);
+					pitchesInChord = currTrans.getPitchesInChord(chords.get(j));
+//					pitchesInChord = currTrans.getPitchesInChord(j);
 				}
 				Collections.sort(pitchesInChord);
 				testData.add(pitchesInChord);

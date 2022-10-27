@@ -29,6 +29,7 @@ import ui.Runner.WeightsInit;
 import utility.DataConverter;
 import de.uos.fmt.musitech.data.score.NotationStaff;
 import de.uos.fmt.musitech.data.score.NotationVoice;
+import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
@@ -275,7 +276,7 @@ public class TrainingManager {
 				currDurLabels = 
 					isTablatureCase && modelDuration ? currTrans.getDurationLabels() : null;
 				currVoicesCoDNotes = 
-					isTablatureCase && modelDuration ? currTrans.getVoicesCoDNotes() : null;
+					isTablatureCase && modelDuration ? currTrans.getVoicesSNU() : null;
 			}
 			// 
 			List<List<Double>> currVoiceLabelsGT = 
@@ -755,7 +756,7 @@ public class TrainingManager {
 					currChordSizes = currTab.getNumberOfNotesPerChord();
 					if (modelDuration) { 
 						currDurLabels = currTrans.getDurationLabels();
-						currVoicesCoDNotes = currTrans.getVoicesCoDNotes();
+						currVoicesCoDNotes = currTrans.getVoicesSNU();
 					}
 				}
 				else {
@@ -763,17 +764,17 @@ public class TrainingManager {
 					currMeterInfo = currTrans.getMeterInfo();
 					currChordSizes = currTrans.getNumberOfNewNotesPerChord();
 					if (dc == DecisionContext.UNIDIR) {
-						currEDUInfo = currTrans.getEqualDurationUnisonsInfo();
+						currEDUInfo = currTrans.getVoicesEDU();
 					}
 					else if (dc == DecisionContext.BIDIR) {
-						currEDUInfo = currTransGT.getEqualDurationUnisonsInfo();
+						currEDUInfo = currTransGT.getVoicesEDU();
 					}
 				}
 				if (dc == DecisionContext.BIDIR) {
 					currVoiceLabelsGT = currTransGT.getVoiceLabels();
 					currDurLabelsGT = currTransGT.getDurationLabels();
 					if (modelDuration) {
-						currVoicesCoDNotesGT = currTransGT.getVoicesCoDNotes();
+						currVoicesCoDNotesGT = currTransGT.getVoicesSNU();
 					}
 				}
 
@@ -2811,6 +2812,7 @@ public class TrainingManager {
 		for (TablatureTranscriptionPair piece : pieces) {
 			Tablature currTablature = null;
 			Transcription currTranscription = piece.getTranscription();
+			List<List<Note>> chords = currTranscription.getChords();
 			int currNumberOfChords = -1;
 			// a. In the tablature case
 			if (piece.getTablature() != null) {
@@ -2819,7 +2821,8 @@ public class TrainingManager {
 			}
 			// b. In the non-tablature case
 			else {
-				currNumberOfChords = currTranscription.getTranscriptionChords().size();
+				currNumberOfChords = chords.size();
+//				currNumberOfChords = currTranscription.getChords().size();
 			}
 			List<List<Integer>> currMappings = 
 				currTranscription.getVoiceAssignments(highestNumberOfVoicesAssumed);
@@ -2834,7 +2837,8 @@ public class TrainingManager {
 				}
 				// b. In the non-tablature case
 				else {
-					currChord = currTranscription.getPitchesInChord(i);
+					currChord = currTranscription.getPitchesInChord(chords.get(i));
+//					currChord = currTranscription.getPitchesInChord(i);
 				}
 				Collections.sort(currChord);
 
@@ -2902,7 +2906,7 @@ public class TrainingManager {
 			}
 			// b. In the non-tablature case
 			else {
-				currNumberOfChords = currTranscription.getTranscriptionChords().size();
+				currNumberOfChords = currTranscription.getChords().size();
 			}	
 			List<List<Integer>> currMappings = 
 				currTranscription.getVoiceAssignments(highestNumberOfVoicesAssumed);
