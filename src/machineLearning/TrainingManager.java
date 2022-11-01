@@ -518,15 +518,15 @@ public class TrainingManager {
 
 		// Create the chord and mapping dictionaries
 		if (ma == ModellingApproach.HMM) {
-			highestNumVoicesAssumed = Transcription.MAXIMUM_NUMBER_OF_VOICES;
+			highestNumVoicesAssumed = Transcription.MAX_NUM_VOICES;
 			boolean useFullSizeMapping = false;
 			chordDictionary = generateChordDictionary(allPieces);
 			ToolBox.storeListOfListsAsCSVFile(chordDictionary, new File(storePath + Runner.chordDict + ".csv"));
 //			ToolBox.storeObjectBinary(chordDictionary, new File(paths[0] + Runner.chordDict + ".ser"));
 			mappingDictionary = generateMappingDictionary(allPieces, highestNumVoicesAssumed);
 			if (useFullSizeMapping) { 
-				if (highestNumVoicesAssumed < Transcription.MAXIMUM_NUMBER_OF_VOICES) {
-					int diff = Transcription.MAXIMUM_NUMBER_OF_VOICES - highestNumVoicesAssumed; 
+				if (highestNumVoicesAssumed < Transcription.MAX_NUM_VOICES) {
+					int diff = Transcription.MAX_NUM_VOICES - highestNumVoicesAssumed; 
 					for (List<Integer> l : mappingDictionary) {
 						for (int i = 0; i < diff; i++) {
 							l.add(-1);
@@ -1097,10 +1097,10 @@ public class TrainingManager {
 				}
 				for (List<Double> l : allLabels) {
 					voiceLabelsForGTs.add(new ArrayList<Double>(
-						l.subList(0, Transcription.MAXIMUM_NUMBER_OF_VOICES)));
+						l.subList(0, Transcription.MAX_NUM_VOICES)));
 					if (modelDuration && dc == DecisionContext.UNIDIR) {
 						durLabelsForGTs.add(new ArrayList<Double>(
-							l.subList(Transcription.MAXIMUM_NUMBER_OF_VOICES, l.size())));
+							l.subList(Transcription.MAX_NUM_VOICES, l.size())));
 					}
 				}
 			}
@@ -1788,7 +1788,7 @@ public class TrainingManager {
 				List<Double> label = DataConverter.convertIntoVoiceLabel(corr);
 				// Get predicted output
 				List<Double> predOutp = new ArrayList<>();
-				for (int i = 0; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+				for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
 					predOutp.add(Double.parseDouble(detailsLine[outpInd + i]));
 				}
 				// Check index of highest value
@@ -2673,7 +2673,7 @@ public class TrainingManager {
 				"[" + numFeatures + " " + 
 				(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 
 				" ").repeat(modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue()) + 
-				Transcription.MAXIMUM_NUMBER_OF_VOICES + "]",
+				Transcription.MAX_NUM_VOICES + "]",
 			"val_perc=" + (trn ? modelParameters.get(Runner.VALIDATION_PERC).intValue() : "-1"),
 			"mini_batch_size=" + (trn ? (mbSize == -1 ? numTrainingExamples : mbSize) : "-1"),
 			"epochs=" + (trn ? modelParameters.get(Runner.EPOCHS).intValue() : "-1"), 

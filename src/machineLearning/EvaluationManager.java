@@ -1393,11 +1393,11 @@ public class EvaluationManager {
 			(dc == DecisionContext.UNIDIR && argModelDuration || 
 			dc == DecisionContext.BIDIR && argModelDuration && argModelDurationAgain);
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
-		int labelSize = Transcription.MAXIMUM_NUMBER_OF_VOICES;
+		int labelSize = Transcription.MAX_NUM_VOICES;
 		int numTabsForModelOutput = 5;
 		int mappingSize = 1;
 		if (modelDur) {
-			labelSize += Transcription.DURATION_LABEL_SIZE; 
+			labelSize += Transcription.MAX_TABSYMBOL_DUR; 
 			numTabsForModelOutput = 33;
 		}
 		if (ma == ModellingApproach.C2C || ma == ModellingApproach.HMM) {
@@ -1832,7 +1832,7 @@ public class EvaluationManager {
 				// 1. (Original) network output
 				double[] output = argAllNetworkOutputs.get(i); // HIER OK
 				double[] outputVoice = 
-					Arrays.copyOfRange(output, 0, Transcription.MAXIMUM_NUMBER_OF_VOICES);
+					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
 				// Determine the predicted voices, i.e., the voice predicted pre-conflict (NN only)
 				// or pre-combining (combined model). In both cases, they must thus NOT be retrieved
 				// from allPredictedVoices.
@@ -2258,7 +2258,7 @@ public class EvaluationManager {
 				// a. (Original) network output
 				double[] output = argAllNetworkOutputs.get(i); // HIER OK
 				double[] outputVoice = 
-					Arrays.copyOfRange(output, 0, Transcription.MAXIMUM_NUMBER_OF_VOICES);
+					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
 				// Determine the predicted voices, i.e., the voice predicted pre-conflict (NN only)
 				// or pre-combining (combined model). In both cases, they must thus NOT be retrieved
 				// from allPredictedVoices.
@@ -2323,7 +2323,7 @@ public class EvaluationManager {
 
 					// Predicted duration label
 					double[] outputDur = Arrays.copyOfRange(output, 
-						Transcription.MAXIMUM_NUMBER_OF_VOICES, output.length);
+						Transcription.MAX_NUM_VOICES, output.length);
 					String[] predictedDurationLabel = new String[outputDur.length]; 
 					for (int j = 0; j < outputDur.length; j++) {
 						String df = decFormOutput.format(outputDur[j]);
@@ -2893,7 +2893,7 @@ public class EvaluationManager {
 			
 //				double[] output = argAllNetworkOutputs.get(i); // HIER OK
 				double[] outputArray = 
-					Arrays.copyOfRange(output, 0, Transcription.MAXIMUM_NUMBER_OF_VOICES);
+					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
 				List<Integer> predictedVoices = 
 					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh).get(0);
 				List<Integer> adaptedVoices = allPredictedVoices.get(i); // HIER OK

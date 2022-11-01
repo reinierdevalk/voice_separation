@@ -262,13 +262,13 @@ public class TestManagerTest extends TestCase {
 //		}
 
 		// allNetworkOutputs
-		double[] eighth = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] eighth = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(eighth, 0.0); eighth[3] = 0.8; eighth[4] = 0.1; eighth[21] = 0.3; eighth[6] = 0.7;
-		double[] quarter = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] quarter = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(quarter, 0.0); quarter[7] = 0.8; quarter[3] = 0.1; quarter[21] = 0.3; quarter[6] = 0.7;
-		double[] half = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] half = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(half, 0.0);	half[15] = 0.8; half[0] = 0.1; half[16] = 0.3; half[31] = 0.7; 
-		double[] whole = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] whole = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(whole, 0.0); whole[31] = 0.8; whole[5] = 0.1; whole[16] = 0.3; whole[30] = 0.7;
 
 		// Chord 0
@@ -849,13 +849,13 @@ public class TestManagerTest extends TestCase {
 //		}
 
 		// allNetworkOutputs (bwd)
-		double[] eighth = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] eighth = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(eighth, 0.0); eighth[3] = 0.8; eighth[4] = 0.1; eighth[21] = 0.3; eighth[6] = 0.7;
-		double[] quarter = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] quarter = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(quarter, 0.0); quarter[7] = 0.8; quarter[3] = 0.1; quarter[21] = 0.3; quarter[6] = 0.7;
-		double[] half = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] half = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(half, 0.0); half[15] = 0.8; half[0] = 0.1; half[16] = 0.3; half[31] = 0.7; 
-		double[] whole = new double[Transcription.DURATION_LABEL_SIZE];
+		double[] whole = new double[Transcription.MAX_TABSYMBOL_DUR];
 		Arrays.fill(whole, 0.0); whole[31] = 0.8; whole[5] = 0.1; whole[16] = 0.3; whole[30] = 0.7;
 
 		List<double[]> allNetworkOutputs = new ArrayList<double[]>(); 

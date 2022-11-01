@@ -293,7 +293,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		// For each element of expected: turn the elements in the proximities arrays from distances into proximities
 		for (int i = 0; i < expected.size(); i++) {
 			double[] currentExpected = expected.get(i);
-			for (int j = 0; j < currentExpected.length - Transcription.MAXIMUM_NUMBER_OF_VOICES; j++) {
+			for (int j = 0; j < currentExpected.length - Transcription.MAX_NUM_VOICES; j++) {
 				double currentValue = currentExpected[j]; 
 				// Do only if currentValue is not -1.0, i.e., if the voice is active
 				if (currentValue != -1.0) {
@@ -373,7 +373,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		// For each element of expected: turn the elements in the proximities arrays from distances into proximities
 		for (int i = 0; i < expected.size(); i++) {
 			double[] currentExpected = expected.get(i);
-			for (int j = 0; j < currentExpected.length - Transcription.MAXIMUM_NUMBER_OF_VOICES; j++) {
+			for (int j = 0; j < currentExpected.length - Transcription.MAX_NUM_VOICES; j++) {
 				double currentValue = currentExpected[j]; 
 				// Do only if currentValue is not -1.0, i.e., if the voice is active
 				if (currentValue != -1.0) {
@@ -1136,7 +1136,7 @@ public class FeatureGeneratorChordTest extends TestCase {
  	  int highestNumberOfVoices = transcription.getNumberOfVoices();
     List<List<Integer>> groundTruthVoiceAssignments = 
 //  		transcription.getVoiceAssignments(tablature, highestNumberOfVoices);
-      transcription.getVoiceAssignments(/*tablature,*/ Transcription.MAXIMUM_NUMBER_OF_VOICES);
+      transcription.getVoiceAssignments(/*tablature,*/ Transcription.MAX_NUM_VOICES);
  	  Integer[][] btp = tablature.getBasicTabSymbolProperties();
   	int lowestNoteIndex = 0;
  	  for (int i = 0; i < groundTruthVoiceAssignments.size(); i++) {
@@ -2458,7 +2458,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 // 	  int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
  	  for (int i = 0; i < expectedAsList.size(); i++) {
   		List<List<Double>> currentExpectedAsList = expectedAsList.get(i);
-  		double[] currentExpected = new double[3 + Transcription.MAXIMUM_NUMBER_OF_VOICES];
+  		double[] currentExpected = new double[3 + Transcription.MAX_NUM_VOICES];
 //   		double[] currentExpected = new double[3 + highestNumberOfVoicesTraining];
 	  	// Add the averages of the proximities to currentExpected
   		for (int j = 0; j < currentExpectedAsList.size() - 1; j++) {
@@ -2624,7 +2624,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 // 	  int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
  	  for (int i = 0; i < expectedAsList.size(); i++) {
   		List<List<Double>> currentExpectedAsList = expectedAsList.get(i);
-   		double[] currentExpected = new double[3 + Transcription.MAXIMUM_NUMBER_OF_VOICES];
+   		double[] currentExpected = new double[3 + Transcription.MAX_NUM_VOICES];
 //   		double[] currentExpected = new double[3 + highestNumberOfVoicesTraining];
 	  	// Add the averages of the proximities to currentExpected
   		for (int j = 0; j < currentExpectedAsList.size() - 1; j++) {

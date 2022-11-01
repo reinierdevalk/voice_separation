@@ -78,7 +78,7 @@ public class UI {
 			
 			// Settings
 			// a. Runner settings
-			skipTraining = false;
+			skipTraining = true;
 			trainUserModel = false;
 			verbose = false;
 			
@@ -89,12 +89,12 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.THESIS_INT_3VV;
-			m = Model.N_PRIME;
+			datasetID = Dataset.BACH_WTC_4VV;
+			m = Model.N;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
 //			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
-			expDir = "thesis/exp_3.2/"; 
+			expDir = "thesis/exp_1/"; 
 			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
 			//
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
@@ -128,8 +128,8 @@ public class UI {
 			// Hyperparameters
 			// a. Tuned hyperparameters
 			// Shallow network
-			lambda = 0.00003; // regularisation parameter  
-			hiddenLayerFactor = 0.5;
+			lambda = 0.00001; // regularisation parameter  
+			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
 			keepProbability = 0.875;

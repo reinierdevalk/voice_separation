@@ -149,8 +149,8 @@ public class HMMManager {
 		// b. The mapping dictionary
 		List<List<Integer>> mappingDictionary = null; // generateMappingDictionary(pieces, highestNumberOfVoicesAssumed);
 		if (useFullSizeMapping) { 
-			if (highestNumberOfVoicesAssumed < Transcription.MAXIMUM_NUMBER_OF_VOICES) {
-				int diff = Transcription.MAXIMUM_NUMBER_OF_VOICES - highestNumberOfVoicesAssumed; 
+			if (highestNumberOfVoicesAssumed < Transcription.MAX_NUM_VOICES) {
+				int diff = Transcription.MAX_NUM_VOICES - highestNumberOfVoicesAssumed; 
 				for (List<Integer> l : mappingDictionary) {
 					for (int i = 0; i < diff; i++) {
 						l.add(-1);

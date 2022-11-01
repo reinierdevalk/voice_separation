@@ -219,15 +219,15 @@ public class TestManager {
 //				numHiddenNeurons = FeatureGenerator.NUM_FEATURES_HL_ABC_NON_TAB;
 //			}
 //		}
-		int numOutputNeurons = Transcription.MAXIMUM_NUMBER_OF_VOICES;
+		int numOutputNeurons = Transcription.MAX_NUM_VOICES;
 		if (ma == ModellingApproach.N2N) {
 			if (isTablatureCase && modelDuration) {	
 				if (dc == DecisionContext.UNIDIR) {
-					numOutputNeurons += Transcription.DURATION_LABEL_SIZE;
+					numOutputNeurons += Transcription.MAX_TABSYMBOL_DUR;
 				}
 				else if (dc == DecisionContext.BIDIR) {
 					if (modelDurationAgain) {
-						numOutputNeurons += Transcription.DURATION_LABEL_SIZE;
+						numOutputNeurons += Transcription.MAX_TABSYMBOL_DUR;
 					}
 				}
 			}
@@ -2133,55 +2133,55 @@ public class TestManager {
 	}
 	
 	
-	/**
-	 * Makes an empty Transcription with the given time signature, key signature, and number of voices.
-	 *
-	 * @param mtl
-	 * @param numberOfVoices
-	 * @return
-	 */
-	private Transcription makeEmptyTranscription(MetricalTimeLine mtl, /*TimeSignature timeSig,
-	 	KeyMarker keyMarker,*/ int numberOfVoices) {
-//		newTranscription = new Transcription();
-		Transcription newTranscription = new Transcription();
-//		NotationSystem notationSystem = newTranscription.createNotationSystem();
-
-		Piece p = new Piece();
-		p.setMetricalTimeLine(mtl);
-		newTranscription.setPiece(p);
-		NotationSystem notationSystem = newTranscription.getPiece().createNotationSystem();
-
-		// Add time and key signatures
-//		MetricalTimeLine mtl = newTranscription.getPiece().getMetricalTimeLine();
-
-//		TimeSignatureMarker timeSigMarker = 
-//			new TimeSignatureMarker(timeSig.getNumerator(), timeSig.getDenominator(), 
-//			new Rational(0, 1));
-//		timeSigMarker.setTimeSignature(timeSig);
-//		mtl.add(timeSigMarker);
-//		mtl.add(keyMarker);
-
-		// Create staves
-		for (int i = 0; i < numberOfVoices; i++) { 
-			NotationStaff staff = new NotationStaff(notationSystem);
-			// Ensure correct cleffing for each staff: G-clef for the upper two and F-clef for the lower three
-			if (i < 2) {
-				staff.setClefType('g', -1, 0);
-			}
-			else {
-				staff.setClefType('f', 1, 0);
-			}
-			notationSystem.add(staff);
-			NotationVoice notationVoice = new NotationVoice(staff);
-			staff.add(notationVoice);
-		}
-
-		// Set the initial NoteSequence and voice labels
-		newTranscription.initialiseNoteSequence();
-		newTranscription.initialiseVoiceLabels(null);
-
-		return newTranscription;
-	}	
+//	/**
+//	 * Makes an empty Transcription with the given time signature, key signature, and number of voices.
+//	 *
+//	 * @param mtl
+//	 * @param numberOfVoices
+//	 * @return
+//	 */
+//	private Transcription makeEmptyTranscription(MetricalTimeLine mtl, /*TimeSignature timeSig,
+//	 	KeyMarker keyMarker,*/ int numberOfVoices) {
+////		newTranscription = new Transcription();
+//		Transcription newTranscription = new Transcription();
+////		NotationSystem notationSystem = newTranscription.createNotationSystem();
+//
+//		Piece p = new Piece();
+//		p.setMetricalTimeLine(mtl);
+//		newTranscription.setPiece(p);
+//		NotationSystem notationSystem = newTranscription.getPiece().createNotationSystem();
+//
+//		// Add time and key signatures
+////		MetricalTimeLine mtl = newTranscription.getPiece().getMetricalTimeLine();
+//
+////		TimeSignatureMarker timeSigMarker = 
+////			new TimeSignatureMarker(timeSig.getNumerator(), timeSig.getDenominator(), 
+////			new Rational(0, 1));
+////		timeSigMarker.setTimeSignature(timeSig);
+////		mtl.add(timeSigMarker);
+////		mtl.add(keyMarker);
+//
+//		// Create staves
+//		for (int i = 0; i < numberOfVoices; i++) { 
+//			NotationStaff staff = new NotationStaff(notationSystem);
+//			// Ensure correct cleffing for each staff: G-clef for the upper two and F-clef for the lower three
+//			if (i < 2) {
+//				staff.setClefType('g', -1, 0);
+//			}
+//			else {
+//				staff.setClefType('f', 1, 0);
+//			}
+//			notationSystem.add(staff);
+//			NotationVoice notationVoice = new NotationVoice(staff);
+//			staff.add(notationVoice);
+//		}
+//
+//		// Set the initial NoteSequence and voice labels
+//		newTranscription.initialiseNoteSequence();
+//		newTranscription.initialiseVoiceLabels(null);
+//
+//		return newTranscription;
+//	}
 
 	boolean overruleHeuristic = false;
 	double threshold = 1.5;
@@ -2364,7 +2364,7 @@ public class TestManager {
 			if (noteIndex % 50 == 0) {
 				System.out.println("processing note " + noteIndex);
 			}
-			currentNetworkOutput = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			currentNetworkOutput = new double[Transcription.MAX_NUM_VOICES];
 			boolean isFinalNote = 
 				isTablatureCase ? noteIndex == basicTabSymbolProperties.length - 1 :
 				noteIndex == basicNoteProperties.length - 1;
@@ -2622,7 +2622,7 @@ public class TestManager {
 			// and, if mt == ModelType.ENS: allCombinedOutputs, allMelodyModelOutputsPerModel
 			// .set(): -
 			noteFeatures.add(null);
-			double[] outp = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			double[] outp = new double[Transcription.MAX_NUM_VOICES];
 			Arrays.fill(outp, 0.0);
 			outp[v] = 1.0;
 			allNetworkOutputs.add(outp);
@@ -3400,7 +3400,8 @@ public class TestManager {
 		keyMarker.setMode(Mode.MODE_MINOR); // TODO
 		keyMarker.setAlterationNum(-1); // TODO
 		
-		newTranscription = makeEmptyTranscription(mtl, highestNumVoicesTraining);
+		newTranscription = new Transcription(mtl, highestNumVoicesTraining);
+//		newTranscription = makeEmptyTranscription(mtl, highestNumVoicesTraining);
 //		newTranscription = 
 //			makeEmptyTranscription(groundTruthTranscription.getPiece().getMetricalTimeLine(),
 //			highestNumVoicesTraining);
@@ -3712,7 +3713,7 @@ public class TestManager {
 //							groundTruthTranscription.getChordVoiceLabels(tablature).get(0); 
 							groundTruthTranscription.getChordVoiceLabels().get(0);
 						List<Integer> groundTruthVoiceAssignment = 
-							DataConverter.getVoiceAssignment(groundTruthChordVoiceLabels, Transcription.MAXIMUM_NUMBER_OF_VOICES); 
+							DataConverter.getVoiceAssignment(groundTruthChordVoiceLabels, Transcription.MAX_NUM_VOICES); 
 						if (!groundTruthVoiceAssignment.equals(bestVoiceAssignment)) {
 							bestVoiceAssignment = groundTruthVoiceAssignment;
 							highestNetworkOutput = 1.0;
@@ -6739,7 +6740,7 @@ public class TestManager {
 			
 //				double[] output = argAllNetworkOutputs.get(i); // HIER OK
 				double[] outputArray = 
-					Arrays.copyOfRange(output, 0, Transcription.MAXIMUM_NUMBER_OF_VOICES);
+					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
 				List<Integer> predictedVoices = 
 					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh).get(0);
 				List<Integer> adaptedVoices = allPredictedVoices.get(i); // HIER OK

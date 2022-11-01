@@ -494,9 +494,9 @@ public class FeatureGenerator {
 
 		Transcription.verifyCase(btp, bnp);
 
-		double[] valuesExcl = new double[4 + (Transcription.MAXIMUM_NUMBER_OF_VOICES - 1)];
+		double[] valuesExcl = new double[4 + (Transcription.MAX_NUM_VOICES - 1)];
 		Arrays.fill(valuesExcl, -1.0);
-		double[] valuesIncl = new double[4 + (Transcription.MAXIMUM_NUMBER_OF_VOICES - 1)];
+		double[] valuesIncl = new double[4 + (Transcription.MAX_NUM_VOICES - 1)];
 		Arrays.fill(valuesIncl, -1.0);
 
 		final int CHORD_SIZE = 0;
@@ -837,7 +837,7 @@ public class FeatureGenerator {
 		Transcription.verifyCase(btp, bnp);
 
 		// 0. Initialise intervalsInChord with all -1.0s
-		double[] intervalsInChord = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES - 1];
+		double[] intervalsInChord = new double[Transcription.MAX_NUM_VOICES - 1];
 		Arrays.fill(intervalsInChord, -1.0);
 
 		// 1. List the pitches in the chord
@@ -890,14 +890,14 @@ public class FeatureGenerator {
 		Direction direction, int noteIndex) {
 
 		// Initialise voicesWithPreviousNoteOnSameCourse with only 0.0s
-		double[] voicesWithPreviousNoteOnSameCourse = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] voicesWithPreviousNoteOnSameCourse = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(voicesWithPreviousNoteOnSameCourse, 0.0);
 
 		Note currentNote = Tablature.convertTabSymbolToNote(btp, noteIndex); 
 		int courseCurrentNote = btp[noteIndex][Tablature.COURSE];
 
 		// For all theoretically possible voices 
-		for (int voiceNumber = 0; voiceNumber < Transcription.MAXIMUM_NUMBER_OF_VOICES; voiceNumber++) {
+		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
 			// If the transcription contains the voice with voiceNumber: find the previous note in that voice
 			if (voiceNumber < transcription.getPiece().getScore().size()) {
 				NotationVoice currentVoice = 
@@ -1123,7 +1123,7 @@ public class FeatureGenerator {
 			// Initialise with the default values also used when a note is the first
 			// one in a voice (see getProximitiesAndMovementToVoice()). The elements that 
 			// correspond with voices not in the transcription retain these values  
-			double[][] r = new double[includeMvmts ? 4 : 3][Transcription.MAXIMUM_NUMBER_OF_VOICES];
+			double[][] r = new double[includeMvmts ? 4 : 3][Transcription.MAX_NUM_VOICES];
 			for (double[] d : r) {
 				Arrays.fill(d, -1.0);
 			}
@@ -1139,7 +1139,7 @@ public class FeatureGenerator {
 		}
 
 		// Traverse all the theoretically possible voices 
-		for (int voiceNumber = 0; voiceNumber < Transcription.MAXIMUM_NUMBER_OF_VOICES; voiceNumber++) {
+		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
 			// a. If transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
 			if (voiceNumber < transcription.getPiece().getScore().size()) {
@@ -1732,7 +1732,7 @@ public class FeatureGenerator {
 		Transcription.verifyCase(btp, bnp);
 
 		// Create voicesAlreadyOccupied and initialise it with only 0.0s
-		double[] voicesAlreadyOccupied = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] voicesAlreadyOccupied = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(voicesAlreadyOccupied, 0.0);
 
 		// a. In the tablature case
@@ -2353,7 +2353,7 @@ public class FeatureGenerator {
 		Transcription.verifyCase(btp, bnp);
 
 		// For every possible voice: model the probability of currentNote belonging to voice
-		double[] voiceProbabilities = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] voiceProbabilities = new double[Transcription.MAX_NUM_VOICES];
 		NotationSystem system = transcription.getPiece().getScore();
 		for (int voice = 0; voice < hiNumVoicesTraining; voice++) {
 //		for (int voice = 0; voice < Transcription.MAXIMUM_NUMBER_OF_VOICES; voice++) {
@@ -2375,7 +2375,7 @@ public class FeatureGenerator {
 			voiceProbabilities[voice] = 
 				mp.modelProbability(ToolBox.convertToListString(allMfv), voice);
 		}
-		for (int i = hiNumVoicesTraining; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+		for (int i = hiNumVoicesTraining; i < Transcription.MAX_NUM_VOICES; i++) {
 			voiceProbabilities[i] = 0.0;
 		}
 
@@ -2493,9 +2493,9 @@ public class FeatureGenerator {
 
 		// 2. For every possible voice: model the probability of currentNote belonging to voice
 //		MelodyFeatureGenerator melodyFeatureGenerator = new MelodyFeatureGenerator(this);
-		Double[] voiceProbabilities = new Double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		Double[] voiceProbabilities = new Double[Transcription.MAX_NUM_VOICES];
 		NotationSystem system = transcription.getPiece().getScore();
-		for (int voice = 0; voice < Transcription.MAXIMUM_NUMBER_OF_VOICES; voice++) {
+		for (int voice = 0; voice < Transcription.MAX_NUM_VOICES; voice++) {
 			List<List<Double>> allMfv = new ArrayList<List<Double>>();
 			// Determine numberOfVoices
 			int numberOfVoices = 0;
@@ -2579,10 +2579,10 @@ public class FeatureGenerator {
 			durationLabels = new ArrayList<List<Double>>();
 		}
 		for (List<Double> currentLabel : labels) {
-			voiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, Transcription.MAXIMUM_NUMBER_OF_VOICES)));
+			voiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, Transcription.MAX_NUM_VOICES)));
 			if (modelDuration) {
 //			if (!argIsBidirectional && argModelDuration || argIsBidirectional) {
-				durationLabels.add(new ArrayList<Double>(currentLabel.subList(Transcription.MAXIMUM_NUMBER_OF_VOICES,
+				durationLabels.add(new ArrayList<Double>(currentLabel.subList(Transcription.MAX_NUM_VOICES,
 					currentLabel.size())));
 			}
 		}
@@ -3102,9 +3102,9 @@ public class FeatureGenerator {
 			predictedDurationLabels = new ArrayList<List<Double>>();
 		}
 		for (List<Double> currentLabel : predictedLabels) {
-			predictedVoiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, Transcription.MAXIMUM_NUMBER_OF_VOICES)));
+			predictedVoiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, Transcription.MAX_NUM_VOICES)));
 			if (argModelDuration) {
-				predictedDurationLabels.add(new ArrayList<Double>(currentLabel.subList(Transcription.MAXIMUM_NUMBER_OF_VOICES,
+				predictedDurationLabels.add(new ArrayList<Double>(currentLabel.subList(Transcription.MAX_NUM_VOICES,
 					currentLabel.size())));
 			}
 		}
@@ -3153,22 +3153,22 @@ public class FeatureGenerator {
 		if (argModellingApproach == ModellingApproach.C2C) {
 			// a. In the tablature case
 			if (argIsTablatureCase) {
-				if (Transcription.MAXIMUM_NUMBER_OF_VOICES == 5) {
+				if (Transcription.MAX_NUM_VOICES == 5) {
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{47, 48, 49, 50, 51});
 					indexOfPitchVoiceRel = 57;
 				}
-				else if (Transcription.MAXIMUM_NUMBER_OF_VOICES == 4) {
+				else if (Transcription.MAX_NUM_VOICES == 4) {
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{38, 39, 40, 41});
 					indexOfPitchVoiceRel = 46;
 				}
 			}
 			// b. In the non-tablature case
 			else {
-				if (Transcription.MAXIMUM_NUMBER_OF_VOICES == 5) {
+				if (Transcription.MAX_NUM_VOICES == 5) {
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{36, 37, 38, 39, 40});
 					indexOfPitchVoiceRel = 46;
 				}
-				else if (Transcription.MAXIMUM_NUMBER_OF_VOICES == 4) {
+				else if (Transcription.MAX_NUM_VOICES == 4) {
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{29, 30, 31, 32});
 					indexOfPitchVoiceRel = 37;
 				}
@@ -3297,7 +3297,7 @@ public class FeatureGenerator {
 				// 1. If f is an indexInMapping: scale by max index
 				if (indicesInMapping.contains(i)) {
 //					int maxIndex = Transcription.MAXIMUM_NUMBER_OF_VOICES - 1 - 1; // TODO
-					int maxIndex = Transcription.MAXIMUM_NUMBER_OF_VOICES - 1; // TODO
+					int maxIndex = Transcription.MAX_NUM_VOICES - 1; // TODO
 					if (f == -1) {
 						fScaled = f;
 					}
@@ -4088,10 +4088,10 @@ public class FeatureGenerator {
  // TESTED for both tablature- and non-tablature case
 	static double[][] getPitchAndTimeProximitiesToAllVoicesMUSCI(Integer[][] basicTabSymbolProperties, Transcription transcription,
 		Note currentNote) {			
-		double[][] pitchAndTimeProximities = new double[3][Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[][] pitchAndTimeProximities = new double[3][Transcription.MAX_NUM_VOICES];
 		
 		// 1. Traverse all the theoretically possible voices 
-		for (int voiceNumber = 0; voiceNumber < Transcription.MAXIMUM_NUMBER_OF_VOICES; voiceNumber++) {
+		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
 		  // a. If the Transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
 		  if (voiceNumber < transcription.getPiece().getScore().size()) {
@@ -4277,7 +4277,7 @@ public class FeatureGenerator {
 		
 	  // Initialise voicesAlreadyOccupied with only 0.0s
 		List<Double> voicesAlreadyOccupied = new ArrayList<Double>();	
-	  for (int i = 0; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+	  for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
 			voicesAlreadyOccupied.add(0.0);
 		}
 	  
@@ -4674,7 +4674,7 @@ public class FeatureGenerator {
 				// 1. If f is an indexInMapping: scale by max index
 				if (indicesInMapping.contains(i)) {
 //					int maxIndex = Transcription.MAXIMUM_NUMBER_OF_VOICES - 1 - 1; // TODO
-					int maxIndex = Transcription.MAXIMUM_NUMBER_OF_VOICES - 1; // TODO
+					int maxIndex = Transcription.MAX_NUM_VOICES - 1; // TODO
 					if (f == -1) {
 						fScaled = f;
 					}

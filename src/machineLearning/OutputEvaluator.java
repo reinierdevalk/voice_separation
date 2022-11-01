@@ -585,7 +585,7 @@ public class OutputEvaluator {
 		List<Double> outputVoices = new ArrayList<Double>();
 		List<Double> outputDuration = new ArrayList<Double>();
 		for (int i = 0; i < networkOutput.length; i++) {
-			if (i < Transcription.MAXIMUM_NUMBER_OF_VOICES) {
+			if (i < Transcription.MAX_NUM_VOICES) {
 				outputVoices.add(networkOutput[i]);
 			}
 			else {
@@ -706,7 +706,7 @@ public class OutputEvaluator {
 
 		// b. For the network output representing the duration (if any)
 		List<Integer> predictedDurations = null; 
-		if (networkOutput.length > Transcription.MAXIMUM_NUMBER_OF_VOICES) {
+		if (networkOutput.length > Transcription.MAX_NUM_VOICES) {
 			predictedDurations = new ArrayList<Integer>();
 			// Get the position of highestValue and add that to predictedDurations. If 
 			// highestValue appears more than once, its first occurrence is returned. 

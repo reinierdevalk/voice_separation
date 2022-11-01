@@ -55,7 +55,7 @@ public class FeatureGeneratorChord {
 		Transcription.verifyCase(btp, bnp);
 	  List<Double> features = new ArrayList<Double>();
 	  
-		for (int i = 0; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+		for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
 			// a. In the tablature case
 		  if (btp != null) {
 			  int numNotesInChord = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
@@ -239,7 +239,7 @@ public class FeatureGeneratorChord {
 	// TESTED
 	double[] getVoicesWithAdjacentNoteOnSameCourse(Integer[][] btp, Transcription transcription, int lowestNoteIndex) {
 		
-		double[] voicesWithAdjacentNotes = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] voicesWithAdjacentNotes = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(voicesWithAdjacentNotes, -1.0);
 					
 	  int numNotesInChord = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
@@ -288,11 +288,11 @@ public class FeatureGeneratorChord {
 		Transcription.verifyCase(btp, bnp);
 
 		// Create the proximity arrays and initialise with all -1.0 (when the voice is not active in the chord)  
-		double[] pitchProx = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] pitchProx = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(pitchProx, -1.0);
-		double[] interOnsetProx = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] interOnsetProx = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(interOnsetProx, -1.0);
-		double[] offsetOnsetProx = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] offsetOnsetProx = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(offsetOnsetProx, -1.0);
 
 		// Create the pitch movements array and initialise with all 0.0 (when the voice is not active in the chord)
@@ -313,7 +313,7 @@ public class FeatureGeneratorChord {
 		//   (b) has no new note in the chord but is sustained; 
 		//   (c) has a new note in the chord, which is the first note in that voice; 
 		//   (d) has a new note in the chord that is of the same pitch as the previous note in that voice
-		double[] pitchMovements = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] pitchMovements = new double[Transcription.MAX_NUM_VOICES];
 		Arrays.fill(pitchMovements, 0.0);
 
 		// Get the voice labels that go with the given voice assignment; then get the voices
@@ -394,7 +394,7 @@ public class FeatureGeneratorChord {
 		Transcription.verifyCase(btp, bnp);
 		
 		List<Double> voicesAlreadyAssigned = new ArrayList<Double>();
-	  for (int i = 0; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+	  for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
 		  voicesAlreadyAssigned.add(0.0);
 	  }
 	  
@@ -571,7 +571,7 @@ public class FeatureGeneratorChord {
 				new ArrayList<List<Double>>(allVoiceLabels.subList(lowestNoteIndex, lowestNoteIndex + chordSize));
 			List<Integer> groundTruthVoiceAssignmentCurrentChord = 
 //				dataConverter.getVoiceAssignment(voiceLabelsCurrentChord, highestNumberOfVoices); 	 
-				DataConverter.getVoiceAssignment(voiceLabelsCurrentChord, Transcription.MAXIMUM_NUMBER_OF_VOICES); 	
+				DataConverter.getVoiceAssignment(voiceLabelsCurrentChord, Transcription.MAX_NUM_VOICES); 	
 			// The ground thruth voice assignment should be the first element in allPossibleVoiceAssignmentsCurrentChord. Thus,
 			// remove it from the List (regardless of its position within) and then re-add it as the first element  
 			allPossibleVoiceAssignmentsCurrentChord.remove(groundTruthVoiceAssignmentCurrentChord);
@@ -850,10 +850,10 @@ public class FeatureGeneratorChord {
 
 		// 5. If necessary: make each voice assignment size Transcription.MAXIMUM_NUMBER_OF_VOICES
 		List<List<Integer>> voiceAssignmentsFinal = new ArrayList<List<Integer>>();
-		if (maxVoiceNumber < Transcription.MAXIMUM_NUMBER_OF_VOICES) {
+		if (maxVoiceNumber < Transcription.MAX_NUM_VOICES) {
 			for (List<Integer> l : voiceAssignments) {
 				List<Integer> finalVoiceAssignment = new ArrayList<Integer>(l); 
-				for (int i = maxVoiceNumber; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+				for (int i = maxVoiceNumber; i < Transcription.MAX_NUM_VOICES; i++) {
 					finalVoiceAssignment.add(-1);
 				}
 				voiceAssignmentsFinal.add(finalVoiceAssignment);
@@ -1015,7 +1015,7 @@ public class FeatureGeneratorChord {
 		chordFeatureVector.addAll(proximitiesAndMovements);
 		// 3. Voices already occupied TODO Enable sustained notes for tablature case
 		if (btp != null) {
-			for (int i = 0; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+			for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
 				chordFeatureVector.add(0.0);
 			}
 		}
@@ -1109,7 +1109,7 @@ public class FeatureGeneratorChord {
 			chordFeatureVector.addAll(noteSpec.subList(7, 12));
 			chordFeatureVector.addAll(noteSpec.subList(13, 18));
 			chordFeatureVector.addAll(noteSpec.subList(19, 24));
-			if (Transcription.MAXIMUM_NUMBER_OF_VOICES == 5) {
+			if (Transcription.MAX_NUM_VOICES == 5) {
 				chordFeatureVector.addAll(noteSpec.subList(25, 30)); // HIERRR
 			}
 
@@ -1137,7 +1137,7 @@ public class FeatureGeneratorChord {
 			chordFeatureVector.addAll(proximitiesAndMovements);
 			// 2. Voices already occupied TODO Enable sustained notes for tablature case
 //			if (btp != null) {
-			for (int i = 0; i < Transcription.MAXIMUM_NUMBER_OF_VOICES; i++) {
+			for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
 				chordFeatureVector.add(0.0);
 			}
 //			}
@@ -1204,7 +1204,7 @@ public class FeatureGeneratorChord {
 			chordFeatureVector.addAll(noteSpec.subList(5, 8));
 			chordFeatureVector.addAll(noteSpec.subList(9, 12));
 			chordFeatureVector.addAll(noteSpec.subList(13, 16));
-			if (Transcription.MAXIMUM_NUMBER_OF_VOICES == 5) {
+			if (Transcription.MAX_NUM_VOICES == 5) {
 				chordFeatureVector.addAll(noteSpec.subList(17, 20));
 			}
 
@@ -1831,7 +1831,7 @@ public class FeatureGeneratorChord {
 		//   (b) has no new onset in the chord but is sustained; 
 		//   (c) has a new onset in the chord, which is the first onset in that voice; 
 		//   (d) has a new onset in the chord that is of the same pitch as the previous onset in that voice
-		double[] pitchMovements = new double[Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] pitchMovements = new double[Transcription.MAX_NUM_VOICES];
 //		double[] pitchMovements = new double[highestNumberOfVoicesTraining];
 		Arrays.fill(pitchMovements, 0.0);
 		
@@ -1885,7 +1885,7 @@ public class FeatureGeneratorChord {
 		}
 	  
 		// Create, set, and return averagePitchAndTimeProximities
-		double[] averagePitchAndTimeProximities = new double[3 + Transcription.MAXIMUM_NUMBER_OF_VOICES];
+		double[] averagePitchAndTimeProximities = new double[3 + Transcription.MAX_NUM_VOICES];
 //	  double[] averagePitchAndTimeProximities = new double[3 + highestNumberOfVoicesTraining];
 	  averagePitchAndTimeProximities[0] = ToolBox.getAverage(pitchProximities); 
 		averagePitchAndTimeProximities[1] = ToolBox.getAverage(interOnsetTimeProximities);
