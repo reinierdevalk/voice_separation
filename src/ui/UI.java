@@ -531,7 +531,7 @@ public class UI {
 		// 6. Run experiment
 		Model mdl = 
 			!deployTrainedUserModel ? m : Runner.ALL_MODELS[modelParams.get(Runner.MODEL).intValue()];
-		Transcription.setMaximumNumberOfVoices( 
+		Transcription.setMaxNumVoices( 
 			(mdl.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4);
 		MelodyPredictor.setMelModelType(MelModelType.SIMPLE_LM);
 		MelodyPredictor.setTermType(mdl.getKylmModelType());

@@ -221,7 +221,7 @@ public class HMMManager {
 			List<List<Note>> chords = currTrans.getChords();
 			// a. In the tablature case
 			if (currTestPiece.getTablature() != null) {
-				numberOfChords = currTab.getTablatureChords().size();
+				numberOfChords = currTab.getChords().size();
 			}
 			// b. In the non-tablature case
 			else {
@@ -235,7 +235,7 @@ public class HMMManager {
 				}
 				// b. In the non-tablature case
 				else {
-					pitchesInChord = currTrans.getPitchesInChord(chords.get(j));
+					pitchesInChord = Transcription.getPitchesInChord(chords.get(j));
 //					pitchesInChord = currTrans.getPitchesInChord(j);
 				}
 				Collections.sort(pitchesInChord);

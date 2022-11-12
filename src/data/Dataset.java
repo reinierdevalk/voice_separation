@@ -347,7 +347,7 @@ public class Dataset implements Serializable {
 					sizes.add(t.getNumberOfNotes());
 				}
 				else if (ma == ModellingApproach.C2C || ma == ModellingApproach.HMM) {
-					sizes.add(t.getTablatureChords().size());
+					sizes.add(t.getChords().size());
 				}
 			}
 		}

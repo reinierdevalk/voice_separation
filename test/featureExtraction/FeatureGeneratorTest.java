@@ -2910,9 +2910,9 @@ public class FeatureGeneratorTest extends TestCase {
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(FeatureGenerator.getIntervalsInChord(basicTabSymbolProperties, durationLabels, null,	lowestNoteIndex));
-			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
 		assertEquals(expected.size(), actual.size());

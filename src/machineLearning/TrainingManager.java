@@ -143,7 +143,7 @@ public class TrainingManager {
 			if (dc == DecisionContext.UNIDIR) {
 				currTabTransPair = new TablatureTranscriptionPair(currTab, currTranscr);
 				if (augment) {
-					System.out.println("augmenting " + currTab.getPiecename());
+					System.out.println("augmenting " + currTab.getName());
 						
 					// Reversed
 					System.out.println("R E V E R S I N G");
@@ -152,10 +152,10 @@ public class TrainingManager {
 //					Tablature currTabRev = Tablature.reverse(currTab);
 					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
-					System.out.println("undapted: " + currTranscr.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscr.getPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed:");
-					System.out.println("undapted: " + currTranscrRev.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrRev.getPiece().getScore().get(0).get(0).get(0).get(0));
 						
 					// Deornamented
@@ -176,19 +176,19 @@ public class TrainingManager {
 						Transcription.reverse(currTranscrDeorn, currTabDeorn);
 
 					System.out.println("first of given:");
-					System.out.println("undapted: " + currTranscr.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscr.getPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
-					System.out.println("undapted: " + currTranscrDeorn.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed:");
-					System.out.println("undapted: " + currTranscrRev.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrRev.getPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed and deornamented:");
-					System.out.println("undapted: " + currTranscrRevDeorn.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrRevDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrRevDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
-					System.out.println("undapted: " + currTranscrDeorn.getUnadaptedGTPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
 
 					// implement transposition
@@ -717,10 +717,10 @@ public class TrainingManager {
 					pieceSizes.add(currTrans.getNumberOfNotes());
 				}
 				
-				int indexInAll = dataset.getPieceNames().indexOf(currTrans.getPieceName());
+				int indexInAll = dataset.getPieceNames().indexOf(currTrans.getName());
 				if (verbose) System.out.println("i = " + i);
-				if (verbose) System.out.println("piece = " + currTab.getPiecename());
-				if (verbose) System.out.println("piece = " + currTrans.getPieceName());
+				if (verbose) System.out.println("piece = " + currTab.getName());
+				if (verbose) System.out.println("piece = " + currTrans.getName());
 				if (verbose) System.out.println("size  = " + pieceSizes.get(pieceSizes.size()-1));
 				if (augment) { // TODO is indexInAll not simply i?
 					indexInAll = indexInAll*augmentFactor;
@@ -2817,7 +2817,7 @@ public class TrainingManager {
 			// a. In the tablature case
 			if (piece.getTablature() != null) {
 				currTablature = piece.getTablature();
-				currNumberOfChords = currTablature.getTablatureChords().size();
+				currNumberOfChords = currTablature.getChords().size();
 			}
 			// b. In the non-tablature case
 			else {
@@ -2837,7 +2837,7 @@ public class TrainingManager {
 				}
 				// b. In the non-tablature case
 				else {
-					currChord = currTranscription.getPitchesInChord(chords.get(i));
+					currChord = Transcription.getPitchesInChord(chords.get(i));
 //					currChord = currTranscription.getPitchesInChord(i);
 				}
 				Collections.sort(currChord);
@@ -2902,7 +2902,7 @@ public class TrainingManager {
 			int currNumberOfChords = -1;
 			// a. In the tablature case
 			if (piece.getTablature() != null) {
-				currNumberOfChords = piece.getTablature().getTablatureChords().size();
+				currNumberOfChords = piece.getTablature().getChords().size();
 			}
 			// b. In the non-tablature case
 			else {

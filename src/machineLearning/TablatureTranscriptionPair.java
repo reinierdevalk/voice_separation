@@ -64,10 +64,10 @@ public class TablatureTranscriptionPair {
 	
 	public String getPieceName() {
 		if (tablature != null) {
-			return tablature.getPiecename();
+			return tablature.getName();
 		}
 		else {
-			return transcription.getPieceName();
+			return transcription.getName();
 		}
 	}
 

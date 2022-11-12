@@ -917,12 +917,12 @@ public class TestManager {
 
 		List<List<Note>> chords = groundTruthTranscription.getChords();		
 		int numChords = 
-			tablature != null ? tablature.getTablatureChords().size() : chords.size();
+			tablature != null ? tablature.getChords().size() : chords.size();
 
 		for (int j = 0; j < numChords; j++) {
 			List<Integer> pitchesInChord =
-				tablature != null ?	tablature.getPitchesInChord(j) : 
-				groundTruthTranscription.getPitchesInChord(chords.get(j));
+				tablature != null ?	tablature.getPitchesInChord(j) : 	
+			Transcription.getPitchesInChord(chords.get(j));
 			Collections.sort(pitchesInChord);
 			observations.add(pitchesInChord);
 		}

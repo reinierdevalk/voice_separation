@@ -144,9 +144,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<double[]> actual = new ArrayList<double[]>();
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(featureGeneratorChord.getProximitiesAndCourseInfoAheadChord(btp, null, lowestNoteIndex, 3));
-			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -306,10 +306,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
 		List<List<Integer>> voiceAssignments = getVoiceAssignments();
 		int lowestOnsetIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(btp, null, transcription, 
 				lowestOnsetIndex, voiceAssignments.get(i)));
-			lowestOnsetIndex += tablature.getTablatureChords().get(i).size(); 	
+			lowestOnsetIndex += tablature.getChords().get(i).size(); 	
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -457,8 +457,8 @@ public class FeatureGeneratorChordTest extends TestCase {
     Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
     int highestNumberOfVoices = transcription.getNumberOfVoices();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
-    	List<TabSymbol> currentChord = tablature.getTablatureChords().get(i);
+    for (int i = 0; i < tablature.getChords().size(); i++) {
+    	List<TabSymbol> currentChord = tablature.getChords().get(i);
     	List<List<Double>> currentChordVoiceLabels = 
     		voiceLabels.subList(lowestNoteIndex, lowestNoteIndex + currentChord.size());
     	List<Integer> currentVoiceAssignment = 
@@ -1275,9 +1275,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 //    List<List<Double>> durationLabels = transcription.getDurationLabels();
 //    List<Integer[]> voicesCoDNotes=  transcription.getVoicesCoDNotes();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+    for (int i = 0; i < tablature.getChords().size(); i++) {
    	  actual.add(featureGeneratorChord.getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, lowestNoteIndex)); 
-   	  lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+   	  lowestNoteIndex += tablature.getChords().get(i).size();
     }
 		
 		// Assert equality
@@ -1347,10 +1347,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //	  List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 	  int lowestNoteIndex = 0;
-	  for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+	  for (int i = 0; i < tablature.getChords().size(); i++) {
 		 	actual.add(FeatureGeneratorChord.getNoteSpecificFeaturesChord(btp, null, 
 		 		/*transcription,*/ meterInfo, lowestNoteIndex));
-		 	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+		 	lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 	  		  
 		// Assert equality
@@ -1477,10 +1477,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getChordLevelFeaturesChord(btp, null,
 				/*transcription,*/ meterInfo, lowestNoteIndex));
-			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
 		// Assert equality
@@ -1591,10 +1591,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
     List<Integer[]> voicesCoDNotes=  transcription.getVoicesSNU();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+    for (int i = 0; i < tablature.getChords().size(); i++) {
  	    actual.add(FeatureGeneratorChord.getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, null, 
  	    	transcription, lowestNoteIndex)); 
- 	    lowestNoteIndex += tablature.getTablatureChords().get(i).size();  
+ 	    lowestNoteIndex += tablature.getChords().get(i).size();  
     }
 		
 		// Assert equality
@@ -2056,17 +2056,17 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 	  int lowestNoteIndex = 0;
 		// a. Including tablature information
-	  for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+	  for (int i = 0; i < tablature.getChords().size(); i++) {
 		 	actual.add(featureGeneratorChord.getIndividualNoteFeaturesChord(basicTabSymbolProperties, null,
 		 		largestChordSizeTraining, lowestNoteIndex, true));
-		 	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+		 	lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 	  // b. Not including tablature information
 	  lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			 actual.add(featureGeneratorChord.getIndividualNoteFeaturesChord(basicTabSymbolProperties, null, 
 					largestChordSizeTraining, lowestNoteIndex, false));
-		 	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+		 	lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 		  
 		// Assert equality
@@ -2254,10 +2254,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  int highestNumberOfVoicesTraining = transcription.getNumberOfVoices(); 
 	  List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
     int lowestOnsetIndex = 0;
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+    for (int i = 0; i < tablature.getChords().size(); i++) {
    	  actual.add(featureGeneratorChord.getSharedNoteFeaturesChord(basicTabSymbolProperties, null, allVoiceLabels,
    	  	largestChordSizeTraining, highestNumberOfVoicesTraining, lowestOnsetIndex));
-      lowestOnsetIndex += tablature.getTablatureChords().get(i).size();
+      lowestOnsetIndex += tablature.getChords().get(i).size();
     }
   	    
     // Assert equality
@@ -2479,10 +2479,10 @@ public class FeatureGeneratorChordTest extends TestCase {
   	Integer[][] btp = tablature.getBasicTabSymbolProperties();
   	List<List<Integer>> voiceAssignments = getVoiceAssignments();
   	int lowestOnsetIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 	  	actual.add(featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(btp, null,	transcription, 
 	  		lowestOnsetIndex, voiceAssignments.get(i)));
-	  	lowestOnsetIndex += tablature.getTablatureChords().get(i).size(); 	
+	  	lowestOnsetIndex += tablature.getChords().get(i).size(); 	
 		}
   	
   	// Assert equality
@@ -2673,9 +2673,9 @@ public class FeatureGeneratorChordTest extends TestCase {
     List<Double> actual = new ArrayList<Double>(); 
     Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
     int lowestNoteIndex = 0;
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+    for (int i = 0; i < tablature.getChords().size(); i++) {
    	  actual.add(featureGeneratorChord.getRangeOfChord(basicTabSymbolProperties, null, lowestNoteIndex));
-   	  lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+   	  lowestNoteIndex += tablature.getChords().get(i).size();
     }
     
     // Assert equality
@@ -2739,10 +2739,10 @@ public class FeatureGeneratorChordTest extends TestCase {
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 		int largestChordSizeTraining = tablature.getLargestTablatureChord();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 		 	actual.add(featureGeneratorChord.getIntervalsInChordMUSCI(basicTabSymbolProperties, null,
 			 	largestChordSizeTraining, lowestNoteIndex));
-		 	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+		 	lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 			
 		// Assert equality
@@ -3103,10 +3103,10 @@ public class FeatureGeneratorChordTest extends TestCase {
     // Calculate actual
   	List<List<Double>> actual = new ArrayList<List<Double>>();
   	lowestNoteIndex = 0;
-    for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+    for (int i = 0; i < tablature.getChords().size(); i++) {
     	actual.add(featureGeneratorChord.generateConstantChordFeatureVector(basicTabSymbolProperties, null, null,
     		largestChordSizeTraining, highestNumberOfVoicesTraining, lowestNoteIndex, true));
-    	lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+    	lowestNoteIndex += tablature.getChords().get(i).size();
     }
 
     // Assert equality
@@ -3171,7 +3171,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			expected.add(new ArrayList<Double>());
 		}
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
@@ -3179,7 +3179,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		List<List<Integer>> voiceAssignments = transcription.getVoiceAssignments(/*tablature,*/ highestNumberOfVoices);
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 		int lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			List<Integer> currentPitchesInChord = 
 				Tablature.getPitchesInChord(btp, lowestNoteIndex); 
@@ -3220,17 +3220,17 @@ public class FeatureGeneratorChordTest extends TestCase {
 				currentExpected.add((double) v);
 			}
 			expected.set(i, currentExpected);
-			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
 		// For each chord: calculate the actual variable chord feature vector and add it to actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		lowestNoteIndex = 0;
-		for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+		for (int i = 0; i < tablature.getChords().size(); i++) {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			actual.add(featureGeneratorChord.generateVariableChordFeatureVector(btp, null, 
 				transcription, lowestNoteIndex, highestNumberOfVoices, currentVoiceAssignment));
-			lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -3350,7 +3350,7 @@ public class FeatureGeneratorChordTest extends TestCase {
  	  int largestChordSizeTraining = tablature.getLargestTablatureChord();
  	  int lowestNoteIndex = 0;
   	// For each chord
- 	  for (int i = 0; i < tablature.getTablatureChords().size(); i++) {
+ 	  for (int i = 0; i < tablature.getChords().size(); i++) {
   		List<List<Integer>> currentOrderedVoiceAssignments = allOrderedVoiceAssignments.get(i);
   		List<List<Double>> currentExpectedChord = new ArrayList<List<Double>>();
   		// For each voice assignment
@@ -3377,7 +3377,7 @@ public class FeatureGeneratorChordTest extends TestCase {
   			currentExpectedChord.add(currentExpected);
   		}
       expected.add(currentExpectedChord);
-      lowestNoteIndex += tablature.getTablatureChords().get(i).size();
+      lowestNoteIndex += tablature.getChords().get(i).size();
   	}
   	
   	// Calculate actual
