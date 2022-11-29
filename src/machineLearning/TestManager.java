@@ -37,6 +37,7 @@ import machineLearning.NNManager.ActivationFunction;
 import representations.Tablature;
 import representations.Transcription;
 import structure.Timeline;
+import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.Configuration;
@@ -617,14 +618,20 @@ public class TestManager {
 					!deployTrainedUserModel ? groundTruthTranscription.getPiece().getHarmonyTrack() :
 					new SortedContainer<Marker>();
 
-				Transcription predictedTranscr = // hier
-					new Transcription(testPieceName,	
-//					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
-					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 
-					allVoiceLabels, allDurationLabels,
-					mtl,
-//					groundTruthTranscription.getPiece().getMetricalTimeLine(),
-					ht);
+				Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
+				Piece predictedPiece = // added 11.22
+					Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
+					allDurationLabels, highestNumVoicesTraining, mtl, ht, testPieceName);
+				Transcription predictedTranscr = 
+					new Transcription(predictedPiece, encoding,	allVoiceLabels, allDurationLabels);
+//				Transcription predictedTranscr = 
+//					new Transcription(testPieceName,	
+////					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
+//					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 
+//					allVoiceLabels, allDurationLabels,
+//					mtl,
+////					groundTruthTranscription.getPiece().getMetricalTimeLine(),
+//					ht);
 //					groundTruthTranscription.getPiece().getHarmonyTrack());
 
 				// Set the colour indices for the predicted Transcription
@@ -1204,12 +1211,20 @@ public class TestManager {
 						// Recreate predictedTranscription
 						File encodingFile = 
 							isTablatureCase ? dataset.getAllEncodingFiles().get(pieceIndex) : null;
+						Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
+						Piece predictedPiece = // added 11.22
+							Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, 
+							updatedVoiceLabels, updatedDurationLabels, highestNumVoicesTraining, 
+							groundTruthTranscription.getPiece().getMetricalTimeLine(), 
+							groundTruthTranscription.getPiece().getHarmonyTrack(), testPieceName);
 						predictedTranscription = 
-							new Transcription(testPieceName, 
-							encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining,  
-							updatedVoiceLabels, updatedDurationLabels,
-							groundTruthTranscription.getPiece().getMetricalTimeLine(),
-							groundTruthTranscription.getPiece().getHarmonyTrack());
+							new Transcription(predictedPiece, encoding, updatedVoiceLabels, updatedDurationLabels);
+//						predictedTranscription = 
+//							new Transcription(testPieceName, 
+//							encodingFile, basicTabSymbolProperties, basicNoteProperties, 
+//							highestNumVoicesTraining, updatedVoiceLabels, updatedDurationLabels,
+//							groundTruthTranscription.getPiece().getMetricalTimeLine(),
+//							groundTruthTranscription.getPiece().getHarmonyTrack());
 					}
 							
 					List<Integer[]> predictedVoicesCoDNotes = predictedTranscription.getVoicesSNU();
@@ -4492,7 +4507,9 @@ public class TestManager {
 								// 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 								int maxDurAsInt = 
 								  	maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
-								predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
+								predictedDurationLabelPrevious = 
+									Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+//								predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 								allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 								predictedDurationPrevious = maxDurPrevious;
 								predictedDurationPrevious.reduce();
@@ -4591,7 +4608,9 @@ public class TestManager {
 									// 4. Redetermine predictedDurationLabel and offsetTime
 									Rational maxDur = metricTimeNext.sub(metricTime);
 									int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-									predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
+									predictedDurationLabel = 
+										Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+//									predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 									predictedDuration = maxDur;
 									predictedDuration.reduce();
 									offsetTime = metricTime.add(predictedDuration);;
@@ -4883,7 +4902,9 @@ public class TestManager {
 											// 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 											int maxDurAsInt = 
 												maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
-											predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
+											predictedDurationLabelPrevious = 
+												Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+//											predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 											allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 											predictedDurationPrevious = maxDurPrevious;	
 											predictedDurationPrevious.reduce();
@@ -4986,7 +5007,9 @@ public class TestManager {
 												// 4. Redetermine predictedDurationLabel and offsetTime
 												Rational maxDur = metricTimeNext.sub(metricTime);
 												int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-												predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
+												predictedDurationLabel = 
+													Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+//												predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 												predictedDuration = maxDur;
 												predictedDuration.reduce();
 												offsetTime = metricTime.add(predictedDuration);;
@@ -5312,7 +5335,9 @@ public class TestManager {
 	
 										// 2. Reset allDurationLabels, allPredictedDurations, and allNotes 
 										int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-										List<Double> predictedDurationLabelAdapted = Transcription.createDurationLabel(maxDurAsInt);
+										List<Double> predictedDurationLabelAdapted = 
+											Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+//										List<Double> predictedDurationLabelAdapted = Transcription.createDurationLabel(maxDurAsInt);
 										allDurationLabels.set(i, predictedDurationLabelAdapted);
 										if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
 											allPredictedDurations.set(i, new Rational[]{maxDur});
@@ -5329,7 +5354,9 @@ public class TestManager {
 										// Adapt predictedDurationLabel and predictedDuration
 										Rational maxDur = onsetTimeNextChord.sub(onset);
 										int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-										predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
+										predictedDurationLabel = 
+											Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+//										predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 										predictedDuration = maxDur;
 										predictedDuration.reduce();
 										// Add to durationsAdapted

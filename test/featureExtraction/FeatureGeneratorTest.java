@@ -7990,11 +7990,16 @@ public class FeatureGeneratorTest extends TestCase {
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, encodingTestpiece1, predictedPiece,
 //			predVoiceLabels, predDurationLabels/*, null*/);
 
+		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
+			gtTranscription.getPiece().getMetricalTimeLine(), gtTranscription.getPiece().getHarmonyTrack(),
+			midiTestpiece1.getName());
 		Transcription predTranscription = 
-			new Transcription(midiTestpiece1.getName(), encodingTestpiece1, btp, null, 5,
-			predVoiceLabels, predDurationLabels, 
-			gtTranscription.getPiece().getMetricalTimeLine(), 
-			gtTranscription.getPiece().getHarmonyTrack());
+			new Transcription(p, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
+//		Transcription predTranscription = 
+//			new Transcription(midiTestpiece1.getName(), new Encoding(encodingTestpiece1), btp, null, 5,
+//			predVoiceLabels, predDurationLabels, 
+//			gtTranscription.getPiece().getMetricalTimeLine(), 
+//			gtTranscription.getPiece().getHarmonyTrack());
 
 //		MIDIExport.exportMidiFile(predTranscription.getPiece(), 
 //			Arrays.asList(new Integer[]{56}), "C:/Users/Reinier/Desktop/bla.mid");
@@ -8146,10 +8151,15 @@ public class FeatureGeneratorTest extends TestCase {
 //		Piece predictedPiece = gtTranscription.createPiece(predVoiceLabels, 5);
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, null, predictedPiece,
 //			predVoiceLabels, null/*, predEDUInfo*/);
-		Transcription predictedTranscription = 
-			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null, 
-			gtTranscription.getPiece().getMetricalTimeLine(), 
-			gtTranscription.getPiece().getHarmonyTrack());
+		
+		Piece p = Transcription.createPiece(null, bnp, predVoiceLabels, null,5, 
+			gtTranscription.getPiece().getMetricalTimeLine(), gtTranscription.getPiece().getHarmonyTrack(),
+			midiTestpiece1.getName());
+		Transcription predictedTranscription = new Transcription(p, null, predVoiceLabels, null);
+//		Transcription predictedTranscription = 
+//			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null, 
+//			gtTranscription.getPiece().getMetricalTimeLine(), 
+//			gtTranscription.getPiece().getHarmonyTrack());
 
 		Note note7 = predictedTranscription.getNoteSequence().getNoteAt(7);
 		Note note24 = predictedTranscription.getNoteSequence().getNoteAt(24);
@@ -8243,12 +8253,18 @@ public class FeatureGeneratorTest extends TestCase {
 //		Piece predictedPiece = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5);
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, encodingTestpiece1, predictedPiece,
 //			predVoiceLabels, predDurationLabels/*, null*/);		
+		
+		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
+			gtTranscription.getPiece().getMetricalTimeLine(), gtTranscription.getPiece().getHarmonyTrack(),
+			midiTestpiece1.getName());
 		Transcription predictedTranscription = 
-			new Transcription(midiTestpiece1.getName(), encodingTestpiece1, btp, null, 5, 
-			predVoiceLabels, predDurationLabels,
-			gtTranscription.getPiece().getMetricalTimeLine(), 
-			gtTranscription.getPiece().getHarmonyTrack()
-		);		
+			new Transcription(p, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
+//		Transcription predictedTranscription = 
+//			new Transcription(midiTestpiece1.getName(), new Encoding(encodingTestpiece1), btp, null, 5, 
+//			predVoiceLabels, predDurationLabels,
+//			gtTranscription.getPiece().getMetricalTimeLine(), 
+//			gtTranscription.getPiece().getHarmonyTrack()
+//		);		
 
 		Note note6 = predictedTranscription.getNoteSequence().getNoteAt(6);
 		Note note23 = predictedTranscription.getNoteSequence().getNoteAt(23);
@@ -8347,10 +8363,14 @@ public class FeatureGeneratorTest extends TestCase {
 //		Piece predictedPiece = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5);
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, null, predictedPiece,
 //			predVoiceLabels, null/*, predEDUInfo*/);		
-		Transcription predictedTranscription = 
-			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null,
+		Piece p  = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
 			gtTranscription.getPiece().getMetricalTimeLine(), 
-			gtTranscription.getPiece().getHarmonyTrack());		
+			gtTranscription.getPiece().getHarmonyTrack(), midiTestpiece1.getName());
+		Transcription predictedTranscription = new Transcription(p, null, predVoiceLabels, null);		
+//		Transcription predictedTranscription = 
+//			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null,
+//			gtTranscription.getPiece().getMetricalTimeLine(), 
+//			gtTranscription.getPiece().getHarmonyTrack());		
 
 		Note note7 = predictedTranscription.getNoteSequence().getNoteAt(7);
 		Note note24 = predictedTranscription.getNoteSequence().getNoteAt(24);
