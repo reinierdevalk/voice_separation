@@ -59,6 +59,7 @@ public class TestManager {
 	Integer[][] basicTabSymbolProperties; // tab / N2N and C2C
 	Integer[][] basicNoteProperties; // non-tab / N2N and C2C
 	List<Integer[]> meterInfo; // tab and non-tab / N2N and C2C	
+	List<Integer[]> keyInfo;
 //	 List<Rational[]> allMetricPositions; // tab and non-tab / N2N and C2C
 	private List<Integer> chordSizes; // tab and non-tab / N2N
 	List<Integer> backwardsMapping; // tab and non-tab / N2N and C2C (but not used in C2C)
@@ -349,6 +350,7 @@ public class TestManager {
 			}
 			basicNoteProperties = groundTruthTranscription.getBasicNoteProperties();
 			meterInfo = groundTruthTranscription.getMeterInfo();
+			keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
 			for (int j = 0; j < basicNoteProperties.length; j++) {
 				allMetricPositions.add(Timeline.getMetricPosition(
 					getMetricTime(j, isTablatureCase), meterInfo));
@@ -682,7 +684,8 @@ public class TestManager {
 //				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
-				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, expPath + MIDIImport.EXTENSION);
+				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, meterInfo, 
+					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
 				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION), null);
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfo();
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
