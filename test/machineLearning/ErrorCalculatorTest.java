@@ -20,6 +20,15 @@ public class ErrorCalculatorTest extends TestCase {
 
 	private File midiTestpiece1;
 	private File encodingTestpiece1;
+	
+	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
+	private static final List<Double> V_0_1 = Transcription.createVoiceLabel(new Integer[]{0, 1});
+	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
+	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
+	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
+	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
+	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
+	private static final List<Double> HALF = Transcription.createDurationLabel(new Integer[]{16*3});
 
 
 	protected void setUp() throws Exception {
@@ -168,16 +177,16 @@ public class ErrorCalculatorTest extends TestCase {
 	private List<List<Double>> getActualVoicesToyExamples() {				
 		// Toy examples 1-3
 		List<List<Double>> actualVoiceLabels = new ArrayList<List<Double>>();
-		actualVoiceLabels.add(Transcription.VOICE_3); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_0));
-		actualVoiceLabels.add(Transcription.VOICE_3); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_3); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_0));
-		actualVoiceLabels.add(Transcription.VOICE_3);
-		actualVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_3, Transcription.VOICE_1));
-		actualVoiceLabels.add(Transcription.VOICE_3); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_0));
-		actualVoiceLabels.add(Transcription.VOICE_3); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
+		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(V_3);
+		actualVoiceLabels.add(Transcription.combineLabels(V_3, V_1));
+		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
 
 		return actualVoiceLabels;
 	}
@@ -186,16 +195,16 @@ public class ErrorCalculatorTest extends TestCase {
 	private List<List<Double>> getActualVoicesToyExamplesNonTab() {				
 		// Toy examples 1-3
 		List<List<Double>> actualVoiceLabels = new ArrayList<List<Double>>();
-		actualVoiceLabels.add(Transcription.VOICE_2); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_2); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_2); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_2);
-		actualVoiceLabels.add(Transcription.VOICE_2);
-		actualVoiceLabels.add(Transcription.VOICE_2); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_0);
-		actualVoiceLabels.add(Transcription.VOICE_2); actualVoiceLabels.add(Transcription.VOICE_1); actualVoiceLabels.add(Transcription.VOICE_0);
+		actualVoiceLabels.add(V_2); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_2); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_2); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_2);
+		actualVoiceLabels.add(V_2);
+		actualVoiceLabels.add(V_2); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_0);
+		actualVoiceLabels.add(V_2); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
 
 		return actualVoiceLabels;
 	}
@@ -233,9 +242,9 @@ public class ErrorCalculatorTest extends TestCase {
 		List<List<Double>> groundTruthVoiceLabels = new ArrayList<List<Double>>();
 		List<Rational[]> allPredictedDurations = new ArrayList<Rational[]>();
 		List<List<Double>> groundTruthDurationLabels = new ArrayList<List<Double>>();
-		List<Double> quarter = Transcription.QUARTER;
+		List<Double> quarter = QUARTER;
 //		List<Double> quarter = Transcription.createDurationLabel(8);
-		List<Double> half = Transcription.HALF;
+		List<Double> half = HALF;
 //		List<Double> half = Transcription.createDurationLabel(16);
 
 		// 1. predictedVoices/-Durations contain one element
@@ -244,8 +253,8 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedVoices.add(Arrays.asList(new Integer[]{1})); // incorrect
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // incorrect
-		groundTruthVoiceLabels.add(Transcription.VOICE_1); 
-		groundTruthVoiceLabels.add(Transcription.VOICE_2);
+		groundTruthVoiceLabels.add(V_1); 
+		groundTruthVoiceLabels.add(V_2);
 		groundTruthDurationLabels.add(half);
 		groundTruthDurationLabels.add(quarter);
 		// b. actualVoices/-Durations contain two elements
@@ -255,9 +264,9 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // half
 		allPredictedDurations.add(new Rational[]{new Rational(1, 8)}); // incorrect
-		groundTruthVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_1));
-		groundTruthVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_1)); 
-		groundTruthVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_2));
+		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_1));
+		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_1)); 
+		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_2));
 		groundTruthDurationLabels.add(half); // CoD with two same durations
 		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
 		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
@@ -269,8 +278,8 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedVoices.add(Arrays.asList(new Integer[]{1, 2})); // incorrect
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct
 		allPredictedDurations.add(new Rational[]{new Rational(1, 4)}); // incorrect 
-		groundTruthVoiceLabels.add(Transcription.VOICE_1); 
-		groundTruthVoiceLabels.add(Transcription.VOICE_0);
+		groundTruthVoiceLabels.add(V_1); 
+		groundTruthVoiceLabels.add(V_0);
 		groundTruthDurationLabels.add(half);
 		groundTruthDurationLabels.add(half);
 		// b. actualVoices contains two elements
@@ -280,9 +289,9 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct 
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // half
 		allPredictedDurations.add(new Rational[]{new Rational(1, 8)}); // incorrect
-		groundTruthVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_2));
-		groundTruthVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_2));
-		groundTruthVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_3));
+		groundTruthVoiceLabels.add(Transcription.combineLabels(V_1, V_2));
+		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_2));
+		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_3));
 		groundTruthDurationLabels.add(half); // CoD with two same durations
 		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
 		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
@@ -377,8 +386,8 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedVoices.add(Arrays.asList(new Integer[]{4})); // incorrect
 
 		List<List<Double>> groundTruthVoiceLabels = new ArrayList<List<Double>>();
-		groundTruthVoiceLabels.add(Transcription.VOICE_1);
-		groundTruthVoiceLabels.add(Transcription.VOICE_2);
+		groundTruthVoiceLabels.add(V_1);
+		groundTruthVoiceLabels.add(V_2);
 		// The voice labels for the equal duration unison notes can remain empty as they are not used  
 		groundTruthVoiceLabels.add(Arrays.asList(new Double[]{})); 
 		groundTruthVoiceLabels.add(Arrays.asList(new Double[]{}));
@@ -737,21 +746,27 @@ public class ErrorCalculatorTest extends TestCase {
 
 
 	public void testGetPositivesAndNegativesPerVoiceNonTab() {
-		Transcription transcription0 = new Transcription(midiTestpiece1, null);
-		Transcription transcription1 = new Transcription(midiTestpiece1, null);
-		Transcription transcription2 = new Transcription(midiTestpiece1, null);
-		Transcription transcription3 = new Transcription(midiTestpiece1, null);
+		Transcription transcription0 = new Transcription(midiTestpiece1);
+		Transcription transcription1 = new Transcription(midiTestpiece1);
+		Transcription transcription2 = new Transcription(midiTestpiece1);
+		Transcription transcription3 = new Transcription(midiTestpiece1);
 
 		// Adapt transcription1-3 so that all unisons become EDUs
 		List<Transcription> transcriptions = Arrays.asList(new Transcription[]{transcription1, transcription2, transcription3});
 		for (Transcription t : transcriptions) {
 			// 1. Adapt the appropriate notes in the NoteSequence
-			Note n13 = t.getNoteSequence().getNoteAt(13);
-			t.getNoteSequence().replaceNoteAt(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
+			Note n13 = t.getNotes().get(13);
+//			Note n13 = t.getNoteSequence().getNoteAt(13);
+			t.getNotes().set(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
 				new Rational(1, 4)));
-			Note n16 = t.getNoteSequence().getNoteAt(16);
-			t.getNoteSequence().replaceNoteAt(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
+//			t.getNoteSequence().replaceNoteAt(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
+//				new Rational(1, 4)));
+			Note n16 = t.getNotes().get(16);
+//			Note n16 = t.getNoteSequence().getNoteAt(16);
+			t.getNotes().set(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
 				new Rational(1, 4)));
+//			t.getNoteSequence().replaceNoteAt(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
+//				new Rational(1, 4)));
 			// 2. For the notes at index 12 and 13: swap the voice labels so that the note with the lower index gets
 			// the lower voice as must be the case with EDUnotes (it currently has the higher voice because in transcription0,
 			// the note with the longer duration, which is in voice 0, is listed first) 

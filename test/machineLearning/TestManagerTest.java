@@ -34,6 +34,16 @@ public class TestManagerTest extends TestCase {
 	private File midiTestpiece1; // = new File(Runner.midiPathTest + "testpiece.mid");	
 //	DataConverter dataConverter = new DataConverterTab();
 	String[] testPaths;
+	
+	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
+	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
+	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
+	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
+	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
+	private static final List<Double> EIGHTH = Transcription.createDurationLabel(new Integer[]{4*3});
+	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
+	private static final List<Double> HALF = Transcription.createDurationLabel(new Integer[]{16*3});
+	
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -465,40 +475,40 @@ public class TestManagerTest extends TestCase {
 		// allVoiceLabelsExpected
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
 		// Chord 0
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_3, Transcription.VOICE_4));
-		allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_3);
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(Transcription.combineLabels(V_3, V_4));
+		allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_3);
+		allVoiceLabels.add(V_0);
 		// Chord 1
-		allVoiceLabels.add(Transcription.VOICE_3);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_0));
-		allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_3);
+		allVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_0);
 		// Chord 2
-		allVoiceLabels.add(Transcription.VOICE_4);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_3, Transcription.VOICE_2));
-		allVoiceLabels.add(Transcription.VOICE_0);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_2));
+		allVoiceLabels.add(V_4);
+		allVoiceLabels.add(Transcription.combineLabels(V_3, V_2));
+		allVoiceLabels.add(V_0);
+		allVoiceLabels.add(Transcription.combineLabels(V_1, V_2));
 		// Chord 3
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_2));
-		allVoiceLabels.add(Transcription.VOICE_2);
+		allVoiceLabels.add(Transcription.combineLabels(V_1, V_2));
+		allVoiceLabels.add(V_2);
 		// Chord 4
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_0);
 		// Chord 5
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_4, Transcription.VOICE_2));
-		allVoiceLabels.add(Transcription.VOICE_3);
-		allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_4));
+		allVoiceLabels.add(Transcription.combineLabels(V_4, V_2));
+		allVoiceLabels.add(V_3);
+		allVoiceLabels.add(V_1);
+		allVoiceLabels.add(V_1);
+		allVoiceLabels.add(Transcription.combineLabels(V_0, V_4));
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
-		allVoiceLabelsExpected.set(2, Transcription.VOICE_1);
-		allVoiceLabelsExpected.set(5, Transcription.VOICE_1);
-		allVoiceLabelsExpected.set(11, Transcription.VOICE_1);
-		allVoiceLabelsExpected.set(12, Transcription.VOICE_1);
-		allVoiceLabelsExpected.set(15, Transcription.VOICE_4);
-		allVoiceLabelsExpected.set(18, Transcription.VOICE_2);
-		allVoiceLabelsExpected.set(19, Transcription.VOICE_0);
+		allVoiceLabelsExpected.set(2, V_1);
+		allVoiceLabelsExpected.set(5, V_1);
+		allVoiceLabelsExpected.set(11, V_1);
+		allVoiceLabelsExpected.set(12, V_1);
+		allVoiceLabelsExpected.set(15, V_4);
+		allVoiceLabelsExpected.set(18, V_2);
+		allVoiceLabelsExpected.set(19, V_0);
 
 		// allPredictedDurationsExpected
 		List<Rational[]> allPredictedDurationsExpected = new ArrayList<Rational[]>();
@@ -532,11 +542,11 @@ public class TestManagerTest extends TestCase {
 		// allDurationLabelsExpected
 		List<List<Double>> allDurationLabelsExpected = new ArrayList<List<Double>>();
 		
-		List<Double> eighthLabel = Transcription.EIGHTH; // trp dur
+		List<Double> eighthLabel = EIGHTH; // trp dur
 //		List<Double> eighthLabel = Transcription.createDurationLabel(4*3); // trp dur
-		List<Double> quarterLabel = Transcription.QUARTER; // trp dur
+		List<Double> quarterLabel = QUARTER; // trp dur
 //		List<Double> quarterLabel = Transcription.createDurationLabel(8*3); // trp dur
-		List<Double> halfLabel = Transcription.HALF; // trp dur
+		List<Double> halfLabel = HALF; // trp dur
 //		List<Double> halfLabel = Transcription.createDurationLabel(16*3); // trp dur
 		// Chord 0
 		allDurationLabelsExpected.add(halfLabel);
@@ -1052,40 +1062,40 @@ public class TestManagerTest extends TestCase {
 		// allVoiceLabelsExpected (fwd)
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
 		// Chord 5
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_3, Transcription.VOICE_4));
-		allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_3);
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(Transcription.combineLabels(V_3, V_4));
+		allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_3);
+		allVoiceLabels.add(V_0);
 		// Chord 4
-		allVoiceLabels.add(Transcription.VOICE_3);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_0)); 
-		allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_3);
+		allVoiceLabels.add(Transcription.combineLabels(V_1, V_0)); 
+		allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_0);
 		// Chord 3
-		allVoiceLabels.add(Transcription.VOICE_4);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_3, Transcription.VOICE_2));
-		allVoiceLabels.add(Transcription.VOICE_0);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_1, Transcription.VOICE_3)); 
+		allVoiceLabels.add(V_4);
+		allVoiceLabels.add(Transcription.combineLabels(V_3, V_2));
+		allVoiceLabels.add(V_0);
+		allVoiceLabels.add(Transcription.combineLabels(V_1, V_3)); 
 		// Chord 2
-		allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.VOICE_2);
+		allVoiceLabels.add(V_1);
+		allVoiceLabels.add(V_2);
 		// Chord 1
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_0);
 		// Chord 0
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_4, Transcription.VOICE_2)); 
-		allVoiceLabels.add(Transcription.VOICE_3);
-		allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.combineLabels(Transcription.VOICE_0, Transcription.VOICE_4)); 
+		allVoiceLabels.add(Transcription.combineLabels(V_4, V_2)); 
+		allVoiceLabels.add(V_3);
+		allVoiceLabels.add(V_1);
+		allVoiceLabels.add(V_1);
+		allVoiceLabels.add(Transcription.combineLabels(V_0, V_4)); 
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
-		allVoiceLabelsExpected.set(15, Transcription.VOICE_4);
-		allVoiceLabelsExpected.set(18, Transcription.VOICE_2); 
-		allVoiceLabelsExpected.set(19, Transcription.VOICE_0);   
-		allVoiceLabelsExpected.set(9, Transcription.VOICE_3);    
-		allVoiceLabelsExpected.set(11, Transcription.VOICE_1); 
-		allVoiceLabelsExpected.set(5, Transcription.VOICE_1);  
-		allVoiceLabelsExpected.set(2, Transcription.VOICE_1);
+		allVoiceLabelsExpected.set(15, V_4);
+		allVoiceLabelsExpected.set(18, V_2); 
+		allVoiceLabelsExpected.set(19, V_0);   
+		allVoiceLabelsExpected.set(9, V_3);    
+		allVoiceLabelsExpected.set(11, V_1); 
+		allVoiceLabelsExpected.set(5, V_1);  
+		allVoiceLabelsExpected.set(2, V_1);
 
 		// allPredictedDurationsExpected (bwd)
 		List<Rational[]> allPredictedDurationsExpected = new ArrayList<Rational[]>(); 
@@ -1118,11 +1128,11 @@ public class TestManagerTest extends TestCase {
 
 		// allDurationLabelsExpected (fwd)
 		List<List<Double>> allDurationLabelsExpected = new ArrayList<List<Double>>();
-		List<Double> eighthLabel = Transcription.EIGHTH; // trp dur
+		List<Double> eighthLabel = EIGHTH; // trp dur
 //		List<Double> eighthLabel = Transcription.createDurationLabel(4*3); // trp dur
-		List<Double> quarterLabel = Transcription.QUARTER; // trp dur
+		List<Double> quarterLabel = QUARTER; // trp dur
 //		List<Double> quarterLabel = Transcription.createDurationLabel(8*3); // trp dur
-		List<Double> halfLabel = Transcription.HALF; // trp dur
+		List<Double> halfLabel = HALF; // trp dur
 //		List<Double> halfLabel = Transcription.createDurationLabel(16*3); // trp dur
 		// Chord 5
 		allDurationLabelsExpected.add(halfLabel);
@@ -1433,7 +1443,7 @@ public class TestManagerTest extends TestCase {
 		
 		// basicNoteProperties
 		testManager.groundTruthTranscription = 
-			new Transcription(new File(Runner.midiPath + "test/" + "test_resolve_conflicts_non_tab.mid"), null);
+			new Transcription(new File(Runner.midiPath + "test/" + "test_resolve_conflicts_non_tab.mid"));
 		testManager.basicNoteProperties = testManager.groundTruthTranscription.getBasicNoteProperties();
 		testManager.meterInfo = testManager.groundTruthTranscription.getMeterInfo();
 
@@ -1581,24 +1591,24 @@ public class TestManagerTest extends TestCase {
 
 		// allVoiceLabelsExpected (in case of each conflict, a voice label is adapted)
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
-		allVoiceLabels.add(Transcription.VOICE_3); allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_1); allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_3); allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_1); allVoiceLabels.add(V_0);
 		//
-		allVoiceLabels.add(Transcription.VOICE_2); allVoiceLabels.add(Transcription.VOICE_3);
+		allVoiceLabels.add(V_2); allVoiceLabels.add(V_3);
 		//
-		allVoiceLabels.add(Transcription.VOICE_3); allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_1); allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_3); allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_1); allVoiceLabels.add(V_0);
 		//
-		allVoiceLabels.add(Transcription.VOICE_3); allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.VOICE_2);
+		allVoiceLabels.add(V_3); allVoiceLabels.add(V_1);
+		allVoiceLabels.add(V_2);
 		//
-		allVoiceLabels.add(Transcription.VOICE_3);
+		allVoiceLabels.add(V_3);
 		//
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_0);
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
-		allVoiceLabelsExpected.set(5, Transcription.VOICE_0);
-		allVoiceLabelsExpected.set(12, Transcription.VOICE_0);
+		allVoiceLabelsExpected.set(5, V_0);
+		allVoiceLabelsExpected.set(12, V_0);
 
 		// pieceExpected (notes are removed from the piece only in case of type (ii) conflicts)
 		Piece pieceExpected = new Piece();
@@ -1775,7 +1785,7 @@ public class TestManagerTest extends TestCase {
 		
 		// basicNoteProperties (fwd)
 		testManager.groundTruthTranscription = 
-			new Transcription(new File(Runner.midiPath+ "test/" + "test_resolve_conflicts_non_tab.mid"), null);
+			new Transcription(new File(Runner.midiPath+ "test/" + "test_resolve_conflicts_non_tab.mid"));
 		testManager.basicNoteProperties = testManager.groundTruthTranscription.getBasicNoteProperties();
 		testManager.meterInfo = testManager.groundTruthTranscription.getMeterInfo();
 		
@@ -1930,26 +1940,26 @@ public class TestManagerTest extends TestCase {
 
 		// allVoiceLabelsExpected (in case of each conflict, a voice label is adapted) (fwd)
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
-		allVoiceLabels.add(Transcription.VOICE_0); allVoiceLabels.add(Transcription.VOICE_2);
-		allVoiceLabels.add(Transcription.VOICE_2); allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_0); allVoiceLabels.add(V_2);
+		allVoiceLabels.add(V_2); allVoiceLabels.add(V_0);
 		//
-		allVoiceLabels.add(Transcription.VOICE_2); allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_2); allVoiceLabels.add(V_0);
 		//
-		allVoiceLabels.add(Transcription.VOICE_3); allVoiceLabels.add(Transcription.VOICE_0);
-		allVoiceLabels.add(Transcription.VOICE_1); allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_3); allVoiceLabels.add(V_0);
+		allVoiceLabels.add(V_1); allVoiceLabels.add(V_0);
 		//
-		allVoiceLabels.add(Transcription.VOICE_3); allVoiceLabels.add(Transcription.VOICE_1);
-		allVoiceLabels.add(Transcription.VOICE_3);
+		allVoiceLabels.add(V_3); allVoiceLabels.add(V_1);
+		allVoiceLabels.add(V_3);
 		//
-		allVoiceLabels.add(Transcription.VOICE_3);
+		allVoiceLabels.add(V_3);
 		//
-		allVoiceLabels.add(Transcription.VOICE_0);
+		allVoiceLabels.add(V_0);
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
-		allVoiceLabelsExpected.set(12, Transcription.VOICE_0);
-		allVoiceLabelsExpected.set(7, Transcription.VOICE_2);
-		allVoiceLabelsExpected.set(2, Transcription.VOICE_1);
-		allVoiceLabelsExpected.set(0, Transcription.VOICE_3);
+		allVoiceLabelsExpected.set(12, V_0);
+		allVoiceLabelsExpected.set(7, V_2);
+		allVoiceLabelsExpected.set(2, V_1);
+		allVoiceLabelsExpected.set(0, V_3);
 
 		// pieceExpected (notes are removed from the piece only in case of type (ii) conflicts) 
 		Piece pieceExpected = new Piece();
@@ -2088,7 +2098,7 @@ public class TestManagerTest extends TestCase {
 	public void testGenerateObservationsNonTab() {
 		TestManager tm = new TestManager();
 		tm.tablature = null;
-		tm.groundTruthTranscription = new Transcription(midiTestpiece1, null);
+		tm.groundTruthTranscription = new Transcription(midiTestpiece1);
 		
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69}));

@@ -20,6 +20,12 @@ public class TrainingManagerTest extends TestCase {
 	
 	private File midiTestpiece1;
 	private File encodingTestpiece1;
+	
+	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
+	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
+	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
+	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
+	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
 	TrainingManager tm = new TrainingManager();
 
@@ -74,11 +80,11 @@ public class TrainingManagerTest extends TestCase {
 		List<List<Double>> labels = new ArrayList<>();
 		List<Integer[]> eduInfo = new ArrayList<>();
 		for (int i = 0; i < 4; i++) {
-			labels.add(Transcription.VOICE_0);
-			labels.add(Transcription.VOICE_1);
-			labels.add(Transcription.VOICE_2);
-			labels.add(Transcription.VOICE_3);
-			labels.add(Transcription.VOICE_4);
+			labels.add(V_0);
+			labels.add(V_1);
+			labels.add(V_2);
+			labels.add(V_3);
+			labels.add(V_4);
 			eduInfo.add(new Integer[]{0, 0});
 			eduInfo.add(new Integer[]{1, 1});
 			eduInfo.add(new Integer[]{2, 2});
@@ -650,7 +656,7 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateChordDictionaryNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{50, 57, 65, 69}))); 
@@ -716,7 +722,7 @@ public class TrainingManagerTest extends TestCase {
 	
 	
 	public void testGenerateMappingDictionaryNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{3, 2, 1, 0, -1}))); 
@@ -771,7 +777,7 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateInitialStateMatrixNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		Integer[] expected = new Integer[]{3, 1, 1, 1, 1, 1, 1, 1};
 
@@ -861,7 +867,7 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateObservationProbabilityMatrixNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// For each TablatureTranscriptionPair (which are the same) there are
 		// 12 unique chords (rows) and 8 unique voice assignments (columns), where
@@ -974,7 +980,7 @@ public class TrainingManagerTest extends TestCase {
 	
 	
 	public void testGenerateTransitionProbabilityMatrixNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// For each TablatureTranscriptionPair (which are the same) there are 
 		// 8 unique voice assignments, where

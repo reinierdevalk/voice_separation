@@ -2588,8 +2588,10 @@ public class FeatureGenerator {
 		}
 
 		// NB: Use of pre-set NoteSequence possible because this method is not used in application mode
-		NoteSequence noteSeq = transcription.getNoteSequence(); 
-		int numberOfNotes = noteSeq.size();
+		List<Note> notes = transcription.getNotes(); 
+//		NoteSequence noteSeq = transcription.getNoteSequence(); 
+		int numberOfNotes = notes.size();
+//		int numberOfNotes = noteSeq.size();
 //		// a. In the tablature case
 //		if (btp != null) {
 //			numberOfNotes = btp.length; 
@@ -2607,7 +2609,8 @@ public class FeatureGenerator {
 				List<Integer> backwardsMapping = getBackwardsMapping(chordSizes);
 				noteIndex = backwardsMapping.get(i);
 			}
-			Note currentNote = noteSeq.getNoteAt(noteIndex);
+			Note currentNote = notes.get(noteIndex);
+//			Note currentNote = noteSeq.getNoteAt(noteIndex);
 			// a. Single-pass model
 //			if (!argIsBidirectional) {
 //			if (mp == null) {
@@ -2666,8 +2669,10 @@ public class FeatureGenerator {
 //			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_BACKWARD).intValue());
 
 		// NB: Use of pre-set NoteSequence possible because this method is not used in application mode
-		NoteSequence noteSeq = transcription.getNoteSequence(); 
-		int numberOfNotes = noteSeq.size();
+		List<Note> notes = transcription.getNotes();
+//		NoteSequence noteSeq = transcription.getNoteSequence(); 
+		int numberOfNotes = notes.size();
+//		int numberOfNotes = noteSeq.size();
 //		// a. In the tablature case
 //		if (btp != null) {
 //			numberOfNotes = btp.length; 
@@ -2685,7 +2690,8 @@ public class FeatureGenerator {
 				List<Integer> backwardsMapping = getBackwardsMapping(chordSizes);
 				noteIndex = backwardsMapping.get(i);
 			}
-			Note currentNote = noteSeq.getNoteAt(noteIndex);
+			Note currentNote = notes.get(noteIndex);
+//			Note currentNote = noteSeq.getNoteAt(noteIndex);
 			allMMOutputs.add(generateMelodyModelOutput(btp, bnp, transcription, currentNote, 
 				highestNumberOfVoicesTraining, mp));
 		}
@@ -3110,7 +3116,8 @@ public class FeatureGenerator {
 		}
 
 		// NB: Use of pre-set NoteSequence possible because this method is not used in application mode
-		NoteSequence noteSeq = predictedTranscription.getNoteSequence(); 
+		List<Note> notes = predictedTranscription.getNotes();
+//		NoteSequence noteSeq = predictedTranscription.getNoteSequence(); 
 		int numberOfNotes;
 		// a. In the tablature case
 		if (btp != null) {
@@ -3132,7 +3139,8 @@ public class FeatureGenerator {
 //			else {
 				noteIndex = i;
 //			}
-			Note currentNote = noteSeq.getNoteAt(noteIndex);
+			Note currentNote = notes.get(noteIndex);
+//			Note currentNote = noteSeq.getNoteAt(noteIndex);
 			// Add the current feature vector to allBidirNoteFeatureVectors
 			allBidirNoteFeatureVectors.add(generateBidirectionalNoteFeatureVector(btp, 
 				predictedDurationLabels, predictedVoicesCoDNotes, bnp, predictedTranscription,
@@ -4454,11 +4462,13 @@ public class FeatureGenerator {
     
 	  // Determine which noteSeq to use 
 		// NB: pre-set NoteSequence possible because this method is not used in application mode
-		NoteSequence noteSeq = transcription.getNoteSequence(); 
+		List<Note> notes = transcription.getNotes();
+//   		NoteSequence noteSeq = transcription.getNoteSequence(); 
 				
 		// For each note at index i: 
 		for (int i = 0; i < numberOfNotes; i++) {
-			Note currentNote = noteSeq.getNoteAt(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
 			
      // Get the current feature vector
 			List<Double> currentNoteFeatureVector = generateNoteFeatureVectorMUSCI(basicTabSymbolProperties,

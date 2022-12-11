@@ -20,6 +20,12 @@ public class FeatureGeneratorChordTest extends TestCase {
 	private File encodingTestpiece1;
 	private File midiTestpiece1;
 	private FeatureGeneratorChord featureGeneratorChord = new FeatureGeneratorChord();
+	
+	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
+	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
+	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
+	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
+	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -160,7 +166,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 
 	public void testGetProximitiesAndCourseInfoAheadChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<double[]> expected = new ArrayList<double[]>();
 		// Chord 0
@@ -323,7 +329,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 
 	public void testGetProximitiesAndMovementsOfChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<double[]> expected = new ArrayList<double[]>();
 		// Chord 0
@@ -478,7 +484,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetPitchVoiceRelationInChordNonTab() {		
-	 	Transcription transcription = new Transcription(midiTestpiece1, null);
+	 	Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected
   	List<Double> expected=  new ArrayList<Double>();
@@ -932,8 +938,8 @@ public class FeatureGeneratorChordTest extends TestCase {
 		basicNoteProperties2[3] = basicNotePropertiesChord2[1];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels2 = new ArrayList<List<Double>>();
-		voiceLabels2.add(Transcription.VOICE_4);
-		voiceLabels2.add(Transcription.VOICE_2);	
+		voiceLabels2.add(V_4);
+		voiceLabels2.add(V_2);	
 		// Determine all musically possible voice assignments
 		List<List<Integer>> expected2 = new ArrayList<List<Integer>>();
 //		List<Integer> exp20 = Arrays.asList(new Integer[]{-1, -1, -1, 0, 1});
@@ -994,8 +1000,8 @@ public class FeatureGeneratorChordTest extends TestCase {
 		basicNoteProperties3[3] = basicNotePropertiesChord3[1];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels3 = new ArrayList<List<Double>>();
-		voiceLabels3.add(Transcription.VOICE_1);
-		voiceLabels3.add(Transcription.VOICE_2);
+		voiceLabels3.add(V_1);
+		voiceLabels3.add(V_2);
 		// Determine the expected voice assignments and add them to expected3
 		List<List<Integer>> expected3 = new ArrayList<List<Integer>>();
 //		List<Integer> exp35 = Arrays.asList(new Integer[]{-1, -1, 0, 1});  
@@ -1040,9 +1046,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 		basicNoteProperties4[3] = basicNotePropertiesChord4[0];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels4 = new ArrayList<List<Double>>();
-		voiceLabels4.add(Transcription.VOICE_2);
-		voiceLabels4.add(Transcription.VOICE_1);
-		voiceLabels4.add(Transcription.VOICE_0);
+		voiceLabels4.add(V_2);
+		voiceLabels4.add(V_1);
+		voiceLabels4.add(V_0);
 		// Determine the expected voice assignments and add them to expected4
 		List<List<Integer>> expected4 = new ArrayList<List<Integer>>(); 
 		List<Integer> exp41 = Arrays.asList(new Integer[]{-1, -1, -1, 0 /**/, -1}); // leaves voices 2, 1, and 0 free
@@ -1076,8 +1082,8 @@ public class FeatureGeneratorChordTest extends TestCase {
 		basicNoteProperties5[3] = basicNotePropertiesChord5[1];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels5 = new ArrayList<List<Double>>();
-		voiceLabels5.add(Transcription.VOICE_2);
-		voiceLabels5.add(Transcription.VOICE_3);
+		voiceLabels5.add(V_2);
+		voiceLabels5.add(V_3);
 		// Determine the expected voice assignments and add them to expected5
 		List<List<Integer>> expected5 = new ArrayList<List<Integer>>();
 //		List<Integer> exp55 = Arrays.asList(new Integer[]{-1, -1, 0, 1});  
@@ -1182,7 +1188,7 @@ public class FeatureGeneratorChordTest extends TestCase {
     
 	
 	public void testGetOrderedVoiceAssignmentsNonTab() {    
- 	  Transcription transcription = new Transcription(midiTestpiece1, null);
+ 	  Transcription transcription = new Transcription(midiTestpiece1);
 
    	List<List<Integer>> groundTruthVoiceAssignments = getVoiceAssignmentsNonTab();
    	  
@@ -1366,7 +1372,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetNoteSpecificFeaturesChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 			
 	  // Determine expected 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -1496,7 +1502,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 
 	public void testGetChordLevelFeaturesChordNonTab() { 		
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -1610,7 +1616,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetVoicesAlreadyOccupiedNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 		
 		// Determine expected
 		List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -1733,7 +1739,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGenerateChordFeatureVectorNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 		
 		List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
 		Integer[][] bnp = transcription.getBasicNoteProperties();
@@ -1867,7 +1873,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGenerateChordFeatureVectorDISSNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
 		Integer[][] bnp = transcription.getBasicNoteProperties();
@@ -2085,7 +2091,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetIndividualNoteFeaturesChordNonTab() {		
-	  Transcription transcription = new Transcription(midiTestpiece1, null);
+	  Transcription transcription = new Transcription(midiTestpiece1);
 
 	  // Determine expected
 		List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
@@ -2273,7 +2279,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetSharedNoteFeaturesChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected
     List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -2497,7 +2503,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetAverageProximitiesAndMovementsOfChordNonTab() {    
- 		Transcription transcription = new Transcription(midiTestpiece1, null);
+ 		Transcription transcription = new Transcription(midiTestpiece1);
  	
   	// Determine expected
   	List<double[]> expected = new ArrayList<double[]>();
@@ -2688,7 +2694,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetRangeOfChordNonTab() {
- 		Transcription transcription = new Transcription(midiTestpiece1, null);
+ 		Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected 
     List<Double> expected = Arrays.asList(new Double[]{19.0, 27.0, 24.0, 18.0, 20.0, 24.0, 24.0, 24.0, 24.0,
@@ -2757,7 +2763,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetIntervalsInChordNonTabMUSCI() {		
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<double[]> expected = new ArrayList<double[]>();
@@ -2976,7 +2982,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetPitchesOfSustainedPreviousNotesInChordMUSCI() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 		
     // Determine expected
     List<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -3020,7 +3026,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGetVoicesOfSustainedPreviousNotesInChordMUSCI() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected
     List<List<Integer>> expected = new ArrayList<List<Integer>>();
@@ -3122,7 +3128,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	
 	
 	public void testGenerateConstantChordFeatureVectorNonTab() {    
-    Transcription transcription = new Transcription(midiTestpiece1, null);
+    Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected
     List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -3245,7 +3251,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 
 	public void testGenerateVariableChordFeatureVectorNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<List<Integer>> voiceAssignments = getVoiceAssignmentsNonTab();
 
@@ -3400,7 +3406,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		
 	
 	public void testGenerateAllCompleteChordFeatureVectorsNonTab() {
- 	 Transcription transcription = new Transcription(midiTestpiece1, null);
+ 	 Transcription transcription = new Transcription(midiTestpiece1);
 
   	int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
   	Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();

@@ -38,6 +38,9 @@ public class FeatureGeneratorTest extends TestCase {
 	private static final int NUM_FEATURES_SET_B_NON_TAB = 4 + 3 + 3;
 	private static final int NUM_FEATURES_SET_C_NON_TAB = 4 + 3 + 3 + 15;
 	private static final int NUM_FEATURES_SET_D_NON_TAB = 4 + 3 + 3 + 15 + 5 ;
+	
+	private static final List<Double> EIGHTH = Transcription.createDurationLabel(new Integer[]{4*3});
+	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
 
 
 	protected void setUp() throws Exception {
@@ -79,17 +82,19 @@ public class FeatureGeneratorTest extends TestCase {
 		List<List<Double>> list1 = predTrans.getDurationLabels();
 		List<List<Double>> list2 = gtTrans.getDurationLabels();
 		
-		NoteSequence nos1 = predTrans.getNoteSequence();
+		List<Note> nos1 = predTrans.getNotes();
+//		NoteSequence nos1 = predTrans.getNoteSequence();
 		List<Note> ns1 = new ArrayList<Note>();
 	    for (Note n : nos1) {
 	    	ns1.add(n);
 	    }
-		NoteSequence nos2 = gtTrans.getNoteSequence();
+	    List<Note> nos2 = predTrans.getNotes();
+//		NoteSequence nos2 = gtTrans.getNoteSequence();
 		List<Note> ns2 = new ArrayList<Note>();
 	    for (Note n : nos2) {
 	    	ns2.add(n);
 	    }
-		
+
 		assertEquals(ns1.size(), ns2.size());
 	    for (int i = 0; i < ns1.size(); i++) {
 	    	// assertEquals(expected.get(i), actual.get(i)) does not work because the Notes are not the same
@@ -199,7 +204,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
   public void testGetBasicNoteFeaturesNonTabMUSCI() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
     List<double[]> expected = new ArrayList<double[]>();
     // Chord 0
@@ -271,7 +276,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
   public void testGetIndicesOfSustainedPreviousNotesMUSCI() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		List<Integer> emptyList = Arrays.asList(new Integer[]{});
@@ -400,7 +405,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetPositionWithinChordNonTabMUSCI() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
 	  // Determine expected 
 	  List<double[]> expected = new ArrayList<double[]>();
@@ -549,7 +554,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetPitchDistancesWithinChordNonTabMUSCI() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
 	  // Determine expected 
 	  List<double[]> expected = new ArrayList<double[]>();
@@ -762,7 +767,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetPitchAndTimeProximitiesToAllVoicesNonTabMUSCI() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
 	  // Determine expected
 	  List<double[][]> expected = new ArrayList<double[][]>();
@@ -880,9 +885,12 @@ public class FeatureGeneratorTest extends TestCase {
   	
     // Calculate actual
 	  List<double[][]> actual = new ArrayList<double[][]>();
-	  NoteSequence noteSeq = transcription.getNoteSequence();
-    for (int i = 0; i < noteSeq.size(); i++) {
-    	Note currentNote = noteSeq.get(i);
+	  List<Note> notes = transcription.getNotes();
+//	  NoteSequence noteSeq = transcription.getNoteSequence();
+	for (int i = 0; i < notes.size(); i++) {
+//	for (int i = 0; i < noteSeq.size(); i++) {
+    	Note currentNote = notes.get(i);
+//    	Note currentNote = noteSeq.get(i);
     	actual.add(FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote));
     }
   
@@ -1005,7 +1013,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetProximitiesAndMovementToVoiceNonTabMUSCI() {    
-    Transcription transcription = new Transcription(midiTestpiece1, null);
+    Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected
   	List<double[]> expected = new ArrayList<double[]>();
@@ -1083,9 +1091,11 @@ public class FeatureGeneratorTest extends TestCase {
   	Integer[][] basicTabSymbolProperties = null;
   	Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
   	List<List<Double>> voiceLabels = transcription.getVoiceLabels();
-  	NoteSequence noteSeq = transcription.getNoteSequence();
+  	List<Note> notes = transcription.getNotes();
+//  	NoteSequence noteSeq = transcription.getNoteSequence();
   	for (int i = 0; i < basicNoteProperties.length; i++) {
-  		Note currentNote = noteSeq.getNoteAt(i);
+  		Note currentNote = notes.get(i);
+//  		Note currentNote = noteSeq.getNoteAt(i);
   		List<Double> currentLabel = voiceLabels.get(i);
   		List<Integer> currentVoices = 
   			DataConverter.convertIntoListOfVoices(currentLabel);
@@ -1187,7 +1197,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetVoicesAlreadyOccupiedNonTabMUSCI() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 	
     // Determine expected
     List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -1344,83 +1354,85 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGenerateAllNoteFeatureVectorsNonTabMUSCI() {
-    Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
-  	Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
-  	NoteSequence noteSeq = transcription.getNoteSequence();
+		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
+		List<Note> notes = transcription.getNotes();
+//		NoteSequence noteSeq = transcription.getNoteSequence();
   	
-    // For each featureSet: determine the expected note feature vectors and add them to expected
-  	List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
-  	List<List<Double>> expectedFeatureSetA = new ArrayList<List<Double>>();
-	  List<List<Double>> expectedFeatureSetB = new ArrayList<List<Double>>();
-	  List<List<Double>> expectedFeatureSetC = new ArrayList<List<Double>>();
-	  List<List<Double>> expectedFeatureSetD = new ArrayList<List<Double>>();
-  	for (int i = 0; i < basicNoteProperties.length; i++) {
-  	  // 1. Determine the expected onset features for featureSet D
-  		List<Double> currentExpectedFeatureSetD = new ArrayList<Double>(); 
-  	  double[] currentBasicNoteFeatures = 
-  	  	FeatureGenerator.getBasicNoteFeaturesMUSCI(null, basicNoteProperties, i);
-  	  for (int j = 0; j < currentBasicNoteFeatures.length; j++) {
-  	  	currentExpectedFeatureSetD.add(currentBasicNoteFeatures[j]);
-  	  }
-  	  double[] currentPositionWithinChord = 
-  	  	FeatureGenerator.getPositionWithinChordMUSCI(null, basicNoteProperties, i);
-  	  for (int j = 0; j < currentPositionWithinChord.length; j++) {
-  	  	currentExpectedFeatureSetD.add(currentPositionWithinChord[j]);
-  	  }
-  	  double[] currentPitchDistancesWithinChord = 
-  	  	FeatureGenerator.getPitchDistancesWithinChordMUSCI(null, basicNoteProperties, i);
-  	  for (int j = 0; j < currentPitchDistancesWithinChord.length; j++) {
-  	  	currentExpectedFeatureSetD.add(currentPitchDistancesWithinChord[j]);
-  	  }
-  	  Note currentNote = noteSeq.getNoteAt(i);
-  	  double[][] currentPitchAndTimeProximities = 
-  	  	FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote);	
-  	  for (int j = 0; j < currentPitchAndTimeProximities.length; j++) {
-  	  	for (int k = 0; k < currentPitchAndTimeProximities[j].length; k++) {
-  	  		currentExpectedFeatureSetD.add(currentPitchAndTimeProximities[j][k]);
-  	  	}
-  	  }
-  	  List<Double> currentVoicesAlreadyOccupied = 
-  	  	FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(null, basicNoteProperties, i, transcription);
-  	  currentExpectedFeatureSetD.addAll(currentVoicesAlreadyOccupied);
+		// For each featureSet: determine the expected note feature vectors and add them to expected
+		List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
+		List<List<Double>> expectedFeatureSetA = new ArrayList<List<Double>>();
+		List<List<Double>> expectedFeatureSetB = new ArrayList<List<Double>>();
+		List<List<Double>> expectedFeatureSetC = new ArrayList<List<Double>>();
+		List<List<Double>> expectedFeatureSetD = new ArrayList<List<Double>>();
+		for (int i = 0; i < basicNoteProperties.length; i++) {
+			// 1. Determine the expected onset features for featureSet D
+			List<Double> currentExpectedFeatureSetD = new ArrayList<Double>(); 
+			double[] currentBasicNoteFeatures = 
+				FeatureGenerator.getBasicNoteFeaturesMUSCI(null, basicNoteProperties, i);
+			for (int j = 0; j < currentBasicNoteFeatures.length; j++) {
+				currentExpectedFeatureSetD.add(currentBasicNoteFeatures[j]);
+			}
+			double[] currentPositionWithinChord = 
+				FeatureGenerator.getPositionWithinChordMUSCI(null, basicNoteProperties, i);
+			for (int j = 0; j < currentPositionWithinChord.length; j++) {
+				currentExpectedFeatureSetD.add(currentPositionWithinChord[j]);
+			}
+			double[] currentPitchDistancesWithinChord = 
+				FeatureGenerator.getPitchDistancesWithinChordMUSCI(null, basicNoteProperties, i);
+			for (int j = 0; j < currentPitchDistancesWithinChord.length; j++) {
+				currentExpectedFeatureSetD.add(currentPitchDistancesWithinChord[j]);
+			}
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
+			double[][] currentPitchAndTimeProximities = 
+				FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote);	
+			for (int j = 0; j < currentPitchAndTimeProximities.length; j++) {
+				for (int k = 0; k < currentPitchAndTimeProximities[j].length; k++) {
+					currentExpectedFeatureSetD.add(currentPitchAndTimeProximities[j][k]);
+				}
+			}
+			List<Double> currentVoicesAlreadyOccupied = 
+				FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(null, basicNoteProperties, i, transcription);
+			currentExpectedFeatureSetD.addAll(currentVoicesAlreadyOccupied);
   	  
-  	  // 2. Use currentExpectedFeatureSetD to determine the expected note features for featureSets A-C; then 
-  	  // add everything to the appropriate Lists and add those to expected
-  	  List<Double> currentExpectedFeatureSetA = 
-  	  	new ArrayList<Double>(currentExpectedFeatureSetD.subList(0, NUM_FEATURES_SET_A_NON_TAB));
-  	  List<Double> currentExpectedFeatureSetB = 
-    	  	new ArrayList<Double>(currentExpectedFeatureSetD.subList(0, NUM_FEATURES_SET_B_NON_TAB));
-  	  List<Double> currentExpectedFeatureSetC = 
-    	  	new ArrayList<Double>(currentExpectedFeatureSetD.subList(0, NUM_FEATURES_SET_C_NON_TAB));
+			// 2. Use currentExpectedFeatureSetD to determine the expected note features for featureSets A-C; then 
+			// add everything to the appropriate Lists and add those to expected
+			List<Double> currentExpectedFeatureSetA = 
+				new ArrayList<Double>(currentExpectedFeatureSetD.subList(0, NUM_FEATURES_SET_A_NON_TAB));
+			List<Double> currentExpectedFeatureSetB = 
+				new ArrayList<Double>(currentExpectedFeatureSetD.subList(0, NUM_FEATURES_SET_B_NON_TAB));
+			List<Double> currentExpectedFeatureSetC = 
+				new ArrayList<Double>(currentExpectedFeatureSetD.subList(0, NUM_FEATURES_SET_C_NON_TAB));
   	  
-  	  expectedFeatureSetA.add(currentExpectedFeatureSetA); 
-  	  expectedFeatureSetB.add(currentExpectedFeatureSetB);
-  	  expectedFeatureSetC.add(currentExpectedFeatureSetC); 
-  	  expectedFeatureSetD.add(currentExpectedFeatureSetD);
-  	}
-  	expected.add(expectedFeatureSetA); expected.add(expectedFeatureSetB);
-  	expected.add(expectedFeatureSetC); expected.add(expectedFeatureSetD);
-  	  
-    // For each featureSet: determine the actual note feature vectors and add them to actual
-  	List<List<List<Double>>> actual = new ArrayList<List<List<Double>>>();
-    for (int i = FeatureGenerator.FEATURE_SET_A; i <= FeatureGenerator.FEATURE_SET_D; i++) {
-	  	int currentFeatureSet = i;
-    	actual.add(FeatureGenerator.generateAllNoteFeatureVectorsMUSCI(null, basicNoteProperties, 
-    		transcription, currentFeatureSet, true));	  
-    }
+			expectedFeatureSetA.add(currentExpectedFeatureSetA); 
+			expectedFeatureSetB.add(currentExpectedFeatureSetB);
+			expectedFeatureSetC.add(currentExpectedFeatureSetC); 
+			expectedFeatureSetD.add(currentExpectedFeatureSetD);
+		}
+		expected.add(expectedFeatureSetA); expected.add(expectedFeatureSetB);
+		expected.add(expectedFeatureSetC); expected.add(expectedFeatureSetD);
+
+		// For each featureSet: determine the actual note feature vectors and add them to actual
+		List<List<List<Double>>> actual = new ArrayList<List<List<Double>>>();
+		for (int i = FeatureGenerator.FEATURE_SET_A; i <= FeatureGenerator.FEATURE_SET_D; i++) {
+			int currentFeatureSet = i;
+			actual.add(FeatureGenerator.generateAllNoteFeatureVectorsMUSCI(null, basicNoteProperties, 
+				transcription, currentFeatureSet, true));	  
+		}
     
-    // Assert equality
-  	assertEquals(expected.size(), actual.size());
-  	for (int i = 0; i < expected.size(); i++) {
-  		assertEquals(expected.get(i).size(), actual.get(i).size());
-  		for (int j = 0; j < expected.get(i).size(); j++) {
-  			assertEquals(expected.get(i).get(j).size(), actual.get(i).get(j).size());
-  			for (int k = 0; k < expected.get(i).get(j).size(); k++) {
-  				assertEquals(expected.get(i).get(j).get(k), actual.get(i).get(j).get(k));
-  			}
-  		}
-  	}
+		// Assert equality
+		assertEquals(expected.size(), actual.size());
+		for (int i = 0; i < expected.size(); i++) {
+			assertEquals(expected.get(i).size(), actual.get(i).size());
+			for (int j = 0; j < expected.get(i).size(); j++) {
+				assertEquals(expected.get(i).get(j).size(), actual.get(i).get(j).size());
+				for (int k = 0; k < expected.get(i).get(j).size(); k++) {
+					assertEquals(expected.get(i).get(j).get(k), actual.get(i).get(j).get(k));
+				}
+			}
+		}
 	}
 	
 	
@@ -1543,7 +1555,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetBasicNoteFeaturesNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<double[]> allInfoAhead = new ArrayList<double[]>();
 		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
@@ -1845,7 +1857,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetProximitiesAndCourseInfoAheadNonTab() {  	
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<double[]> expected = new ArrayList<double[]>();
@@ -2277,7 +2289,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetNumberOfNewOnsetsInNextChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<Double> expected = new ArrayList<Double>();
@@ -2463,7 +2475,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
 	public void testGetPositionWithinChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected 
 		List<double[]> expected = new ArrayList<double[]>();	  
@@ -2585,7 +2597,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
 	public void testGetSizeOfChordInclusiveNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<Integer> expected = new ArrayList<Integer>();
@@ -2673,7 +2685,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
 	public void testGetIndexExclusiveNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<Integer> expected = new ArrayList<Integer>();
@@ -2762,7 +2774,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetIndexInclusiveNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<Integer> expected = new ArrayList<Integer>();
@@ -2926,7 +2938,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetIntervalsInChordNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 		
 		// Determine expected
 		List<double[]> expected = new ArrayList<double[]>();
@@ -4104,23 +4116,24 @@ public class FeatureGeneratorTest extends TestCase {
 
 		List<double[][]> actual = new ArrayList<double[][]>();
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
-		NoteSequence noteSeq = transcription.getNoteSequence();
+		List<Note> notes = transcription.getNotes();
+//		NoteSequence noteSeq = transcription.getNoteSequence();
 		// a. Direction.LEFT (decisionContextSize = 1)
 		// Not modelling duration
 		for (int i = 0; i < btp.length; i++) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, noteSeq.get(i), Direction.LEFT, false, false, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 1, false));
 		}
 		// Modelling duration
 		for (int i = 0; i < btp.length; i++) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, noteSeq.get(i), Direction.LEFT, true, false, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, true, false, 1, false));
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		// Not modelling duration
 		for (int i = 0; i < btp.length; i++) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, false));
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = 
@@ -4128,18 +4141,18 @@ public class FeatureGeneratorTest extends TestCase {
 		// Using the bwd model
 		for (int i : backwardsMapping) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, noteSeq.get(i), Direction.RIGHT, false, false, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.RIGHT, false, false, 1, false));
 		}
 		// Using the bi-directional model
 		for (int i : backwardsMapping) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, noteSeq.get(i), Direction.RIGHT, true, true, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.RIGHT, true, true, 1, false));
 		}
 		// d. Direction.LEFT (decisionContextSize = 3, averaged)		
 		// Not modelling duration
 		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 14, 15, 16, 17, 18})) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3, true));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true));
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -4156,7 +4169,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetPitchAndTimeProximitiesToAllVoicesNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<double[][]> expected = new ArrayList<double[][]>();
 		// a. Direction.LEFT (decisionContextSize = 1)
@@ -4805,30 +4818,36 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 
 		List<double[][]> actual = new ArrayList<double[][]>();
-		NoteSequence noteSeq = transcription.getNoteSequence();
+		List<Note> notes = transcription.getNotes();
+//		NoteSequence noteSeq = transcription.getNoteSequence();
 		// a. Direction.LEFT (decisionContextSize = 1)
-		for (int i = 0; i < noteSeq.size(); i++) {
-			Note currentNote = noteSeq.get(i);
+		for (int i = 0; i < notes.size(); i++) {
+//		for (int i = 0; i < noteSeq.size(); i++) {	
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
 				transcription, currentNote, Direction.LEFT, false, false, 1, false));
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
-		for (int i = 0; i < noteSeq.size(); i++) {
-			Note currentNote = noteSeq.get(i);
+		for (int i = 0; i < notes.size(); i++) {
+//		for (int i = 0; i < noteSeq.size(); i++) {
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
 				transcription, currentNote, Direction.LEFT, false, false, 3, false));
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(transcription.getNumberOfNewNotesPerChord());
 		for (int i : backwardsMapping) {
-			Note currentNote = noteSeq.get(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
 				transcription, currentNote, Direction.RIGHT, false, false, 1, false));
 		}
 		// d. Direction.LEFT (decisionContextSize = 3, averaged)
 		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17, 18, 19})) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, noteSeq.get(i), Direction.LEFT, false, false, 3, true));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true));
 		}
 
 		assertEquals(expected.size(), actual.size());
@@ -5509,10 +5528,12 @@ public class FeatureGeneratorTest extends TestCase {
 		List<double[]> actual = new ArrayList<double[]>();
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
-		NoteSequence noteSeq = transcription.getNoteSequence();
+		List<Note> notes = transcription.getNotes();
+//		NoteSequence noteSeq = transcription.getNoteSequence();
 		// a. Direction.LEFT (decisionContextSize = 1)
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
-			Note currentNote = noteSeq.get(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.get(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -5527,7 +5548,8 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
-			Note currentNote = noteSeq.get(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.get(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -5543,7 +5565,8 @@ public class FeatureGeneratorTest extends TestCase {
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(tablature.getNumberOfNotesPerChord());
 		for (int i : backwardsMapping) {
-			Note currentNote = noteSeq.get(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.get(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = DataConverter.convertIntoListOfVoices(currentLabel);
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
@@ -5558,7 +5581,8 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 		// d. Direction.LEFT (decisionContextSize = 3, averaged)
 		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 14, 15, 16, 17, 18})) {
-			Note currentNote = noteSeq.getNoteAt(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -5582,7 +5606,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetProximitiesAndMovementToVoiceAllNonTab() {    
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 		
 		List<double[]> expected = new ArrayList<double[]>();
 		// a. Direction.LEFT (decisionContextSize = 1)
@@ -5932,10 +5956,12 @@ public class FeatureGeneratorTest extends TestCase {
 		List<double[]> actual = new ArrayList<double[]>();
 		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
-		NoteSequence noteSeq = transcription.getNoteSequence();
+		List<Note> notes = transcription.getNotes();
+//		NoteSequence noteSeq = transcription.getNoteSequence();
 		// a. Direction.LEFT (decisionContextSize = 1)
 		for (int i = 0; i < basicNoteProperties.length; i++) {
-			Note currentNote = noteSeq.getNoteAt(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -5950,7 +5976,8 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		for (int i = 0; i < basicNoteProperties.length; i++) {
-			Note currentNote = noteSeq.getNoteAt(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -5966,7 +5993,8 @@ public class FeatureGeneratorTest extends TestCase {
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(transcription.getNumberOfNewNotesPerChord());
 		for (int i : backwardsMapping) {
-			Note currentNote = noteSeq.getNoteAt(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -5981,7 +6009,8 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 		// d. Direction.LEFT (decisionContextSize = 3, averaged)
 		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17, 18, 19})) {
-			Note currentNote = noteSeq.getNoteAt(i);
+			Note currentNote = notes.get(i);
+//			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
 				DataConverter.convertIntoListOfVoices(currentLabel);
@@ -6044,14 +6073,14 @@ public class FeatureGeneratorTest extends TestCase {
   	Transcription transcriptionC = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesC = transcriptionC.getVoicesSNU();
    	List<List<Double>> durationLabelsC = transcriptionC.getDurationLabels();
-   	List<Double> durLab12C = Transcription.QUARTER;
+   	List<Double> durLab12C = QUARTER;
    	durationLabelsC.set(12, durLab12C);
     // d. CoDNotes of equal duration (eighth)
   	Tablature tablatureD = new Tablature(encodingTestpiece1, true);
   	Transcription transcriptionD = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesD = transcriptionD.getVoicesSNU();
    	List<List<Double>> durationLabelsD = transcriptionD.getDurationLabels();
-   	List<Double> durLab12D = Transcription.EIGHTH;
+   	List<Double> durLab12D = EIGHTH;
    	durationLabelsD.set(12, durLab12D);
    		
    	List<Tablature> allTablatures = Arrays.asList(new Tablature[]{tablatureA, tablatureB,	tablatureC,	tablatureD});
@@ -6302,7 +6331,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetVoicesAlreadyOccupiedNonTab() {
-  	Transcription transcription = new Transcription(midiTestpiece1, null);
+  	Transcription transcription = new Transcription(midiTestpiece1);
 
     // Determine expected
     List<double[]> expected = new ArrayList<double[]>();
@@ -6764,8 +6793,10 @@ public class FeatureGeneratorTest extends TestCase {
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-		Note note6 = transcription.getNoteSequence().getNoteAt(6);
-		Note note23 = transcription.getNoteSequence().getNoteAt(23);
+		Note note6 = transcription.getNotes().get(6);
+//		Note note6 = transcription.getNoteSequence().getNoteAt(6);
+		Note note23 = transcription.getNotes().get(23);
+//		Note note23 = transcription.getNoteSequence().getNoteAt(23);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
 		// a. Fwd model
@@ -6927,10 +6958,12 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGenerateNoteFeatureVectorNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
-		Note note7 = transcription.getNoteSequence().getNoteAt(7);
-		Note note24 = transcription.getNoteSequence().getNoteAt(24);
+		Note note7 = transcription.getNotes().get(7);
+//		Note note7 = transcription.getNoteSequence().getNoteAt(7);
+		Note note24 = transcription.getNotes().get(24);
+//		Note note24 = transcription.getNoteSequence().getNoteAt(24);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
 		// a. Fwd model
@@ -7028,8 +7061,10 @@ public class FeatureGeneratorTest extends TestCase {
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-		Note note6 = transcription.getNoteSequence().getNoteAt(6);
-		Note note23 = transcription.getNoteSequence().getNoteAt(23);
+		Note note6 = transcription.getNotes().get(6);
+//		Note note6 = transcription.getNoteSequence().getNoteAt(6);
+		Note note23 = transcription.getNotes().get(23);
+//		Note note23 = transcription.getNoteSequence().getNoteAt(23);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
 		// a. Fwd model
@@ -7173,10 +7208,12 @@ public class FeatureGeneratorTest extends TestCase {
 
 	
 	public void testGenerateNoteFeatureVectorDISSFirstNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
-		Note note7 = transcription.getNoteSequence().getNoteAt(7);
-		Note note24 = transcription.getNoteSequence().getNoteAt(24);
+		Note note7 = transcription.getNotes().get(7);
+//		Note note7 = transcription.getNoteSequence().getNoteAt(7);
+		Note note24 = transcription.getNotes().get(24);
+//		Note note24 = transcription.getNoteSequence().getNoteAt(24);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
 		// a. Fwd model
@@ -7266,8 +7303,10 @@ public class FeatureGeneratorTest extends TestCase {
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-		Note note6 = transcription.getNoteSequence().getNoteAt(6);
-		Note note23 = transcription.getNoteSequence().getNoteAt(23);
+		Note note6 = transcription.getNotes().get(6);
+//		Note note6 = transcription.getNoteSequence().getNoteAt(6);
+		Note note23 = transcription.getNotes().get(23);
+//		Note note23 = transcription.getNoteSequence().getNoteAt(23);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
 		// a. Fwd model
@@ -7533,10 +7572,12 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGenerateNoteFeatureVectorDISSNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
-		Note note7 = transcription.getNoteSequence().getNoteAt(7);
-		Note note24 = transcription.getNoteSequence().getNoteAt(24);
+		Note note7 = transcription.getNotes().get(7);
+//		Note note7 = transcription.getNoteSequence().getNoteAt(7);
+		Note note24 = transcription.getNotes().get(24);
+//		Note note24 = transcription.getNoteSequence().getNoteAt(24);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
 		// a. Fwd model
@@ -7786,7 +7827,7 @@ public class FeatureGeneratorTest extends TestCase {
 		
 		
 	public void testGetMelodyFeatureVectorNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -7896,7 +7937,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGenerateMelodyFeatureVectorsNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		// Determine expected
 		List<List<Double>> expected = new ArrayList<List<Double>>();
@@ -7972,15 +8013,15 @@ public class FeatureGeneratorTest extends TestCase {
 //		List<Integer[]> predVoicesCoDNotes = gtTranscription.getVoicesCoDNotes();
 		// Chord 0: note 0 becomes CoD (voices 3 and 4) of length 1/8; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 1.0, 1.0}));
-		predDurationLabels.set(0, Transcription.EIGHTH);
+		predDurationLabels.set(0, EIGHTH);
 //		predDurationLabels.set(0, Transcription.createDurationLabel(4));
 		Collections.swap(predVoiceLabels, 2, 3);
 		// Chord 1: note 6 gets length 1/8
-		predDurationLabels.set(6, Transcription.EIGHTH);
+		predDurationLabels.set(6, EIGHTH);
 //		predDurationLabels.set(6, Transcription.createDurationLabel(4));
 		// Chord 3: notes 9 and 10 swap voice and note 10 gets length 1/8
 		Collections.swap(predVoiceLabels, 9, 10);
-		predDurationLabels.set(10, Transcription.EIGHTH);
+		predDurationLabels.set(10, EIGHTH);
 //		predDurationLabels.set(10, Transcription.createDurationLabel(4));
 
 		// Create predicted Transcription
@@ -8006,8 +8047,10 @@ public class FeatureGeneratorTest extends TestCase {
 //		MIDIExport.exportMidiFile(predictedTranscription.getUnadaptedGTPiece(), 
 //			Arrays.asList(new Integer[]{56}), "C:/Users/Reinier/Desktop/blaUn.mid");
 
-		Note note6 = predTranscription.getNoteSequence().getNoteAt(6);
-		Note note23 = predTranscription.getNoteSequence().getNoteAt(23);
+		Note note6 = predTranscription.getNotes().get(6);
+//		Note note6 = predTranscription.getNoteSequence().getNoteAt(6);
+		Note note23 = predTranscription.getNotes().get(23);
+//		Note note23 = predTranscription.getNoteSequence().getNoteAt(23);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>(); 
 		// a. Not modelling duration
@@ -8134,7 +8177,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGenerateBidirectionalNoteFeatureVectorNonTab() {
-		Transcription gtTranscription = new Transcription(midiTestpiece1, null);
+		Transcription gtTranscription = new Transcription(midiTestpiece1);
 
 		// Create predicted Lists
 		List<List<Double>> predVoiceLabels = gtTranscription.getVoiceLabels();
@@ -8161,8 +8204,10 @@ public class FeatureGeneratorTest extends TestCase {
 //			gtTranscription.getPiece().getMetricalTimeLine(), 
 //			gtTranscription.getPiece().getHarmonyTrack());
 
-		Note note7 = predictedTranscription.getNoteSequence().getNoteAt(7);
-		Note note24 = predictedTranscription.getNoteSequence().getNoteAt(24);
+		Note note7 = predictedTranscription.getNotes().get(7);
+//		Note note7 = predictedTranscription.getNoteSequence().getNoteAt(7);
+		Note note24 = predictedTranscription.getNotes().get(24);
+//		Note note24 = predictedTranscription.getNoteSequence().getNoteAt(24);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>(); 
 		// Chord 1, note at index 7
@@ -8237,15 +8282,15 @@ public class FeatureGeneratorTest extends TestCase {
 //		List<Integer[]> predVoicesCoDNotes = gtTranscription.getVoicesCoDNotes();
 		// Chord 0: note 0 becomes CoD (voices 3 and 4) of length 1/8; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 1.0, 1.0}));
-		predDurationLabels.set(0, Transcription.EIGHTH);
+		predDurationLabels.set(0, EIGHTH);
 //		predDurationLabels.set(0, Transcription.createDurationLabel(4));
 		Collections.swap(predVoiceLabels, 2, 3);
 		// Chord 1: note 6 gets length 1/8
-		predDurationLabels.set(6, Transcription.EIGHTH);
+		predDurationLabels.set(6, EIGHTH);
 //		predDurationLabels.set(6, Transcription.createDurationLabel(4));
 		// Chord 3: notes 9 and 10 swap voice and note 10 gets length 1/8
 		Collections.swap(predVoiceLabels, 9, 10);
-		predDurationLabels.set(10, Transcription.EIGHTH);
+		predDurationLabels.set(10, EIGHTH);
 //		predDurationLabels.set(10, Transcription.createDurationLabel(4));
 
 		// Create predicted Transcription
@@ -8266,8 +8311,10 @@ public class FeatureGeneratorTest extends TestCase {
 //			gtTranscription.getPiece().getHarmonyTrack()
 //		);		
 
-		Note note6 = predictedTranscription.getNoteSequence().getNoteAt(6);
-		Note note23 = predictedTranscription.getNoteSequence().getNoteAt(23);
+		Note note6 = predictedTranscription.getNotes().get(6);
+//		Note note6 = predictedTranscription.getNoteSequence().getNoteAt(6);
+		Note note23 = predictedTranscription.getNotes().get(23);
+//		Note note23 = predictedTranscription.getNoteSequence().getNoteAt(23);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>(); 
 		// Chord 1, note at index 6
@@ -8347,7 +8394,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGenerateBidirectionalNoteFeatureVectorOLDNonTab() {
-		Transcription gtTranscription = new Transcription(midiTestpiece1, null);
+		Transcription gtTranscription = new Transcription(midiTestpiece1);
 
 		// Create predicted Lists
 		List<List<Double>> predVoiceLabels = gtTranscription.getVoiceLabels();
@@ -8372,8 +8419,10 @@ public class FeatureGeneratorTest extends TestCase {
 //			gtTranscription.getPiece().getMetricalTimeLine(), 
 //			gtTranscription.getPiece().getHarmonyTrack());		
 
-		Note note7 = predictedTranscription.getNoteSequence().getNoteAt(7);
-		Note note24 = predictedTranscription.getNoteSequence().getNoteAt(24);
+		Note note7 = predictedTranscription.getNotes().get(7);
+//		Note note7 = predictedTranscription.getNoteSequence().getNoteAt(7);
+		Note note24 = predictedTranscription.getNotes().get(24);
+//		Note note24 = predictedTranscription.getNoteSequence().getNoteAt(24);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>(); 
 		// Chord 1, note at index 7
@@ -8757,7 +8806,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetBackwardsMappingNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<Integer> expected = Arrays.asList(new Integer[]{
 			36, 37, 38, 39, 

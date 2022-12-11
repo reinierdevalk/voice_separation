@@ -28,6 +28,7 @@ import de.uos.fmt.musitech.data.structure.harmony.KeyMarker.Mode;
 import de.uos.fmt.musitech.data.time.Marker;
 import de.uos.fmt.musitech.data.time.MetricalTimeLine;
 import de.uos.fmt.musitech.utility.math.Rational;
+import exports.MEIExport;
 import exports.MIDIExport;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
@@ -350,7 +351,7 @@ public class TestManager {
 			}
 			basicNoteProperties = groundTruthTranscription.getBasicNoteProperties();
 			meterInfo = groundTruthTranscription.getMeterInfo();
-			keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
+//			keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
 			for (int j = 0; j < basicNoteProperties.length; j++) {
 				allMetricPositions.add(Timeline.getMetricPosition(
 					getMetricTime(j, isTablatureCase), meterInfo));
@@ -362,6 +363,7 @@ public class TestManager {
 			chordSizes = groundTruthTranscription.getNumberOfNewNotesPerChord();
 		}
 		// c. Both
+		keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
 		if (pm == ProcessingMode.BWD) {
 			backwardsMapping = FeatureGenerator.getBackwardsMapping(chordSizes);
 		}
@@ -666,7 +668,7 @@ public class TestManager {
 					Collections.sort(combined);
 					colInd.add(combined);
 					colInd.addAll(indiv);
-					predictedTranscr.setColourIndices(colInd);
+//					predictedTranscr.setColourIndices(colInd);
 				}
 
 				String dir;
@@ -686,16 +688,21 @@ public class TestManager {
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, meterInfo, 
 					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
-				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION), null);
+				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfo();
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
-//					MEIExport.exportMEIFile(
-//						t, (tablature != null) ? tablature.getBasicTabSymbolProperties() : null, 
-//						mi, t.getKeyInfo(), 
-//						(tablature != null) ? tablature.getTripletOnsetPairs() : null, colInd, 
-//						grandStaff, expPath);
+					MEIExport.exportMEIFile(
+						t, tablature,
+//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
+//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
+						colInd, 
+						grandStaff,
+						true,
+						true,
+						expPath
+					);
 				}
 			}
 			if (!deployTrainedUserModel) {
@@ -2281,7 +2288,8 @@ public class TestManager {
 		}
 		// b. In the non-tablature case
 		else {
-			currentNote = groundTruthTranscription.getNoteSequence().getNoteAt(noteIndex);
+			currentNote = groundTruthTranscription.getNotes().get(noteIndex);
+//			currentNote = groundTruthTranscription.getNoteSequence().getNoteAt(noteIndex);
 		}
 //		// Set the ticks for currentNote
 //		if (noteIndex < 10) {
@@ -3756,7 +3764,8 @@ public class TestManager {
 					}
 					// b. In the non-tablature case
 					else {
-						currentNote = groundTruthTranscription.getNoteSequence().getNoteAt(currentNoteIndex);
+						currentNote = groundTruthTranscription.getNotes().get(currentNoteIndex);
+//						currentNote = groundTruthTranscription.getNoteSequence().getNoteAt(currentNoteIndex);
 					}
 
 					// Add currentNote to each voice that is predicted for it

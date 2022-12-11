@@ -82,7 +82,7 @@ public class MelodyFeatureGeneratorTest extends TestCase {
 
 
 	public void testGetMelodyModelFeatureVectorsNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1, null);
+		Transcription transcription = new Transcription(midiTestpiece1);
 
 		List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
 		// metricTime == null 

@@ -18,6 +18,12 @@ import junit.framework.TestCase;
 import representations.Transcription;
 
 public class EvaluationManagerTest extends TestCase {
+	
+	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
+	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
+	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
+	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
+	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -157,9 +163,9 @@ public class EvaluationManagerTest extends TestCase {
 		outputs.add(new double[]{0.1, 0.2, 0.3, 0.1, 0.3}); // incorrect 
 		
 		List<List<Double>> labels = new ArrayList<List<Double>>();
-		labels.add(Transcription.VOICE_3); labels.add(Transcription.VOICE_3);
-		labels.add(Transcription.VOICE_3); labels.add(Transcription.VOICE_3);
-		labels.add(Transcription.VOICE_3); labels.add(Transcription.VOICE_3);
+		labels.add(V_3); labels.add(V_3);
+		labels.add(V_3); labels.add(V_3);
+		labels.add(V_3); labels.add(V_3);
 		
 		double[][] expected = new double[2][6];
 		double a = Math.log(0.4) / Math.log(2);
