@@ -1,7 +1,6 @@
 package machineLearning;
 
 import java.io.File;
-import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,10 +12,17 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.ArrayUtils;
 
 import data.Dataset;
-import machineLearning.EvaluationManager.Metric;
+import de.uos.fmt.musitech.data.score.NotationStaff;
+import de.uos.fmt.musitech.data.score.NotationVoice;
+import de.uos.fmt.musitech.data.structure.Note;
+import de.uos.fmt.musitech.utility.math.Rational;
+import featureExtraction.FeatureGenerator;
+import featureExtraction.FeatureGeneratorChord;
+import interfaces.PythonInterface;
 import machineLearning.NNManager.ActivationFunction;
 import representations.Tablature;
 import representations.Transcription;
+import tbp.RhythmSymbol;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.DecisionContext;
@@ -27,13 +33,6 @@ import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
 import ui.Runner.WeightsInit;
 import utility.DataConverter;
-import de.uos.fmt.musitech.data.score.NotationStaff;
-import de.uos.fmt.musitech.data.score.NotationVoice;
-import de.uos.fmt.musitech.data.structure.Note;
-import de.uos.fmt.musitech.utility.math.Rational;
-import featureExtraction.FeatureGenerator;
-import featureExtraction.FeatureGeneratorChord;
-import interfaces.PythonInterface;
 
 public class TrainingManager {
 
@@ -65,7 +64,10 @@ public class TrainingManager {
 	static boolean augment = false;
 	static int augmentFactor = 2;
 	boolean deduplicate = false;
-	Rational ornThresh = new Rational(1, 8);
+//	Rational ornThresh = new Rational(1, 8);
+	int ornThresh = RhythmSymbol.SEMIMINIM.getDuration();
+
+
 	public void prepareTraining(String start) {		
 		Map<String, Double> mp = Runner.getModelParams();
 		boolean useCV = ToolBox.toBoolean(mp.get(Runner.CROSS_VAL).intValue());
@@ -127,10 +129,10 @@ public class TrainingManager {
 			String currPieceName = pieceNames.get(i);
 //			System.out.println(currPieceName);
 			Tablature currTab = 
-				dataset.isTablatureSet() ? dataset.getAllTablatures().get(i) : null; 
+				dataset.isTablatureSet() ? dataset.getAllTablatures().get(i) : null;			
 			Transcription currTranscr = dataset.getAllTranscriptions().get(i);
 			voiceLabelsGTPerPiece.add(currTranscr.getVoiceLabels());
-
+			
 			numNotesTotal += currTab != null ? currTab.getNumberOfNotes() :
 				currTranscr.getNumberOfNotes();
 			piecesTotal += 1;
@@ -146,10 +148,12 @@ public class TrainingManager {
 					System.out.println("augmenting " + currTab.getName());
 						
 					// Reversed
-					System.out.println("R E V E R S I N G");
+					System.out.println("R E V E R S I N G");									
 					Tablature currTabRev = new Tablature(currTab); 
-					currTabRev.reverse(); // TODO check if this changes currTab too
+					currTabRev.augment(-1, -1, "reverse");
+//					currTabRev.reverse();
 //					Tablature currTabRev = Tablature.reverse(currTab);
+		
 					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
 					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
@@ -159,17 +163,35 @@ public class TrainingManager {
 					System.out.println("apted:    " + currTranscrRev.getPiece().getScore().get(0).get(0).get(0).get(0));
 						
 					// Deornamented
-					System.out.println("D E O R N A M E N T I N G");
+					System.out.println("D E O R N A M E N T I N G");										
 					Tablature currTabDeorn = new Tablature(currTab);
-					currTabDeorn.deornament(ornThresh); // TODO check if this changes currTab too
+					currTabDeorn.augment(ornThresh, -1, "deornament");
+//					currTabDeorn.deornament(ornThresh);
 //					Tablature currTabDeorn = Tablature.deornament(currTab, ornThresh);
+					
 					Transcription currTranscrDeorn = 
 						Transcription.deornament(currTranscr, currTab, ornThresh);
 		
 					// Reversed and deornamented
-					System.out.println("R E V E R S E  + D E O R N A M E N T");
+					System.out.println("R E V E R S E  +  D E O R N A M E N T");
 					Tablature currTabRevDeorn = new Tablature(currTabDeorn);
-					currTabRevDeorn.reverse(); // TODO check if this changes currTab too
+					currTabRevDeorn.augment(-1, -1, "reverse");
+//					currTabRevDeorn.reverse();
+
+//					for (int ii = 35; ii < 40; ii++) {
+//					System.out.println(Arrays.asList(currTabDeorn.getBasicTabSymbolProperties()[ii]));
+//					}
+//					System.out.println("----");	
+//					for (int ii = 35; ii < 40; ii++) {
+//					System.out.println(Arrays.asList(currTabDeorn.getBasicTabSymbolProperties()[ii]));
+//					}
+//					System.out.println("----");	
+//					for (int ii = 35; ii < 40; ii++) {
+//					System.out.println(Arrays.asList(currTabRevDeorn.getBasicTabSymbolProperties()[ii]));
+//					}
+//					System.out.println("----");	
+//					System.exit(0);
+					
 //					Tablature currTabRevDeorn = currTabDeorn.reverse();
 //					Tablature currTabRevDeorn = Tablature.reverse(currTabDeorn);
 					Transcription currTranscrRevDeorn = 

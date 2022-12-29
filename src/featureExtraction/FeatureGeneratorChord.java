@@ -346,7 +346,7 @@ public class FeatureGeneratorChord {
 					bnp[currentNoteIndex][Transcription.ONSET_TIME_DENOM]);
 				Rational metricDuration = new Rational(bnp[currentNoteIndex][Transcription.DUR_NUMER], 
 					bnp[currentNoteIndex][Transcription.DUR_DENOM]);
-				currentNote = Transcription.createNote(pitch, metricTime, metricDuration);
+				currentNote = Transcription.createNote(pitch, metricTime, metricDuration, null);
 			}
 			List<Integer> currentVoices = voices.get(i);
 
@@ -1867,7 +1867,7 @@ public class FeatureGeneratorChord {
 	  			bnp[currentOnsetIndex][Transcription.ONSET_TIME_DENOM]);
 	  		Rational metricDuration = new Rational(bnp[currentOnsetIndex][Transcription.DUR_NUMER], 
 	  			bnp[currentOnsetIndex][Transcription.DUR_DENOM]);
-	  		currentNote = Transcription.createNote(pitch, metricTime, metricDuration);
+	  		currentNote = Transcription.createNote(pitch, metricTime, metricDuration, null);
 	  	}
 	  	List<Integer> currentVoices = voices.get(i);
 	  	

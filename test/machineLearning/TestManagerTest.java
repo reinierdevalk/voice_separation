@@ -339,48 +339,48 @@ public class TestManagerTest extends TestCase {
 		// Voice 0
 		NotationStaff staff0 = new NotationStaff(system); system.add(staff0);
 		NotationVoice voice0 = new NotationVoice(staff0); staff0.add(voice0);
-		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2));
-		Note voice0n1a = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2)); // to be removed 
-		Note voice0n1b = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2));
-		Note voice0n2 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 4));
-		Note voice0n3 = Transcription.createNote(67, new Rational(11, 8), new Rational(1, 8));
-		Note voice0n4 = Transcription.createNote(67, new Rational(6, 4), new Rational(1, 2));
+		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice0n1a = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2), null); // to be removed 
+		Note voice0n1b = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice0n2 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 4), null);
+		Note voice0n3 = Transcription.createNote(67, new Rational(11, 8), new Rational(1, 8), null);
+		Note voice0n4 = Transcription.createNote(67, new Rational(6, 4), new Rational(1, 2), null);
 		voice0.add(voice0n0); voice0.add(voice0n1a); voice0.add(voice0n1b); voice0.add(voice0n2); voice0.add(voice0n3); 
 		voice0.add(voice0n4);
 		// Voice 1
 		NotationStaff staff1 = new NotationStaff(system); system.add(staff1); 
 		NotationVoice voice1 = new NotationVoice(staff1); staff1.add(voice1); 
-		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 2));
-		Note voice1n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2));
-		Note voice1n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 4));
-		Note voice1n3 = Transcription.createNote(57, new Rational(5, 4), new Rational(1, 4));
-		Note voice1n4 = Transcription.createNote(53, new Rational(6, 4), new Rational(1, 2));
+		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice1n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice1n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 4), null);
+		Note voice1n3 = Transcription.createNote(57, new Rational(5, 4), new Rational(1, 4), null);
+		Note voice1n4 = Transcription.createNote(53, new Rational(6, 4), new Rational(1, 2), null);
 		voice1.add(voice1n0); voice1.add(voice1n1); voice1.add(voice1n2); voice1.add(voice1n3); voice1.add(voice1n4);
 		// Voice 2
 		NotationStaff staff2 = new NotationStaff(system); system.add(staff2); 
 		NotationVoice voice2 = new NotationVoice(staff2); staff2.add(voice2);
-		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2));
-		Note voice2n1 = Transcription.createNote(57, new Rational(2, 4), new Rational(1, 2));
-		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2)); // to be adapted
-		Note voice2n3 = Transcription.createNote(67, new Rational(5, 4), new Rational(1, 4));
-		Note voice2n4a = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2)); // to be removed
-		Note voice2n4b = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2));
+		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice2n1 = Transcription.createNote(57, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2), null); // to be adapted
+		Note voice2n3 = Transcription.createNote(67, new Rational(5, 4), new Rational(1, 4), null);
+		Note voice2n4a = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2), null); // to be removed
+		Note voice2n4b = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2), null);
 		voice2.add(voice2n0); voice2.add(voice2n1); voice2.add(voice2n2); voice2.add(voice2n3); 
 		voice2.add(voice2n4a); voice2.add(voice2n4b);
 		// Voice 3
 		NotationStaff staff3 = new NotationStaff(system); system.add(staff3); 
 		NotationVoice voice3 = new NotationVoice(staff3); staff3.add(voice3); 
-		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2));
-		Note voice3n1 = Transcription.createNote(43, new Rational(2, 4), new Rational(1, 2));
-		Note voice3n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2)); // to be adapted
-		Note voice3n3 = Transcription.createNote(48, new Rational(6, 4), new Rational(1, 2));
+		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice3n1 = Transcription.createNote(43, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice3n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2), null); // to be adapted
+		Note voice3n3 = Transcription.createNote(48, new Rational(6, 4), new Rational(1, 2), null);
 		voice3.add(voice3n0); voice3.add(voice3n1); voice3.add(voice3n2); voice3.add(voice3n3); 
 		// Voice 4
 		NotationStaff staff4 = new NotationStaff(system); system.add(staff4); 
 		NotationVoice voice4 = new NotationVoice(staff4); staff4.add(voice4);
-		Note voice4n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2));
-		Note voice4n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 1)); // to be adapted
-		Note voice4n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2));
+		Note voice4n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice4n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 1), null); // to be adapted
+		Note voice4n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2), null);
 		voice4.add(voice4n0); voice4.add(voice4n1); voice4.add(voice4n2);
 		testManager.newTranscription = new Transcription();
 		testManager.newTranscription.setPiece(piece);
@@ -618,19 +618,19 @@ public class TestManagerTest extends TestCase {
 		adaptedVoice1.add(voice1n0); adaptedVoice1.add(voice1n1); adaptedVoice1.add(voice1n2); 
 		adaptedVoice1.add(voice1n3); adaptedVoice1.add(voice1n4); 
 		// Voice 2
-		Note voice2n2Adapted = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 4));
+		Note voice2n2Adapted = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 4), null);
 		NotationStaff adaptedStaff2 = new NotationStaff(adaptedSystem); adaptedSystem.add(adaptedStaff2); 
 		NotationVoice adaptedVoice2 = new NotationVoice(adaptedStaff2); adaptedStaff2.add(adaptedVoice2);
 		adaptedVoice2.add(voice2n0); adaptedVoice2.add(voice2n1); adaptedVoice2.add(voice2n2Adapted); 
 		adaptedVoice2.add(voice2n3); /*adaptedVoice2.add(voice2n4a);*/ adaptedVoice2.add(voice2n4b);
 		// Voice 3
-		Note voice3n2Adapted = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 4));
+		Note voice3n2Adapted = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 4), null);
 		NotationStaff adaptedStaff3 = new NotationStaff(adaptedSystem); adaptedSystem.add(adaptedStaff3); 
 		NotationVoice adaptedVoice3 = new NotationVoice(adaptedStaff3); adaptedStaff3.add(adaptedVoice3);
 		adaptedVoice3.add(voice3n0); adaptedVoice3.add(voice3n1); adaptedVoice3.add(voice3n2Adapted); 
 		adaptedVoice3.add(voice3n3);  
 		// Voice 4
-		Note voice4n1Adapted = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2));
+		Note voice4n1Adapted = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2), null);
 		NotationStaff adaptedStaff4 = new NotationStaff(adaptedSystem); adaptedSystem.add(adaptedStaff4); 
 		NotationVoice adaptedVoice4 = new NotationVoice(adaptedStaff4); adaptedStaff4.add(adaptedVoice4);
 		adaptedVoice4.add(voice4n0); adaptedVoice4.add(voice4n1Adapted); adaptedVoice4.add(voice4n2);
@@ -926,48 +926,48 @@ public class TestManagerTest extends TestCase {
 		// Voice 0
 		NotationStaff staff0 = new NotationStaff(system); system.add(staff0);
 		NotationVoice voice0 = new NotationVoice(staff0); staff0.add(voice0);
-		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2));
-		Note voice0n1a = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2)); // to be removed (type (ii)) 
-		Note voice0n1b = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2));
-		Note voice0n2 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 4));
-		Note voice0n3 = Transcription.createNote(67, new Rational(11, 8), new Rational(1, 8));
-		Note voice0n4 = Transcription.createNote(67, new Rational(6, 4), new Rational(1, 2));
+		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice0n1a = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2), null); // to be removed (type (ii)) 
+		Note voice0n1b = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice0n2 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 4), null);
+		Note voice0n3 = Transcription.createNote(67, new Rational(11, 8), new Rational(1, 8), null);
+		Note voice0n4 = Transcription.createNote(67, new Rational(6, 4), new Rational(1, 2), null);
 		voice0.add(voice0n0); voice0.add(voice0n1a); voice0.add(voice0n1b); voice0.add(voice0n2); voice0.add(voice0n3); 
 		voice0.add(voice0n4);
 		// Voice 1
 		NotationStaff staff1 = new NotationStaff(system); system.add(staff1); 
 		NotationVoice voice1 = new NotationVoice(staff1); staff1.add(voice1); 
-		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 2));
-		Note voice1n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2));
-		Note voice1n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 4));
-		Note voice1n3 = Transcription.createNote(57, new Rational(5, 4), new Rational(1, 4));
-		Note voice1n4 = Transcription.createNote(53, new Rational(6, 4), new Rational(1, 2));
+		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice1n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice1n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 4), null);
+		Note voice1n3 = Transcription.createNote(57, new Rational(5, 4), new Rational(1, 4), null);
+		Note voice1n4 = Transcription.createNote(53, new Rational(6, 4), new Rational(1, 2), null);
 		voice1.add(voice1n0); voice1.add(voice1n1); voice1.add(voice1n2); voice1.add(voice1n3); voice1.add(voice1n4);
 		// Voice 2
 		NotationStaff staff2 = new NotationStaff(system); system.add(staff2); 
 		NotationVoice voice2 = new NotationVoice(staff2); staff2.add(voice2);
-		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2));
-		Note voice2n1 = Transcription.createNote(57, new Rational(2, 4), new Rational(1, 2));
-//		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2));
-		Note voice2n3 = Transcription.createNote(67, new Rational(5, 4), new Rational(1, 4));
-		Note voice2n4a = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2)); // to be removed (type (ii))
-		Note voice2n4b = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2));
+		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice2n1 = Transcription.createNote(57, new Rational(2, 4), new Rational(1, 2), null);
+//		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice2n3 = Transcription.createNote(67, new Rational(5, 4), new Rational(1, 4), null);
+		Note voice2n4a = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2), null); // to be removed (type (ii))
+		Note voice2n4b = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2), null);
 		voice2.add(voice2n0); voice2.add(voice2n1); /*voice2.add(voice2n2);*/ voice2.add(voice2n3); 
 		voice2.add(voice2n4a); voice2.add(voice2n4b);
 		// Voice 3
 		NotationStaff staff3 = new NotationStaff(system); system.add(staff3); 
 		NotationVoice voice3 = new NotationVoice(staff3); staff3.add(voice3); 
-		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2));
-		Note voice3n1 = Transcription.createNote(43, new Rational(2, 4), new Rational(1, 2));
-		Note voice3n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2));
-		Note voice3n3 = Transcription.createNote(48, new Rational(6, 4), new Rational(1, 2));
+		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice3n1 = Transcription.createNote(43, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice3n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice3n3 = Transcription.createNote(48, new Rational(6, 4), new Rational(1, 2), null);
 		voice3.add(voice3n0); voice3.add(voice3n1); voice3.add(voice3n2); voice3.add(voice3n3); 
 		// Voice 4
 		NotationStaff staff4 = new NotationStaff(system); system.add(staff4); 
 		NotationVoice voice4 = new NotationVoice(staff4); staff4.add(voice4);
-		Note voice4n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2));
-		Note voice4n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 1)); // to be adapted
-		Note voice4n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2));
+		Note voice4n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice4n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 1), null); // to be adapted
+		Note voice4n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 2), null);
 		voice4.add(voice4n0); voice4.add(voice4n1); voice4.add(voice4n2);
 		testManager.newTranscription = new Transcription();
 		testManager.newTranscription.setPiece(piece);
@@ -1216,7 +1216,7 @@ public class TestManagerTest extends TestCase {
 		adaptedVoice3.add(voice3n0); adaptedVoice3.add(voice3n1); adaptedVoice3.add(voice3n2/*Adapted*/); 
 		adaptedVoice3.add(voice3n3);  
 		// Voice 4
-		Note voice4n1Adapted = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2));
+		Note voice4n1Adapted = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2), null);
 		NotationStaff adaptedStaff4 = new NotationStaff(adaptedSystem); adaptedSystem.add(adaptedStaff4); 
 		NotationVoice adaptedVoice4 = new NotationVoice(adaptedStaff4); adaptedStaff4.add(adaptedVoice4);
 		adaptedVoice4.add(voice4n0); adaptedVoice4.add(voice4n1Adapted); adaptedVoice4.add(voice4n2);
@@ -1496,33 +1496,33 @@ public class TestManagerTest extends TestCase {
 		// Voice 0
 		NotationStaff staff0 = new NotationStaff(system); system.add(staff0);
 		NotationVoice voice0 = new NotationVoice(staff0); staff0.add(voice0);
-		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2));
-		Note voice0n1 = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2));
-		Note voice0n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 2));
-		Note voice0n3 = Transcription.createNote(67, new Rational(6, 4), new Rational(3, 8));
-		Note voice0n4 = Transcription.createNote(67, new Rational(15, 8), new Rational(1, 8));
+		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice0n1 = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice0n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice0n3 = Transcription.createNote(67, new Rational(6, 4), new Rational(3, 8), null);
+		Note voice0n4 = Transcription.createNote(67, new Rational(15, 8), new Rational(1, 8), null);
 		voice0.add(voice0n0); voice0.add(voice0n1); voice0.add(voice0n2); voice0.add(voice0n3); voice0.add(voice0n4);
 		// Voice 1
 		NotationStaff staff1 = new NotationStaff(system); system.add(staff1); 
 		NotationVoice voice1 = new NotationVoice(staff1); staff1.add(voice1); 
-		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 1));
-		Note voice1n1 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 2));
-		Note voice1n2 = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2));
+		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 1), null);
+		Note voice1n1 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice1n2 = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2), null);
 		voice1.add(voice1n0); voice1.add(voice1n1); voice1.add(voice1n2);
 		// Voice 2
 		NotationStaff staff2 = new NotationStaff(system); system.add(staff2); 
 		NotationVoice voice2 = new NotationVoice(staff2); staff2.add(voice2);
-		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2));
-		Note voice2n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2));
-		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 1));
+		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice2n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 1), null);
 		voice2.add(voice2n0); voice2.add(voice2n1); voice2.add(voice2n2);
 		// Voice 3
 		NotationStaff staff3 = new NotationStaff(system); system.add(staff3); 
 		NotationVoice voice3 = new NotationVoice(staff3); staff3.add(voice3); 
-		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 1));
-		Note voice3n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2));
-		Note voice3n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 4));
-		Note voice3n3 = Transcription.createNote(43, new Rational(7, 4), new Rational(1, 4));
+		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 1), null);
+		Note voice3n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice3n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 4), null);
+		Note voice3n3 = Transcription.createNote(43, new Rational(7, 4), new Rational(1, 4), null);
 		voice3.add(voice3n0); voice3.add(voice3n1); voice3.add(voice3n2); voice3.add(voice3n3);
 		testManager.newTranscription = new Transcription();
 		testManager.newTranscription.setPiece(piece);
@@ -1840,33 +1840,33 @@ public class TestManagerTest extends TestCase {
 		// Voice 0
 		NotationStaff staff0 = new NotationStaff(system); system.add(staff0);
 		NotationVoice voice0 = new NotationVoice(staff0); staff0.add(voice0);
-		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2));
-		Note voice0n1 = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2));
-		Note voice0n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 2));
-		Note voice0n3 = Transcription.createNote(67, new Rational(6, 4), new Rational(3, 8));
-		Note voice0n4 = Transcription.createNote(67, new Rational(15, 8), new Rational(1, 8));
+		Note voice0n0 = Transcription.createNote(67, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice0n1 = Transcription.createNote(67, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice0n2 = Transcription.createNote(67, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice0n3 = Transcription.createNote(67, new Rational(6, 4), new Rational(3, 8), null);
+		Note voice0n4 = Transcription.createNote(67, new Rational(15, 8), new Rational(1, 8), null);
 		voice0.add(voice0n0); voice0.add(voice0n1); voice0.add(voice0n2); voice0.add(voice0n3); voice0.add(voice0n4);
 		// Voice 1
 		NotationStaff staff1 = new NotationStaff(system); system.add(staff1); 
 		NotationVoice voice1 = new NotationVoice(staff1); staff1.add(voice1); 
-		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 1));
-		Note voice1n1 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 2));
-		Note voice1n2 = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2));
+		Note voice1n0 = Transcription.createNote(57, new Rational(0, 4), new Rational(1, 1), null);
+		Note voice1n1 = Transcription.createNote(57, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice1n2 = Transcription.createNote(57, new Rational(6, 4), new Rational(1, 2), null);
 		voice1.add(voice1n0); voice1.add(voice1n1); voice1.add(voice1n2);
 		// Voice 2
 		NotationStaff staff2 = new NotationStaff(system); system.add(staff2); 
 		NotationVoice voice2 = new NotationVoice(staff2); staff2.add(voice2);
-		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2));
-		Note voice2n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2));
-		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 1));
+		Note voice2n0 = Transcription.createNote(53, new Rational(0, 4), new Rational(1, 2), null);
+		Note voice2n1 = Transcription.createNote(53, new Rational(2, 4), new Rational(1, 2), null);
+		Note voice2n2 = Transcription.createNote(53, new Rational(4, 4), new Rational(1, 1), null);
 		voice2.add(voice2n0); voice2.add(voice2n1); voice2.add(voice2n2);
 		// Voice 3
 		NotationStaff staff3 = new NotationStaff(system); system.add(staff3); 
 		NotationVoice voice3 = new NotationVoice(staff3); staff3.add(voice3); 
-		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 1));
-		Note voice3n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2));
-		Note voice3n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 4));
-		Note voice3n3 = Transcription.createNote(43, new Rational(7, 4), new Rational(1, 4));
+		Note voice3n0 = Transcription.createNote(43, new Rational(0, 4), new Rational(1, 1), null);
+		Note voice3n1 = Transcription.createNote(43, new Rational(4, 4), new Rational(1, 2), null);
+		Note voice3n2 = Transcription.createNote(43, new Rational(6, 4), new Rational(1, 4), null);
+		Note voice3n3 = Transcription.createNote(43, new Rational(7, 4), new Rational(1, 4), null);
 		voice3.add(voice3n0); voice3.add(voice3n1); voice3.add(voice3n2); voice3.add(voice3n3);
 		testManager.newTranscription = new Transcription();
 		testManager.newTranscription.setPiece(piece);

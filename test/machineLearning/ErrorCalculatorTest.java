@@ -758,13 +758,13 @@ public class ErrorCalculatorTest extends TestCase {
 			Note n13 = t.getNotes().get(13);
 //			Note n13 = t.getNoteSequence().getNoteAt(13);
 			t.getNotes().set(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
-				new Rational(1, 4)));
+				new Rational(1, 4), null));
 //			t.getNoteSequence().replaceNoteAt(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
 //				new Rational(1, 4)));
 			Note n16 = t.getNotes().get(16);
 //			Note n16 = t.getNoteSequence().getNoteAt(16);
 			t.getNotes().set(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
-				new Rational(1, 4)));
+				new Rational(1, 4), null));
 //			t.getNoteSequence().replaceNoteAt(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
 //				new Rational(1, 4)));
 			// 2. For the notes at index 12 and 13: swap the voice labels so that the note with the lower index gets

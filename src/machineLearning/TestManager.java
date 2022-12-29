@@ -1368,7 +1368,7 @@ public class TestManager {
 							List<List<List<Rational[]>>> lastNNotesPerVoicePerNote = 
 								groundTruthTranscription.getLastNotesInVoices(n);
 							// Make test data in csv format, where each row is a note that has
-							// have V sequences that have N notes (or are null)
+							// V sequences that have N notes (or are null)
 							String testData = 
 								Transcription.getLastNotesInVoicesString(lastNNotesPerVoicePerNote, 
 								meter);
@@ -7177,7 +7177,7 @@ public class TestManager {
 		// noteList
 		if (predictedVoices.size() == 2) {
 			Note secondNote = Transcription.createNote(firstNote.getMidiPitch(), 
-				firstNote.getMetricTime(), firstNote.getMetricDuration());
+				firstNote.getMetricTime(), firstNote.getMetricDuration(), null);
 			noteList.add(secondNote);
 			allNotes.set(noteIndexBwd, noteList);
 		}
@@ -7372,7 +7372,7 @@ public class TestManager {
 		// and replace the element at noteIndex in allNotes with the augmented noteList
 		if (predictedVoices.size() == 2) {
 			Note secondNote = Transcription.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
-				firstNote.getMetricDuration());
+				firstNote.getMetricDuration(), null);
 			noteList.add(secondNote);
 			allNotes.set(noteIndexBwd, noteList);
 		}
@@ -7454,7 +7454,7 @@ public class TestManager {
 			List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel); 	  	
 			// Create otherNote (which is an exact copy of firstNote and secondNote)
 			Note otherNote = Transcription.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
-				firstNote.getMetricDuration());
+				firstNote.getMetricDuration(), null);
 
 			// 1. predictedVoices has no CoD  
 			if (predictedVoices.size() == 1) {
