@@ -616,10 +616,10 @@ public class TestManager {
 					isTablatureCase ? dataset.getAllEncodingFiles().get(pieceIndex) : null;
 
 				MetricalTimeLine mtl = // zondag
-					!deployTrainedUserModel ? groundTruthTranscription.getPiece().getMetricalTimeLine() : 
+					!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getMetricalTimeLine() : 
 					new MetricalTimeLine(); 
 				SortedContainer<Marker> ht = // zondag
-					!deployTrainedUserModel ? groundTruthTranscription.getPiece().getHarmonyTrack() :
+					!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getHarmonyTrack() :
 					new SortedContainer<Marker>();
 
 				Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
@@ -686,7 +686,7 @@ public class TestManager {
 //				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
-				MIDIExport.exportMidiFile(predictedTranscr.getPiece(), instruments, meterInfo, 
+				MIDIExport.exportMidiFile(predictedTranscr.getScorePiece(), instruments, meterInfo, 
 					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
 				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfo();
@@ -1225,8 +1225,8 @@ public class TestManager {
 						Piece predictedPiece = // added 11.22
 							Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, 
 							updatedVoiceLabels, updatedDurationLabels, highestNumVoicesTraining, 
-							groundTruthTranscription.getPiece().getMetricalTimeLine(), 
-							groundTruthTranscription.getPiece().getHarmonyTrack(), testPieceName);
+							groundTruthTranscription.getScorePiece().getMetricalTimeLine(), 
+							groundTruthTranscription.getScorePiece().getHarmonyTrack(), testPieceName);
 						predictedTranscription = 
 							new Transcription(predictedPiece, encoding, updatedVoiceLabels, updatedDurationLabels);
 //						predictedTranscription = 
@@ -3414,7 +3414,7 @@ public class TestManager {
 // 			highestNumVoicesTraining + ") and the given key and time signature ..."); 
 		
 		MetricalTimeLine mtl = // zondag
-			!deployTrainedUserModel ? groundTruthTranscription.getPiece().getMetricalTimeLine() : 
+			!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getMetricalTimeLine() : 
 			new MetricalTimeLine(); 
 		long[][] ts = mtl.getTimeSignature(); // zondag
 //		long[][] ts = !applToNewData ?
@@ -4043,7 +4043,7 @@ public class TestManager {
 		// For each predicted voice: determine the onset time of the next note in that voice
 		List<Rational> metricTimesNext = new ArrayList<Rational>();
 		for (int i : predictedVoices) {
-			NotationVoice nv = transcription.getPiece().getScore().get(i).get(0);
+			NotationVoice nv = transcription.getScorePiece().getScore().get(i).get(0);
 			// a. For type (i) or (ii) conflicts, which only occur when using the fwd model, and where the predicted voices
 			// will contain at least one note (the one at metricTime) and nv.size() is thus never null
 			if (metricTimeNext != null) {
@@ -4500,7 +4500,7 @@ public class TestManager {
 									new ScoreNote(new ScorePitch(pitchPrevious), metricTimePrevious, maxDurPrevious);
 								for (int predictedVoicePrevious : predictedVoicesPrevious) {
 									NotationVoice nv = 
-										newTranscription.getPiece().getScore().get(predictedVoicePrevious).get(0);
+										newTranscription.getScorePiece().getScore().get(predictedVoicePrevious).get(0);
 									for (NotationChord nc : nv) {
 										if (nc.getMetricTime().equals(metricTimePrevious)) {
 											nc.get(0).setScoreNote(adaptedScoreNotePrevious);
@@ -4553,7 +4553,7 @@ public class TestManager {
 //								  isBidirectional && listNum == 0 && isTablatureCase && modelDuration) {	
 						else if (listNum == 0 && isTablatureCase && modelDuration && pm == ProcessingMode.BWD) { // JOA     				
 							// NB: nv will always contain notes as this else is only read when currentListOfIndices is not empty 
-							NotationVoice nv = newTranscription.getPiece().getScore().get(firstPredictedVoice).get(0);
+							NotationVoice nv = newTranscription.getScorePiece().getScore().get(firstPredictedVoice).get(0);
 							// Find the pitch and the onset time of the next Note in nv
 							Rational metricTimeNext = null;
 							int pitchNext = -1;
@@ -4894,7 +4894,7 @@ public class TestManager {
 											ScoreNote adaptedScoreNotePrevious = 
 												new ScoreNote(new ScorePitch(pitchPrevious), metricTimePrevious, maxDurPrevious);
 											for (int predictedVoicePrevious : predictedVoicesPrevious) {
-												NotationVoice nv = newTranscription.getPiece().getScore().get(predictedVoicePrevious).get(0);
+												NotationVoice nv = newTranscription.getScorePiece().getScore().get(predictedVoicePrevious).get(0);
 												for (NotationChord nc : nv) {
 													if (nc.getMetricTime().equals(metricTimePrevious)) {
 											 	  		nc.get(0).setScoreNote(adaptedScoreNotePrevious);
@@ -4949,7 +4949,7 @@ public class TestManager {
 										// NB: nv will always contain notes as this else is only read when currentListOfIndices is not 
 										// empty 
 										NotationVoice nv = 
-											newTranscription.getPiece().getScore().get(secondPredictedVoicePrevious).get(0);
+											newTranscription.getScorePiece().getScore().get(secondPredictedVoicePrevious).get(0);
 										// Find the pitch and the onset time of the next Note in nv
 										Rational metricTimeNext = null;
 										int pitchNext = -1;
@@ -5233,7 +5233,7 @@ public class TestManager {
 							}
 						}
 					}
-					int maxNumVoices = newTranscription.getPiece().getScore().size(); // TODO this is possible because newTranscription has highestNumberOfVoicesTraining voices
+					int maxNumVoices = newTranscription.getScorePiece().getScore().size(); // TODO this is possible because newTranscription has highestNumberOfVoicesTraining voices
 
 					// If the note at noteIndex is the last note in the chord and there is a next chord
 					if ((indexInChord == sizeChord - 1) && sizeNextChord != -1) {
@@ -5329,7 +5329,7 @@ public class TestManager {
 										ScoreNote adaptedScoreNote = null;
 										// 1. Adapt the Note's duration in newTranscription
 										for (int voice : currentVoices) {
-											NotationVoice nv = newTranscription.getPiece().getScore().get(voice).get(0);
+											NotationVoice nv = newTranscription.getScorePiece().getScore().get(voice).get(0);
 											for (NotationChord nc : nv) {
 												Note n = nc.get(0);
 												if (n.getMidiPitch() == pitch && n.getMetricTime().equals(onset)) {
@@ -7092,7 +7092,7 @@ public class TestManager {
 			}
 		}
 
-		NotationSystem notationSystem = newTranscription.getPiece().getScore();
+		NotationSystem notationSystem = newTranscription.getScorePiece().getScore();
 		// Get noteList, which at this point only contains one element, and get that element
 		List<Note> noteList = allNotes.get(noteIndexBwd);
 		Note firstNote = noteList.get(0);
@@ -7267,7 +7267,7 @@ public class TestManager {
 			}
 		}
 
-		NotationSystem notationSystem = newTranscription.getPiece().getScore();
+		NotationSystem notationSystem = newTranscription.getScorePiece().getScore();
 		// Get noteList, which at this point only contains one element, and get that element
 		List<Note> noteList = allNotes.get(noteIndexBwd);
 		Note firstNote = noteList.get(0);
@@ -8209,9 +8209,9 @@ public class TestManager {
    */
   private void addDurations(int numberOfVoices) {
 //  	NotationSystem notationSystem = newTranscription.getScore();
-  	NotationSystem notationSystem = newTranscription.getPiece().getScore();
+  	NotationSystem notationSystem = newTranscription.getScorePiece().getScore();
 //  	MetricalTimeLine metricalTimeLine = newTranscription.getMetricalTimeLine();
-  	MetricalTimeLine metricalTimeLine = newTranscription.getPiece().getMetricalTimeLine();		
+  	MetricalTimeLine metricalTimeLine = newTranscription.getScorePiece().getMetricalTimeLine();		
   	long[][] timeSignature = metricalTimeLine.getTimeSignature();
   	
     // For each voice in newTranscription

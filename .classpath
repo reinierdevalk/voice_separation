@@ -18,5 +18,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/formats-representations"/>
 	<classpathentry kind="lib" path="lib/forms-1.3.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/path"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/musitech"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

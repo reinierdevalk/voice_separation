@@ -651,7 +651,7 @@ public class TestManagerTest extends TestCase {
 		List<Rational[]> allPredictedDurationsActual = testManager.allPredictedDurations;
 		List<List<Double>> allDurationLabelsActual = testManager.allDurationLabels;
 		List<Integer[]> allVoicesCoDNotesActual = testManager.allVoicesCoDNotes;
-		Piece pieceActual = testManager.newTranscription.getPiece();
+		Piece pieceActual = testManager.newTranscription.getScorePiece();
 		List<List<Note>> allNotesActual = testManager.allNotes;
 		System.out.println(testManager.conflictsRecord);
 
@@ -1239,7 +1239,7 @@ public class TestManagerTest extends TestCase {
 		List<Rational[]> allPredictedDurationsActual = testManager.allPredictedDurations;
 		List<List<Double>> allDurationLabelsActual = testManager.allDurationLabels;
 		List<Integer[]> allVoicesCoDNotesActual = testManager.allVoicesCoDNotes;
-		Piece pieceActual = testManager.newTranscription.getPiece();
+		Piece pieceActual = testManager.newTranscription.getScorePiece();
 		List<List<Note>> allNotesActual = testManager.allNotes;
 		System.out.println(testManager.conflictsRecord);
 
@@ -1625,7 +1625,7 @@ public class TestManagerTest extends TestCase {
 		List<double[]> allNetworkOutputsAdaptedActual = testManager.allNetworkOutputsAdapted;
 		List<List<Integer>> allPredictedVoicesActual = testManager.allPredictedVoices;
 		List<List<Double>> allVoiceLabelsActual = testManager.allVoiceLabels;
-		Piece pieceActual = testManager.newTranscription.getPiece();
+		Piece pieceActual = testManager.newTranscription.getScorePiece();
 		List<List<Note>> allNotesActual = testManager.allNotes;
 		System.out.println(testManager.conflictsRecord);
 
@@ -1979,7 +1979,7 @@ public class TestManagerTest extends TestCase {
 		List<double[]> allNetworkOutputsAdaptedActual = testManager.allNetworkOutputsAdapted;
 		List<List<Integer>> allPredictedVoicesActual = testManager.allPredictedVoices;
 		List<List<Double>> allVoiceLabelsActual = testManager.allVoiceLabels;
-		Piece pieceActual = testManager.newTranscription.getPiece();
+		Piece pieceActual = testManager.newTranscription.getScorePiece();
 		List<List<Note>> allNotesActual = testManager.allNotes;
 		System.out.println(testManager.conflictsRecord);
 

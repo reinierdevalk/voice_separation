@@ -995,7 +995,7 @@ public class FeatureGeneratorTest extends TestCase {
   		// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
   		for (int j = 0; j < currentVoices.size(); j++) {
   	    int currentVoice = currentVoices.get(j);
-  	    NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+  	    NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
   	    actual.add(FeatureGenerator.getProximitiesAndMovementToVoiceMUSCI(basicTabSymbolProperties, 
   				currentVoiceToCompareTo, currentNote));
   		}
@@ -1103,7 +1103,7 @@ public class FeatureGeneratorTest extends TestCase {
   		// NB: currentVoices.size() will always be 1, as CoDs don't occur in the non-tablature case
   		for (int j = 0; j < currentVoices.size(); j++) {
   	    int currentVoice = currentVoices.get(j);
-  	    NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+  	    NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
   	    actual.add(FeatureGenerator.getProximitiesAndMovementToVoiceMUSCI(basicTabSymbolProperties, 
   				currentVoiceToCompareTo, currentNote));
   		}
@@ -5540,7 +5540,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(
 					basicTabSymbolProperties, currentVoiceToCompareTo, currentNote, 
 					Direction.LEFT, 1, false));
@@ -5556,7 +5556,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(
 					basicTabSymbolProperties, currentVoiceToCompareTo, currentNote, 
 					Direction.LEFT, 3, false));
@@ -5573,7 +5573,7 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
 				NotationVoice currentVoiceToCompareTo = 
-					transcription.getPiece().getScore().get(currentVoice).get(0);
+					transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(
 					basicTabSymbolProperties, currentVoiceToCompareTo, 
 					currentNote, Direction.RIGHT, 1, false));
@@ -5589,7 +5589,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(basicTabSymbolProperties, 
 					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, true));
 			}
@@ -5969,7 +5969,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
 					currentVoiceToCompareTo, currentNote, Direction.LEFT, 1, false));
 			}
@@ -5985,7 +5985,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
 					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, false));
 			}
@@ -6002,7 +6002,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
 					currentVoiceToCompareTo, currentNote, Direction.RIGHT, 1, false));
 			}
@@ -6018,7 +6018,7 @@ public class FeatureGeneratorTest extends TestCase {
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
-				NotationVoice currentVoiceToCompareTo = transcription.getPiece().getScore().get(currentVoice).get(0);
+				NotationVoice currentVoiceToCompareTo = transcription.getScorePiece().getScore().get(currentVoice).get(0);
 				actual.addAll(FeatureGenerator.getProximitiesAndMovementToVoiceAll(null, 
 					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, true));
 			}
@@ -7809,7 +7809,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-		NotationVoice nv0 = transcription.getPiece().getScore().get(0).get(0);
+		NotationVoice nv0 = transcription.getScorePiece().getScore().get(0).get(0);
 		for (int i = 0; i < nv0.size(); i++) {
 			Note n = nv0.get(i).get(0);
 			actual.add(FeatureGenerator.generateMelodyFeatureVector(basicTabSymbolProperties, nv0, n));
@@ -7850,7 +7850,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
-		NotationVoice nv0 = transcription.getPiece().getScore().get(0).get(0);
+		NotationVoice nv0 = transcription.getScorePiece().getScore().get(0).get(0);
 		for (int i = 0; i < nv0.size(); i++) {
 			Note n = nv0.get(i).get(0);
 			actual.add(FeatureGenerator.generateMelodyFeatureVector(null, nv0, n));
@@ -7912,7 +7912,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-		NotationSystem system = transcription.getPiece().getScore(); 
+		NotationSystem system = transcription.getScorePiece().getScore(); 
 		NotationVoice nv0 = system.get(0).get(0);
 		NotationVoice nv1 = system.get(1).get(0);
 		NotationVoice nv2 = system.get(2).get(0);
@@ -7979,7 +7979,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
-		NotationSystem system = transcription.getPiece().getScore(); 
+		NotationSystem system = transcription.getScorePiece().getScore(); 
 		NotationVoice nv0 = system.get(0).get(0);
 		NotationVoice nv1 = system.get(1).get(0);
 		NotationVoice nv2 = system.get(2).get(0);
@@ -8032,7 +8032,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			predVoiceLabels, predDurationLabels/*, null*/);
 
 		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
-			gtTranscription.getPiece().getMetricalTimeLine(), gtTranscription.getPiece().getHarmonyTrack(),
+			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
 			midiTestpiece1.getName());
 		Transcription predTranscription = 
 			new Transcription(p, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
@@ -8196,7 +8196,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			predVoiceLabels, null/*, predEDUInfo*/);
 		
 		Piece p = Transcription.createPiece(null, bnp, predVoiceLabels, null,5, 
-			gtTranscription.getPiece().getMetricalTimeLine(), gtTranscription.getPiece().getHarmonyTrack(),
+			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
 			midiTestpiece1.getName());
 		Transcription predictedTranscription = new Transcription(p, null, predVoiceLabels, null);
 //		Transcription predictedTranscription = 
@@ -8300,7 +8300,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			predVoiceLabels, predDurationLabels/*, null*/);		
 		
 		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
-			gtTranscription.getPiece().getMetricalTimeLine(), gtTranscription.getPiece().getHarmonyTrack(),
+			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
 			midiTestpiece1.getName());
 		Transcription predictedTranscription = 
 			new Transcription(p, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
@@ -8411,8 +8411,8 @@ public class FeatureGeneratorTest extends TestCase {
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, null, predictedPiece,
 //			predVoiceLabels, null/*, predEDUInfo*/);		
 		Piece p  = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
-			gtTranscription.getPiece().getMetricalTimeLine(), 
-			gtTranscription.getPiece().getHarmonyTrack(), midiTestpiece1.getName());
+			gtTranscription.getScorePiece().getMetricalTimeLine(), 
+			gtTranscription.getScorePiece().getHarmonyTrack(), midiTestpiece1.getName());
 		Transcription predictedTranscription = new Transcription(p, null, predVoiceLabels, null);		
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null,

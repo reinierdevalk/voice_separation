@@ -85,7 +85,7 @@ public class MelodyFeatureGenerator {
 				midi = new File(Runner.midiPath + "bach-WTC/thesis/" + s);
 			}
 			Transcription trans = new Transcription(midi, encoding);
-			NotationSystem system = trans.getPiece().getScore();
+			NotationSystem system = trans.getScorePiece().getScore();
 
 			for (int voice = 0; voice < trans.getNumberOfVoices(); voice++) {
 				NotationVoice nv = system.get(voice).get(0);
@@ -122,7 +122,7 @@ public class MelodyFeatureGenerator {
 		int voice, int n, Rational metricTime) {
 		List<List<Double>> featureVector = new ArrayList<List<Double>>();
 
-		NotationSystem system = transcription.getPiece().getScore();
+		NotationSystem system = transcription.getScorePiece().getScore();
 		NotationVoice nv = system.get(voice).get(0);
 		// For each Note in the voice
 		for (int i = 0; i < nv.size(); i++) {

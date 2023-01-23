@@ -7,6 +7,7 @@ import java.util.List;
 
 import representations.Tablature;
 import representations.Transcription;
+import structure.ScorePiece;
 import tools.ToolBox;
 import utility.DataConverter;
 import de.uos.fmt.musitech.data.score.NotationVoice;
@@ -354,7 +355,7 @@ public class FeatureGeneratorChord {
 			// and the pitch movement, and set the corresponding elements in the Arrays
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int voice = currentVoices.get(j);
-				NotationVoice currentVoice = transcription.getPiece().getScore().get(voice).get(0);
+				NotationVoice currentVoice = transcription.getScorePiece().getScore().get(voice).get(0);
 				double[] pitchAndTimeProximities = 
 				FeatureGenerator.getProximitiesAndMovementToVoiceAll(btp, currentVoice, 
 					currentNote, Direction.LEFT, 1, false).get(0); // TODO turn Direction.LEFT into method argument 
@@ -1867,7 +1868,7 @@ public class FeatureGeneratorChord {
 	  			bnp[currentOnsetIndex][Transcription.ONSET_TIME_DENOM]);
 	  		Rational metricDuration = new Rational(bnp[currentOnsetIndex][Transcription.DUR_NUMER], 
 	  			bnp[currentOnsetIndex][Transcription.DUR_DENOM]);
-	  		currentNote = Transcription.createNote(pitch, metricTime, metricDuration, null);
+	  		currentNote = ScorePiece.createNote(pitch, metricTime, metricDuration, null);
 	  	}
 	  	List<Integer> currentVoices = voices.get(i);
 	  	
@@ -1875,7 +1876,7 @@ public class FeatureGeneratorChord {
 	  	// voice and the pitch movement, and add the numbers to the lists
 	  	for (int j = 0; j < currentVoices.size(); j++) {
 	  		int voiceAssignedToNote = currentVoices.get(j);
-	  		NotationVoice currentVoice = transcription.getPiece().getScore().get(voiceAssignedToNote).get(0);
+	  		NotationVoice currentVoice = transcription.getScorePiece().getScore().get(voiceAssignedToNote).get(0);
 			  double[] pitchAndTimeProximities = FeatureGenerator.getProximitiesAndMovementToVoiceMUSCI(btp, currentVoice, currentNote); 
 				pitchProximities.add(pitchAndTimeProximities[0]);
 			  interOnsetTimeProximities.add(pitchAndTimeProximities[1]);

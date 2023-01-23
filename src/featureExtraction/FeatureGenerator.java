@@ -899,9 +899,9 @@ public class FeatureGenerator {
 		// For all theoretically possible voices 
 		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
 			// If the transcription contains the voice with voiceNumber: find the previous note in that voice
-			if (voiceNumber < transcription.getPiece().getScore().size()) {
+			if (voiceNumber < transcription.getScorePiece().getScore().size()) {
 				NotationVoice currentVoice = 
-					transcription.getPiece().getScore().get(voiceNumber).get(0);
+					transcription.getScorePiece().getScore().get(voiceNumber).get(0);
   
 //				// 1. Get the index of the previous Note
 //				int previousNoteIndex = getIndexOfPreviousNoteInVoice(currentVoice, currentNote);
@@ -1142,8 +1142,8 @@ public class FeatureGenerator {
 		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
 			// a. If transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
-			if (voiceNumber < transcription.getPiece().getScore().size()) {
-				NotationVoice currentVoice = transcription.getPiece().getScore().get(voiceNumber).get(0);
+			if (voiceNumber < transcription.getScorePiece().getScore().size()) {
+				NotationVoice currentVoice = transcription.getScorePiece().getScore().get(voiceNumber).get(0);
 				List<double[]> allPAndTProxCurrNote = 
 					getProximitiesAndMovementToVoiceAll(btp, currentVoice, currentNote, 
 					direction, decisionContextSize, averageProxAndMvmts);
@@ -2354,7 +2354,7 @@ public class FeatureGenerator {
 
 		// For every possible voice: model the probability of currentNote belonging to voice
 		double[] voiceProbabilities = new double[Transcription.MAX_NUM_VOICES];
-		NotationSystem system = transcription.getPiece().getScore();
+		NotationSystem system = transcription.getScorePiece().getScore();
 		for (int voice = 0; voice < hiNumVoicesTraining; voice++) {
 //		for (int voice = 0; voice < Transcription.MAXIMUM_NUMBER_OF_VOICES; voice++) {
 			List<List<Double>> allMfv = new ArrayList<List<Double>>();
@@ -2494,7 +2494,7 @@ public class FeatureGenerator {
 		// 2. For every possible voice: model the probability of currentNote belonging to voice
 //		MelodyFeatureGenerator melodyFeatureGenerator = new MelodyFeatureGenerator(this);
 		Double[] voiceProbabilities = new Double[Transcription.MAX_NUM_VOICES];
-		NotationSystem system = transcription.getPiece().getScore();
+		NotationSystem system = transcription.getScorePiece().getScore();
 		for (int voice = 0; voice < Transcription.MAX_NUM_VOICES; voice++) {
 			List<List<Double>> allMfv = new ArrayList<List<Double>>();
 			// Determine numberOfVoices
@@ -4102,8 +4102,8 @@ public class FeatureGenerator {
 		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
 		  // a. If the Transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
-		  if (voiceNumber < transcription.getPiece().getScore().size()) {
-			  NotationVoice currentVoice = transcription.getPiece().getScore().get(voiceNumber).get(0);
+		  if (voiceNumber < transcription.getScorePiece().getScore().size()) {
+			  NotationVoice currentVoice = transcription.getScorePiece().getScore().get(voiceNumber).get(0);
 			  double[] pitchAndTimeProximitiesOfCurrentNote = 
 			  	getProximitiesAndMovementToVoiceMUSCI(basicTabSymbolProperties, currentVoice, currentNote);
 			  pitchAndTimeProximities[0][voiceNumber] = pitchAndTimeProximitiesOfCurrentNote[0];

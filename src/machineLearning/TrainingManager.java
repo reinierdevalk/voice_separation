@@ -157,10 +157,10 @@ public class TrainingManager {
 					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
 					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("apted:    " + currTranscr.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("apted:    " + currTranscr.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed:");
 					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("apted:    " + currTranscrRev.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("apted:    " + currTranscrRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 						
 					// Deornamented
 					System.out.println("D E O R N A M E N T I N G");										
@@ -199,19 +199,19 @@ public class TrainingManager {
 
 					System.out.println("first of given:");
 					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("adapted:  " + currTranscr.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("adapted:  " + currTranscr.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
 					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("adapted:  " + currTranscrDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("adapted:  " + currTranscrDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed:");
 					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("apted:    " + currTranscrRev.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("apted:    " + currTranscrRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed and deornamented:");
 					System.out.println("undapted: " + currTranscrRevDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("apted:    " + currTranscrRevDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("apted:    " + currTranscrRevDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
 					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("adapted:  " + currTranscrDeorn.getPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("adapted:  " + currTranscrDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 
 					// implement transposition
 						
@@ -363,7 +363,7 @@ public class TrainingManager {
 				if (mt == ModelType.MM) {
 					List<List<List<String>>> currMFVs = new ArrayList<List<List<String>>>();
 					// For each voice in currentTranscription
-					for (NotationStaff nst : currTrans.getPiece().getScore()) {
+					for (NotationStaff nst : currTrans.getScorePiece().getScore()) {
 						NotationVoice nv = nst.get(0);
 						// Only if nv contains notes
 						if (nv.size() != 0) {
@@ -928,7 +928,7 @@ public class TrainingManager {
 							System.exit(0);
 							currMFVs = new ArrayList<List<List<String>>>();
 							// For each voice in currentTranscription
-							for (NotationStaff nst : currTrans.getPiece().getScore()) {
+							for (NotationStaff nst : currTrans.getScorePiece().getScore()) {
 								NotationVoice nv = nst.get(0);
 								// Only if nv contains notes
 								if (nv.size() != 0) {
