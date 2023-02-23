@@ -2,18 +2,15 @@ package machineLearning;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import data.Dataset;
-import data.Dataset.DatasetID;
 import de.uos.fmt.musitech.data.structure.Note;
 import representations.Tablature;
 import representations.Transcription;
 import tools.ToolBox;
 import ui.Runner;
-import utility.DataConverter;
 
 public class HMMManager {
 

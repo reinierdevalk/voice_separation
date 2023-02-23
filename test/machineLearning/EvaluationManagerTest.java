@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
-import data.Dataset.DatasetID;
 import tools.ToolBox;
 import ui.Runner;
-import ui.Runner.Implementation;
 import ui.Runner.Model;
 import ui.Runner.ModellingApproach;
-import ui.Runner.ProcessingMode;
 import junit.framework.TestCase;
 import representations.Transcription;
 
@@ -25,10 +22,12 @@ public class EvaluationManagerTest extends TestCase {
 	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
 	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

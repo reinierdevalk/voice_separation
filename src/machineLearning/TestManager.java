@@ -37,7 +37,10 @@ import interfaces.PythonInterface;
 import machineLearning.NNManager.ActivationFunction;
 import representations.Tablature;
 import representations.Transcription;
+import structure.ScoreMetricalTimeLine;
+import structure.ScorePiece;
 import structure.Timeline;
+import structure.metric.Utils;
 import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner;
@@ -259,7 +262,7 @@ public class TestManager {
 	private void startTestProcess(int fold, int mode, String[] argPaths, String[] times) {
 		long tePreProcTime = 0;
 		if (mode == Runner.TEST) { 
-			tePreProcTime = (long) Integer.parseInt(times[0]);
+			tePreProcTime = Integer.parseInt(times[0]);
 		}
 		String start = times[1];
 
@@ -321,11 +324,14 @@ public class TestManager {
 		List<Rational[]> allMetricPositions = new ArrayList<>();
 		if (isTablatureCase) {
 			basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
-			meterInfo = tablature.getTimeline().getMeterInfo();
+			meterInfo = tablature.getMeterInfo();
 //			meterInfo = tablature.getTimeline().getMeterInfoOBS();
+			Timeline tl = tablature.getEncoding().getTimeline();
 			for (int j = 0; j < basicTabSymbolProperties.length; j++) {
-				allMetricPositions.add(Timeline.getMetricPosition(
-					getMetricTime(j, isTablatureCase), meterInfo));
+				allMetricPositions.add(
+					tl.getMetricPosition((int) getMetricTime(j, isTablatureCase).mul(Tablature.SRV_DEN).toDouble())
+//					Utils.getMetricPosition(getMetricTime(j, isTablatureCase), meterInfo)
+				);
 			}
 //			allMetricPositions = tablature.getAllMetricPositions();
 			// When using the bwd model, chordSizes must be set in reverse order. This must be 
@@ -352,9 +358,14 @@ public class TestManager {
 			basicNoteProperties = groundTruthTranscription.getBasicNoteProperties();
 			meterInfo = groundTruthTranscription.getMeterInfo();
 //			keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
+			MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
+			ScoreMetricalTimeLine smtl = groundTruthTranscription.getScorePiece().getScoreMetricalTimeLine();
 			for (int j = 0; j < basicNoteProperties.length; j++) {
-				allMetricPositions.add(Timeline.getMetricPosition(
-					getMetricTime(j, isTablatureCase), meterInfo));
+				allMetricPositions.add(
+					smtl.getMetricPosition(getMetricTime(j, isTablatureCase))
+//					ScoreMetricalTimeLine.getMetricPosition(mtl, getMetricTime(j, isTablatureCase))	
+//					Utils.getMetricPosition(getMetricTime(j, isTablatureCase), meterInfo)
+				);
 			}
 //			allMetricPositions = groundTruthTranscription.getAllMetricPositions();
 			// When using the bwd model, chordSizes must be set in reverse order. This must be 
@@ -623,9 +634,12 @@ public class TestManager {
 					new SortedContainer<Marker>();
 
 				Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
-				Piece predictedPiece = // added 11.22
-					Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
-					allDurationLabels, highestNumVoicesTraining, mtl, ht, testPieceName);
+				ScorePiece predictedPiece = 
+					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
+					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
+//				Piece predictedPiece = // added 11.22
+//					Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
+//					allDurationLabels, highestNumVoicesTraining, mtl, ht, testPieceName);
 				Transcription predictedTranscr = 
 					new Transcription(predictedPiece, encoding,	allVoiceLabels, allDurationLabels);
 //				Transcription predictedTranscr = 
@@ -689,7 +703,7 @@ public class TestManager {
 				MIDIExport.exportMidiFile(predictedTranscr.getScorePiece(), instruments, meterInfo, 
 					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
 				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
-				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfo();
+				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
@@ -1222,13 +1236,19 @@ public class TestManager {
 						File encodingFile = 
 							isTablatureCase ? dataset.getAllEncodingFiles().get(pieceIndex) : null;
 						Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
-						Piece predictedPiece = // added 11.22
-							Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, 
-							updatedVoiceLabels, updatedDurationLabels, highestNumVoicesTraining, 
-							groundTruthTranscription.getScorePiece().getMetricalTimeLine(), 
-							groundTruthTranscription.getScorePiece().getHarmonyTrack(), testPieceName);
+						ScorePiece predictedPiece = 
+							new ScorePiece(basicTabSymbolProperties, basicNoteProperties, updatedVoiceLabels, 
+							updatedDurationLabels, groundTruthTranscription.getScorePiece().getMetricalTimeLine(),
+							groundTruthTranscription.getScorePiece().getHarmonyTrack(), highestNumVoicesTraining, 
+							testPieceName);
+//						Piece predictedPiece = // added 11.22
+//							Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, 
+//							updatedVoiceLabels, updatedDurationLabels, highestNumVoicesTraining, 
+//							groundTruthTranscription.getScorePiece().getMetricalTimeLine(), 
+//							groundTruthTranscription.getScorePiece().getHarmonyTrack(), testPieceName);
 						predictedTranscription = 
-							new Transcription(predictedPiece, encoding, updatedVoiceLabels, updatedDurationLabels);
+							new Transcription(new ScorePiece(predictedPiece), encoding, updatedVoiceLabels, 
+							updatedDurationLabels);
 //						predictedTranscription = 
 //							new Transcription(testPieceName, 
 //							encodingFile, basicTabSymbolProperties, basicNoteProperties, 
@@ -1361,7 +1381,7 @@ public class TestManager {
 					boolean LSTM = false;
 					if (LSTM) {
 						List<Integer[]> mi = groundTruthTranscription.getMeterInfo(); 
-						String meter = mi.get(0)[Timeline.MI_NUM] + "/" + mi.get(0)[Timeline.MI_DEN];
+						String meter = mi.get(0)[Transcription.MI_NUM] + "/" + mi.get(0)[Transcription.MI_DEN];
 						boolean doLastNNotesThing = false;
 						if (doLastNNotesThing) {
 							int n = 5;
@@ -3772,8 +3792,9 @@ public class TestManager {
 					List<Integer> currentPredictedVoices = predictedChordVoices.get(j);
 					Rational currentMetricTime = currentNote.getMetricTime();
 					for (int k = 0; k < currentPredictedVoices.size(); k++) {
-						int currentPredictedVoice = currentPredictedVoices.get(k); 
-						newTranscription.addNote(currentNote, currentPredictedVoice, currentMetricTime);
+						int currentPredictedVoice = currentPredictedVoices.get(k);
+						newTranscription.getScorePiece().addNote(currentNote, currentPredictedVoice, currentMetricTime);
+//						newTranscription.addNote(currentNote, currentPredictedVoice, currentMetricTime);
 						// Add information to applicationProcess  
 						String message = 
 							"Note at noteIndex " + currentNoteIndex + " (chordIndex " + chordIndex +
@@ -4225,6 +4246,9 @@ public class TestManager {
 		if (Runner.getDataset().isTablatureSet()) {
 			deviationThreshold = modelParameters.get(Runner.DEV_THRESHOLD);
 		}
+		Timeline tl = tablature != null? tablature.getEncoding().getTimeline() : null;
+		MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
+		ScoreMetricalTimeLine smtl = groundTruthTranscription.getScorePiece().getScoreMetricalTimeLine();
 		
 		// Determine noteIndexBwd, which is needed when using the bwd model for the lists in bwd order. When using the 
 		// fwd model, it will always be the same as noteIndex
@@ -4447,8 +4471,14 @@ public class TestManager {
 						// 0. Get the metric position and the index in the chord of the previous note
 						Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);	
 						String metPosPrevious = 
-							ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
-//							ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
+							Utils.getMetricPositionAsString(
+							tablature != null ?
+							tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())		
+							:
+							smtl.getMetricPosition(mt)
+//							ScoreMetricalTimeLine.getMetricPosition(mtl, mt)
+//							Utils.getMetricPosition(mt, meterInfo)
+						);
 						int indexInChordPrevious = -1;
 						if (isTablatureCase) {
 							indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM]; 
@@ -4595,8 +4625,15 @@ public class TestManager {
 											// Set metPosNext and indexInChordNext 
 											mt = getMetricTime(noteIndexNext, isTablatureCase);
 											metPosNext = 
-												ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
-//												ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
+												Utils.getMetricPositionAsString(
+												tablature != null ?		
+												tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())
+												:
+												smtl.getMetricPosition(mt)
+//												ScoreMetricalTimeLine.getMetricPosition(mtl, mt)	
+//												Utils.getMetricPosition(mt, meterInfo)
+											);
+
 											indexInChordNext = basicTabSymbolProperties[j][Tablature.NOTE_SEQ_NUM];
 											break;
 										}
@@ -4831,8 +4868,8 @@ public class TestManager {
 					if (isTablatureCase) {
 						for (int i = 0; i < currentListOfIndices.size(); i++) {
 							int noteIndexPrevious = currentListOfIndices.get(i);
-							// Determine noteIndexPreviousBwd, which is needed when using the bwd model for the lists in bwd order. 
-							// When using the fwd model, it will always be the same as noteIndexPrevious
+							// Determine noteIndexPreviousBwd, which is needed when using the bwd model for the lists 
+							// in bwd order. When using the fwd model, it will always be the same as noteIndexPrevious
 							int noteIndexPreviousBwd = noteIndexPrevious;
 							if (pm == ProcessingMode.BWD) {
 								for (int j = 0; j < backwardsMapping.size(); j++) {
@@ -4851,7 +4888,14 @@ public class TestManager {
 									// 0. Get the metric position and the index in the chord of the previous note
 									Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
 									String metPosPrevious = 
-										ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
+										Utils.getMetricPositionAsString(
+										tablature != null ?
+										tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())		
+										:
+										smtl.getMetricPosition(mt)
+//										ScoreMetricalTimeLine.getMetricPosition(mtl, mt)
+//										Utils.getMetricPosition(mt, meterInfo)
+										);
 //										ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
 									int indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM];  	  	
 	
@@ -4994,8 +5038,14 @@ public class TestManager {
 														// Set metPosNext and indexInChordNext 
 														mt = getMetricTime(noteIndexNext, isTablatureCase);
 														metPosNext = 
-															ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
-//															ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexNext));
+															Utils.getMetricPositionAsString(
+															tablature != null ?
+															tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())
+															:
+															smtl.getMetricPosition(mt)
+//															ScoreMetricalTimeLine.getMetricPosition(mtl, mt)	
+//															Utils.getMetricPosition(mt, meterInfo)
+														);
 														indexInChordNext = basicTabSymbolProperties[j][Tablature.NOTE_SEQ_NUM];
 														break;
 													}
@@ -5052,7 +5102,8 @@ public class TestManager {
 										int pitchPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.PITCH];
 										Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME], 
 											Tablature.SRV_DEN);
-										newTranscription.removeNote(pitchPrevious, secondPredictedVoicePrevious, metricTimePrevious);      
+										newTranscription.getScorePiece().removeNote(metricTimePrevious, secondPredictedVoicePrevious, pitchPrevious);
+//										newTranscription.removeNote(metricTimePrevious, secondPredictedVoicePrevious, pitchPrevious);
 										// 3. Record conflict and add to conflictsRecord
 //										conflictsRecord = conflictsRecord.concat(getConflictText("(ii)", noteIndexBwd, metPos, indexInChord,
 //											noteIndexPreviousBwd, metPosPrevious, indexInChordPrevious, predictedVoices, predictedVoicesPrevious,
@@ -5164,8 +5215,14 @@ public class TestManager {
 							// 0. Get the metric position and the index in the chord of the previous note
 							Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
 							String metPosPrevious = 
-								ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(mt, meterInfo));
-//								ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndexPrevious));
+								Utils.getMetricPositionAsString(
+								tablature != null ?
+								tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())		
+								:
+								smtl.getMetricPosition(mt)
+//								ScoreMetricalTimeLine.getMetricPosition(mtl, mt)	
+//								Utils.getMetricPosition(mt, meterInfo)
+							);
 							int indexInChordPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.NOTE_SEQ_NUM];  	
 							// 1. Add index to conflictIndices
 							if (!conflictIndices.get(0).contains(noteIndexBwd)) {
@@ -5299,7 +5356,14 @@ public class TestManager {
 									int pitch = basicTabSymbolProperties[i][Tablature.PITCH];
 									Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],
 										Tablature.SRV_DEN);
-									metPoss.add(ToolBox.getMetricPositionAsString(Timeline.getMetricPosition(onset, meterInfo)));
+									metPoss.add(Utils.getMetricPositionAsString(
+										tablature != null ?
+										tl.getMetricPosition((int) onset.mul(Tablature.SRV_DEN).toDouble())
+										:
+										smtl.getMetricPosition(onset))
+//										ScoreMetricalTimeLine.getMetricPosition(mtl, onset))
+//										Utils.getMetricPosition(onset, meterInfo))
+									);
 									indicesInChord.add(basicTabSymbolProperties[i][Tablature.NOTE_SEQ_NUM]);
 									// If i != noteIndex, get the duration from allPredictedDurations
 									if (i != noteIndex) {  
@@ -7175,9 +7239,13 @@ public class TestManager {
 		// 1. If a CoD is predicted: create a second Note (which is an exact copy of the first), add
 		// that to noteList, and replace the element at noteIndex in allNotes with the augmented 
 		// noteList
+		MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
 		if (predictedVoices.size() == 2) {
-			Note secondNote = Transcription.createNote(firstNote.getMidiPitch(), 
-				firstNote.getMetricTime(), firstNote.getMetricDuration(), null);
+			Note secondNote = 
+				ScorePiece.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(), 
+				firstNote.getMetricDuration(), -1, mtl);
+//				ScorePiece.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(), 
+//				firstNote.getMetricDuration(), -1, null);
 			noteList.add(secondNote);
 			allNotes.set(noteIndexBwd, noteList);
 		}
@@ -7205,7 +7273,8 @@ public class TestManager {
 			}
 
 			// Add Note and store information in applicationProcessRecord
-			newTranscription.addNote(noteToAdd, predictedVoice, onsetTime);	  	  		  
+			newTranscription.getScorePiece().addNote(noteToAdd, predictedVoice, onsetTime);
+//			newTranscription.addNote(noteToAdd, predictedVoice, onsetTime);
 			
 			if (!ditKanWeg) {
 				int chordIndex = 0; // TODO chordIndex incorrect when using bwd model
@@ -7371,8 +7440,8 @@ public class TestManager {
 		// 1. If a CoD is predicted: create a second Note (which is an exact copy of the first), add that to noteList,
 		// and replace the element at noteIndex in allNotes with the augmented noteList
 		if (predictedVoices.size() == 2) {
-			Note secondNote = Transcription.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
-				firstNote.getMetricDuration(), null);
+			Note secondNote = ScorePiece.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
+				firstNote.getMetricDuration(), -1, null);
 			noteList.add(secondNote);
 			allNotes.set(noteIndexBwd, noteList);
 		}
@@ -7420,7 +7489,7 @@ public class TestManager {
 //				System.out.println("predictedVoice = " + predictedVoice);
 //				System.out.println("onsetTime = " + onsetTime);
 
-				newTranscription.addNote(noteToAdd, predictedVoice, onsetTime);	  	  		  
+				newTranscription.getScorePiece().addNote(noteToAdd, predictedVoice, onsetTime);	  	  		  
 				
 				int chordIndex = 0; // TODO chordIndex incorrect when using bwd model
 				// a. In the tablature case
@@ -7453,8 +7522,8 @@ public class TestManager {
 			List<Double> actualVoiceLabel = groundTruthVoiceLabels.get(noteIndexBwd);
 			List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel); 	  	
 			// Create otherNote (which is an exact copy of firstNote and secondNote)
-			Note otherNote = Transcription.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
-				firstNote.getMetricDuration(), null);
+			Note otherNote = ScorePiece.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
+				firstNote.getMetricDuration(), -1, null);
 
 			// 1. predictedVoices has no CoD  
 			if (predictedVoices.size() == 1) {
@@ -7464,11 +7533,11 @@ public class TestManager {
 					int actualVoice = actualVoices.get(0);
 					// a. If actualVoices contains the predicted voice: add firstNote to that predicted voice
 					if (actualVoices.contains(predictedVoice)) {
-						newTranscription.addNote(firstNote, predictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, predictedVoice, onsetTime);
 					}
 					// b. If not: add firstNote to the actual voice and reset allVoiceLabels
 					else {
-						newTranscription.addNote(firstNote, actualVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoice, onsetTime);
 //							allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
@@ -7478,7 +7547,7 @@ public class TestManager {
 					// a. If actualVoices contains the predicted voice: add firstNote to that predicted voice; also add
 					// otherNote to the other voice in actualVoices and reset allVoiceLabels
 					if (actualVoices.contains(predictedVoice)) {
-						newTranscription.addNote(firstNote, predictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, predictedVoice, onsetTime);
 						// Determine the other voice in actualVoices
 						int otherVoice = -1;
 						for (int i = 0; i < actualVoices.size(); i++) {
@@ -7486,14 +7555,14 @@ public class TestManager {
 								otherVoice = actualVoices.get(i);
 							}
 						}
-						newTranscription.addNote(otherNote, otherVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(otherNote, otherVoice, onsetTime);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
 					// b. If not: add firstNote and otherNote to the voices in actualVoices and reset allVoiceLabels
 					else {
-						newTranscription.addNote(firstNote, actualVoices.get(0), onsetTime);
-						newTranscription.addNote(otherNote, actualVoices.get(1), onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoices.get(0), onsetTime);
+						newTranscription.getScorePiece().addNote(otherNote, actualVoices.get(1), onsetTime);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
@@ -7508,13 +7577,13 @@ public class TestManager {
 					// a. If actualVoices contains the first predicted voice: add firstNote to that predicted voice and
 					// reset allVoiceLabels
 					if (actualVoices.contains(firstPredictedVoice)) {
-						newTranscription.addNote(firstNote, firstPredictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, firstPredictedVoice, onsetTime);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
 					// b. If not: add firstNote to the actual voice and reset allVoiceLabels
 					else {
-						newTranscription.addNote(firstNote, actualVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoice, onsetTime);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
@@ -7524,7 +7593,7 @@ public class TestManager {
 					// a. If actualVoices contains the first predicted voice: add firstNote to that predicted voice; 
 					// also add otherNote to the other voice in actualVoices and reset allVoiceLabels
 					if (actualVoices.contains(firstPredictedVoice)) {
-						newTranscription.addNote(firstNote, firstPredictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, firstPredictedVoice, onsetTime);
 						// Determine the other voice in actualVoices
 						int otherVoice = -1;
 						for (int i = 0; i < actualVoices.size(); i++) {
@@ -7532,14 +7601,14 @@ public class TestManager {
 								otherVoice = actualVoices.get(i);
 							}
 						}
-						newTranscription.addNote(otherNote, otherVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(otherNote, otherVoice, onsetTime);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
 					// b. If not: add firstNote and otherNote to the voices in actualVoices and reset allVoiceLabels
 					else {
-						newTranscription.addNote(firstNote, actualVoices.get(0), onsetTime);
-						newTranscription.addNote(otherNote, actualVoices.get(1), onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoices.get(0), onsetTime);
+						newTranscription.getScorePiece().addNote(otherNote, actualVoices.get(1), onsetTime);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}

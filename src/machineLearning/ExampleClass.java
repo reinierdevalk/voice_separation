@@ -8,6 +8,7 @@ package machineLearning;
  *
  */
 public class ExampleClass implements ExampleClassInterface {
+	@Override
 	public void someMethod() {
 		
 	}

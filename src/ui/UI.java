@@ -541,7 +541,7 @@ public class UI {
 		System.out.println("pathTrainedUserModel   = " + pathTrainedUserModel);
 		System.out.println("pathStoredNN           = " + pathStoredNN);
 		System.out.println("pathStoredMM           = " + pathStoredMM);
-		System.exit(0);
+//		System.exit(0);
 		Runner.setPaths(new String[]{storePath, pathPredTransFirstPass, pathTrainedUserModel, 
 			pathStoredNN, pathStoredMM});
 		Runner.setModelParams(modelParams);

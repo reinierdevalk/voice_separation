@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import data.Dataset;
 import de.uos.fmt.musitech.utility.math.Rational;
 import representations.Transcription;
+import structure.metric.Utils;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.DecisionContext;
@@ -1313,7 +1314,7 @@ public class EvaluationManager {
 					currAvgsAndStDevs[1][ind] = ToolBox.stDev(errsPerFold);
 				}
 				else if (m == Metric.RUNTIME && !isForDur) {
-					currAvgsAndStDevs[2][ind] = (double) ToolBox.sumListInteger(totals);
+					currAvgsAndStDevs[2][ind] = ToolBox.sumListInteger(totals);
 				}
 			}
 			avgsAndStDevs.add(currAvgsAndStDevs);
@@ -1807,7 +1808,7 @@ public class EvaluationManager {
 				curr.add(String.valueOf(i));
 				curr.add(String.valueOf(chordIndex));
 				if (allMetricPositions != null) {
-					curr.add(ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
+					curr.add(Utils.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
 				}
 				else {
 					curr.add("");
@@ -2064,7 +2065,7 @@ public class EvaluationManager {
 					curr.add(String.valueOf(noteIndex));
 					curr.add(String.valueOf(i));
 					if (allMetricPositions != null) {
-						curr.add(ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
+						curr.add(Utils.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
 					}
 					else {
 						curr.add("");
@@ -2241,7 +2242,7 @@ public class EvaluationManager {
 				// Test and application mode: add metric position
 				if (allMetricPositions != null) {
 					noteAndChordIndices.append(", bar ".concat( 
-						ToolBox.getMetricPositionAsString(allMetricPositions.get(noteIndex)))); // HIER OK
+						Utils.getMetricPositionAsString(allMetricPositions.get(noteIndex)))); // HIER OK
 				}
 				noteAndChordIndices.append("\r\n");
 
@@ -2432,7 +2433,7 @@ public class EvaluationManager {
 				// Test and application mode: add metric position
 				if (allMetricPositions != null) {
 					chordAndNoteIndices.append(", bar ".concat( 
-						ToolBox.getMetricPositionAsString(allMetricPositions.get(lowestNoteIndex))));
+						Utils.getMetricPositionAsString(allMetricPositions.get(lowestNoteIndex))));
 				}
 				chordAndNoteIndices.append("\r\n");
 				lowestNoteIndex += chordSize;

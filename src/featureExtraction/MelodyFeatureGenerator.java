@@ -89,8 +89,9 @@ public class MelodyFeatureGenerator {
 
 			for (int voice = 0; voice < trans.getNumberOfVoices(); voice++) {
 				NotationVoice nv = system.get(voice).get(0);
-//				List<List<Double>> features = mfg.getMelodyModelFeatureVectors(btp, nv, null);
-				List<List<Double>> features = new FeatureGenerator().generateMelodyFeatureVectors(btp, nv, null);
+new FeatureGenerator();
+				//				List<List<Double>> features = mfg.getMelodyModelFeatureVectors(btp, nv, null);
+				List<List<Double>> features = FeatureGenerator.generateMelodyFeatureVectors(btp, nv, null);
 				ToolBox.storeObject(features, new File("F:/research/data/melody_feat/" + 
 					set + "/" + s + " (voice " + voice + ").xml"));
 			}

@@ -20,6 +20,7 @@ public class MelodyFeatureGeneratorTest extends TestCase {
 //	private MelodyFeatureGenerator mfg = new MelodyFeatureGenerator(new FeatureGenerator());
 	private MelodyFeatureGenerator mfg = new MelodyFeatureGenerator();
 	
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -28,6 +29,7 @@ public class MelodyFeatureGeneratorTest extends TestCase {
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

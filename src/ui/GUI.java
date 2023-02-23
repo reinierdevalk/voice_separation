@@ -18,6 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.WindowConstants;
 
 import data.Dataset;
 import data.Dataset.DatasetID;
@@ -35,7 +36,7 @@ public class GUI {
 	private static void initialize() {
 		JFrame jf = new JFrame();
 		jf.setSize(717, 354);
-		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		// getEncodingWindowMenubar() -->
 		JMenuBar mb = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
@@ -43,6 +44,7 @@ public class GUI {
 		JMenuItem openFile = new JMenuItem("Open"); 
 		fileMenu.add(openFile); 
 		openFile.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent e) {
 //				openFileAction();
 			}
@@ -50,6 +52,7 @@ public class GUI {
 		JMenuItem saveFile = new JMenuItem("Save");
 		fileMenu.add(saveFile);
 		saveFile.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent e) {
 //				saveFileAction();
 			}
@@ -70,7 +73,8 @@ public class GUI {
 		btnFwd.setSelected(true);
 		btnFwd.setBounds(569, 55, 109, 23);
 		btnFwd.addActionListener(new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
+    		@Override
+			public void actionPerformed(ActionEvent e) {
     			// TODO Auto-generated Event stub actionPerformed()
     			pm = ProcessingMode.FWD;
     			System.out.println(pm);
@@ -81,7 +85,8 @@ public class GUI {
 		JRadioButton btnBwd = new JRadioButton("BWD");
 		btnBwd.setBounds(569, 81, 109, 23);
 		btnBwd.addActionListener(new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
+    		@Override
+			public void actionPerformed(ActionEvent e) {
     			// TODO Auto-generated Event stub actionPerformed()
     			pm = ProcessingMode.BWD;
     			System.out.println(pm);
@@ -130,7 +135,8 @@ public class GUI {
 		cbMod.setSelectedIndex(4);
 		cbMod.setSelectedItem(model);
 		cbMod.addActionListener(new ActionListener() {
-			 public void actionPerformed(ActionEvent e) {
+			 @Override
+			public void actionPerformed(ActionEvent e) {
 				 Model m = (Model) cbMod.getSelectedItem();
 				 model = m;
 				 System.out.println(m);
@@ -152,7 +158,8 @@ public class GUI {
 		cbDataset.setModel(new DefaultComboBoxModel(selID.toArray(new DatasetID[0])));
 		cbDataset.setBounds(290, 17, 124, 23);
 		cbDataset.addActionListener(new ActionListener() {
-			 public void actionPerformed(ActionEvent e) {
+			 @Override
+			public void actionPerformed(ActionEvent e) {
 				 DatasetID di = (DatasetID) cbDataset.getSelectedItem();
 				 datasetID = di;
 				 System.out.println(di);
@@ -166,7 +173,8 @@ public class GUI {
 		cbExp.setModel(new DefaultComboBoxModel(new String[] {"1", "2.1", "2.2", "3.1", "3.2", "3.3.1", "3.3.2", "4", "other"}));
 		cbExp.setBounds(82, 17, 137, 22);
 		ActionListener alExp = new ActionListener() {
-			 public void actionPerformed(ActionEvent e) {
+			 @Override
+			public void actionPerformed(ActionEvent e) {
 				 String exp = (String) cbExp.getSelectedItem();
 				 experiment = exp;
 			 }

@@ -27,6 +27,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
 	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
@@ -34,6 +35,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
@@ -1350,7 +1352,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 	  // Calculate actual 
 	  List<List<Double>> actual = new ArrayList<List<Double>>();
 	  Integer[][] btp = tablature.getBasicTabSymbolProperties();
-	  List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+	  List<Integer[]> meterInfo = tablature.getMeterInfo();
 //	  List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 	  int lowestNoteIndex = 0;
 	  for (int i = 0; i < tablature.getChords().size(); i++) {
@@ -1480,7 +1482,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		Integer[][] btp = tablature.getBasicTabSymbolProperties();
-		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo();
+		List<Integer[]> meterInfo = tablature.getMeterInfo();
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		int lowestNoteIndex = 0;
 		for (int i = 0; i < tablature.getChords().size(); i++) {
@@ -1719,7 +1721,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 		
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
-		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo(); 
+		List<Integer[]> meterInfo = tablature.getMeterInfo(); 
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS(); 
 		actual.add(featureGeneratorChord.generateChordFeatureVector(btp, null, transcription, meterInfo, 4,
 			getVoiceAssignments().get(1)));
@@ -1853,7 +1855,7 @@ public class FeatureGeneratorChordTest extends TestCase {
 
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
-		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfo(); 
+		List<Integer[]> meterInfo = tablature.getMeterInfo(); 
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS(); 
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(btp, null, transcription, meterInfo, 4,
 			getVoiceAssignments().get(1)));

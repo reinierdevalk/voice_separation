@@ -15,7 +15,6 @@ import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
-import ui.UI;
 
 public class Dataset implements Serializable {
 

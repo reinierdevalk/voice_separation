@@ -29,6 +29,7 @@ public class TrainingManagerTest extends TestCase {
 
 	TrainingManager tm = new TrainingManager();
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
@@ -36,6 +37,7 @@ public class TrainingManagerTest extends TestCase {
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");	
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
@@ -609,7 +611,7 @@ public class TrainingManagerTest extends TestCase {
 		modelParameters.put(Runner.FEAT_VEC, (double) FeatureVector.PHD_D.getIntRep());	
 		
 		for (double d : HLFactors) {
-			modelParameters.put(Runner.HIDDEN_LAYER_FACTOR, (double) d);
+			modelParameters.put(Runner.HIDDEN_LAYER_FACTOR, d);
 			actual.add(TrainingManager.getNumberOfHiddenNeurons(modelParameters, numFeatures, false));
 		}
 

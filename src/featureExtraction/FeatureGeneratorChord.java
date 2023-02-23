@@ -12,6 +12,7 @@ import tools.ToolBox;
 import utility.DataConverter;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
+import de.uos.fmt.musitech.data.time.MetricalTimeLine;
 import de.uos.fmt.musitech.utility.math.Rational;
 import featureExtraction.FeatureGenerator.Direction;
 
@@ -333,6 +334,7 @@ public class FeatureGeneratorChord {
 		}
 
 		// For each note in the chord
+		MetricalTimeLine mtl = transcription.getScorePiece().getMetricalTimeLine();
 		for (int i = 0; i < chordSize; i++) {
 			int currentNoteIndex = lowestNoteIndex + i; 
 			Note currentNote = null;
@@ -347,7 +349,8 @@ public class FeatureGeneratorChord {
 					bnp[currentNoteIndex][Transcription.ONSET_TIME_DENOM]);
 				Rational metricDuration = new Rational(bnp[currentNoteIndex][Transcription.DUR_NUMER], 
 					bnp[currentNoteIndex][Transcription.DUR_DENOM]);
-				currentNote = Transcription.createNote(pitch, metricTime, metricDuration, null);
+				currentNote = ScorePiece.createNote(pitch, metricTime, metricDuration, -1, mtl);
+//				currentNote = ScorePiece.createNote(pitch, metricTime, metricDuration, -1, null);
 			}
 			List<Integer> currentVoices = voices.get(i);
 
@@ -937,9 +940,9 @@ public class FeatureGeneratorChord {
 					int currChordSize = btp[currLowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS]; 
 					currLowestNoteIndexNext = currLowestNoteIndex + currChordSize;
 					for (int j = currLowestNoteIndex; j < currLowestNoteIndexNext; j++) {
-						pitchProxAndCourse[arrayIndex] = (double) btp[j][Tablature.PITCH];
+						pitchProxAndCourse[arrayIndex] = btp[j][Tablature.PITCH];
 						arrayIndex ++;
-						pitchProxAndCourse[arrayIndex] = (double) btp[j][Tablature.COURSE];
+						pitchProxAndCourse[arrayIndex] = btp[j][Tablature.COURSE];
 						arrayIndex ++;
 					}
 				}
@@ -955,7 +958,7 @@ public class FeatureGeneratorChord {
 					int currChordSize = bnp[currLowestNoteIndex][Transcription.CHORD_SIZE_AS_NUM_ONSETS]; 
 					currLowestNoteIndexNext = currLowestNoteIndex + currChordSize;
 					for (int j = currLowestNoteIndex; j < currLowestNoteIndexNext; j++) {
-						pitchProxAndCourse[arrayIndex] = (double) bnp[j][Transcription.PITCH];
+						pitchProxAndCourse[arrayIndex] = bnp[j][Transcription.PITCH];
 						arrayIndex ++;
 					}
 				}
@@ -1635,7 +1638,7 @@ public class FeatureGeneratorChord {
 //		  sharedOnsetFeaturesChord.add(basicNoteFeaturesFirstOnset[MIN_DURATION]);
 		  double minDuration = 
 		  	(double) basicTabSymbolProperties[lowestNoteIndex][Tablature.MIN_DURATION] / Tablature.SRV_DEN;
-		  sharedOnsetFeaturesChord.add((double) minDuration);		  
+		  sharedOnsetFeaturesChord.add(minDuration);		  
 		  // 2. Range
 		  sharedOnsetFeaturesChord.add(getRangeOfChord(basicTabSymbolProperties, basicNoteProperties, lowestNoteIndex));
       // 3. Intervals in chord
@@ -1854,6 +1857,7 @@ public class FeatureGeneratorChord {
 		}
 		
 		// For each onset in the chord
+		MetricalTimeLine mtl = transcription.getScorePiece().getMetricalTimeLine();
 		for (int i = 0; i < chordSize; i++) {
 	  	int currentOnsetIndex = lowestNoteIndex + i; 
 	  	Note currentNote = null;
@@ -1868,7 +1872,8 @@ public class FeatureGeneratorChord {
 	  			bnp[currentOnsetIndex][Transcription.ONSET_TIME_DENOM]);
 	  		Rational metricDuration = new Rational(bnp[currentOnsetIndex][Transcription.DUR_NUMER], 
 	  			bnp[currentOnsetIndex][Transcription.DUR_DENOM]);
-	  		currentNote = ScorePiece.createNote(pitch, metricTime, metricDuration, null);
+	  		currentNote = ScorePiece.createNote(pitch, metricTime, metricDuration, -1, mtl);
+//	  		currentNote = ScorePiece.createNote(pitch, metricTime, metricDuration, -1, null);
 	  	}
 	  	List<Integer> currentVoices = voices.get(i);
 	  	

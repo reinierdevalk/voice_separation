@@ -1,7 +1,6 @@
 package machineLearning;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,12 +8,12 @@ import java.util.List;
 
 import machineLearning.ErrorCalculator;
 import representations.Transcription;
+import structure.ScorePiece;
 import ui.Runner;
 import ui.UI;
 import junit.framework.TestCase;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
-import exports.MEIExport;
 
 public class ErrorCalculatorTest extends TestCase {
 
@@ -31,6 +30,7 @@ public class ErrorCalculatorTest extends TestCase {
 	private static final List<Double> HALF = Transcription.createDurationLabel(new Integer[]{16*3});
 
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
@@ -40,6 +40,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
@@ -757,14 +758,14 @@ public class ErrorCalculatorTest extends TestCase {
 			// 1. Adapt the appropriate notes in the NoteSequence
 			Note n13 = t.getNotes().get(13);
 //			Note n13 = t.getNoteSequence().getNoteAt(13);
-			t.getNotes().set(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
-				new Rational(1, 4), null));
+			t.getNotes().set(13, ScorePiece.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
+				new Rational(1, 4), -1, t.getScorePiece().getMetricalTimeLine()));
 //			t.getNoteSequence().replaceNoteAt(13, Transcription.createNote(n13.getMidiPitch(), n13.getMetricTime(), 
 //				new Rational(1, 4)));
 			Note n16 = t.getNotes().get(16);
 //			Note n16 = t.getNoteSequence().getNoteAt(16);
-			t.getNotes().set(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
-				new Rational(1, 4), null));
+			t.getNotes().set(16, ScorePiece.createNote(n16.getMidiPitch(), n16.getMetricTime(),
+				new Rational(1, 4), -1, t.getScorePiece().getMetricalTimeLine()));
 //			t.getNoteSequence().replaceNoteAt(16, Transcription.createNote(n16.getMidiPitch(), n16.getMetricTime(),
 //				new Rational(1, 4)));
 			// 2. For the notes at index 12 and 13: swap the voice labels so that the note with the lower index gets

@@ -23,6 +23,7 @@ import machineLearning.NNManager.ActivationFunction;
 import representations.Tablature;
 import representations.Transcription;
 import tbp.RhythmSymbol;
+import tbp.Symbol;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.DecisionContext;
@@ -154,7 +155,9 @@ public class TrainingManager {
 //					currTabRev.reverse();
 //					Tablature currTabRev = Tablature.reverse(currTab);
 		
-					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
+					Transcription currTranscrRev = new Transcription(currTranscr);
+					currTranscrRev.augment(currTabRev.getEncoding(), null, -1, "reverse");
+//					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
 					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscr.getScorePiece().getScore().get(0).get(0).get(0).get(0));
@@ -169,14 +172,15 @@ public class TrainingManager {
 //					currTabDeorn.deornament(ornThresh);
 //					Tablature currTabDeorn = Tablature.deornament(currTab, ornThresh);
 					
-					Transcription currTranscrDeorn = 
-						Transcription.deornament(currTranscr, currTab, ornThresh);
-		
+					Transcription currTranscrDeorn = new Transcription(currTranscr);
+					currTranscrDeorn.augment(currTabDeorn.getEncoding(), 
+						new Rational(ornThresh, Symbol.BREVIS.getDuration()), -1, "deornament");
+//					Transcription currTranscrDeorn = Transcription.deornament(currTranscr, currTab, ornThresh);
 					// Reversed and deornamented
 					System.out.println("R E V E R S E  +  D E O R N A M E N T");
-					Tablature currTabRevDeorn = new Tablature(currTabDeorn);
-					currTabRevDeorn.augment(-1, -1, "reverse");
-//					currTabRevDeorn.reverse();
+					Tablature currTabDeornRev = new Tablature(currTabDeorn);
+					currTabDeornRev.augment(-1, -1, "reverse");
+//					currTabDeornRev.reverse();
 
 //					for (int ii = 35; ii < 40; ii++) {
 //					System.out.println(Arrays.asList(currTabDeorn.getBasicTabSymbolProperties()[ii]));
@@ -191,11 +195,13 @@ public class TrainingManager {
 //					}
 //					System.out.println("----");	
 //					System.exit(0);
-					
+
+					Transcription currTranscrDeornRev = new Transcription(currTranscrDeorn);
+					currTranscrDeornRev.augment(currTabDeornRev.getEncoding(), null, -1, "reverse");
 //					Tablature currTabRevDeorn = currTabDeorn.reverse();
 //					Tablature currTabRevDeorn = Tablature.reverse(currTabDeorn);
-					Transcription currTranscrRevDeorn = 
-						Transcription.reverse(currTranscrDeorn, currTabDeorn);
+//					Transcription currTranscrDeornRev = 
+//						Transcription.reverse(currTranscrDeorn, currTabDeorn);
 
 					System.out.println("first of given:");
 					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
@@ -207,8 +213,8 @@ public class TrainingManager {
 					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed and deornamented:");
-					System.out.println("undapted: " + currTranscrRevDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
-					System.out.println("apted:    " + currTranscrRevDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrDeornRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("apted:    " + currTranscrDeornRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
 					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
@@ -220,7 +226,7 @@ public class TrainingManager {
 					currTabTransPairDeorn = 
 						new TablatureTranscriptionPair(currTabDeorn, currTranscrDeorn);					
 					currTabTransPairRevDeorn = 
-						new TablatureTranscriptionPair(currTabRevDeorn, currTranscrRevDeorn);
+						new TablatureTranscriptionPair(currTabDeornRev, currTranscrDeornRev);
 				}
 			}
 			if (dc == DecisionContext.BIDIR) {
@@ -287,7 +293,7 @@ public class TrainingManager {
 				isTablatureCase ? currTab.getNumberOfNotesPerChord() : currTrans.getNumberOfNewNotesPerChord(); // was currTransGT.getNumberOfNewNotesPerChord() 06.05	
 			List<Integer[]> currMeterInfo = 
 //				isTablatureCase ? currTab.getTimeline().getMeterInfoOBS() : currTrans.getMeterInfo(); // was currTransGT.getMeterInfo() 06.05	
-				isTablatureCase ? currTab.getTimeline().getMeterInfo() : currTrans.getMeterInfo(); // was currTransGT.getMeterInfo() 06.05	
+				isTablatureCase ? currTab.getMeterInfo() : currTrans.getMeterInfo(); // was currTransGT.getMeterInfo() 06.05	
 			// Voice information is different for currTrans and currTransGT, and must be 
 			// taken from the former
 			List<List<Double>> currVoiceLabels = null;
@@ -658,7 +664,7 @@ public class TrainingManager {
 	 */
 	private void startTrainingProcess(int fold, List<TablatureTranscriptionPair> trainingPieces, 
 		int testPieceIndex, String[] argPaths, String[] times) {
-		long trPreProcTime = (long) Integer.parseInt(times[0]);
+		long trPreProcTime = Integer.parseInt(times[0]);
 		String start = times[1];
 
 		Map<String, Double> modelParameters = Runner.getModelParams();		
@@ -773,7 +779,7 @@ public class TrainingManager {
 				List<Integer[]> currVoicesCoDNotesGT = null;
 				if (isTablatureCase) {
 					currBTP = currTab.getBasicTabSymbolProperties();
-					currMeterInfo = currTab.getTimeline().getMeterInfo();
+					currMeterInfo = currTab.getMeterInfo();
 //					currMeterInfo = currTab.getTimeline().getMeterInfoOBS();
 					currChordSizes = currTab.getNumberOfNotesPerChord();
 					if (modelDuration) { 
@@ -2624,7 +2630,7 @@ public class TrainingManager {
 		}
 		// Else: calculate
 		else {
-			double exactNum = (double) numFeatures * modelParameters.get(Runner.HIDDEN_LAYER_FACTOR);
+			double exactNum = numFeatures * modelParameters.get(Runner.HIDDEN_LAYER_FACTOR);
 			return (int) Math.round(exactNum);
 		}
 	}

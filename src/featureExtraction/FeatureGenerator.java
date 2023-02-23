@@ -9,13 +9,13 @@ import java.util.Map;
 import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
-import de.uos.fmt.musitech.data.structure.container.NoteSequence;
 import de.uos.fmt.musitech.utility.math.Rational;
 import machineLearning.MelodyPredictor;
 import representations.Tablature;
 import representations.Transcription;
-import structure.Timeline;
+import structure.metric.Utils;
 import tbp.RhythmSymbol;
+import tbp.Symbol;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.FeatureVector;
@@ -142,13 +142,13 @@ public class FeatureGenerator {
 			// 5. Whether the note has ornamentation characteristics, yes or no
 			basicNoteFeatures[IS_ORNAMENTATION] = 0.0;
 			if (btp[noteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS] == 1 && 
-				btp[noteIndex][Tablature.MIN_DURATION] < RhythmSymbol.SEMIMINIM.getDuration()) {
+				btp[noteIndex][Tablature.MIN_DURATION] < Symbol.SEMIMINIM.getDuration()) {
 				basicNoteFeatures[IS_ORNAMENTATION]= 1.0;
 			}
 			// 6. The metric position of the note within the bar		  
 			Rational metricTime = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
 				Tablature.SRV_DEN);	
-			Rational[] metricPosition = Timeline.getMetricPosition(metricTime, meterInfo);
+			Rational[] metricPosition = Utils.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
 			// 7-24. The onset time proximity, the pitch proximity and course information for the next NUM_NEXT_CHORDS chords
@@ -183,7 +183,7 @@ public class FeatureGenerator {
 			// 3. The metric position of the note within the bar
 			Rational metricTime = new Rational(bnp[noteIndex][Transcription.ONSET_TIME_NUMER],
 				bnp[noteIndex][Transcription.ONSET_TIME_DENOM]);	
-			Rational[] metricPosition = Timeline.getMetricPosition(metricTime, meterInfo);
+			Rational[] metricPosition = Utils.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR_NON_TAB] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
 			// 4-15. The onset time proximity and the pitch proximity information for the next NUM_NEXT_CHORDS chords
@@ -1360,7 +1360,7 @@ public class FeatureGenerator {
 					// offsetOnsetTime (values between -inf and +inf (in theory))
 					proxAndMvmtToVoice[2] += calculateProximity(offsetOnsetTimeIncl); 
 					// pitchMovement (values between -inf and +inf (in theory))
-					proxAndMvmtToVoice[3] += (double) pitchMovement;
+					proxAndMvmtToVoice[3] += pitchMovement;
 				}
 			}
 //			// Calculate average distances
@@ -1518,7 +1518,7 @@ public class FeatureGenerator {
 					// offsetOnsetTime (values between -inf and +inf (in theory))
 					proximitiesAndMovementToVoice[2] = calculateProximity(offsetOnsetTimeIncl); 
 					// pitchMovement (values between -inf and +inf (in theory))
-					proximitiesAndMovementToVoice[3] = (double) pitchMovement;
+					proximitiesAndMovementToVoice[3] = pitchMovement;
 				}
 			}
 			// b. If voiceToCompareTo contains no Notes before currentNote (i.e., if currentNote is the first Note in 
@@ -3765,7 +3765,7 @@ public class FeatureGenerator {
 		  // 6. Whether the note has ornamentation characteristics, yes or no
 		  basicNoteFeatures[6] = 0.0;
 		  if (basicTabSymbolProperties[noteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS] == 1 && 
-		    basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION] < RhythmSymbol.SEMIMINIM.getDuration()) {
+		    basicTabSymbolProperties[noteIndex][Tablature.MIN_DURATION] < Symbol.SEMIMINIM.getDuration()) {
 		    basicNoteFeatures[6]= 1.0;
 		  }
 		  // 7. Whether the note is produced by plucking an open course, yes or no
@@ -4228,13 +4228,13 @@ public class FeatureGenerator {
 			}
 		  // 5. Create and set proximitiesAndMovementToVoice
 		  // a. pitchDif (values >= 0)
-			proximitiesAndMovementToVoice[0] = calculateProximity((double)pitchDif);
+			proximitiesAndMovementToVoice[0] = calculateProximity(pitchDif);
 		  // b. interOnsetTime (values > 0) 
 			proximitiesAndMovementToVoice[1] = calculateProximity(interOnsetTime);
 		  // c. offsetOnsetTime (values between -inf and +inf (in theory))
 			proximitiesAndMovementToVoice[2] = calculateProximity(offsetOnsetTime); 
 			// d. pitchMovement (values between -inf and +inf (in theory))
-			proximitiesAndMovementToVoice[3] = (double) pitchMovement;
+			proximitiesAndMovementToVoice[3] = pitchMovement;
 		}
 	  // b. If voiceToCompareTo contains no Notes before currentNote (i.e., if currentNote is the first Note in 
 		// voiceToCompareTo): set "does-not-apply" values of -1.0 (proximities) and 0.0 (movement)
