@@ -3793,7 +3793,7 @@ public class TestManager {
 					Rational currentMetricTime = currentNote.getMetricTime();
 					for (int k = 0; k < currentPredictedVoices.size(); k++) {
 						int currentPredictedVoice = currentPredictedVoices.get(k);
-						newTranscription.getScorePiece().addNote(currentNote, currentPredictedVoice, currentMetricTime);
+						newTranscription.getScorePiece().addNote(currentNote, currentPredictedVoice/*, currentMetricTime*/);
 //						newTranscription.addNote(currentNote, currentPredictedVoice, currentMetricTime);
 						// Add information to applicationProcess  
 						String message = 
@@ -4247,8 +4247,10 @@ public class TestManager {
 			deviationThreshold = modelParameters.get(Runner.DEV_THRESHOLD);
 		}
 		Timeline tl = tablature != null? tablature.getEncoding().getTimeline() : null;
-		MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
-		ScoreMetricalTimeLine smtl = groundTruthTranscription.getScorePiece().getScoreMetricalTimeLine();
+		MetricalTimeLine mtl = newTranscription.getScorePiece().getMetricalTimeLine();
+//		MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
+		ScoreMetricalTimeLine smtl = newTranscription.getScorePiece().getScoreMetricalTimeLine();
+//		ScoreMetricalTimeLine smtl = groundTruthTranscription.getScorePiece().getScoreMetricalTimeLine();
 		
 		// Determine noteIndexBwd, which is needed when using the bwd model for the lists in bwd order. When using the 
 		// fwd model, it will always be the same as noteIndex
@@ -7273,7 +7275,7 @@ public class TestManager {
 			}
 
 			// Add Note and store information in applicationProcessRecord
-			newTranscription.getScorePiece().addNote(noteToAdd, predictedVoice, onsetTime);
+			newTranscription.getScorePiece().addNote(noteToAdd, predictedVoice/*, onsetTime*/);
 //			newTranscription.addNote(noteToAdd, predictedVoice, onsetTime);
 			
 			if (!ditKanWeg) {
@@ -7489,7 +7491,7 @@ public class TestManager {
 //				System.out.println("predictedVoice = " + predictedVoice);
 //				System.out.println("onsetTime = " + onsetTime);
 
-				newTranscription.getScorePiece().addNote(noteToAdd, predictedVoice, onsetTime);	  	  		  
+				newTranscription.getScorePiece().addNote(noteToAdd, predictedVoice/*, onsetTime*/);	  	  		  
 				
 				int chordIndex = 0; // TODO chordIndex incorrect when using bwd model
 				// a. In the tablature case
@@ -7533,11 +7535,11 @@ public class TestManager {
 					int actualVoice = actualVoices.get(0);
 					// a. If actualVoices contains the predicted voice: add firstNote to that predicted voice
 					if (actualVoices.contains(predictedVoice)) {
-						newTranscription.getScorePiece().addNote(firstNote, predictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, predictedVoice/*, onsetTime*/);
 					}
 					// b. If not: add firstNote to the actual voice and reset allVoiceLabels
 					else {
-						newTranscription.getScorePiece().addNote(firstNote, actualVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoice/*, onsetTime*/);
 //							allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
@@ -7547,7 +7549,7 @@ public class TestManager {
 					// a. If actualVoices contains the predicted voice: add firstNote to that predicted voice; also add
 					// otherNote to the other voice in actualVoices and reset allVoiceLabels
 					if (actualVoices.contains(predictedVoice)) {
-						newTranscription.getScorePiece().addNote(firstNote, predictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, predictedVoice/*, onsetTime*/);
 						// Determine the other voice in actualVoices
 						int otherVoice = -1;
 						for (int i = 0; i < actualVoices.size(); i++) {
@@ -7555,14 +7557,14 @@ public class TestManager {
 								otherVoice = actualVoices.get(i);
 							}
 						}
-						newTranscription.getScorePiece().addNote(otherNote, otherVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(otherNote, otherVoice/*, onsetTime*/);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
 					// b. If not: add firstNote and otherNote to the voices in actualVoices and reset allVoiceLabels
 					else {
-						newTranscription.getScorePiece().addNote(firstNote, actualVoices.get(0), onsetTime);
-						newTranscription.getScorePiece().addNote(otherNote, actualVoices.get(1), onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoices.get(0)/*, onsetTime*/);
+						newTranscription.getScorePiece().addNote(otherNote, actualVoices.get(1)/*, onsetTime*/);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
@@ -7577,13 +7579,13 @@ public class TestManager {
 					// a. If actualVoices contains the first predicted voice: add firstNote to that predicted voice and
 					// reset allVoiceLabels
 					if (actualVoices.contains(firstPredictedVoice)) {
-						newTranscription.getScorePiece().addNote(firstNote, firstPredictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, firstPredictedVoice/*, onsetTime*/);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
 					// b. If not: add firstNote to the actual voice and reset allVoiceLabels
 					else {
-						newTranscription.getScorePiece().addNote(firstNote, actualVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoice/*, onsetTime*/);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
@@ -7593,7 +7595,7 @@ public class TestManager {
 					// a. If actualVoices contains the first predicted voice: add firstNote to that predicted voice; 
 					// also add otherNote to the other voice in actualVoices and reset allVoiceLabels
 					if (actualVoices.contains(firstPredictedVoice)) {
-						newTranscription.getScorePiece().addNote(firstNote, firstPredictedVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, firstPredictedVoice/*, onsetTime*/);
 						// Determine the other voice in actualVoices
 						int otherVoice = -1;
 						for (int i = 0; i < actualVoices.size(); i++) {
@@ -7601,14 +7603,14 @@ public class TestManager {
 								otherVoice = actualVoices.get(i);
 							}
 						}
-						newTranscription.getScorePiece().addNote(otherNote, otherVoice, onsetTime);
+						newTranscription.getScorePiece().addNote(otherNote, otherVoice/*, onsetTime*/);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}
 					// b. If not: add firstNote and otherNote to the voices in actualVoices and reset allVoiceLabels
 					else {
-						newTranscription.getScorePiece().addNote(firstNote, actualVoices.get(0), onsetTime);
-						newTranscription.getScorePiece().addNote(otherNote, actualVoices.get(1), onsetTime);
+						newTranscription.getScorePiece().addNote(firstNote, actualVoices.get(0)/*, onsetTime*/);
+						newTranscription.getScorePiece().addNote(otherNote, actualVoices.get(1)/*, onsetTime*/);
 //						allVoiceLabels.set(noteIndexBwd, groundTruthVoiceLabels.get(noteIndexBwd)); // FUK 23-6
 						allVoiceLabels.set(noteIndex, groundTruthVoiceLabels.get(noteIndexBwd));
 					}

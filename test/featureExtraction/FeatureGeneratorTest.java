@@ -15,6 +15,7 @@ import featureExtraction.FeatureGenerator.Direction;
 import junit.framework.TestCase;
 import representations.Tablature;
 import representations.Transcription;
+import structure.ScorePiece;
 import tbp.Encoding;
 import tools.ToolBox;
 import ui.Runner;
@@ -74,8 +75,8 @@ public class FeatureGeneratorTest extends TestCase {
 //			"Predicted duration labels " + pieceName + ".xml"));
 			"dur_lab-" + pieceName + ".ser"));
 		
-		Piece argPiece = Transcription.createPiece(tab.getBasicTabSymbolProperties(), null, predVoiceLabels,
-			predDurationLabels, 4, null, null, "");
+		ScorePiece argPiece = new ScorePiece(tab.getBasicTabSymbolProperties(), null, predVoiceLabels,
+			predDurationLabels, null, null, 4, "");
 			
 		Transcription predTrans = null;
 //			new Transcription(midiFile, encodingFile, argPiece, 
@@ -8033,11 +8034,14 @@ public class FeatureGeneratorTest extends TestCase {
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, encodingTestpiece1, predictedPiece,
 //			predVoiceLabels, predDurationLabels/*, null*/);
 
-		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
-			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
-			midiTestpiece1.getName());
+		ScorePiece sp = new ScorePiece(btp, null, predVoiceLabels, predDurationLabels,
+			gtTranscription.getScorePiece().getMetricalTimeLine(), 
+			gtTranscription.getScorePiece().getHarmonyTrack(), 5, midiTestpiece1.getName());
+//		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
+//			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
+//			midiTestpiece1.getName());
 		Transcription predTranscription = 
-			new Transcription(p, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
+			new Transcription(sp, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
 //		Transcription predTranscription = 
 //			new Transcription(midiTestpiece1.getName(), new Encoding(encodingTestpiece1), btp, null, 5,
 //			predVoiceLabels, predDurationLabels, 
@@ -8197,10 +8201,13 @@ public class FeatureGeneratorTest extends TestCase {
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, null, predictedPiece,
 //			predVoiceLabels, null/*, predEDUInfo*/);
 		
-		Piece p = Transcription.createPiece(null, bnp, predVoiceLabels, null,5, 
-			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
-			midiTestpiece1.getName());
-		Transcription predictedTranscription = new Transcription(p, null, predVoiceLabels, null);
+		ScorePiece sp = new ScorePiece(null, bnp, predVoiceLabels, null,
+			gtTranscription.getScorePiece().getMetricalTimeLine(), 
+			gtTranscription.getScorePiece().getHarmonyTrack(), 5, midiTestpiece1.getName());
+//		Piece p = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
+//			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
+//			midiTestpiece1.getName());
+		Transcription predictedTranscription = new Transcription(sp, null, predVoiceLabels, null);
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null, 
 //			gtTranscription.getPiece().getMetricalTimeLine(), 
@@ -8301,11 +8308,14 @@ public class FeatureGeneratorTest extends TestCase {
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, encodingTestpiece1, predictedPiece,
 //			predVoiceLabels, predDurationLabels/*, null*/);		
 		
-		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
-			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
-			midiTestpiece1.getName());
+		ScorePiece sp = new ScorePiece(btp, null, predVoiceLabels, predDurationLabels,
+			gtTranscription.getScorePiece().getMetricalTimeLine(), 
+			gtTranscription.getScorePiece().getHarmonyTrack(), 5, midiTestpiece1.getName());
+//		Piece p = Transcription.createPiece(btp, null, predVoiceLabels, predDurationLabels, 5, 
+//			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
+//			midiTestpiece1.getName());
 		Transcription predictedTranscription = 
-			new Transcription(p, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
+			new Transcription(sp, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), new Encoding(encodingTestpiece1), btp, null, 5, 
 //			predVoiceLabels, predDurationLabels,
@@ -8412,10 +8422,13 @@ public class FeatureGeneratorTest extends TestCase {
 //		Piece predictedPiece = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5);
 //		Transcription predictedTranscription = new Transcription(midiTestpiece1, null, predictedPiece,
 //			predVoiceLabels, null/*, predEDUInfo*/);		
-		Piece p  = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
+		ScorePiece sp = new ScorePiece(null, bnp, predVoiceLabels, null, 
 			gtTranscription.getScorePiece().getMetricalTimeLine(), 
-			gtTranscription.getScorePiece().getHarmonyTrack(), midiTestpiece1.getName());
-		Transcription predictedTranscription = new Transcription(p, null, predVoiceLabels, null);		
+			gtTranscription.getScorePiece().getHarmonyTrack(), 5, midiTestpiece1.getName());
+//		Piece p  = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
+//			gtTranscription.getScorePiece().getMetricalTimeLine(), 
+//			gtTranscription.getScorePiece().getHarmonyTrack(), midiTestpiece1.getName());
+		Transcription predictedTranscription = new Transcription(sp, null, predVoiceLabels, null);		
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null,
 //			gtTranscription.getPiece().getMetricalTimeLine(), 

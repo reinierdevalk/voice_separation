@@ -89,7 +89,7 @@ public class TrainingManager {
 		int maxMetaCycles = mt != ModelType.DNN ? mp.get(Runner.META_CYCLES).intValue() : -1;
 		int highestNumberOfVoices =	Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
 		int valPerc = mp.get(Runner.VALIDATION_PERC).intValue();
-		boolean bidirAsInThesis = false;
+		boolean bidirAsInThesis = true;
 		boolean firstPassIsBwd = // TODO add mFirstPass and pmFirstPass to UI
 			dc == DecisionContext.BIDIR && pathPredTransFirstPass.contains("bwd");
 
@@ -236,7 +236,8 @@ public class TrainingManager {
 				}
 				else {
 					int fold = i+1;
-					int testPieceIndex = datasetSize - (i+1);
+					int testPieceIndex = datasetSize - i;
+//					int testPieceIndex = datasetSize - (i+1);
 					if (bidirAsInThesis) {
 						String foldStr = 
 							"fold_" + ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex));

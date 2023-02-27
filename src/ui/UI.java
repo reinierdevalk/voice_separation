@@ -90,12 +90,13 @@ public class UI {
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
 			datasetID = Dataset.THESIS_INT_3VV;
-			m = Model.N;
+			m = Model.B;
 			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
 //			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
-			expDir = "thesis/exp_1/"; 
-			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
+			expDir = "thesis/exp_3.3.1/"; 
+//			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
+			expDirFirstPass = "thesis/exp_3.1/thesis-int/3vv/N/bwd/";
 			//
 //			config = Configuration.ONE; // cnf 1; "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)" 
 			config = Configuration.TWO; // cnf 2; "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)"
