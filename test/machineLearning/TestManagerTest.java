@@ -29,6 +29,7 @@ import ui.Runner.Model;
 import ui.Runner.ProcessingMode;
 import ui.UI;
 import utility.DataConverter;
+import utility.DataConverterTest;
 
 public class TestManagerTest extends TestCase {
 
@@ -489,31 +490,31 @@ public class TestManagerTest extends TestCase {
 		// allVoiceLabelsExpected
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
 		// Chord 0
-		allVoiceLabels.add(Transcription.combineLabels(V_3, V_4));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_4));
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_0);
 		// Chord 1
 		allVoiceLabels.add(V_3);
-		allVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_0);
 		// Chord 2
 		allVoiceLabels.add(V_4);
-		allVoiceLabels.add(Transcription.combineLabels(V_3, V_2));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_2));
 		allVoiceLabels.add(V_0);
-		allVoiceLabels.add(Transcription.combineLabels(V_1, V_2));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_2));
 		// Chord 3
-		allVoiceLabels.add(Transcription.combineLabels(V_1, V_2));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_2));
 		allVoiceLabels.add(V_2);
 		// Chord 4
 		allVoiceLabels.add(V_0);
 		// Chord 5
-		allVoiceLabels.add(Transcription.combineLabels(V_4, V_2));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_4, V_2));
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_1);
 		allVoiceLabels.add(V_1);
-		allVoiceLabels.add(Transcription.combineLabels(V_0, V_4));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_4));
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
 		allVoiceLabelsExpected.set(2, V_1);
@@ -1079,31 +1080,31 @@ public class TestManagerTest extends TestCase {
 		// allVoiceLabelsExpected (fwd)
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
 		// Chord 5
-		allVoiceLabels.add(Transcription.combineLabels(V_3, V_4));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_4));
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_0);
 		// Chord 4
 		allVoiceLabels.add(V_3);
-		allVoiceLabels.add(Transcription.combineLabels(V_1, V_0)); 
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0)); 
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_0);
 		// Chord 3
 		allVoiceLabels.add(V_4);
-		allVoiceLabels.add(Transcription.combineLabels(V_3, V_2));
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_2));
 		allVoiceLabels.add(V_0);
-		allVoiceLabels.add(Transcription.combineLabels(V_1, V_3)); 
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_3)); 
 		// Chord 2
 		allVoiceLabels.add(V_1);
 		allVoiceLabels.add(V_2);
 		// Chord 1
 		allVoiceLabels.add(V_0);
 		// Chord 0
-		allVoiceLabels.add(Transcription.combineLabels(V_4, V_2)); 
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_4, V_2)); 
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_1);
 		allVoiceLabels.add(V_1);
-		allVoiceLabels.add(Transcription.combineLabels(V_0, V_4)); 
+		allVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_4)); 
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
 		allVoiceLabelsExpected.set(15, V_4);

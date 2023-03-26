@@ -707,16 +707,16 @@ public class TestManager {
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
-					MEIExport.exportMEIFile(
-						t, tablature,
-//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
-//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
-						colInd, 
-						grandStaff,
-						true,
-						true,
-						expPath
-					);
+//					MEIExport.exportMEIFile(
+//						t, tablature,
+////						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
+////						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
+//						colInd, 
+//						grandStaff,
+//						true,
+//						true,
+//						expPath
+//					);
 				}
 			}
 			if (!deployTrainedUserModel) {
@@ -5104,7 +5104,9 @@ public class TestManager {
 										int pitchPrevious = basicTabSymbolProperties[noteIndexPrevious][Tablature.PITCH];
 										Rational metricTimePrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.ONSET_TIME], 
 											Tablature.SRV_DEN);
-										newTranscription.getScorePiece().removeNote(metricTimePrevious, secondPredictedVoicePrevious, pitchPrevious);
+										Rational durationPrevious = new Rational(basicTabSymbolProperties[noteIndexPrevious][Tablature.MIN_DURATION],
+											Tablature.SRV_DEN);
+										newTranscription.getScorePiece().removeNote(pitchPrevious, metricTimePrevious, durationPrevious, secondPredictedVoicePrevious);
 //										newTranscription.removeNote(metricTimePrevious, secondPredictedVoicePrevious, pitchPrevious);
 										// 3. Record conflict and add to conflictsRecord
 //										conflictsRecord = conflictsRecord.concat(getConflictText("(ii)", noteIndexBwd, metPos, indexInChord,

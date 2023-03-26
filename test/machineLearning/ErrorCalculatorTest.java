@@ -11,6 +11,7 @@ import representations.Transcription;
 import structure.ScorePiece;
 import ui.Runner;
 import ui.UI;
+import utility.DataConverterTest;
 import junit.framework.TestCase;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
@@ -179,14 +180,14 @@ public class ErrorCalculatorTest extends TestCase {
 		// Toy examples 1-3
 		List<List<Double>> actualVoiceLabels = new ArrayList<List<Double>>();
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
-		actualVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
-		actualVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
 		actualVoiceLabels.add(V_3);
-		actualVoiceLabels.add(Transcription.combineLabels(V_3, V_1));
+		actualVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_1));
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
-		actualVoiceLabels.add(Transcription.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
 
 		return actualVoiceLabels;
@@ -265,12 +266,12 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // half
 		allPredictedDurations.add(new Rational[]{new Rational(1, 8)}); // incorrect
-		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_1));
-		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_1)); 
-		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_2));
+		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_1));
+		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_1)); 
+		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_2));
 		groundTruthDurationLabels.add(half); // CoD with two same durations
-		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
-		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
 
 		// 2. predictedVoices contains two elements
 		// NB: predictedDurations containing two elements currently not implemented
@@ -290,12 +291,12 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct 
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // half
 		allPredictedDurations.add(new Rational[]{new Rational(1, 8)}); // incorrect
-		groundTruthVoiceLabels.add(Transcription.combineLabels(V_1, V_2));
-		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_2));
-		groundTruthVoiceLabels.add(Transcription.combineLabels(V_0, V_3));
+		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_2));
+		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_2));
+		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_3));
 		groundTruthDurationLabels.add(half); // CoD with two same durations
-		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
-		groundTruthDurationLabels.add(Transcription.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
 
 		// 1. Voices
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();

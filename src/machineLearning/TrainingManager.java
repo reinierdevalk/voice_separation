@@ -159,10 +159,10 @@ public class TrainingManager {
 					currTranscrRev.augment(currTabRev.getEncoding(), null, -1, "reverse");
 //					Transcription currTranscrRev = Transcription.reverse(currTranscr, currTab);
 					System.out.println("first of given:");
-					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscr.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscr.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed:");
-					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrRev.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 						
 					// Deornamented
@@ -204,19 +204,19 @@ public class TrainingManager {
 //						Transcription.reverse(currTranscrDeorn, currTabDeorn);
 
 					System.out.println("first of given:");
-					System.out.println("undapted: " + currTranscr.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscr.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscr.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
-					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrDeorn.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed:");
-					System.out.println("undapted: " + currTranscrRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrRev.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of reversed and deornamented:");
-					System.out.println("undapted: " + currTranscrDeornRev.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrDeornRev.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("apted:    " + currTranscrDeornRev.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("first of deornamented:");
-					System.out.println("undapted: " + currTranscrDeorn.getOriginalPiece().getScore().get(0).get(0).get(0).get(0));
+					System.out.println("undapted: " + currTranscrDeorn.getUnaugmentedScorePiece().getScore().get(0).get(0).get(0).get(0));
 					System.out.println("adapted:  " + currTranscrDeorn.getScorePiece().getScore().get(0).get(0).get(0).get(0));
 
 					// implement transposition
