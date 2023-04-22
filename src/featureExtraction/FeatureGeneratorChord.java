@@ -2372,7 +2372,8 @@ public class FeatureGeneratorChord {
 		// (1) multiply the value of the element by possibilitiesPerVoice^the index of the element
 		// (2) sum the outcomes for all elements
 		int ID = 0;
-		int possibilitiesPerVoice = Tablature.MAXIMUM_NUMBER_OF_NOTES + 1;
+		int possibilitiesPerVoice = 5 + 1;
+//		int possibilitiesPerVoice = Tablature.MAXIMUM_NUMBER_OF_NOTES + 1;
 		for (int i = 0; i < reversedVoiceAssignment.size(); i++) {
   		int currentIndex = i;
   		int currentOnset = reversedVoiceAssignment.get(i);
