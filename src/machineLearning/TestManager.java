@@ -707,16 +707,16 @@ public class TestManager {
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
 				for (boolean grandStaff : new Boolean[]{false, true}) {
-//					MEIExport.exportMEIFile(
-//						t, tablature,
-////						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
-////						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
-//						colInd, 
-//						grandStaff,
-//						true,
-//						true,
-//						expPath
-//					);
+					MEIExport.exportMEIFile(
+						t, tablature,
+//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
+//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
+						colInd, 
+						grandStaff,
+						true,
+						true,
+						expPath
+					);
 				}
 			}
 			if (!deployTrainedUserModel) {
