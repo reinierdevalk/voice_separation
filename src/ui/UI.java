@@ -78,7 +78,7 @@ public class UI {
 			
 			// Settings
 			// a. Runner settings
-			skipTraining = true;
+			skipTraining = false;
 			trainUserModel = false;
 			verbose = false;
 			
@@ -89,7 +89,7 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.BACH_WTC_4VV;
+			datasetID = Dataset.THESIS_INT_3VV;
 			m = Model.N;
 			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
@@ -129,7 +129,7 @@ public class UI {
 			// Hyperparameters
 			// a. Tuned hyperparameters
 			// Shallow network
-			lambda = 0.00001; // regularisation parameter  
+			lambda = 0.001; // regularisation parameter  
 			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
