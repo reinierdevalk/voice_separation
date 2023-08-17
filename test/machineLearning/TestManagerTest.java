@@ -71,7 +71,7 @@ public class TestManagerTest extends TestCase {
 
 
 	public void testGetMaximumDuration() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 		
 		List<Rational> nextMetricTimes = new ArrayList<Rational>();
@@ -2086,26 +2086,26 @@ public class TestManagerTest extends TestCase {
 	
 	public void testGenerateObservations() {
 		TestManager tm = new TestManager();
-		tm.tablature = new Tablature(encodingTestpiece1, true);
+		tm.tablature = new Tablature(encodingTestpiece1);
 		tm.groundTruthTranscription = new Transcription(midiTestpiece1, encodingTestpiece1);
 		
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
-		expected.add(Arrays.asList(new Integer[]{48, 55, 63, 67}));
-		expected.add(Arrays.asList(new Integer[]{43, 55, 67, 70}));
-		expected.add(Arrays.asList(new Integer[]{46}));
-		expected.add(Arrays.asList(new Integer[]{45, 48, 57, 63}));
-		expected.add(Arrays.asList(new Integer[]{43}));
-		expected.add(Arrays.asList(new Integer[]{43, 55, 55, 58, 67}));
-		expected.add(Arrays.asList(new Integer[]{43, 58, 62, 67}));
-		expected.add(Arrays.asList(new Integer[]{57, 66}));
-		expected.add(Arrays.asList(new Integer[]{43, 55, 62, 67}));
+		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69}));
+		expected.add(Arrays.asList(new Integer[]{45, 57, 69, 72}));
+		expected.add(Arrays.asList(new Integer[]{48}));
+		expected.add(Arrays.asList(new Integer[]{47, 50, 59, 65}));
+		expected.add(Arrays.asList(new Integer[]{45}));
+		expected.add(Arrays.asList(new Integer[]{45, 57, 57, 60, 69}));
+		expected.add(Arrays.asList(new Integer[]{45, 60, 64, 69}));
+		expected.add(Arrays.asList(new Integer[]{59, 68}));
+		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
+		expected.add(Arrays.asList(new Integer[]{68}));
+		expected.add(Arrays.asList(new Integer[]{69}));
+		expected.add(Arrays.asList(new Integer[]{68}));
 		expected.add(Arrays.asList(new Integer[]{66}));
-		expected.add(Arrays.asList(new Integer[]{67}));
-		expected.add(Arrays.asList(new Integer[]{66}));
-		expected.add(Arrays.asList(new Integer[]{64}));
-		expected.add(Arrays.asList(new Integer[]{66}));
-		expected.add(Arrays.asList(new Integer[]{67}));
-		expected.add(Arrays.asList(new Integer[]{43, 55, 62, 67}));
+		expected.add(Arrays.asList(new Integer[]{68}));
+		expected.add(Arrays.asList(new Integer[]{69}));
+		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
 		
 		List<List<Integer>> actual = tm.generateObservations();
 		

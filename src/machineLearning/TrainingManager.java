@@ -87,7 +87,8 @@ public class TrainingManager {
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext();
 		int maxMetaCycles = mt != ModelType.DNN ? mp.get(Runner.META_CYCLES).intValue() : -1;
-		int highestNumberOfVoices =	Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
+		int highestNumberOfVoices =	Runner.getHighestNumVoicesTraining(false);
+//		int highestNumberOfVoices =	Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
 		int valPerc = mp.get(Runner.VALIDATION_PERC).intValue();
 		boolean bidirAsInThesis = true;
 		boolean firstPassIsBwd = // TODO add mFirstPass and pmFirstPass to UI
@@ -672,7 +673,8 @@ public class TrainingManager {
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
 		int highestNumberOfVoices =	
-			Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
+//			Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
+			Runner.getHighestNumVoicesTraining(false);
 		int valPerc = modelParameters.get(Runner.VALIDATION_PERC).intValue();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
@@ -748,7 +750,7 @@ public class TrainingManager {
 				
 				int indexInAll = dataset.getPieceNames().indexOf(currTrans.getName());
 				if (verbose) System.out.println("i = " + i);
-				if (verbose) System.out.println("piece = " + currTab.getName());
+//				if (verbose) System.out.println("piece = " + currTab.getName());
 				if (verbose) System.out.println("piece = " + currTrans.getName());
 				if (verbose) System.out.println("size  = " + pieceSizes.get(pieceSizes.size()-1));
 				if (augment) { // TODO is indexInAll not simply i?
@@ -888,6 +890,7 @@ public class TrainingManager {
 							currNoteFeatures = noteFeaturesPerPiece.get(indexInAll);
 						}
 						else {
+							System.out.println("========================================00");
 							System.exit(0);
 							// NB: When using the bwd model, the features will be ordered accordingly; this is done inside
 							// generateAllNoteFeatureVectors(), so all arguments can remain in their original (fwd) order
@@ -964,6 +967,7 @@ public class TrainingManager {
 							currBackwardsMapping = backwardsMappingPerPiece.get(indexInAll);
 						}
 						else {
+							System.out.println("================================================");
 							System.exit(0);
 							currBackwardsMapping = FeatureGenerator.getBackwardsMapping(currChordSizes); // TODO is re-calculated every time rather than retrieved with a get()-method (slower)	
 							backwardsMappingPerPiece.set(indexInAll, currBackwardsMapping);
@@ -1073,6 +1077,7 @@ public class TrainingManager {
 						currPossibleVoiceAssignmentsAllChords = possibleVoiceAssignmentsAllChordsPerPiece.get(indexInAll);
 					}
 					else {
+						System.out.println("=======================================");
 						System.exit(0);
 						currPossibleVoiceAssignmentsAllChords =
 							FeatureGeneratorChord.getOrderedVoiceAssignments(currBTP, currBNP,
@@ -1088,6 +1093,7 @@ public class TrainingManager {
 						currentChordFeatures = chordFeaturesPerPiece.get(indexInAll);
 					}
 					else {
+						System.out.println("=======================================");
 						System.exit(0);
 						currentChordFeatures =  
 							FeatureGeneratorChord.generateAllChordFeatureVectors(currBTP,
@@ -2697,7 +2703,8 @@ public class TrainingManager {
 		String hyperparams = String.join(",", Arrays.asList(
 			"ismir_2018=" + Boolean.toString(ToolBox.toBoolean(modelParameters.get(Runner.ISMIR_2018).intValue())),
 			"use_stored_weights=" + (trn ? Boolean.toString(wi == WeightsInit.INIT_FROM_LIST) : "true"),
-			"user_model=" + Boolean.toString(Runner.getDeployTrainedUserModel()),
+			"user_model=" + Boolean.toString(Runner.getTrainUserModel()),
+//			"user_model=" + Boolean.toString(Runner.getDeployTrainedUserModel()),
 			"layer_sizes=" + 
 				"[" + numFeatures + " " + 
 				(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 

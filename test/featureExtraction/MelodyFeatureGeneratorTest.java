@@ -36,28 +36,28 @@ public class MelodyFeatureGeneratorTest extends TestCase {
 
 
 	public void testGetMelodyModelFeatureVectors() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
 		// metricTime == null
 		List<List<Double>> expected0 = new ArrayList<List<Double>>();
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 0.0, -1.0, 0.0, -1.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 0.0, -1.0, 0.0, -1.0}));
 		//
-		expected0.add(Arrays.asList(new Double[]{70.0, 3/16.0, 3.0, 1/4.0, 0.0, -1.0}));
-		expected0.add(Arrays.asList(new Double[]{63.0, 1/8.0, -7.0, 1/4.0, -4.0, 1/2.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 4.0, 1/4.0, -3.0, 1/2.0}));
-		expected0.add(Arrays.asList(new Double[]{62.0, 1/8.0, -5.0, 1/4.0, -1.0, 1/2.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/8.0, 4.0, 1/8.0, -1.0, 3/8.0}));
+		expected0.add(Arrays.asList(new Double[]{72.0, 3/16.0, 3.0, 1/4.0, 0.0, -1.0}));
+		expected0.add(Arrays.asList(new Double[]{65.0, 1/8.0, -7.0, 1/4.0, -4.0, 1/2.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 4.0, 1/4.0, -3.0, 1/2.0}));
+		expected0.add(Arrays.asList(new Double[]{64.0, 1/8.0, -5.0, 1/4.0, -1.0, 1/2.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/8.0, 4.0, 1/8.0, -1.0, 3/8.0}));
 		//
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/16.0, 1.0, 1/8.0, 5.0, 1/4.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/16.0, -1.0, 1/16.0, 0.0, 3/16.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/32.0, 1.0, 1/16.0, 0.0, 1/8.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/32.0, -1.0, 1/32.0, 0.0, 3/32.0}));
-		expected0.add(Arrays.asList(new Double[]{64.0, 1/32.0, -2.0, 1/32.0, -3.0, 1/16.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/32.0, 2.0, 1/32.0, 0.0, 1/16.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 1.0, 1/32.0, 3.0, 1/16.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 0.0, 1/2.0, 1.0, 17/32.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/16.0, 1.0, 1/8.0, 5.0, 1/4.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/16.0, -1.0, 1/16.0, 0.0, 3/16.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/32.0, 1.0, 1/16.0, 0.0, 1/8.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/32.0, -1.0, 1/32.0, 0.0, 3/32.0}));
+		expected0.add(Arrays.asList(new Double[]{66.0, 1/32.0, -2.0, 1/32.0, -3.0, 1/16.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/32.0, 2.0, 1/32.0, 0.0, 1/16.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 1.0, 1/32.0, 3.0, 1/16.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 0.0, 1/2.0, 1.0, 17/32.0}));
 
 		// metricTime == 17/8
 		List<List<Double>> expected1 = new ArrayList<List<Double>>(expected0.subList(0, 8));

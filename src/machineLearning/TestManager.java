@@ -21,11 +21,11 @@ import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.score.ScoreNote;
 import de.uos.fmt.musitech.data.score.ScorePitch;
 import de.uos.fmt.musitech.data.structure.Note;
-import de.uos.fmt.musitech.data.structure.Piece;
 import de.uos.fmt.musitech.data.structure.container.SortedContainer;
 import de.uos.fmt.musitech.data.structure.harmony.KeyMarker;
 import de.uos.fmt.musitech.data.structure.harmony.KeyMarker.Mode;
 import de.uos.fmt.musitech.data.time.Marker;
+import de.uos.fmt.musitech.data.time.MetricalComparator;
 import de.uos.fmt.musitech.data.time.MetricalTimeLine;
 import de.uos.fmt.musitech.utility.math.Rational;
 import exports.MEIExport;
@@ -304,7 +304,7 @@ public class TestManager {
 
 		String storePath = argPaths[0];
 		String pathPredTransFirstPass = argPaths[1];
-		String pathTrainedUserModel= argPaths[2];
+		String pathTrainedUserModel = argPaths[2];
 		String pathStoredNN = argPaths[3];
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
@@ -374,7 +374,18 @@ public class TestManager {
 			chordSizes = groundTruthTranscription.getNumberOfNewNotesPerChord();
 		}
 		// c. Both
-		keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
+		if (!deployTrainedUserModel) {
+			keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
+		}
+//		// TODO G minor set as default
+//		else {
+//			keyInfo = new ArrayList<>();
+//			keyInfo.add(new Integer[]{
+//				-2, 1, 
+//				1, meterInfo.get(meterInfo.size()-1)[Transcription.MI_LAST_BAR],
+//				0, 0}
+//			);
+//		}
 		if (pm == ProcessingMode.BWD) {
 			backwardsMapping = FeatureGenerator.getBackwardsMapping(chordSizes);
 		}
@@ -525,8 +536,12 @@ public class TestManager {
 			// test mode, or when using a non-NN model 
 			if (!(mt == ModelType.ENS && mode == Runner.TEST) && mt != ModelType.DNN && 
 				mt != ModelType.OTHER && mt != ModelType.HMM) {
-				initialiseNetwork(mt == ModelType.ENS ? pathStoredNN : storePath,
-					minAndMaxFeatureValues[0].length);
+				initialiseNetwork(
+					mt == ModelType.ENS ? pathStoredNN : 
+					(!deployTrainedUserModel ? storePath : pathTrainedUserModel), // 08.07.2023
+//					storePath,
+					minAndMaxFeatureValues[0].length
+				); 
 			}
 			List<Double> modelWeighting = null;
 			if (mt == ModelType.ENS) {
@@ -628,10 +643,21 @@ public class TestManager {
 
 				MetricalTimeLine mtl = // zondag
 					!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getMetricalTimeLine() : 
-					new MetricalTimeLine(); 
+					new MetricalTimeLine();
 				SortedContainer<Marker> ht = // zondag
 					!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getHarmonyTrack() :
-					new SortedContainer<Marker>();
+					new SortedContainer<Marker>(null, Marker.class, new MetricalComparator());
+//						new SortedContainer<Marker>();
+				// TODO G-tuning is assumed as default
+				if (deployTrainedUserModel) {
+					KeyMarker km = new KeyMarker(Rational.ZERO, (long) 0.0);
+					// F minor -- 4640_10_quand_mon_mari_lasso
+//					km.setAlterationNumAndMode(-4, KeyMarker.Mode.MODE_MAJOR); km.setRoot('A'); km.setRootAlteration(1);
+					// D minor -- Quand_mon_mary_4 / Quand_mon_mary_more_finely_handled
+					km.setAlterationNumAndMode(-1, KeyMarker.Mode.MODE_MAJOR); km.setRoot('F'); km.setRootAlteration(0);
+//					km.setAlterationNumAndMode(-2, KeyMarker.Mode.MODE_MAJOR); km.setRoot('B'); km.setRootAlteration(1);
+					ht.add(km);
+				}
 
 				Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
 				ScorePiece predictedPiece = 
@@ -657,10 +683,10 @@ public class TestManager {
 				if (!deployTrainedUserModel) {
 					// Element 0 of testResults contains the assignment errors, which has
 					// as element 0: general high-level voice assignment information
-					// as element 1: the indices of all incorrect assignments
-					// as element 2: the indices of all overlooked CoD assignments
-					// as element 3: the indices of all superfluous CoD assignments
-					// as element 4: the indices of all half CoD assignments
+					// as element 1: the indices of all incorrect assignments (red)
+					// as element 2: the indices of all overlooked CoD assignments (orange)
+					// as element 3: the indices of all superfluous CoD assignments (green)
+					// as element 4: the indices of all half CoD assignments (blue(?))
 					// and, if modelling duration
 					// as element 5: general high-level duration assignment information
 					// as element 6: the indices of all incorrect assignments
@@ -701,22 +727,25 @@ public class TestManager {
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getScorePiece(), instruments, meterInfo, 
-					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
+					predictedTranscr.getKeyInfo(), expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
+//					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
 				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
 				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
-				for (boolean grandStaff : new Boolean[]{false, true}) {
-					MEIExport.exportMEIFile(
-						t, tablature,
-//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
-//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
-						colInd, 
-						grandStaff,
-						true,
-						true,
-						expPath
-					);
+				if (tablature != null) {
+					for (boolean grandStaff : new Boolean[]{false, true}) {
+						MEIExport.exportMEIFile(
+							t, tablature,
+	//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
+	//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
+							colInd, 
+							grandStaff,
+							true,
+							true,
+							new String[]{expPath, "halcyon"}
+						);
+					}
 				}
 			}
 			if (!deployTrainedUserModel) {
@@ -2407,13 +2436,36 @@ public class TestManager {
 			currentNetworkOutput = networkManager.evalNetwork(currentNoteFeatureVector);
 		}
 		else if (mt == ModelType.DNN || mt == ModelType.OTHER){
+//			System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
+//			System.out.println(noteIndex);
 			if (noteIndex % 50 == 0) {
 				System.out.println("processing note " + noteIndex);
 			}
 			currentNetworkOutput = new double[Transcription.MAX_NUM_VOICES];
-			boolean isFinalNote = 
-				isTablatureCase ? noteIndex == basicTabSymbolProperties.length - 1 :
-				noteIndex == basicNoteProperties.length - 1;
+			boolean isFinalNote = false;
+			if (pm == ProcessingMode.FWD) {
+				isFinalNote = 
+					isTablatureCase ? noteIndex == basicTabSymbolProperties.length - 1 :
+					noteIndex == basicNoteProperties.length - 1;
+			}
+			else {
+				int indLast = -1;
+				// NB btp and bnp are not reversed
+				Integer[][] prop = isTablatureCase ? basicTabSymbolProperties : basicNoteProperties;
+				int chordSeqInd = isTablatureCase ? Tablature.CHORD_SEQ_NUM : Transcription.CHORD_SEQ_NUM; 
+				for (int i = 0; i < prop.length; i++) {
+					if (prop[i][chordSeqInd] == 1) {
+						indLast = i - 1;
+						break;
+					}
+				}
+				isFinalNote = noteIndex == indLast;	
+			}
+			if (isFinalNote) {
+				System.out.println(noteIndex);
+//				System.exit(0);
+			}
+
 			String cmds = "";
 			boolean isScikit = false;
 			if (isScikit) {	
@@ -2538,6 +2590,8 @@ public class TestManager {
 				String fvAsStr = currentNoteFeatureVector.toString();			
 				String scriptName = Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py"));
 				cmds += 
+					(deployTrainedUserModel ? "sess = tf.InteractiveSession()" + "\r\n" : "") +
+//					(deployTrainedUserModel ? scriptName + ".start_sess()" + "\r\n" : "") +
 //					"sess = tf.InteractiveSession()" + cr +
 //					"tf.set_random_seed(hyperparams['seed'])" + cr +
 					"kwargs = {'weights_biases':weights_biases, 'feature_vector':" + fvAsStr + "}" + "\r\n" +
@@ -2553,6 +2607,8 @@ public class TestManager {
 				}
 				
 				String output = PythonInterface.addToIPythonSession(pr, cmds, isFinalNote);
+//				System.out.println("#######################################3");
+//				System.out.println(output);
 				String predStr = output.substring(output.indexOf("@[") + 2, output.indexOf("]@")).trim();
 				// Remove any line breaks
 				predStr = predStr.replace("\r\n", "");
@@ -3597,7 +3653,9 @@ public class TestManager {
 						"hyperparams['layer_sizes'], " + 
 						"hyperparams['use_stored_weights'], " +
 //						"paths_extensions['store_path'], " + "sess)");
-						"paths_extensions['store_path'])" + "\r\n";			
+						(!deployTrainedUserModel ? "paths_extensions['store_path'])" : 
+						"paths_extensions['path_trained_user_model'])")
+						+ "\r\n";			
 				}
 //				System.out.println("cmdStr = " + Arrays.toString(s));
 				pr = PythonInterface.runIPythonSession(cmds);
@@ -7147,6 +7205,7 @@ public class TestManager {
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
+		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
 
 		// Determine noteIndexBwd, which is needed when using the bwd model for the lists in
 		// bwd order. When using the fwd model, it will always be the same as noteIndex
@@ -7243,7 +7302,9 @@ public class TestManager {
 		// 1. If a CoD is predicted: create a second Note (which is an exact copy of the first), add
 		// that to noteList, and replace the element at noteIndex in allNotes with the augmented 
 		// noteList
-		MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
+		MetricalTimeLine mtl = 
+			!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getMetricalTimeLine() : null; // 08-07.2023
+//		MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
 		if (predictedVoices.size() == 2) {
 			Note secondNote = 
 				ScorePiece.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(), 

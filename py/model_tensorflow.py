@@ -9,7 +9,7 @@ from functools import partial
 trn = 0
 tst = 1
 app = 2
-verbose = True
+verbose = False
 plot_or_not = True
 check_accuracies = False
 
@@ -234,11 +234,14 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 
 			print('epoch', str(epoch) + '/' + str(epochs), 'completed: loss =', epoch_loss, 'acc =', acc_trn)
 
+			total_cost.append(epoch_loss)
+			accs_trn.append(acc_trn)
+			
 			# Non-user model (model selection) case: save weights and softmaxes for the current epoch  
 			# if its acc_vld is the highest so far. Check acc_vld every tenth epoch
 			if not user_model and epoch % 10 == 0:
-				total_cost.append(epoch_loss)
-				accs_trn.append(acc_trn)
+#				total_cost.append(epoch_loss)
+#				accs_trn.append(acc_trn)
 				if val_perc != 0:
 					if arg_hyperparams['ismir_2018']:
 						# This is incorrect: sess.run() should not be run again (see loop over the mini 
@@ -278,7 +281,7 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 						np.savetxt(store_path + 'best_epoch.csv', [[int(epoch), acc_vld]], delimiter=',')
 
 		# User model case: save weights and softmaxes for the final epoch   
-		if user_model:
+		if user_model:	
 			save_path = saver.save(sess, store_path + 'weights/' + 'trained.ckpt')
 			np.savetxt(store_path + out_ext, sm_trn, delimiter=',')
 

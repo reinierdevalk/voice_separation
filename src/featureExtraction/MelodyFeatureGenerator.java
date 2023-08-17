@@ -84,13 +84,15 @@ public class MelodyFeatureGenerator {
 			else {
 				midi = new File(Runner.midiPath + "bach-WTC/thesis/" + s);
 			}
-			Transcription trans = new Transcription(midi, encoding);
+			Transcription trans = new Transcription(true, midi, encoding);
+//			Transcription trans = new Transcription(midi, encoding);
+			
 			NotationSystem system = trans.getScorePiece().getScore();
 
 			for (int voice = 0; voice < trans.getNumberOfVoices(); voice++) {
 				NotationVoice nv = system.get(voice).get(0);
-new FeatureGenerator();
-				//				List<List<Double>> features = mfg.getMelodyModelFeatureVectors(btp, nv, null);
+				new FeatureGenerator();
+//				List<List<Double>> features = mfg.getMelodyModelFeatureVectors(btp, nv, null);
 				List<List<Double>> features = FeatureGenerator.generateMelodyFeatureVectors(btp, nv, null);
 				ToolBox.storeObject(features, new File("F:/research/data/melody_feat/" + 
 					set + "/" + s + " (voice " + voice + ").xml"));

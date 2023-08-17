@@ -624,27 +624,27 @@ public class TrainingManagerTest extends TestCase {
 	
 	
 	public void testGenerateChordDictionary() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
-		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+		Tablature tab = new Tablature(encodingTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
-		expected.add(Arrays.asList(new Integer[]{48, 55, 63, 67})); 
-		expected.add(Arrays.asList(new Integer[]{43, 55, 67, 70})); 
-		expected.add(Arrays.asList(new Integer[]{46})); 
-		expected.add(Arrays.asList(new Integer[]{45, 48, 57, 63})); 
-		expected.add(Arrays.asList(new Integer[]{43})); 
-		expected.add(Arrays.asList(new Integer[]{43, 55, 55, 58, 67})); 
-		expected.add(Arrays.asList(new Integer[]{43, 58, 62, 67})); 
-		expected.add(Arrays.asList(new Integer[]{57, 66})); 
-		expected.add(Arrays.asList(new Integer[]{43, 55, 62, 67}));
+		expected.add(Arrays.asList(new Integer[]{50, 57, 65, 69})); 
+		expected.add(Arrays.asList(new Integer[]{45, 57, 69, 72})); 
+		expected.add(Arrays.asList(new Integer[]{48})); 
+		expected.add(Arrays.asList(new Integer[]{47, 50, 59, 65})); 
+		expected.add(Arrays.asList(new Integer[]{45})); 
+		expected.add(Arrays.asList(new Integer[]{45, 57, 57, 60, 69})); 
+		expected.add(Arrays.asList(new Integer[]{45, 60, 64, 69})); 
+		expected.add(Arrays.asList(new Integer[]{59, 68})); 
+		expected.add(Arrays.asList(new Integer[]{45, 57, 64, 69}));
+		expected.add(Arrays.asList(new Integer[]{68}));
+		expected.add(Arrays.asList(new Integer[]{69}));
 		expected.add(Arrays.asList(new Integer[]{66}));
-		expected.add(Arrays.asList(new Integer[]{67}));
-		expected.add(Arrays.asList(new Integer[]{64}));
 
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
-		List<List<Integer>> actual = new TrainingManager().generateChordDictionary(tablatureTranscriptionPairs);
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
+		List<List<Integer>> actual = new TrainingManager().generateChordDictionary(tabTransPairs);
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -658,7 +658,7 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateChordDictionaryNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{50, 57, 65, 69}))); 
@@ -674,10 +674,10 @@ public class TrainingManagerTest extends TestCase {
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{69})));
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{66})));
 		 		  
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
-		List<List<Integer>> actual = new TrainingManager().generateChordDictionary(tablatureTranscriptionPairs);
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
+		List<List<Integer>> actual = new TrainingManager().generateChordDictionary(tabTransPairs);
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -691,8 +691,8 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateMappingDictionary() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
-		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+		Tablature tab = new Tablature(encodingTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{3, 2, 1, 0, -1}))); 
@@ -705,12 +705,12 @@ public class TrainingManagerTest extends TestCase {
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, -1, 0, -1, -1})));
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{0, -1, -1, -1, -1})));
 
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
+		int highestNumberOfVoices = trans.getNumberOfVoices();
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
 		List<List<Integer>> actual =
-			new TrainingManager().generateMappingDictionary(tablatureTranscriptionPairs, highestNumberOfVoices);
+			new TrainingManager().generateMappingDictionary(tabTransPairs, highestNumberOfVoices);
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -724,7 +724,7 @@ public class TrainingManagerTest extends TestCase {
 	
 	
 	public void testGenerateMappingDictionaryNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1);
 
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{3, 2, 1, 0, -1}))); 
@@ -737,12 +737,12 @@ public class TrainingManagerTest extends TestCase {
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{1, -1, 0, -1, -1})));
 		expected.add(new ArrayList<Integer>(Arrays.asList(new Integer[]{0, -1, -1, -1, -1})));
 
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
+		int highestNumberOfVoices = trans.getNumberOfVoices();
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
 		List<List<Integer>> actual =
-			new TrainingManager().generateMappingDictionary(tablatureTranscriptionPairs, highestNumberOfVoices);
+			new TrainingManager().generateMappingDictionary(tabTransPairs, highestNumberOfVoices);
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -756,15 +756,15 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateInitialStateMatrix() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
-		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+		Tablature tab = new Tablature(encodingTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[] expected = new Integer[]{3, 1, 1, 1, 1, 1, 1, 1, 1};
 
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
+		int highestNumberOfVoices = trans.getNumberOfVoices();
 		List<TablatureTranscriptionPair> pieces = new ArrayList<TablatureTranscriptionPair>();
-		pieces.add(new TablatureTranscriptionPair(tablature, transcription));
-		pieces.add(new TablatureTranscriptionPair(tablature, transcription));
+		pieces.add(new TablatureTranscriptionPair(tab, trans));
+		pieces.add(new TablatureTranscriptionPair(tab, trans));
 		TrainingManager tm = new TrainingManager();
 		List<List<Integer>> voiceAssignmentDictionary = 
 			tm.generateMappingDictionary(pieces, highestNumberOfVoices);
@@ -779,14 +779,14 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateInitialStateMatrixNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1);
 
 		Integer[] expected = new Integer[]{3, 1, 1, 1, 1, 1, 1, 1};
 
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
+		int highestNumberOfVoices = trans.getNumberOfVoices();
 		List<TablatureTranscriptionPair> pieces = new ArrayList<TablatureTranscriptionPair>();
-		pieces.add(new TablatureTranscriptionPair(null, transcription));
-		pieces.add(new TablatureTranscriptionPair(null, transcription));
+		pieces.add(new TablatureTranscriptionPair(null, trans));
+		pieces.add(new TablatureTranscriptionPair(null, trans));
 		TrainingManager tm = new TrainingManager();
 		List<List<Integer>> voiceAssignmentDictionary = 
 			tm.generateMappingDictionary(pieces, highestNumberOfVoices);
@@ -801,8 +801,8 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateObservationProbabilityMatrix() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
-		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+		Tablature tab = new Tablature(encodingTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
 		
 		// For each TablatureTranscriptionPair (which are the same) there are
 		// 12 unique chords (rows) and 9 unique voice assignments (columns), where
@@ -846,17 +846,17 @@ public class TrainingManagerTest extends TestCase {
 		expected[10] = new Integer[]{0,   0,   1,   0,   1,   0,   0,   0,   1+4};
 		expected[11] = new Integer[]{0,   0,   1,   0,   1,   0,   0,   0,   1+2};
 
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
+		int highestNumberOfVoices = trans.getNumberOfVoices();
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
 		TrainingManager tm = new TrainingManager();
 		List<List<Integer>> chordDictionary = 
-			tm.generateChordDictionary(tablatureTranscriptionPairs);
+			tm.generateChordDictionary(tabTransPairs);
 		List<List<Integer>> voiceAssignmentDictionary =
-			tm.generateMappingDictionary(tablatureTranscriptionPairs, highestNumberOfVoices);	
+			tm.generateMappingDictionary(tabTransPairs, highestNumberOfVoices);	
 
-		Integer[][] actual = tm.generateObservationProbabilityMatrix(tablatureTranscriptionPairs,
+		Integer[][] actual = tm.generateObservationProbabilityMatrix(tabTransPairs,
 			chordDictionary, voiceAssignmentDictionary, highestNumberOfVoices);
 		assertEquals(expected.length, actual.length);
 		for (int i = 0; i < expected.length; i++) {
@@ -869,7 +869,7 @@ public class TrainingManagerTest extends TestCase {
 
 
 	public void testGenerateObservationProbabilityMatrixNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1);
 
 		// For each TablatureTranscriptionPair (which are the same) there are
 		// 12 unique chords (rows) and 8 unique voice assignments (columns), where
@@ -913,16 +913,16 @@ public class TrainingManagerTest extends TestCase {
 		expected[10] = new Integer[]{0,   1,   0,   1,   0,   0,   0,   1+4};
 		expected[11] = new Integer[]{0,   1,   0,   1,   0,   0,   0,   1+2};
 
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
+		int highestNumberOfVoices = trans.getNumberOfVoices();
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
 		TrainingManager tm = new TrainingManager();
 		List<List<Integer>> chordDictionary = 
-			tm.generateChordDictionary(tablatureTranscriptionPairs);
+			tm.generateChordDictionary(tabTransPairs);
 		List<List<Integer>> voiceAssignmentDictionary =
-			tm.generateMappingDictionary(tablatureTranscriptionPairs, highestNumberOfVoices);
-		Integer[][] actual = tm.generateObservationProbabilityMatrix(tablatureTranscriptionPairs,
+			tm.generateMappingDictionary(tabTransPairs, highestNumberOfVoices);
+		Integer[][] actual = tm.generateObservationProbabilityMatrix(tabTransPairs,
 			chordDictionary, voiceAssignmentDictionary, highestNumberOfVoices);
 
 		assertEquals(expected.length, actual.length);
@@ -936,8 +936,8 @@ public class TrainingManagerTest extends TestCase {
 
 	
 	public void testGenerateTransitionProbabilityMatrix() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
-		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
+		Tablature tab = new Tablature(encodingTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		// For each TablatureTranscriptionPair (which are the same) there are 
 		// 9 unique voice assignments, where
@@ -961,14 +961,14 @@ public class TrainingManagerTest extends TestCase {
 		expected[7] = new Integer[]{1+2, 1, 1, 1, 1, 1, 1, 1, 1}; 
 		expected[8] = new Integer[]{1+2, 1, 1, 1, 1, 1, 1, 1, 1+10}; 
 
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(tablature, transcription));
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(tab, trans));
+		int highestNumberOfVoices = trans.getNumberOfVoices();
 		TrainingManager tm = new TrainingManager();
 		List<List<Integer>> voiceAssignmentDictionary = 
-			tm.generateMappingDictionary(tablatureTranscriptionPairs, highestNumberOfVoices);
-		Integer[][] actual = tm.generateTransitionProbabilityMatrix(tablatureTranscriptionPairs,
+			tm.generateMappingDictionary(tabTransPairs, highestNumberOfVoices);
+		Integer[][] actual = tm.generateTransitionProbabilityMatrix(tabTransPairs,
 			voiceAssignmentDictionary, highestNumberOfVoices);
 
 		assertEquals(expected.length, actual.length);
@@ -982,7 +982,7 @@ public class TrainingManagerTest extends TestCase {
 	
 	
 	public void testGenerateTransitionProbabilityMatrixNonTab() {
-		Transcription transcription = new Transcription(midiTestpiece1);
+		Transcription trans = new Transcription(midiTestpiece1);
 
 		// For each TablatureTranscriptionPair (which are the same) there are 
 		// 8 unique voice assignments, where
@@ -1005,15 +1005,15 @@ public class TrainingManagerTest extends TestCase {
 		expected[6] = new Integer[]{1+2, 1, 1, 1, 1, 1, 1, 1}; 
 		expected[7] = new Integer[]{1+2, 1, 1, 1, 1, 1, 1, 1+10}; 
 
-		List<TablatureTranscriptionPair> tablatureTranscriptionPairs = new ArrayList<TablatureTranscriptionPair>();
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
-		tablatureTranscriptionPairs.add(new TablatureTranscriptionPair(null, transcription));
-		int highestNumberOfVoices = transcription.getNumberOfVoices();
+		List<TablatureTranscriptionPair> tabTransPairs = new ArrayList<TablatureTranscriptionPair>();
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
+		tabTransPairs.add(new TablatureTranscriptionPair(null, trans));
+		int highestNumberOfVoices = trans.getNumberOfVoices();
 		TrainingManager tm = new TrainingManager();
 		List<List<Integer>> voiceAssignmentDictionary = 
-			tm.generateMappingDictionary(tablatureTranscriptionPairs, highestNumberOfVoices);
+			tm.generateMappingDictionary(tabTransPairs, highestNumberOfVoices);
 		Integer[][] actual = 
-			tm.generateTransitionProbabilityMatrix(tablatureTranscriptionPairs,
+			tm.generateTransitionProbabilityMatrix(tabTransPairs,
 			voiceAssignmentDictionary, highestNumberOfVoices);
 
 		assertEquals(expected.length, actual.length);

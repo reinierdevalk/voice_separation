@@ -80,7 +80,7 @@ public class UI {
 			// a. Runner settings
 			skipTraining = false;
 			trainUserModel = false;
-			verbose = false;
+			verbose = true;
 			
 			// b. Variable settings
 			boolean gridSearch = false;
@@ -90,11 +90,11 @@ public class UI {
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
 			datasetID = Dataset.THESIS_INT_3VV;
-			m = Model.N;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd
+			m = Model.B;
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
 //			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
-			expDir = "thesis/exp_3.1/"; 
+			expDir = "thesis/exp_3.3.1/"; 
 //			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
 			expDirFirstPass = "thesis/exp_3.1/thesis-int/3vv/N/bwd/";
 			//
@@ -154,7 +154,7 @@ public class UI {
 			cycles = 10;
 			// DNN
 			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
-			epochs = 600;
+			epochs = 600; // 460;
 			// General
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
 			deviationThreshold = 0.05;
@@ -203,7 +203,7 @@ public class UI {
 		}
 		// If deploying a trained model: deduce parameters and settings		
 		// CLI usage:
-		// $ java -cp <classPaths> ui.UI <model> <pm> <dsIDTrain> '<rootPath>' '<verbose>' '<userDefinedName>'
+		// $ java -cp <classPaths> ui.UI '<modelID>' '<rootPath>' '<verbose>' '<userDefinedName>'
 		//
 		// The class ui.UI takes four arguments: 
 		// - <modelID>			the trained model's ID, consisting of the model, pm, and 
@@ -495,7 +495,7 @@ public class UI {
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(false));
 			modelParams.put(Runner.WEIGHTS_INIT, (double) WeightsInit.INIT_FROM_LIST.getIntRep());
 		}
-		
+
 //		for (Entry<String, Double> e : modelParams.entrySet()) {
 //			System.out.println(e.getKey() + ": " + e.getValue());
 //		}

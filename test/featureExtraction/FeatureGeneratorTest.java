@@ -63,7 +63,7 @@ public class FeatureGeneratorTest extends TestCase {
 		File midiFile = new File(Runner.midiPath + "4vv/" + pieceName);
 		File encodingFile = new File(Runner.encodingsPath + "4vv/" + pieceName + Encoding.EXTENSION);
 		
-		Tablature tab = new Tablature(encodingFile, true); 
+		Tablature tab = new Tablature(encodingFile); 
 		Transcription gtTrans = new Transcription(midiFile, encodingFile);
 		
 		List<List<Double>> predVoiceLabels = ToolBox.getStoredObject(new ArrayList<List<Double>>(),
@@ -136,7 +136,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetBasicNoteFeaturesMUSCI() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 
 	List<double[]> expected = new ArrayList<double[]>();
     // Chord 0
@@ -334,7 +334,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
   public void testGetPositionWithinChordMUSCI() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 			    
 	  // Determine expected	  
 	  List<double[]> expected = new ArrayList<double[]>();
@@ -483,7 +483,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetPitchDistancesWithinChordMUSCI() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 			    	  
 	  // Determine expected
 	  List<double[]> expected = new ArrayList<double[]>();
@@ -632,7 +632,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetPitchAndTimeProximitiesToAllVoicesMUSCI() {
-    Tablature tablature = new Tablature(encodingTestpiece1, true);
+    Tablature tablature = new Tablature(encodingTestpiece1);
   	Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
   	// Determine expected
@@ -912,7 +912,7 @@ public class FeatureGeneratorTest extends TestCase {
   
 	
 	public void testGetProximitiesAndMovementToVoiceMUSCI() {
-    Tablature tablature = new Tablature(encodingTestpiece1, true);
+    Tablature tablature = new Tablature(encodingTestpiece1);
   	Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
   	
     // Determine expected
@@ -1124,7 +1124,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetVoicesAlreadyOccupiedMUSCI() {
-    Tablature tablature = new Tablature(encodingTestpiece1, true);
+    Tablature tablature = new Tablature(encodingTestpiece1);
   	Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
     // Determine expected
@@ -1276,7 +1276,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGenerateAllNoteFeatureVectorsMUSCI() {
-    Tablature tablature = new Tablature(encodingTestpiece1, true);
+    Tablature tablature = new Tablature(encodingTestpiece1);
     Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
   	Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
@@ -1440,7 +1440,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetBasicNoteFeatures() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 
 		List<double[]> allInfoAhead = new ArrayList<double[]>();
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
@@ -1677,7 +1677,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 	
 	public void testGetProximitiesAndCourseInfoAhead() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 			
 		// Determine expected
 		List<double[]> expected = new ArrayList<double[]>();
@@ -2213,7 +2213,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetNumberOfNewOnsetsInNextChord() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 
 		// Determine expected
 		List<Double> expected = new ArrayList<Double>();
@@ -2336,7 +2336,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetPositionWithinChord() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 		
 		// Determine expected 
@@ -2554,7 +2554,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
 	public void testGetSizeOfChordInclusive() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		// Determine expected
@@ -2644,7 +2644,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetIndexExclusive() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 
 		// Determine expected
 		List<Integer> expected = new ArrayList<Integer>();
@@ -2731,7 +2731,7 @@ public class FeatureGeneratorTest extends TestCase {
   
   
 	public void testGetIndexInclusive() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		// Determine expected
@@ -2900,7 +2900,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetIntervalsInChord() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<double[]> expected = new ArrayList<double[]>();
@@ -3251,7 +3251,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGetVoicesWithAdjacentNoteOnSameCourse() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		double[] empty = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
@@ -3350,7 +3350,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 	// TWEE gedaan
 	public void testGetPitchAndTimeProximitiesToAllVoices() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<double[][]> expected = new ArrayList<double[][]>();
@@ -5176,7 +5176,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 	// EEN gedaan
 	public void testGetProximitiesAndMovementToVoiceAll() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<double[]> expected = new ArrayList<double[]>();
@@ -6061,25 +6061,25 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	public void testGetVoicesAlreadyOccupied() {
 		// a. Unadapted (longer CoDnote in the upper voice)
-		Tablature tablatureA = new Tablature(encodingTestpiece1, true);
+		Tablature tablatureA = new Tablature(encodingTestpiece1);
   	Transcription transcriptionA = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesA = transcriptionA.getVoicesSNU();
   	List<List<Double>> durationLabelsA = transcriptionA.getDurationLabels();
     // b. Longer CoDNote in the lower voice
-  	Tablature tablatureB = new Tablature(encodingTestpiece1, true);
+  	Tablature tablatureB = new Tablature(encodingTestpiece1);
   	Transcription transcriptionB = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesB = transcriptionB.getVoicesSNU();
   	voicesCoDNotesB.set(12, new Integer[]{1, 0});
    	List<List<Double>> durationLabelsB = transcriptionB.getDurationLabels();
    	// c. CoDNotes of equal duration (quarter)
-  	Tablature tablatureC = new Tablature(encodingTestpiece1, true);
+  	Tablature tablatureC = new Tablature(encodingTestpiece1);
   	Transcription transcriptionC = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesC = transcriptionC.getVoicesSNU();
    	List<List<Double>> durationLabelsC = transcriptionC.getDurationLabels();
    	List<Double> durLab12C = QUARTER;
    	durationLabelsC.set(12, durLab12C);
     // d. CoDNotes of equal duration (eighth)
-  	Tablature tablatureD = new Tablature(encodingTestpiece1, true);
+  	Tablature tablatureD = new Tablature(encodingTestpiece1);
   	Transcription transcriptionD = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesD = transcriptionD.getVoicesSNU();
    	List<List<Double>> durationLabelsD = transcriptionD.getDurationLabels();
@@ -6792,7 +6792,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGenerateNoteFeatureVector() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
@@ -6807,7 +6807,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdNoDur6 = new ArrayList<Double>(); 
 		expFwdNoDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, 0/4.0, // basicNoteFeatures
+			72.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, 0/4.0, // basicNoteFeatures
 			1.0/((3/16.0) + 1), 1.0/(24+1), 6.0, -1.0, -1.0, -1.0, // proximitiesAndCourseInfoAhead
 			1.0/((1/4.0) + 1), 1.0/(7+1), 2.0, -1.0, -1.0, -1.0, 
 			1.0/((3/8.0) + 1), 1.0/(27+1), 6.0, -1.0, -1.0, -1.0, 
@@ -6823,7 +6823,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdNoDur23 = new ArrayList<Double>(); 
 		expFwdNoDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, 7/8.0, // basicNoteFeatures
+			59.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, 7/8.0, // basicNoteFeatures
 			1.0/((1/8.0) + 1), 1.0/(2+1), 4.0, -1.0, 1.0/(5+1), 2.0, // proximitiesAndCourseInfoAhead
 			1.0/((3/16.0) + 1), -1.0, -1.0, -1.0, 1.0/(9+1), 2.0, 
 			1.0/((1/4.0) + 1), -1.0, -1.0, -1.0, 1.0/(10+1), 1.0,  
@@ -6841,7 +6841,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdDur6 = new ArrayList<Double>(); 
 		expFwdDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, 0/4.0, // basicNoteFeatures
+			72.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, 0/4.0, // basicNoteFeatures
 			1.0/((3/16.0) + 1), 1.0/(24+1), 6.0, -1.0, -1.0, -1.0, // proximitiesAndCourseInfoAhead
 			1.0/((1/4.0) + 1), 1.0/(7+1), 2.0, -1.0, -1.0, -1.0, 
 			1.0/((3/8.0) + 1), 1.0/(27+1), 6.0, -1.0, -1.0, -1.0, 
@@ -6857,7 +6857,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdDur23 = new ArrayList<Double>();
 		expFwdDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, 7/8.0, // basicNoteFeatures
+			59.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, 7/8.0, // basicNoteFeatures
 			1.0/((1/8.0) + 1), 1.0/(2+1), 4.0, -1.0, 1.0/(5+1), 2.0, // proximitiesAndCourseInfoAhead
 			1.0/((3/16.0) + 1), -1.0, -1.0, -1.0, 1.0/(9+1), 2.0,
 			1.0/((1/4.0) + 1), -1.0, -1.0, -1.0, 1.0/(10+1), 1.0, 
@@ -6876,7 +6876,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expBwdNoDur6 = new ArrayList<Double>(); 
 		expBwdNoDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, 0/4.0, // basicNoteFeatures
+			72.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, 0/4.0, // basicNoteFeatures
 			1.0/((3/16.0) + 1), 1.0/(24+1), 6.0, -1.0, -1.0, -1.0, // proximitiesAndCourseInfoAhead
 			1.0/((1/4.0) + 1), 1.0/(7+1), 2.0, -1.0, -1.0, -1.0, 
 			1.0/((3/8.0) + 1), 1.0/(27+1), 6.0, -1.0, -1.0, -1.0, 
@@ -6893,7 +6893,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expBwdNoDur23 = new ArrayList<Double>(); 
 		expBwdNoDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, 7/8.0, // basicNoteFeatures
+			59.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, 7/8.0, // basicNoteFeatures
 			1.0/((1/8.0) + 1), 1.0/(2+1), 4.0, -1.0, 1.0/(5+1), 2.0, // proximitiesAndCourseInfoAhead
 			1.0/((3/16.0) + 1), -1.0, -1.0, -1.0, 1.0/(9+1), 2.0,
 			1.0/((1/4.0) + 1), -1.0, -1.0, -1.0, 1.0/(10+1), 1.0,
@@ -7060,7 +7060,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGenerateNoteFeatureVectorDISSFirst() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
@@ -7075,7 +7075,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdNoDur6 = new ArrayList<Double>(); 
 		expFwdNoDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7088,7 +7088,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdNoDur23 = new ArrayList<Double>(); 
 		expFwdNoDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, // note-level
 			0.0, -1.0, 9.0, // note-chord
 			2.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0, // chord-level
 			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
@@ -7103,7 +7103,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdDur6 = new ArrayList<Double>(); 
 		expFwdDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7116,7 +7116,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdDur23 = new ArrayList<Double>();
 		expFwdDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, // note-level
 			2.0, 2.0, 9.0, // note-chord
 			5.0, 7/8.0, 4.0, 12.0, 2.0, 9.0, 1.0, // chord-level
 			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
@@ -7132,7 +7132,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expBwdNoDur6 = new ArrayList<Double>(); 
 		expBwdNoDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 3/16.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			1.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7146,7 +7146,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expBwdNoDur23 = new ArrayList<Double>(); 
 		expBwdNoDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 1/8.0, 9/8.0, 0.0, // note-level
 			0.0, -1.0, 9.0, // note-chord
 			2.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0,// chord-level
 			0.0, 0.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7302,7 +7302,7 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	// DRIE gedaan
 	public void testGenerateNoteFeatureVectorDISS() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
@@ -7317,7 +7317,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdNoDur6 = new ArrayList<Double>(); 
 		expFwdNoDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 3/16.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7330,7 +7330,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdNoDur23 = new ArrayList<Double>(); 
 		expFwdNoDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
 			0.0, -1.0, 9.0, // note-chord
 			2.0, 1/8.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0, // chord-level
 			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
@@ -7345,7 +7345,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdNoDurThree6 = new ArrayList<Double>(); 
 		expFwdNoDurThree6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 3/16.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7371,7 +7371,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdNoDurThree23 = new ArrayList<Double>(); 
 		expFwdNoDurThree23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
 			0.0, -1.0, 9.0, // note-chord
 			2.0, 1/8.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0, // chord-level
 			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
@@ -7399,7 +7399,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdNoDurThreeAvg6 = new ArrayList<Double>(); 
 		expFwdNoDurThreeAvg6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 3/16.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7413,7 +7413,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdNoDurThreeAvg23 = new ArrayList<Double>(); 
 		expFwdNoDurThreeAvg23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
 			0.0, -1.0, 9.0, // note-chord
 			2.0, 1/8.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0, // chord-level
 			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
@@ -7453,7 +7453,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expFwdDur6 = new ArrayList<Double>(); 
 		expFwdDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 3/16.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			0.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7466,7 +7466,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expFwdDur23 = new ArrayList<Double>();
 		expFwdDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
 			2.0, 2.0, 9.0, // note-chord
 			5.0, 1/8.0, 7/8.0, 4.0, 12.0, 2.0, 9.0, 1.0, // chord-level
 			0.0, 0.0, 1.0, 0.0, 0.0 // polyphonic embedding
@@ -7482,7 +7482,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 1, note at index 6
 		List<Double> expBwdNoDur6 = new ArrayList<Double>(); 
 		expBwdNoDur6.addAll(Arrays.asList(new Double[]{
-			70.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
+			72.0, 2.0, 8.0, 1/4.0, 0.0, // note-level
 			3.0, 3.0, -1.0, // note-chord
 			4.0, 3/16.0, 0/4.0, 1.0, 12.0, 12.0, 3.0, -1.0, // chord-level
 			1.0, 1.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7495,7 +7495,7 @@ public class FeatureGeneratorTest extends TestCase {
 		// Chord 7, note at index 23
 		List<Double> expBwdNoDur23 = new ArrayList<Double>(); 
 		expBwdNoDur23.addAll(Arrays.asList(new Double[]{
-			57.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
+			59.0, 3.0, 0.0, 9/8.0, 0.0, // note-level
 			0.0, -1.0, 9.0, // note-chord
 			2.0, 1/8.0, 7/8.0, 4.0, 9.0, -1.0, -1.0, -1.0,// chord-level
 			0.0, 0.0, 0.0, 0.0, 0.0 // polyphonic embedding
@@ -7788,26 +7788,26 @@ public class FeatureGeneratorTest extends TestCase {
 	
 	
 	public void testGenerateMelodyFeatureVector() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 
 		List<List<Double>> expected = new ArrayList<List<Double>>();
-		expected.add(Arrays.asList(new Double[]{67.0, 1/4.0, 0.0, -1.0}));
+		expected.add(Arrays.asList(new Double[]{69.0, 1/4.0, 0.0, -1.0}));
 		//
-		expected.add(Arrays.asList(new Double[]{70.0, 3/16.0, 3.0, 1/4.0}));
-		expected.add(Arrays.asList(new Double[]{63.0, 1/8.0, -7.0, 1/4.0}));
-		expected.add(Arrays.asList(new Double[]{67.0, 1/4.0, 4.0, 1/4.0}));
-		expected.add(Arrays.asList(new Double[]{62.0, 1/8.0, -5.0, 1/4.0}));
-		expected.add(Arrays.asList(new Double[]{66.0, 1/8.0, 4.0, 1/8.0}));
+		expected.add(Arrays.asList(new Double[]{72.0, 3/16.0, 3.0, 1/4.0}));
+		expected.add(Arrays.asList(new Double[]{65.0, 1/8.0, -7.0, 1/4.0}));
+		expected.add(Arrays.asList(new Double[]{69.0, 1/4.0, 4.0, 1/4.0}));
+		expected.add(Arrays.asList(new Double[]{64.0, 1/8.0, -5.0, 1/4.0}));
+		expected.add(Arrays.asList(new Double[]{68.0, 1/8.0, 4.0, 1/8.0}));
 		//
-		expected.add(Arrays.asList(new Double[]{67.0, 1/16.0, 1.0, 1/8.0}));
-		expected.add(Arrays.asList(new Double[]{66.0, 1/16.0, -1.0, 1/16.0}));
-		expected.add(Arrays.asList(new Double[]{67.0, 1/32.0, 1.0, 1/16.0}));
-		expected.add(Arrays.asList(new Double[]{66.0, 1/32.0, -1.0, 1/32.0}));
-		expected.add(Arrays.asList(new Double[]{64.0, 1/32.0, -2.0, 1/32.0}));
-		expected.add(Arrays.asList(new Double[]{66.0, 1/32.0, 2.0, 1/32.0}));
-		expected.add(Arrays.asList(new Double[]{67.0, 1/4.0, 1.0, 1/32.0}));
-		expected.add(Arrays.asList(new Double[]{67.0, 1/4.0, 0.0, 1/2.0}));
+		expected.add(Arrays.asList(new Double[]{69.0, 1/16.0, 1.0, 1/8.0}));
+		expected.add(Arrays.asList(new Double[]{68.0, 1/16.0, -1.0, 1/16.0}));
+		expected.add(Arrays.asList(new Double[]{69.0, 1/32.0, 1.0, 1/16.0}));
+		expected.add(Arrays.asList(new Double[]{68.0, 1/32.0, -1.0, 1/32.0}));
+		expected.add(Arrays.asList(new Double[]{66.0, 1/32.0, -2.0, 1/32.0}));
+		expected.add(Arrays.asList(new Double[]{68.0, 1/32.0, 2.0, 1/32.0}));
+		expected.add(Arrays.asList(new Double[]{69.0, 1/4.0, 1.0, 1/32.0}));
+		expected.add(Arrays.asList(new Double[]{69.0, 1/4.0, 0.0, 1/2.0}));
 
 		// Calculate actual
 		List<List<Double>> actual = new ArrayList<List<Double>>();
@@ -7871,7 +7871,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGenerateMelodyFeatureVectors() {
-		Tablature tablature = new Tablature(encodingTestpiece1, true);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
 	 
 		// Determine expected
@@ -7879,36 +7879,36 @@ public class FeatureGeneratorTest extends TestCase {
 		// a. If note == null
 		// Complete voice 0
 		List<List<Double>> expected0 = new ArrayList<List<Double>>();
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 0.0, -1.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 0.0, -1.0}));
 		//
-		expected0.add(Arrays.asList(new Double[]{70.0, 3/16.0, 3.0, 1/4.0}));
-		expected0.add(Arrays.asList(new Double[]{63.0, 1/8.0, -7.0, 1/4.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 4.0, 1/4.0}));
-		expected0.add(Arrays.asList(new Double[]{62.0, 1/8.0, -5.0, 1/4.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/8.0, 4.0, 1/8.0}));
+		expected0.add(Arrays.asList(new Double[]{72.0, 3/16.0, 3.0, 1/4.0}));
+		expected0.add(Arrays.asList(new Double[]{65.0, 1/8.0, -7.0, 1/4.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 4.0, 1/4.0}));
+		expected0.add(Arrays.asList(new Double[]{64.0, 1/8.0, -5.0, 1/4.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/8.0, 4.0, 1/8.0}));
 		//
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/16.0, 1.0, 1/8.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/16.0, -1.0, 1/16.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/32.0, 1.0, 1/16.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/32.0, -1.0, 1/32.0}));
-		expected0.add(Arrays.asList(new Double[]{64.0, 1/32.0, -2.0, 1/32.0}));
-		expected0.add(Arrays.asList(new Double[]{66.0, 1/32.0, 2.0, 1/32.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 1.0, 1/32.0}));
-		expected0.add(Arrays.asList(new Double[]{67.0, 1/4.0, 0.0, 1/2.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/16.0, 1.0, 1/8.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/16.0, -1.0, 1/16.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/32.0, 1.0, 1/16.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/32.0, -1.0, 1/32.0}));
+		expected0.add(Arrays.asList(new Double[]{66.0, 1/32.0, -2.0, 1/32.0}));
+		expected0.add(Arrays.asList(new Double[]{68.0, 1/32.0, 2.0, 1/32.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 1.0, 1/32.0}));
+		expected0.add(Arrays.asList(new Double[]{69.0, 1/4.0, 0.0, 1/2.0}));
 
 		// b. If note != null
 		// Voice 1, up to note 2
 		List<List<Double>> expected1 = new ArrayList<List<Double>>();
-		expected1.add(Arrays.asList(new Double[]{63.0, 1/4.0, 0.0, -1.0}));	  
+		expected1.add(Arrays.asList(new Double[]{65.0, 1/4.0, 0.0, -1.0}));	  
 		// Voice 2, up to note 25
 		List<List<Double>> expected2 = new ArrayList<List<Double>>();
-		expected2.add(Arrays.asList(new Double[]{55.0, 1/4.0, 0.0, -1.0}));
-		expected2.add(Arrays.asList(new Double[]{55.0, 3/16.0, 0.0, 1/4.0}));
-		expected2.add(Arrays.asList(new Double[]{57.0, 1/8.0, 2.0, 1/4.0}));
-		expected2.add(Arrays.asList(new Double[]{55.0, 1/4.0, -2.0, 1/4.0}));
-		expected2.add(Arrays.asList(new Double[]{58.0, 1/8.0, 3.0, 1/4.0}));
-		expected2.add(Arrays.asList(new Double[]{57.0, 1/8.0, -1.0, 1/8.0}));
-		expected2.add(Arrays.asList(new Double[]{43.0, 1/16.0, -14.0, 1/8.0}));
+		expected2.add(Arrays.asList(new Double[]{57.0, 1/4.0, 0.0, -1.0}));
+		expected2.add(Arrays.asList(new Double[]{57.0, 3/16.0, 0.0, 1/4.0}));
+		expected2.add(Arrays.asList(new Double[]{59.0, 1/8.0, 2.0, 1/4.0}));
+		expected2.add(Arrays.asList(new Double[]{57.0, 1/4.0, -2.0, 1/4.0}));
+		expected2.add(Arrays.asList(new Double[]{60.0, 1/8.0, 3.0, 1/4.0}));
+		expected2.add(Arrays.asList(new Double[]{59.0, 1/8.0, -1.0, 1/8.0}));
+		expected2.add(Arrays.asList(new Double[]{45.0, 1/16.0, -14.0, 1/8.0}));
 
 		expected.addAll(expected0); expected.addAll(expected1); expected.addAll(expected2);
 
@@ -8790,7 +8790,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	public void testGetBackwardsMapping() {
-		Tablature tablature = new Tablature(encodingTestpiece1, false);
+		Tablature tablature = new Tablature(encodingTestpiece1);
 			
 		List<Integer> expected = Arrays.asList(new Integer[]{
 			35, 36, 37, 38, 

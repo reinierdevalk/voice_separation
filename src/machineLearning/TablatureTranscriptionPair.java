@@ -44,11 +44,12 @@ public class TablatureTranscriptionPair {
 	 * @param tabEncodingsFolder
 	 * @param midiFilesFolder
 	 */
-	public TablatureTranscriptionPair(String pieceName, String tabEncodingsFolder, String midiFilesFolder) {
+	private TablatureTranscriptionPair(String pieceName, String tabEncodingsFolder, String midiFilesFolder) {
 		File encodingFile = new File(tabEncodingsFolder + pieceName + Encoding.EXTENSION);
 		File midiFile = new File(midiFilesFolder + pieceName);
 		tablature = new Tablature(encodingFile, true);
-		transcription = new Transcription(midiFile, encodingFile);
+		transcription = new Transcription(true, midiFile, encodingFile);
+//		transcription = new Transcription(midiFile, encodingFile);
 	}
 	
 	
@@ -102,7 +103,8 @@ public class TablatureTranscriptionPair {
 //			else {
 //				trans = new Transcription(midiFile, encodingFile);
 //			}
-			Transcription trans = new Transcription(midiFile, encodingFile);
+			Transcription trans = new Transcription(true, midiFile, encodingFile);
+//			Transcription trans = new Transcription(midiFile, encodingFile);
 			allPairs.add(new TablatureTranscriptionPair(tab, trans));
 		}
 		return allPairs;

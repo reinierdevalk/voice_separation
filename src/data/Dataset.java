@@ -198,7 +198,9 @@ public class Dataset implements Serializable {
 				}
 			}
 			currTranscription = 
-				!deployTrainedUserModel ? new Transcription(midiFile, encodingFile) : null;
+//				!deployTrainedUserModel ? new Transcription(midiFile, encodingFile) : null;
+				!deployTrainedUserModel ? new Transcription(true, midiFile, encodingFile) : null;
+
 //			if (isTabAsNonTab) {
 //				int currInterval = 0;
 //				if (currentPieceName.equals("ochsenkun-1558-absolon_fili-shorter")) {
