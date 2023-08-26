@@ -89,12 +89,13 @@ public class UI {
 			weightsInit = WeightsInit.INIT_FROM_LIST;
 //			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.THESIS_INT_3VV;
-			m = Model.B;
-			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
+			datasetID = Dataset.JOSQUIN_INT_4VV;
+			m = Model.N;
+			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
 //			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
-			expDir = "thesis/exp_3.3.1/"; 
+//			expDir = "thesis/exp_3.3.1/";
+			expDir = "ISMIR-2019/";
 //			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
 			expDirFirstPass = "thesis/exp_3.1/thesis-int/3vv/N/bwd/";
 			//
@@ -129,7 +130,7 @@ public class UI {
 			// Hyperparameters
 			// a. Tuned hyperparameters
 			// Shallow network
-			lambda = 0.001; // regularisation parameter  
+			lambda = 0.0001; // regularisation parameter  
 			hiddenLayerFactor = 1.0;
 			epsilon = 0.05;
 			// DNN
@@ -150,7 +151,7 @@ public class UI {
 
 			// b. Non-tuned hyperparameters 
 			// Shallow network
-			maxMetaCycles = (m == Model.C) ? 60 : 40;
+			maxMetaCycles = (m == Model.C) ? 60 : 80; // 40
 			cycles = 10;
 			// DNN
 			seed = 0; // seed = 0 used for all experiments ISMIR 2018 paper
@@ -159,7 +160,7 @@ public class UI {
 			learningRate = (m.getModelType() == ModelType.DNN) ? alpha : 1.0;
 			deviationThreshold = 0.05;
 			miniBatchSize = -1;
-			validationPercentage = (m.getModelType() == ModelType.DNN) ? 20 : 0; // 10 : 0;
+			validationPercentage = (m.getModelType() == ModelType.DNN) ? 20 : 20; // 10 : 20;
 			if (trainUserModel) {
 				validationPercentage = 0;
 			}
