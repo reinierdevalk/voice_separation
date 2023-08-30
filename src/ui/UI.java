@@ -86,8 +86,8 @@ public class UI {
 			boolean gridSearch = false;
 			useCV = true;
 			estimateEntries = false;
-			weightsInit = WeightsInit.INIT_FROM_LIST;
-//			weightsInit = WeightsInit.INIT_RANDOM;
+//			weightsInit = WeightsInit.INIT_FROM_LIST;
+			weightsInit = WeightsInit.INIT_RANDOM;
 			//
 			datasetID = Dataset.JOSQUIN_INT_4VV;
 			m = Model.N;

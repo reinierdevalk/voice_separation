@@ -422,9 +422,9 @@ public class Dataset implements Serializable {
 			"5265_14_absalon_fili_me_desprez",
 			"5263_12_in_exitu_israel_de_egipto_desprez-1",
 			"5263_12_in_exitu_israel_de_egipto_desprez-2",
-			"5263_12_in_exitu_israel_de_egipto_desprez-3", // m is too low (ternary section(s))
+//			"5263_12_in_exitu_israel_de_egipto_desprez-3", // m is too low (ternary section(s))
 			"4465_33-34_memor_esto-1",
-			"4465_33-34_memor_esto-2", // m is too low (ternary section(s))
+//			"4465_33-34_memor_esto-2", // m is too low (ternary section(s))
 			"1274_12_qui_habitat_in_adjutorio-1",
 			"1274_12_qui_habitat_in_adjutorio-2",
 			"5264_13_qui_habitat_in_adjutorio_desprez-1",
@@ -447,7 +447,7 @@ public class Dataset implements Serializable {
 			"1030_coment_peult_avoir_joye",		
 			"5191_18_mille_regres",
 			"4482_50_mille_regrets_P",
-			"4469_39_plus_nulz_regrets_P", // Chord at bar 57 contains three C4 (MIDIpitch 60): removed from Altus
+			"4469_39_plus_nulz_regrets_P", // Chord at bar 57 contains three C4 (MIDI pitch 60): removed from Altus
 			"922_milano_098_que_voulez_vous_dire_de_moi"	
 				
 //			"ochsenkun-1558_5-absolon_fili",
