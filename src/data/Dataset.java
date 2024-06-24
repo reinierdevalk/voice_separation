@@ -8,10 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import imports.MIDIImport;
-import representations.Tablature;
-import representations.Transcription;
-import tbp.Encoding;
+import conversion.imports.MIDIImport;
+import external.Tablature;
+import external.Transcription;
+import internal.core.Encoding;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
@@ -447,7 +447,7 @@ public class Dataset implements Serializable {
 			"1030_coment_peult_avoir_joye",		
 			"5191_18_mille_regres",
 			"4482_50_mille_regrets_P",
-			"4469_39_plus_nulz_regrets_P", // Chord at bar 57 contains three C4 (MIDI pitch 60): removed from Altus
+			"4469_39_plus_nulz_regrets_P", // Chord at bar 57 has 3* MIDI pitch 60 --> remove from Altus
 			"922_milano_098_que_voulez_vous_dire_de_moi"	
 				
 //			"ochsenkun-1558_5-absolon_fili",

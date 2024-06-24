@@ -3,18 +3,21 @@ package data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
-import ui.UI;
 
 public class DatasetTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 	}
 
 	@Override
@@ -27,7 +30,7 @@ public class DatasetTest extends TestCase {
 		List<Integer> expected = Arrays.asList(new Integer[]{3*39, 3*16, 3*40, 3*16});
 
 		String[] paths = new String[]{
-			Runner.encodingsPath + "test/", Runner.midiPath + "test/", Runner.midiPath+ "test/"};
+			Runner.encodingsPath + "/test/", Runner.midiPath + "/test/", Runner.midiPath + "/test/"};
 
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, paths, false);

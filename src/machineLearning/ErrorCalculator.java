@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.List;
 
 import tools.ToolBox;
-import utility.DataConverter;
+import tools.labels.LabelTools;
 import de.uos.fmt.musitech.utility.math.Rational;
-import representations.Transcription;
+import external.Transcription;
 
 public class ErrorCalculator {
 
@@ -97,7 +97,7 @@ public class ErrorCalculator {
 			// Get the predicted voices and the actual voices for the note at index i
 			List<Integer> predictedVoices = allPredictedVoices.get(i);
 			List<Double> actualVoiceLabel = groundTruthVoiceLabels.get(i);
-			List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+			List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 
 			// a. In the tablature case
 			if (equalDurationUnisonsInfo == null) {
@@ -154,7 +154,7 @@ public class ErrorCalculator {
 //					List<Double> predictedDurationLabel = allPredictedDurationLabels.get(i);
 					Rational[] predictedDurations = allPredictedDurations.get(i);
 					List<Double> actualDurationLabel = groundTruthDurationLabels.get(i);
-					Rational[] actualDurations = DataConverter.convertIntoDuration(actualDurationLabel);
+					Rational[] actualDurations = LabelTools.convertIntoDuration(actualDurationLabel);
 
 					// NB: predictedDurations will currently always contain only one element
 					// If actualDurations contains one element (i.e., the note at index i is no CoD or a CoD whose notes have
@@ -454,7 +454,7 @@ public class ErrorCalculator {
 		// First turn allPredictedVoices into a List of voice labels
 		List<List<Double>> predictedVoiceLabels = new ArrayList<List<Double>>();
 		for (int i = 0; i < allPredictedVoices.size(); i++) {
-			List<Double> currentPredictedVoiceLabel = DataConverter.convertIntoVoiceLabel(allPredictedVoices.get(i));
+			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(allPredictedVoices.get(i));
 			predictedVoiceLabels.add(currentPredictedVoiceLabel);
 		}
 		List<List<Integer>> notesPerVoicePredicted = Transcription.listNotesPerVoice(predictedVoiceLabels);
@@ -641,7 +641,7 @@ public class ErrorCalculator {
 		// Get the notes per voice as predicted
 		List<List<Double>> predictedVoiceLabels = new ArrayList<List<Double>>();
 		for (int i = 0; i < allPredictedVoices.size(); i++) {
-			List<Double> currentPredictedVoiceLabel = DataConverter.convertIntoVoiceLabel(allPredictedVoices.get(i));
+			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(allPredictedVoices.get(i));
 			predictedVoiceLabels.add(currentPredictedVoiceLabel);
 		}
 		List<List<Integer>> notesPerVoicePredicted = Transcription.listNotesPerVoice(predictedVoiceLabels);
@@ -771,7 +771,7 @@ public class ErrorCalculator {
 		// Get the notes per voice as predicted
 		List<List<Double>> predictedVoiceLabels = new ArrayList<List<Double>>();
 		for (int i = 0; i < allPredictedVoices.size(); i++) {
-			List<Double> currentPredictedVoiceLabel = DataConverter.convertIntoVoiceLabel(allPredictedVoices.get(i));
+			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(allPredictedVoices.get(i));
 			predictedVoiceLabels.add(currentPredictedVoiceLabel);
 		}
 		List<List<Integer>> notesPerVoicePredicted = Transcription.listNotesPerVoice(predictedVoiceLabels);
@@ -851,7 +851,7 @@ public class ErrorCalculator {
 			double[] currOutp = outputs.get(i);
 			List<Double> currLabel = labels.get(i);
 //			int actualVoice = dc.convertIntoListOfVoices(currLabel).get(0); 
-			List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(currLabel);
+			List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(currLabel);
 			for (int v : actualVoices) {
 				double p = currOutp[v];
 				if (actualVoices.size() == 2) {
@@ -1092,7 +1092,7 @@ public class ErrorCalculator {
 					// Get the predicted voice and the ground truth voice for the note
 					int predictedVoice = i;
 					int groundTruthVoice = 
-						DataConverter.convertIntoListOfVoices(groundTruthVoiceLabels.get(currentIndex)).get(0);
+						LabelTools.convertIntoListOfVoices(groundTruthVoiceLabels.get(currentIndex)).get(0);
 					// Get the other allowed voice (i.e., not the ground truth voice) for the note 
 					int otherAllowedVoice = equalDurationUnisonsInfo.get(currentIndex)[0];
 					if (equalDurationUnisonsInfo.get(currentIndex)[0] == groundTruthVoice) {

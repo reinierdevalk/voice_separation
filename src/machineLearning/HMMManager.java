@@ -7,8 +7,8 @@ import java.util.List;
 
 import data.Dataset;
 import de.uos.fmt.musitech.data.structure.Note;
-import representations.Tablature;
-import representations.Transcription;
+import external.Tablature;
+import external.Transcription;
 import tools.ToolBox;
 import ui.Runner;
 

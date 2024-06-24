@@ -4,16 +4,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import de.uos.fmt.musitech.data.structure.Note;
+import external.Tablature;
+import external.Transcription;
 import junit.framework.TestCase;
-import representations.Tablature;
-import representations.Transcription;
-import tbp.TabSymbol;
+import tbp.symbols.TabSymbol;
 import tools.ToolBox;
+import tools.labels.LabelTools;
+import tools.path.PathTools;
 import ui.Runner;
-import ui.UI;
-import utility.DataConverter;
 
 public class FeatureGeneratorChordTest extends TestCase {
 
@@ -30,7 +31,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
 	}
@@ -470,7 +473,7 @@ public class FeatureGeneratorChordTest extends TestCase {
     	List<List<Double>> currentChordVoiceLabels = 
     		voiceLabels.subList(lowestNoteIndex, lowestNoteIndex + currentChord.size());
     	List<Integer> currentVoiceAssignment = 
-    		DataConverter.getVoiceAssignment(currentChordVoiceLabels, highestNumberOfVoices);
+    		LabelTools.getVoiceAssignment(currentChordVoiceLabels, highestNumberOfVoices);
     	actual.add(FeatureGeneratorChord.getPitchVoiceRelationInChord(basicTabSymbolProperties, null, null, 
     		lowestNoteIndex, currentVoiceAssignment));
     	lowestNoteIndex += currentChord.size();
@@ -561,7 +564,7 @@ public class FeatureGeneratorChordTest extends TestCase {
     	List<List<Double>> currentChordVoiceLabels = 
     		allVoiceLabels.subList(lowestNoteIndex, lowestNoteIndex + currentChord.size());
     	List<Integer> currentVoiceAssignment = 
-    		DataConverter.getVoiceAssignment(currentChordVoiceLabels, highestNumberOfVoices);
+    		LabelTools.getVoiceAssignment(currentChordVoiceLabels, highestNumberOfVoices);
     	actual.add(FeatureGeneratorChord.getPitchVoiceRelationInChord(null, basicNoteProperties, allVoiceLabels,
     		lowestNoteIndex, currentVoiceAssignment));
     	lowestNoteIndex += currentChord.size();
@@ -3184,9 +3187,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 			List<Integer> currentPitchesInChord = 
 				Tablature.getPitchesInChord(btp, lowestNoteIndex); 
 			List<List<Double>> currentVoiceLabelsChord = 
-				DataConverter.getChordVoiceLabels(currentVoiceAssignment); 	  			
+				LabelTools.getChordVoiceLabels(currentVoiceAssignment); 	  			
 			List<List<Integer>> currentVoicesInChord = 
-				DataConverter.getVoicesInChord(currentVoiceLabelsChord);
+				LabelTools.getVoicesInChord(currentVoiceLabelsChord);
 
 			List<Double> currentExpected = new ArrayList<Double>();
 			// 1. Add proximities and movements
@@ -3263,9 +3266,9 @@ public class FeatureGeneratorChordTest extends TestCase {
 			List<Integer> currentNewPitchesInChord = Transcription.getPitchesInChord(bnp, 
 				lowestNoteIndex); 
 			List<List<Double>> currentVoiceLabelsChord = 
-				DataConverter.getChordVoiceLabels(currentVoiceAssignment); 	  			
+				LabelTools.getChordVoiceLabels(currentVoiceAssignment); 	  			
 			List<List<Integer>> currentNewVoicesInChord = 
-				DataConverter.getVoicesInChord(currentVoiceLabelsChord);
+				LabelTools.getVoicesInChord(currentVoiceLabelsChord);
 			List<List<Integer>> currentAllPitchesAndVoicesInChord = 
 				Transcription.getAllPitchesAndVoicesInChord(bnp, currentNewPitchesInChord,
 				currentNewVoicesInChord, voiceLabels, lowestNoteIndex);

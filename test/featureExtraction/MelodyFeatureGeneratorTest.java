@@ -4,14 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import junit.framework.TestCase;
-import representations.Tablature;
-import representations.Transcription;
-import ui.Runner;
-import ui.UI;
 import de.uos.fmt.musitech.utility.math.Rational;
-import featureExtraction.MelodyFeatureGenerator;
+import external.Tablature;
+import external.Transcription;
+import junit.framework.TestCase;
+import tools.path.PathTools;
+import ui.Runner;
 
 public class MelodyFeatureGeneratorTest extends TestCase {
 
@@ -23,8 +23,9 @@ public class MelodyFeatureGeneratorTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 	}

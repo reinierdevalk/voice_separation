@@ -16,15 +16,18 @@ import de.uos.fmt.musitech.data.score.NotationStaff;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Tablature;
+import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
 import interfaces.PythonInterface;
-import machineLearning.NNManager.ActivationFunction;
-import representations.Tablature;
-import representations.Transcription;
-import tbp.RhythmSymbol;
-import tbp.Symbol;
+import machinelearning.NNManager;
+import machinelearning.RelativeTrainingExample;
+import machinelearning.NNManager.ActivationFunction;
+import tbp.symbols.RhythmSymbol;
+import tbp.symbols.Symbol;
 import tools.ToolBox;
+import tools.labels.LabelTools;
 import ui.Runner;
 import ui.Runner.DecisionContext;
 import ui.Runner.FeatureVector;
@@ -33,7 +36,6 @@ import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
 import ui.Runner.WeightsInit;
-import utility.DataConverter;
 
 public class TrainingManager {
 
@@ -1408,7 +1410,7 @@ public class TrainingManager {
 					if (isScikit) {
 						smoothen = true;
 						cmd = new String[]{
-							"python", Runner.scriptPythonPath + Runner.scriptScikit, 
+							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.train, 
 							storePath,			
@@ -1421,7 +1423,7 @@ public class TrainingManager {
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
 							allNoteFeatures.size(), storePath, null);
 						cmd = new String[]{
-							"python", Runner.scriptPythonPath + Runner.scriptTensorFlow, 
+							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.train, 
 							argStrings.get(0), 
 							argStrings.get(1)};
@@ -1820,7 +1822,7 @@ public class TrainingManager {
 				if (!detailsLine[corrInd+1].equals("")) {
 					corr.add(Integer.parseInt(detailsLine[corrInd+1]));
 				}
-				List<Double> label = DataConverter.convertIntoVoiceLabel(corr);
+				List<Double> label = LabelTools.convertIntoVoiceLabel(corr);
 				// Get predicted output
 				List<Double> predOutp = new ArrayList<>();
 				for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {

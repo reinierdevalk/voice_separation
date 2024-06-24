@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import imports.MIDIImport;
-import representations.Tablature;
-import representations.Transcription;
-import tbp.Encoding;
+import conversion.imports.MIDIImport;
+import external.Tablature;
+import external.Transcription;
+import internal.core.Encoding;
 
 public class TablatureTranscriptionPair {
 	Tablature tablature;

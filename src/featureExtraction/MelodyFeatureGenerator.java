@@ -6,14 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import n_grams.KylmModel;
-import representations.Tablature;
-import representations.Transcription;
 import tools.ToolBox;
 import ui.Runner;
 import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Tablature;
+import external.Transcription;
 
 public class MelodyFeatureGenerator {
 

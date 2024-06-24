@@ -15,15 +15,15 @@ import java.util.Map.Entry;
 
 import data.Dataset;
 import de.uos.fmt.musitech.utility.math.Rational;
-import representations.Transcription;
-import structure.metric.Utils;
+import external.Transcription;
 import tools.ToolBox;
+import tools.labels.LabelTools;
+import tools.music.TimeMeterTools;
 import ui.Runner;
 import ui.Runner.DecisionContext;
 import ui.Runner.Model;
 import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
-import utility.DataConverter;
 
 public class EvaluationManager {
 
@@ -156,17 +156,17 @@ public class EvaluationManager {
 		int numTabs = 4;
 		// Per-fold case
 		if (times.length == 2) {
-			header.append(ToolBox.tabify(trOrEv.concat(" started"), numTabs).concat(start).concat("\r\n"));  
-			header.append(ToolBox.tabify(trOrEv.concat(" completed"), numTabs).concat(end).concat("\r\n"));
+			header.append(ToolBox.tabify(trOrEv.concat(" started"), numTabs, true).concat(start).concat("\r\n"));  
+			header.append(ToolBox.tabify(trOrEv.concat(" completed"), numTabs, true).concat(end).concat("\r\n"));
 		}
 		// Overall case
 		else {
-			header.append(ToolBox.tabify("experiment started", numTabs).concat(start).concat("\r\n"));  
-			header.append(ToolBox.tabify("training started", numTabs).concat(times[1]).concat("\r\n")); 
-			header.append(ToolBox.tabify("training completed", numTabs).concat(times[2]).concat("\r\n"));
-			header.append(ToolBox.tabify("evaluation started", numTabs).concat(times[3]).concat("\r\n")); 
-			header.append(ToolBox.tabify("evaluation completed", numTabs).concat(times[4]).concat("\r\n"));
-			header.append(ToolBox.tabify("experiment completed", numTabs).concat(end).concat("\r\n"));
+			header.append(ToolBox.tabify("experiment started", numTabs, true).concat(start).concat("\r\n"));  
+			header.append(ToolBox.tabify("training started", numTabs, true).concat(times[1]).concat("\r\n")); 
+			header.append(ToolBox.tabify("training completed", numTabs, true).concat(times[2]).concat("\r\n"));
+			header.append(ToolBox.tabify("evaluation started", numTabs, true).concat(times[3]).concat("\r\n")); 
+			header.append(ToolBox.tabify("evaluation completed", numTabs, true).concat(times[4]).concat("\r\n"));
+			header.append(ToolBox.tabify("experiment completed", numTabs, true).concat(end).concat("\r\n"));
 		}
 		
 		String timeDiff;
@@ -177,7 +177,7 @@ public class EvaluationManager {
 		else {
 			timeDiff = String.valueOf(sec);
 		}
-		header.append(ToolBox.tabify("runtime in seconds", numTabs).concat(timeDiff).concat("\r\n"));
+		header.append(ToolBox.tabify("runtime in seconds", numTabs, true).concat(timeDiff).concat("\r\n"));
 
 		return header.toString();
 	}
@@ -204,7 +204,7 @@ public class EvaluationManager {
 
 		// Data
 		dataAndParams.append("D A T A S E T" + "\r\n");
-		dataAndParams.append(ToolBox.tabify(dataset.getName(), 4) +
+		dataAndParams.append(ToolBox.tabify(dataset.getName(), 4, true) +
 //		dataAndParams.append(ToolBox.tabify(Dataset.DATASET_ID, 4) + 		
 			dataset.getDatasetID().toString().toLowerCase() + "\r\n");
 		// Per-fold case
@@ -221,31 +221,31 @@ public class EvaluationManager {
 			int numTrainingExamples = totalNumExamples - numTestExamples;
 			
 			if (mode == Runner.TEST || mode == Runner.APPL) {
-				dataAndParams.append(ToolBox.tabify("test set", 4) + testPieceName + "\r\n");
-				dataAndParams.append(ToolBox.tabify("test examples", 4) + numTestExamples + "\r\n");
+				dataAndParams.append(ToolBox.tabify("test set", 4, true) + testPieceName + "\r\n");
+				dataAndParams.append(ToolBox.tabify("test examples", 4, true) + numTestExamples + "\r\n");
 			}
 //			System.out.println(trainingPieceNames);
-			dataAndParams.append(ToolBox.tabify("training set", 4) + trainingPieceNames.get(0) + "\r\n");
+			dataAndParams.append(ToolBox.tabify("training set", 4, true) + trainingPieceNames.get(0) + "\r\n");
 			for (int i = 1; i < trainingPieceNames.size(); i++) {
-				dataAndParams.append(ToolBox.tabify("", 4) + trainingPieceNames.get(i) + "\r\n");
+				dataAndParams.append(ToolBox.tabify("", 4, true) + trainingPieceNames.get(i) + "\r\n");
 			}
-			dataAndParams.append(ToolBox.tabify("training examples", 4) + numTrainingExamples + "\r\n");
+			dataAndParams.append(ToolBox.tabify("training examples", 4, true) + numTrainingExamples + "\r\n");
 		}
 		// Overall case
 		else {
-			dataAndParams.append(ToolBox.tabify("dataset", 4) + allPieceNames.get(0) + "\r\n");
+			dataAndParams.append(ToolBox.tabify("dataset", 4, true) + allPieceNames.get(0) + "\r\n");
 			for (int i = 1; i < allPieceNames.size(); i++) {
-				dataAndParams.append(ToolBox.tabify("", 4) + allPieceNames.get(i) + "\r\n");
+				dataAndParams.append(ToolBox.tabify("", 4, true) + allPieceNames.get(i) + "\r\n");
 			}
-			dataAndParams.append(ToolBox.tabify("data examples", 4) + totalNumExamples + "\r\n");
+			dataAndParams.append(ToolBox.tabify("data examples", 4, true) + totalNumExamples + "\r\n");
 		}
 		
 		int largestChordSize = dataset.getLargestChordSize();
 		int highestNumVoices = Runner.getHighestNumVoicesTraining(Runner.getDeployTrainedUserModel());
 
-		dataAndParams.append(ToolBox.tabify(Runner.LARGEST_CHORD_SIZE, 4) + largestChordSize + "\r\n");
+		dataAndParams.append(ToolBox.tabify(Runner.LARGEST_CHORD_SIZE, 4, true) + largestChordSize + "\r\n");
 //			modelParameters.get(Runner.LARGEST_CHORD_SIZE).intValue() + "\r\n"); 		
-		dataAndParams.append(ToolBox.tabify(Runner.HIGHEST_NUM_VOICES, 4) + highestNumVoices + "\r\n");
+		dataAndParams.append(ToolBox.tabify(Runner.HIGHEST_NUM_VOICES, 4, true) + highestNumVoices + "\r\n");
 //			modelParameters.get(Runner.HIGHEST_NUM_VOICES).intValue() + "\r\n");	
 		
 		// Model parameters
@@ -259,7 +259,7 @@ public class EvaluationManager {
 				String key = e.getKey();
 				Double value = e.getValue(); 
 				if (!paramsNotPrinted.contains(key) && value != null) {
-					dataAndParams.append(ToolBox.tabify(key, 4));
+					dataAndParams.append(ToolBox.tabify(key, 4, true));
 					if (enumKeys.containsKey(key)) {
 						if (key.equals(Runner.CONFIG)) {
 							dataAndParams.append(enumKeys.get(key)[value.intValue()] + 
@@ -842,19 +842,19 @@ public class EvaluationManager {
 		line.append(lineSeg);
 		line.append(lineSeg);
 		StringBuffer legendLineOne = new StringBuffer();
-		legendLineOne.append(ToolBox.tabify(MODE, 1));
-		legendLineOne.append(ToolBox.tabify(FOLD, 1));
-		legendLineOne.append(ToolBox.tabify("metric", 1));
+		legendLineOne.append(ToolBox.tabify(MODE, 1, true));
+		legendLineOne.append(ToolBox.tabify(FOLD, 1, true));
+		legendLineOne.append(ToolBox.tabify("metric", 1, true));
 		StringBuffer legendLineTwo = new StringBuffer();
-		legendLineTwo.append(ToolBox.tabify("", 1));
-		legendLineTwo.append(ToolBox.tabify("", 1));
+		legendLineTwo.append(ToolBox.tabify("", 1, true));
+		legendLineTwo.append(ToolBox.tabify("", 1, true));
 		StringBuffer footnote = new StringBuffer();
 		for (Metric mtr : metricsUsed) {
 			line.append(lineSeg);
 			if (mtr != metricsUsed.get(metricsUsed.size()-1)) {
-				legendLineOne.append(ToolBox.tabify("", 1));
+				legendLineOne.append(ToolBox.tabify("", 1, true));
 			}
-			legendLineTwo.append(ToolBox.tabify(mtr.getStringRep(), 1));
+			legendLineTwo.append(ToolBox.tabify(mtr.getStringRep(), 1, true));
 		}
 		line.append("\r\n");
 		legendLineOne.append("\r\n");
@@ -863,16 +863,16 @@ public class EvaluationManager {
 			// Adapt legend
 			for (String s : new String[]{Metric.ACC.getStringRep(), Metric.INCORR.getStringRep(),
 				Metric.OVERL.getStringRep(), Metric.CNF.getStringRep()}) {
-				String r = ToolBox.tabify(s, 1);
+				String r = ToolBox.tabify(s, 1, true);
 				int start = legendLineTwo.indexOf(r);
-				legendLineTwo.replace(start, start + r.length(), ToolBox.tabify(s + "*", 1));  
+				legendLineTwo.replace(start, start + r.length(), ToolBox.tabify(s + "*", 1, true));  
 			}			
 			footnote.append("* top values apply to voice, bottom values to duration\r\n");
 		}
 		StringBuffer indentedLineOne = 
-			new StringBuffer(line).replace(0, 2*lineSeg.length(), ToolBox.tabify("", 2));
+			new StringBuffer(line).replace(0, 2*lineSeg.length(), ToolBox.tabify("", 2, true));
 		StringBuffer indentedLineTwo = 
-			new StringBuffer(line).replace(0, lineSeg.length(), ToolBox.tabify("", 1));
+			new StringBuffer(line).replace(0, lineSeg.length(), ToolBox.tabify("", 1, true));
 
 		// Combine elements
 		txt.append(line);
@@ -907,19 +907,19 @@ public class EvaluationManager {
 			StringBuffer totalTime = new StringBuffer();
 			for (int i = 0; i < metricsUsedPadded.size(); i++) {
 				if (i == MODE_IND) {
-					prePr.append(ToolBox.tabify(Runner.prePr, 1));
-					postPr.append(ToolBox.tabify(Runner.postPr, 1));
-					totalTime.append(ToolBox.tabify("", 1));
+					prePr.append(ToolBox.tabify(Runner.prePr, 1, true));
+					postPr.append(ToolBox.tabify(Runner.postPr, 1, true));
+					totalTime.append(ToolBox.tabify("", 1, true));
 				}
 				else {
 					if (metricsUsedPadded.get(i) != Metric.RUNTIME) {
-						prePr.append(ToolBox.tabify("", 1));
-						postPr.append(ToolBox.tabify("", 1));
+						prePr.append(ToolBox.tabify("", 1, true));
+						postPr.append(ToolBox.tabify("", 1, true));
 						if (i == FOLD_IND) {
-							totalTime.append(ToolBox.tabify(Runner.total, 1));
+							totalTime.append(ToolBox.tabify(Runner.total, 1, true));
 						}
 						else {
-							totalTime.append(ToolBox.tabify("", 1));
+							totalTime.append(ToolBox.tabify("", 1, true));
 						}
 					}
 					else {	
@@ -927,8 +927,8 @@ public class EvaluationManager {
 						String post = csvTable[csvTable.length-1][rntInd];
 						sumTime += Integer.parseInt(pre);
 						sumTime += Integer.parseInt(post);
-						prePr.append(ToolBox.tabify(pre, 1)).append("\r\n");
-						postPr.append(ToolBox.tabify(post, 1)).append("\r\n");
+						prePr.append(ToolBox.tabify(pre, 1, true)).append("\r\n");
+						postPr.append(ToolBox.tabify(post, 1, true)).append("\r\n");
 					}
 				}
 			}
@@ -973,17 +973,17 @@ public class EvaluationManager {
 						for (int j = 0; j < metricsUsedPadded.size(); j++) {
 							Metric mtr = metricsUsedPadded.get(j);
 							if (j == MODE_IND) {
-								prp.append(ToolBox.tabify(csvTable[firstFoldRow-1][MODE_IND], 1));
+								prp.append(ToolBox.tabify(csvTable[firstFoldRow-1][MODE_IND], 1, true));
 							}
 							else if (j == FOLD_IND) {
-								prp.append(ToolBox.tabify(Runner.prePr, 1));
+								prp.append(ToolBox.tabify(Runner.prePr, 1, true));
 							}
 							else if (mtr == Metric.RUNTIME) {
 								double d = Double.parseDouble(csvTable[firstFoldRow-1][rntInd]);
-								prp.append(ToolBox.tabify(String.valueOf((int)d), 1));
+								prp.append(ToolBox.tabify(String.valueOf((int)d), 1, true));
 							}
 							else {
-								prp.append(ToolBox.tabify("", 1));
+								prp.append(ToolBox.tabify("", 1, true));
 							}
 						}
 						prp.append("\r\n");
@@ -1025,14 +1025,14 @@ public class EvaluationManager {
 //								|| isEmpty) {
 							if (k == MODE_IND || (mtr != null && !mtr.isEF() && k != FOLD_IND) 
 								|| isEmpty) {
-								String s = ToolBox.tabify("", 1);
+								String s = ToolBox.tabify("", 1, true);
 								avgStr.append(s);
 								stdevStr.append(s);
 								if (j == 0) {
 									if (mtr == Metric.RUNTIME) {
 										int totVal = (int) curr[2][csvLegend.indexOf(mtr.getStringRep())];
 										sumTime += totVal;
-										totalsStr.append(ToolBox.tabify(String.valueOf(totVal), 1));
+										totalsStr.append(ToolBox.tabify(String.valueOf(totVal), 1, true));
 									}
 									else {
 										totalsStr.append(s);
@@ -1048,10 +1048,10 @@ public class EvaluationManager {
 									s = "";
 //									t = "";
 								}
-								avgStr.append(ToolBox.tabify(a, 1));
-								stdevStr.append(ToolBox.tabify(s, 1));
+								avgStr.append(ToolBox.tabify(a, 1, true));
+								stdevStr.append(ToolBox.tabify(s, 1, true));
 								if (j == 0) {
-									totalsStr.append(ToolBox.tabify(t, 1));
+									totalsStr.append(ToolBox.tabify(t, 1, true));
 								}
 							}
 							else if (mtr.isEF() && !isEmpty) {
@@ -1061,10 +1061,10 @@ public class EvaluationManager {
 								}
 								double avgVal = curr[0][csvLegend.indexOf(mtr.getStringRep())];
 								double stdevVal = curr[1][csvLegend.indexOf(mtr.getStringRep())];
-								avgStr.append(ToolBox.tabify(ToolBox.formatDouble(avgVal, maxLen, 5), 1));
-								stdevStr.append(ToolBox.tabify(ToolBox.formatDouble(stdevVal, maxLen, 5), 1));
+								avgStr.append(ToolBox.tabify(ToolBox.formatDouble(avgVal, maxLen, 5), 1, true));
+								stdevStr.append(ToolBox.tabify(ToolBox.formatDouble(stdevVal, maxLen, 5), 1, true));
 								if (j == 0) {
-									totalsStr.append(ToolBox.tabify("", 1));
+									totalsStr.append(ToolBox.tabify("", 1, true));
 								}
 							}
 						}
@@ -1083,7 +1083,7 @@ public class EvaluationManager {
 				txt.append(postPr);
 				txt.append(line); 
 				// Complete totalTime
-				totalTime.append(ToolBox.tabify(String.valueOf(sumTime), 1)).append("\r\n");
+				totalTime.append(ToolBox.tabify(String.valueOf(sumTime), 1, true)).append("\r\n");
 				txt.append(totalTime);
 				txt.append(line); 
 				txt.append(footnote);
@@ -1180,7 +1180,7 @@ public class EvaluationManager {
 					}
 					formatted = ToolBox.formatDouble(d, maxLen, 5);
 				}
-				txt.append(ToolBox.tabify(formatted, 1));
+				txt.append(ToolBox.tabify(formatted, 1, true));
 			}
 			txt.append("\r\n");
 		}
@@ -1337,7 +1337,7 @@ public class EvaluationManager {
 
 		int tabLen = 8; // TODO assumes that a tab is 8 chars wide
 		int len = (numTabsTotal * tabLen) - (numTabsIndent * tabLen);
-		String linePrefix = ToolBox.tabify(prefix, numTabsIndent);
+		String linePrefix = ToolBox.tabify(prefix, numTabsIndent, true);
 		String suffix = ",";
 		String postSuffix = " ";
 		StringBuffer currLine = new StringBuffer();
@@ -1363,7 +1363,7 @@ public class EvaluationManager {
 				else {
 					currLine.append("\r\n");
 					res.append(linePrefix).append(currLine);
-					linePrefix = ToolBox.tabify("", numTabsIndent);
+					linePrefix = ToolBox.tabify("", numTabsIndent, true);
 					currLine = new StringBuffer();
 					currLine.append(s);
 				}
@@ -1452,7 +1452,7 @@ public class EvaluationManager {
 			for (int j = 0; j < i; j++) {
 				line.append(lineSeg);
 			}
-			legend.append(ToolBox.tabify(s, i));
+			legend.append(ToolBox.tabify(s, i, true));
 		}
 
 		// Adapt legend for duration
@@ -1460,12 +1460,12 @@ public class EvaluationManager {
 //		if (dc == DecisionContext.UNIDIR && argModelDuration || 
 //			dc == DecisionContext.BIDIR && argModelDuration && argModelDurationAgain) {			
 			for (String s : new String[]{"voice", "model output"}) {
-				String r = ToolBox.tabify(s, 1);
+				String r = ToolBox.tabify(s, 1, true);
 				int start = legend.indexOf(r);
-				legend.replace(start, start + r.length(), ToolBox.tabify(s + "*", 1));
+				legend.replace(start, start + r.length(), ToolBox.tabify(s + "*", 1, true));
 				if (s.equals("voice")) {
 					start = legend.lastIndexOf(r);
-					legend.replace(start, start + r.length(), ToolBox.tabify(s + "*", 1));
+					legend.replace(start, start + r.length(), ToolBox.tabify(s + "*", 1, true));
 				}
 			}
 			footnote.append("* top values apply to voice, bottom values to duration\r\n");
@@ -1599,13 +1599,13 @@ public class EvaluationManager {
 					}
 				}
 			}
-			detailsLine.append(ToolBox.tabify(note, 1));
-			detailsLine.append(ToolBox.tabify(chord, 1));
-			detailsLine.append(ToolBox.tabify(bar, 2));
-			detailsLine.append(ToolBox.tabify(correct, 1));
-			detailsLine.append(ToolBox.tabify(modelOutput, numTabsForModelOutput));
-			detailsLine.append(ToolBox.tabify(assigned, 2));
-			detailsLine.append(ToolBox.tabify(category, 1));	
+			detailsLine.append(ToolBox.tabify(note, 1, true));
+			detailsLine.append(ToolBox.tabify(chord, 1, true));
+			detailsLine.append(ToolBox.tabify(bar, 2, true));
+			detailsLine.append(ToolBox.tabify(correct, 1, true));
+			detailsLine.append(ToolBox.tabify(modelOutput, numTabsForModelOutput, true));
+			detailsLine.append(ToolBox.tabify(assigned, 2, true));
+			detailsLine.append(ToolBox.tabify(category, 1, true));	
 			details.append(detailsLine).append("\r\n");
 		}
 		details.append(line).append("\r\n");
@@ -1808,7 +1808,7 @@ public class EvaluationManager {
 				curr.add(String.valueOf(i));
 				curr.add(String.valueOf(chordIndex));
 				if (allMetricPositions != null) {
-					curr.add(Utils.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
+					curr.add(TimeMeterTools.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
 				}
 				else {
 					curr.add("");
@@ -1818,7 +1818,7 @@ public class EvaluationManager {
 				StringBuffer voiceInfo = new StringBuffer();
 				// a. Correct
 				List<Double> actualVoiceLabel = argGroundTruthVoiceLabels.get(i); // HIER OK
-				List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+				List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 				curr.add(String.valueOf(actualVoices.get(0)));
 				if (actualVoices.size() == 2) {
 					curr.add(String.valueOf(actualVoices.get(1)));
@@ -1936,7 +1936,7 @@ public class EvaluationManager {
 					// a. Correct
 					List<Double> actualDurLabel = argGroundTruthDurationLabels.get(i); // HIER OK
 					List<Rational> actualDurations = 
-						Arrays.asList(DataConverter.convertIntoDuration(actualDurLabel));
+						Arrays.asList(LabelTools.convertIntoDuration(actualDurLabel));
 					// NB The prefix "0 " is needed to show the duration as a fraction in the .csv
 					// file. Note: 0 1/1 is shown as 1, not as 1/1
 					currDur.add("0 " + String.valueOf(actualDurations.get(0)));
@@ -1952,9 +1952,9 @@ public class EvaluationManager {
 						OutputEvaluator.interpretNetworkOutput(output, allowCoD, 
 						deviationThreshold).get(1);
 					List<Double> predictedDurationsAsLabel = 
-						DataConverter.convertIntoDurationLabel(predictedDurationsAsIndex);
+						LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
 					List<Rational> predictedDurations = 
-						Arrays.asList(DataConverter.convertIntoDuration(predictedDurationsAsLabel));
+						Arrays.asList(LabelTools.convertIntoDuration(predictedDurationsAsLabel));
 					// NB: predictedDurations will have only one element as currently only one 
 					// duration per note is predicted. Thus, the argument currentVoicesCoDNotes
 					// can remain null TODO
@@ -1973,7 +1973,7 @@ public class EvaluationManager {
 						List<Double> predictedDurationLabelAdapted = 
 							allPredictedDurationLabels.get(noteIndex); // HIER OK
 						List<Rational> adaptedDurations = 
-							Arrays.asList(DataConverter.convertIntoDuration(predictedDurationLabelAdapted));
+							Arrays.asList(LabelTools.convertIntoDuration(predictedDurationLabelAdapted));
 
 						currDur.add("0 " + String.valueOf(adaptedDurations.get(0)));
 						if (adaptedDurations.size() > 1) {
@@ -2049,9 +2049,9 @@ public class EvaluationManager {
 						possibleVoiceAssignmentsCurrentChord.indexOf(bestVoiceAssignment);
 				}
 				List<List<Double>> bestChordLabels = 
-					DataConverter.getChordVoiceLabels(bestVoiceAssignment);
+					LabelTools.getChordVoiceLabels(bestVoiceAssignment);
 				List<List<Integer>> predictedChordVoices = 
-					DataConverter.getVoicesInChord(bestChordLabels);
+					LabelTools.getVoicesInChord(bestChordLabels);
 				// HMM: highestNetworkOutput = predictedIndex
 				double highestNetworkOutput = argAllHighestNetworkOutputs.get(i); // 1x
 				
@@ -2065,7 +2065,7 @@ public class EvaluationManager {
 					curr.add(String.valueOf(noteIndex));
 					curr.add(String.valueOf(i));
 					if (allMetricPositions != null) {
-						curr.add(Utils.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
+						curr.add(TimeMeterTools.getMetricPositionAsString(allMetricPositions.get(noteIndex)));
 					}
 					else {
 						curr.add("");
@@ -2074,7 +2074,7 @@ public class EvaluationManager {
 					// 2. Voice information
 					// a. Correct
 					List<Double> actualVoiceLabel = chordLabels.get(j);
-					List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+					List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 					curr.add(String.valueOf(actualVoices.get(0)));
 					if (actualVoices.size() == 2) {
 						curr.add(String.valueOf(actualVoices.get(1)));
@@ -2242,7 +2242,7 @@ public class EvaluationManager {
 				// Test and application mode: add metric position
 				if (allMetricPositions != null) {
 					noteAndChordIndices.append(", bar ".concat( 
-						Utils.getMetricPositionAsString(allMetricPositions.get(noteIndex)))); // HIER OK
+						TimeMeterTools.getMetricPositionAsString(allMetricPositions.get(noteIndex)))); // HIER OK
 				}
 				noteAndChordIndices.append("\r\n");
 
@@ -2251,7 +2251,7 @@ public class EvaluationManager {
 				// Correct voice label
 				List<Double> actualVoiceLabel = argGroundTruthVoiceLabels.get(i); // HIER OK
 				double[] labelArray = ToolBox.listToArray(actualVoiceLabel);
-				List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+				List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 				voiceInfo.append(getDetailsLine("voice label", labelArray, actualVoices, 
 					null, null, null, decFormLabel));
 
@@ -2317,7 +2317,7 @@ public class EvaluationManager {
 					List<Double> actualDurLabel = argGroundTruthDurationLabels.get(i); // HIER OK
 					double[] labelArrayDur = ToolBox.listToArray(actualDurLabel);
 					List<Rational> actualDurations = 
-						Arrays.asList(DataConverter.convertIntoDuration(actualDurLabel));
+						Arrays.asList(LabelTools.convertIntoDuration(actualDurLabel));
 					Integer[] currentVoicesCoDNotes = argVoicesCoDNotes.get(i);
 					durationInfo.append(getDetailsLine("duration label", labelArray, actualVoices, 
 						labelArrayDur, actualDurations, currentVoicesCoDNotes, decFormLabel));
@@ -2335,9 +2335,9 @@ public class EvaluationManager {
 						OutputEvaluator.interpretNetworkOutput(output, allowCoD, 
 						deviationThreshold).get(1);
 					List<Double> predictedDurationsAsLabel = 
-						DataConverter.convertIntoDurationLabel(predictedDurationsAsIndex);
+						LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
 					List<Rational> predictedDurations = 
-						Arrays.asList(DataConverter.convertIntoDuration(predictedDurationsAsLabel));
+						Arrays.asList(LabelTools.convertIntoDuration(predictedDurationsAsLabel));
 					// NB: predictedDurations will have only one element as currently only one 
 					// duration per note is predicted. Thus, the argument currentVoicesCoDNotes
 					// can remain null TODO
@@ -2350,7 +2350,7 @@ public class EvaluationManager {
 						List<Double> predictedDurationLabelAdapted = 
 							allPredictedDurationLabels.get(noteIndex); // HIER OK
 						List<Rational> adaptedDurations = 
-							Arrays.asList(DataConverter.convertIntoDuration(predictedDurationLabelAdapted));
+							Arrays.asList(LabelTools.convertIntoDuration(predictedDurationLabelAdapted));
 						String end = "]";
 						if (predictedDurations.size() == 2) {
 							end = "])";
@@ -2433,7 +2433,7 @@ public class EvaluationManager {
 				// Test and application mode: add metric position
 				if (allMetricPositions != null) {
 					chordAndNoteIndices.append(", bar ".concat( 
-						Utils.getMetricPositionAsString(allMetricPositions.get(lowestNoteIndex))));
+						TimeMeterTools.getMetricPositionAsString(allMetricPositions.get(lowestNoteIndex))));
 				}
 				chordAndNoteIndices.append("\r\n");
 				lowestNoteIndex += chordSize;
@@ -2448,7 +2448,7 @@ public class EvaluationManager {
 				for (List<Double> actualVoiceLabel : chordLabels) {
 					double[] labelArray = ToolBox.listToArray(actualVoiceLabel);
 					List<Integer> actualVoices = 
-						DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+						LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 					voiceInfo.append(getDetailsLine(tag, labelArray, actualVoices, 
 						null, null, null, decFormLabel));
 					if (!tag.isEmpty()) {
@@ -2457,14 +2457,14 @@ public class EvaluationManager {
 				}
 
 				String one = "highest model output";
-				voiceInfo.append(ToolBox.tabify(one, 4));
+				voiceInfo.append(ToolBox.tabify(one, 4, true));
 
 				// Predicted voice label(s)
 				List<Integer> bestVoiceAssignment = argAllBestVoiceAssignments.get(i);
 				List<List<Integer>> possibleVoiceAssignmentsCurrentChord = argPossibleVoiceAssignmentsAllChords.get(i);
 				int bestEval = possibleVoiceAssignmentsCurrentChord.indexOf(bestVoiceAssignment);
-				List<List<Double>> bestChordLabels = DataConverter.getChordVoiceLabels(bestVoiceAssignment);
-				List<List<Integer>> predictedChordVoices = DataConverter.getVoicesInChord(bestChordLabels);
+				List<List<Double>> bestChordLabels = LabelTools.getChordVoiceLabels(bestVoiceAssignment);
+				List<List<Integer>> predictedChordVoices = LabelTools.getVoicesInChord(bestChordLabels);
 				double highestNetworkOutput = argAllHighestNetworkOutputs.get(i);
 
 				String pv = "voice  ";
@@ -2476,10 +2476,10 @@ public class EvaluationManager {
 				String two = "[".concat(decFormOutput.format(highestNetworkOutput)).concat(
 					"] for mapping ").concat(String.valueOf(bestEval)).concat(": ").concat(
 					String.valueOf(bestVoiceAssignment));
-				voiceInfo.append(ToolBox.tabify(two, 6));
+				voiceInfo.append(ToolBox.tabify(two, 6, true));
 
 				String three = pv.concat(String.valueOf(predictedChordVoices)); 
-				voiceInfo.append(ToolBox.tabify(three, 2)).append("\r\n");
+				voiceInfo.append(ToolBox.tabify(three, 2, true)).append("\r\n");
 
 				details.append(chordAndNoteIndices).append(voiceInfo);
 				if (i != numChords - 1) {
@@ -2515,8 +2515,8 @@ public class EvaluationManager {
 			for (int i = 0; i < labelOrOutput.length; i++) {
 				formatted[i] = decForm.format(labelOrOutput[i]); 
 			}
-			sb.append(ToolBox.tabify(outputType, 4));
-			sb.append(ToolBox.tabify(Arrays.toString(formatted), 6));
+			sb.append(ToolBox.tabify(outputType, 4, true));
+			sb.append(ToolBox.tabify(Arrays.toString(formatted), 6, true));
 			StringBuffer vv = new StringBuffer();
 			if (voices.size() == 1) {
 				vv.append("voice  ");
@@ -2525,7 +2525,7 @@ public class EvaluationManager {
 				vv.append("voices ");
 			}
 			vv.append(voices);
-			sb.append(ToolBox.tabify(vv.toString(), 2));
+			sb.append(ToolBox.tabify(vv.toString(), 2, true));
 		}
 		// Duration case
 		else {
@@ -2543,19 +2543,19 @@ public class EvaluationManager {
 			for (int i = 0; i < broken.length; i++) {
 				String curr = Arrays.toString(broken[i]);
 				if (i == 0) {
-					sb.append(ToolBox.tabify(outputType, 4));
+					sb.append(ToolBox.tabify(outputType, 4, true));
 					curr = curr.replace("]", ",");
-					sb.append(ToolBox.tabify(curr, 4).concat("\r\n"));
+					sb.append(ToolBox.tabify(curr, 4, true).concat("\r\n"));
 				}
 				else {
-					sb.append(ToolBox.tabify("", 4));
+					sb.append(ToolBox.tabify("", 4, true));
 					curr = curr.replace("[", " ");
 					if (i != broken.length - 1) {
 						curr = curr.replace("]", ",");
-						sb.append(ToolBox.tabify(curr, 4).concat("\r\n"));
+						sb.append(ToolBox.tabify(curr, 4, true).concat("\r\n"));
 					}
 					else {
-						sb.append(ToolBox.tabify(curr, 6));
+						sb.append(ToolBox.tabify(curr, 6, true));
 					}
 				}
 			}
@@ -2586,7 +2586,7 @@ public class EvaluationManager {
 				dd.append(durations.toString().concat(" (for voices ").concat(voices.toString()).concat(
 					")"));
 			}
-			sb.append(ToolBox.tabify(dd.toString(), 2));	
+			sb.append(ToolBox.tabify(dd.toString(), 2, true));	
 		}
 		sb.append("\r\n");
 		return sb.toString();
@@ -2798,7 +2798,7 @@ public class EvaluationManager {
 	static Integer[] assertCorrectnessMMOutput(List<Double> voiceLabel, double[] outputMM) {
 		Integer[] res = new Integer[2];
 		
-		int currVoice = DataConverter.convertIntoListOfVoices(voiceLabel).get(0);
+		int currVoice = LabelTools.convertIntoListOfVoices(voiceLabel).get(0);
 		List<Double> currMMoAsList = ToolBox.arrayToList(outputMM);
 		double max = Collections.max(currMMoAsList);
 		// If the correct voice has the highest network output: decide whether fully or partly
@@ -2899,7 +2899,7 @@ public class EvaluationManager {
 					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh).get(0);
 				List<Integer> adaptedVoices = allPredictedVoices.get(i); // HIER OK
 				List<Double> actualVoiceLabel = argGroundTruthVoiceLabels.get(i); // HIER OK
-				List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+				List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 
 				// Keep track of the conflict reassignments
 				boolean voicesPredictedInitiallyCorrectly = false;
@@ -3015,21 +3015,21 @@ public class EvaluationManager {
 				List<Integer> predictedDurationsAsIndex = 
 					OutputEvaluator.interpretNetworkOutput(output, allowCoD, devThresh).get(1);
 				List<Double> predictedDurationsAsLabel = 
-					DataConverter.convertIntoDurationLabel(predictedDurationsAsIndex);
+					LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
 				Rational[] predictedDurations = 
-					DataConverter.convertIntoDuration(predictedDurationsAsLabel);
+					LabelTools.convertIntoDuration(predictedDurationsAsLabel);
 				for (Rational r : predictedDurations) {
 					r.reduce();
 				}
 					
 				List<Double> predictedDurationLabelAdapted = allPredictedDurationLabels.get(noteIndex); // HIER OK
-				Rational[] adaptedDurations = DataConverter.convertIntoDuration(predictedDurationLabelAdapted); 
+				Rational[] adaptedDurations = LabelTools.convertIntoDuration(predictedDurationLabelAdapted); 
 				for (Rational r : adaptedDurations) {
 					r.reduce();
 				}
 					
 				List<Double> actualDurationLabel = argGroundTruthDurationLabels.get(i); // HIER OK
-				Rational[]	actualDurations = DataConverter.convertIntoDuration(actualDurationLabel);
+				Rational[]	actualDurations = LabelTools.convertIntoDuration(actualDurationLabel);
 				for (Rational r : actualDurations) {
 					r.reduce();
 				}

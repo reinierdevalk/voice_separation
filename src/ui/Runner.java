@@ -8,16 +8,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import conversion.exports.MEIExport;
 import data.Dataset;
 import featureExtraction.FeatureGenerator;
 import machineLearning.EvaluationManager;
 import machineLearning.MelodyPredictor;
-import machineLearning.NNManager;
 import machineLearning.TestManager;
 import machineLearning.TrainingManager;
+import machinelearning.NNManager;
 import n_grams.KylmModel;
-import path.Path;
 import tools.ToolBox;
+import tools.path.PathTools;
 
 public class Runner {
 
@@ -41,8 +42,8 @@ public class Runner {
 	public static String outPath;
 	public static String midiPath;
 	public static String modelsPath;
-	public static String scriptPythonPath;
-	public static String scriptMatlabPath;
+	public static String pythonScriptPath;
+	public static String matlabScriptPath;
 	public static String experimentsPath;
 	public static String storedDatasetsPath;
 	//
@@ -772,32 +773,92 @@ public class Runner {
 	}
 
 
-	public static void setPathsToCodeAndData(String argRootDir, boolean appliedToNewData) throws IOException {
+	public static void setPathsToCodeAndData(String argRootPath, boolean appliedToNewData) throws IOException {
+		Map<String, String> paths = PathTools.getPaths();
+//		String rp = paths.get("ROOT_PATH");
+		String cp = paths.get("CODE_PATH");
+		String tp = paths.get("TEMPLATES_PATH");
+		String ep = paths.get("EXPERIMENTS_PATH");
+//		String dd = paths.get("DAATA_DIR");
+//		String td = paths.get("TEEMPLATES_DIR");
+		
+		for (Map.Entry<String, String> entry : paths.entrySet()) {
+			System.out.println(entry.getKey() + " -- " + entry.getValue());
+		}
+		System.exit(0);
+		
 		if (!appliedToNewData) {
-			String codePath = ToolBox.pathify(new String[]{argRootDir, "software/code/eclipse/"});
-			scriptPythonPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
-			scriptMatlabPath = ToolBox.pathify(new String[]{codePath, "voice_separation/m/"});
+			String codePath = PathTools.getPathString(Arrays.asList(cp));
+//			String codePath = PathTools.getPathString(Arrays.asList(rp, cp));
+//			String codePath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH});
+			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+//			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
+			matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
+//			matlabScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/m/"});
 			//
-			String dataPath = ToolBox.pathify(new String[]{argRootDir, Path.getDataDir()});
-			encodingsPath = ToolBox.pathify(new String[]{dataPath, Path.getEncodingsPath()});
-			midiPath = ToolBox.pathify(new String[]{dataPath, Path.getMIDIPath()});
-			storedDatasetsPath = ToolBox.pathify(new String[]{dataPath, "datasets/"});
-			modelsPath = ToolBox.pathify(new String[]{dataPath, "models/"});
+//			String dataPath = PathTools.getPathString(Arrays.asList(dp));
+//			String dataPath = PathTools.getPathString(Arrays.asList(rp, dd));
+//			String dataPath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.DATA_DIR});
+			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+//			encodingsPath = ToolBox.pathify(new String[]{dataPath, Path.ENCODINGS_PATH});
+			midiPath = PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
+//			midiPath = ToolBox.pathify(new String[]{dataPath, Path.MIDI_PATH});
+			storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
+//			storedDatasetsPath = ToolBox.pathify(new String[]{dataPath, "datasets/"});
+			modelsPath = PathTools.getPathString(Arrays.asList(paths.get("MODELS_PATH")));
+//			modelsPath = ToolBox.pathify(new String[]{dataPath, "models/"});
 			//
-			experimentsPath = ToolBox.pathify(new String[]{argRootDir, "experiments/"});
+			experimentsPath = PathTools.getPathString(Arrays.asList(ep));
+//			experimentsPath = PathTools.getPathString(Arrays.asList(rp, paths.get("EXPEERIMENTS_DIR")));
+//			experimentsPath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.EXPEERIMENTS_DIR});
+			//
+//			MEIExport.setTemplatePath(tp);
+//				PathTools.getPathString(Arrays.asList(tp, ))		
+//				PathTools.getPathString(Arrays.asList(rp, dd, td))	
+//				ToolBox.pathify(new String[]{Path.ROOT_PATH + Path.DATA_DIR, Path.TEMPLATES_DIR})
+//			);
+			MEIExport.setPythonScriptPath(
+				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
+//				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
+			);
 		}
 		else {
 			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
-			String codePath = ToolBox.pathify(new String[]{
-				new File(argRootDir).getCanonicalFile().getParent(), "software/code/eclipse/"});
-			scriptPythonPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
+			boolean isDeploymentDevCase = 
+				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
+//				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
+			System.out.println("HIER");
+			System.out.println(isDeploymentDevCase);
+			System.exit(0);
+			String codePath = isDeploymentDevCase ?
+				PathTools.getPathString(Arrays.asList(cp)) :
+//				PathTools.getPathString(Arrays.asList(rp, cp)) :
+//				ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH}) :
+				PathTools.getPathString(Arrays.asList(argRootPath, paths.get("CODE_DIR"))); // TODO paths.get("CODE_DIR") was "code/" 
+			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+//			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
+			String userPath = PathTools.getPathString(Arrays.asList(argRootPath, "user"));
+//			String userPath = ToolBox.pathify(new String[]{argRootPath, "user/"});
+			encodingsPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
+//			encodingsPath = ToolBox.pathify(new String[]{userPath, "in/"});
+			midiPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
+//			midiPath = ToolBox.pathify(new String[]{userPath, "in/"});
+			outPath = PathTools.getPathString(Arrays.asList(userPath, "out"));
+//			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
+			modelsPath = PathTools.getPathString(Arrays.asList(argRootPath, "models"));
+//			modelsPath = ToolBox.pathify(new String[]{argRootPath, "models/"});
 			//
-			String userPath = ToolBox.pathify(new String[]{argRootDir, "user/"});
-			encodingsPath = ToolBox.pathify(new String[]{userPath, "in/encodings/"});
-			midiPath = ToolBox.pathify(new String[]{userPath, "in/MIDI/"});
-			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
-			//
-			modelsPath = ToolBox.pathify(new String[]{argRootDir, "models/"});
+			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, tp));
+//			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, td));
+//			String templatePath = ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR}); 
+//			MEIExport.setTemplatePath(
+//				templatePath
+////				ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR})
+//			);
+			MEIExport.setPythonScriptPath(
+				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
+//				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
+			);
 		}
 	}
 
@@ -830,7 +891,7 @@ public class Runner {
 	}
 
 	public static void runExperiment(boolean trainUserModel, boolean skipTraining, 
-		boolean deployTrainedUserModel, boolean verbose) {
+		boolean deployTrainedUserModel, boolean verbose, Map<String, String> transcriptionParams) {
 
 		String startPreProc = ToolBox.getTimeStampPrecise();
 		
@@ -925,7 +986,7 @@ public class Runner {
 
 			// 2. Test
 			String startTe = ToolBox.getTimeStamp();
-			new TestManager().prepareTesting(startTe);
+			new TestManager().prepareTesting(startTe, transcriptionParams);
 			String endEval = ToolBox.getTimeStamp();
 //			System.exit(0);
 			
@@ -1019,7 +1080,7 @@ public class Runner {
 			else {
 				System.out.println("\napplying the model.");
 			}
-			new TestManager().prepareTesting(startTe);
+			new TestManager().prepareTesting(startTe, transcriptionParams);
 
 //			String endEval = ToolBox.getTimeStamp();
 //			System.out.println("### 4. endEval = " + endEval);

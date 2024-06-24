@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import tools.ToolBox;
+import tools.labels.LabelTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
-import utility.DataConverter;
 import de.uos.fmt.musitech.utility.math.Rational;
-import representations.Transcription;
+import external.Transcription;
 
 public class OutputEvaluator {
 	
@@ -189,9 +189,9 @@ public class OutputEvaluator {
 				// d. Convert predictedBestMapping into a List of voices, and add it to 
 				// allPredictedVoices
 				List<List<Double>> predictedChordVoiceLabels = 
-					DataConverter.getChordVoiceLabels(predictedBestMapping); 
+					LabelTools.getChordVoiceLabels(predictedBestMapping); 
 				List<List<Integer>> predictedChordVoices = 
-					DataConverter.getVoicesInChord(predictedChordVoiceLabels); 
+					LabelTools.getVoicesInChord(predictedChordVoiceLabels); 
 				allPredictedVoices.addAll(predictedChordVoices);
 			}
 		}
@@ -248,8 +248,8 @@ public class OutputEvaluator {
 //				System.out.println(Arrays.toString(predictedLabel));
 				List<Integer> predDur = 
 					interpretNetworkOutput(predictedLabel, allowCoD, deviationThreshold).get(1);
-				List<Double> durLabel = DataConverter.convertIntoDurationLabel(predDur);
-				allPredictedDurations.add(DataConverter.convertIntoDuration(durLabel));
+				List<Double> durLabel = LabelTools.convertIntoDurationLabel(predDur);
+				allPredictedDurations.add(LabelTools.convertIntoDuration(durLabel));
 //				}
 			}
 		}

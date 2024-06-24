@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
+import external.Transcription;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.Model;
 import ui.Runner.ModellingApproach;
 import junit.framework.TestCase;
-import representations.Transcription;
 
 public class EvaluationManagerTest extends TestCase {
 	
@@ -39,12 +39,12 @@ public class EvaluationManagerTest extends TestCase {
 		int numTabsIndent = 1;
 		int numTabsTotal = 3;
 		String expected1 = 
-			ToolBox.tabify("O", 1) + "14, 15, 144, " + "\r\n" + 
-			ToolBox.tabify("", 1) + "146, 1028" + "\r\n";
+			ToolBox.tabify("O", 1, true) + "14, 15, 144, " + "\r\n" + 
+			ToolBox.tabify("", 1, true) + "146, 1028" + "\r\n";
 		String expected2 = 
-			ToolBox.tabify("O", 1) + "14, 15, 144, " + "\r\n" + 
-			ToolBox.tabify("", 1) + "145, 146, 1027, " + "\r\n" + 
-			ToolBox.tabify("", 1) + "1028" + "\r\n";
+			ToolBox.tabify("O", 1, true) + "14, 15, 144, " + "\r\n" + 
+			ToolBox.tabify("", 1, true) + "145, 146, 1027, " + "\r\n" + 
+			ToolBox.tabify("", 1, true) + "1028" + "\r\n";
 		
 		String actual1 = EvaluationManager.breakList("O", list1, numTabsIndent, numTabsTotal);
 		String actual2 = EvaluationManager.breakList("O", list2, numTabsIndent, numTabsTotal);

@@ -1,5 +1,7 @@
 package machineLearning;
 
+import machinelearning.ExampleClassInterface;
+
 /**
  * Example class to demonstrate the use of an interface. 
  * See ML_Manager.src.machineLearning.ExampleClassInterface

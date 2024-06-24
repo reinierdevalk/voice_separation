@@ -5,16 +5,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import machineLearning.ErrorCalculator;
-import representations.Transcription;
-import structure.ScorePiece;
+import tools.labels.LabelToolsTest;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.UI;
-import utility.DataConverterTest;
 import junit.framework.TestCase;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Transcription;
+import internal.core.ScorePiece;
 
 public class ErrorCalculatorTest extends TestCase {
 
@@ -34,8 +36,9 @@ public class ErrorCalculatorTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 	}
@@ -180,14 +183,14 @@ public class ErrorCalculatorTest extends TestCase {
 		// Toy examples 1-3
 		List<List<Double>> actualVoiceLabels = new ArrayList<List<Double>>();
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
-		actualVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_0));
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
-		actualVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_0));
 		actualVoiceLabels.add(V_3);
-		actualVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_1));
+		actualVoiceLabels.add(LabelToolsTest.combineLabels(V_3, V_1));
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
-		actualVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
+		actualVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_0));
 		actualVoiceLabels.add(V_3); actualVoiceLabels.add(V_1); actualVoiceLabels.add(V_0);
 
 		return actualVoiceLabels;
@@ -266,12 +269,12 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // half
 		allPredictedDurations.add(new Rational[]{new Rational(1, 8)}); // incorrect
-		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_1));
-		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_1)); 
-		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_2));
+		groundTruthVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_1));
+		groundTruthVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_1)); 
+		groundTruthVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_2));
 		groundTruthDurationLabels.add(half); // CoD with two same durations
-		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
-		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(LabelToolsTest.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(LabelToolsTest.combineLabels(quarter, half));
 
 		// 2. predictedVoices contains two elements
 		// NB: predictedDurations containing two elements currently not implemented
@@ -291,12 +294,12 @@ public class ErrorCalculatorTest extends TestCase {
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // correct 
 		allPredictedDurations.add(new Rational[]{new Rational(1, 2)}); // half
 		allPredictedDurations.add(new Rational[]{new Rational(1, 8)}); // incorrect
-		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_2));
-		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_2));
-		groundTruthVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_3));
+		groundTruthVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_2));
+		groundTruthVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_2));
+		groundTruthVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_3));
 		groundTruthDurationLabels.add(half); // CoD with two same durations
-		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
-		groundTruthDurationLabels.add(DataConverterTest.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(LabelToolsTest.combineLabels(quarter, half));
+		groundTruthDurationLabels.add(LabelToolsTest.combineLabels(quarter, half));
 
 		// 1. Voices
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();

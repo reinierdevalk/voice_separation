@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+import conversion.imports.MIDIImport;
 import data.Dataset;
 import de.uos.fmt.musitech.data.score.NotationChord;
 import de.uos.fmt.musitech.data.score.NotationStaff;
@@ -28,21 +29,23 @@ import de.uos.fmt.musitech.data.time.Marker;
 import de.uos.fmt.musitech.data.time.MetricalComparator;
 import de.uos.fmt.musitech.data.time.MetricalTimeLine;
 import de.uos.fmt.musitech.utility.math.Rational;
-import exports.MEIExport;
-import exports.MIDIExport;
+import conversion.exports.MEIExport;
+import conversion.exports.MIDIExport;
+import external.Tablature;
+import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
-import imports.MIDIImport;
 import interfaces.PythonInterface;
-import machineLearning.NNManager.ActivationFunction;
-import representations.Tablature;
-import representations.Transcription;
-import structure.ScoreMetricalTimeLine;
-import structure.ScorePiece;
-import structure.Timeline;
-import structure.metric.Utils;
-import tbp.Encoding;
+import internal.core.Encoding;
+import internal.core.ScorePiece;
+import internal.structure.ScoreMetricalTimeLine;
+import internal.structure.Timeline;
+import machinelearning.NNManager;
+import machinelearning.NNManager.ActivationFunction;
 import tools.ToolBox;
+import tools.labels.LabelTools;
+import tools.music.PitchKeyTools;
+import tools.music.TimeMeterTools;
 import ui.Runner;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
@@ -51,7 +54,6 @@ import ui.Runner.Model;
 import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
-import utility.DataConverter;
 
 public class TestManager {	
 	// 1. Created before testing: data and derived information // TODO make all fields that are protected private (only needed in TestManagerTest) and create get()-methods
@@ -117,7 +119,7 @@ public class TestManager {
 	private String applicationProcess = "";
 	private List<List<List<Integer>>> allObservations;
 	
-	public void prepareTesting(String start) {
+	public void prepareTesting(String start, Map<String, String> transcriptionParams) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Dataset dataset = Runner.getDataset();
 		String[] paths = Runner.getPaths();
@@ -144,14 +146,14 @@ public class TestManager {
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.BIDIR) {
 //				if (!deployTrainedUserModel) {
 					new TestManager().startTestProcess(k, Runner.TEST, paths, 
-						new String[]{tePreProcTime, startFoldTe}); // TODO new tm necessary to reset class vars
+						new String[]{tePreProcTime, startFoldTe}, transcriptionParams); // TODO new tm necessary to reset class vars
 				}
 				
 				// 2. Test in application mode (transfer learning or deploy trained unidir user model)
 				String startFoldAppl = ToolBox.getTimeStampPrecise();
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.UNIDIR) {
 					new TestManager().startTestProcess(k, Runner.APPL, paths,  
-						new String[]{null, startFoldAppl}); // TODO new tm necessary to reset class vars
+						new String[]{null, startFoldAppl}, transcriptionParams); // TODO new tm necessary to reset class vars
 				}
 			}
 		}
@@ -180,7 +182,8 @@ public class TestManager {
 				// 1. Test in test mode (previously predicted information is not used in the feature
 				// calculation)
 				TestManager tm = new TestManager();	// necessary to reset class variables
-				tm.startTestProcess(k, Runner.TEST, currentPaths, new String[]{tePreProcTime, startFoldTe});
+				tm.startTestProcess(k, Runner.TEST, currentPaths, new String[]{tePreProcTime, 
+					startFoldTe}, transcriptionParams);
 
 				// 2. If applicable: test in application mode (previously predicted information is 
 				// used in the feature calculation))
@@ -189,7 +192,7 @@ public class TestManager {
 					tm = new TestManager(); // necessary to reset class variables
 					if (mt != ModelType.MM) {
 						tm.startTestProcess(k, Runner.APPL, currentPaths, 
-							new String[]{null, startFoldAppl});
+							new String[]{null, startFoldAppl}, transcriptionParams);
 					}
 				}
 			}
@@ -259,7 +262,8 @@ public class TestManager {
 	 * @param mode
 	 * @param times
 	 */
-	private void startTestProcess(int fold, int mode, String[] argPaths, String[] times) {
+	private void startTestProcess(int fold, int mode, String[] argPaths, String[] times, 
+		Map<String, String> transcriptionParams) {
 		long tePreProcTime = 0;
 		if (mode == Runner.TEST) { 
 			tePreProcTime = Integer.parseInt(times[0]);
@@ -650,12 +654,24 @@ public class TestManager {
 //						new SortedContainer<Marker>();
 				// TODO G-tuning is assumed as default
 				if (deployTrainedUserModel) {
+					int numAlt = Integer.valueOf(transcriptionParams.get("-k")); // TODO don't hardcode -k
+					int md = Integer.valueOf(transcriptionParams.get("-m")); // TODO don't hardcode -m
+					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
+					System.out.println(numAlt);
+					System.out.println(md);
+					System.out.println(rra[0]);
+					System.out.println(rra[1]);
+//					System.exit(0);
 					KeyMarker km = new KeyMarker(Rational.ZERO, (long) 0.0);
 					// F minor -- 4640_10_quand_mon_mari_lasso
 //					km.setAlterationNumAndMode(-4, KeyMarker.Mode.MODE_MAJOR); km.setRoot('A'); km.setRootAlteration(1);
 					// D minor -- Quand_mon_mary_4 / Quand_mon_mary_more_finely_handled
-					km.setAlterationNumAndMode(-1, KeyMarker.Mode.MODE_MAJOR); km.setRoot('F'); km.setRootAlteration(0);
+//					km.setAlterationNumAndMode(-1, KeyMarker.Mode.MODE_MAJOR); km.setRoot('F'); km.setRootAlteration(0);
 //					km.setAlterationNumAndMode(-2, KeyMarker.Mode.MODE_MAJOR); km.setRoot('B'); km.setRootAlteration(1);
+//					km.setAlterationNumAndMode(-3, KeyMarker.Mode.MODE_MAJOR); km.setRoot('E'); km.setRootAlteration(1);
+					km.setAlterationNumAndMode(numAlt, md == 0 ? KeyMarker.Mode.MODE_MAJOR : KeyMarker.Mode.MODE_MINOR); 
+					km.setRoot(rra[0].charAt(0)); 
+					km.setRootAlteration(rra[1].equals("") ? 0 : Integer.parseInt(rra[1]));
 					ht.add(km);
 				}
 
@@ -719,9 +735,9 @@ public class TestManager {
 				else {
 					dir = !deployTrainedUserModel ? storePath + Runner.output : storePath;
 				}
-//				if (!deployTrainedUserModel) {
-				ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
-//				}
+				if (!deployTrainedUserModel) {
+					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
+				}
 				
 //				Piece p = predictedTranscr.getPiece();
 				String expPath = dir + testPieceName;
@@ -734,17 +750,17 @@ public class TestManager {
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
 				if (tablature != null) {
-					for (boolean grandStaff : new Boolean[]{false, true}) {
+					for (boolean grandStaff : new Boolean[]{true, false}) {
 						MEIExport.exportMEIFile(
 							t, tablature,
 	//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
 	//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
 							colInd, 
 							grandStaff,
-							true,
-							true,
+							false,
+							/*true,*/
 							new String[]{expPath, "halcyon"}
-						);
+							);
 					}
 				}
 			}
@@ -1051,8 +1067,8 @@ public class TestManager {
 		List<List<Integer>> allVoices = new ArrayList<List<Integer>>();
 		for (int index : mappingIndices) {
 			List<List<Double>> currChordVoiceLabels = 
-				DataConverter.getChordVoiceLabels(mappingDictionary.get(index));
-			allVoices.addAll(DataConverter.getVoicesInChord(currChordVoiceLabels));    	
+				LabelTools.getChordVoiceLabels(mappingDictionary.get(index));
+			allVoices.addAll(LabelTools.getVoicesInChord(currChordVoiceLabels));    	
 		}
 		return allVoices;
 	}
@@ -1070,7 +1086,7 @@ public class TestManager {
 
 		// Create the Matlab command
 		String cmd = "matlab -wait -nosplash -nodesktop -r \"";
-		cmd += "code_path = '" + Runner.scriptMatlabPath + "'; ";
+		cmd += "code_path = '" + Runner.matlabScriptPath + "'; ";
 		cmd += "exp_path = '" + Paths.get(path).getParent().toString().replace("\\", "/") + "/" + "'; ";
 		cmd += "addpath(genpath(code_path)); "; // make all dirs in the code path availalbe to Matlab
 		cmd += "addpath(genpath(exp_path)); "; // make all dirs in the experiment path available to Matlab
@@ -1138,7 +1154,7 @@ public class TestManager {
 		allPredictedVoices = getVoicesFromMappingIndices(predictedIndices);
 		allVoiceLabels = new ArrayList<List<Double>>();
 		for (List<Integer> l : allPredictedVoices) {
-			allVoiceLabels.add(DataConverter.convertIntoVoiceLabel(l));
+			allVoiceLabels.add(LabelTools.convertIntoVoiceLabel(l));
 		}
 
 		// Get test results
@@ -1376,7 +1392,7 @@ public class TestManager {
 					// For scikit
 					if (isScikit) {
 						cmd = new String[]{
-							"python", Runner.scriptPythonPath + Runner.scriptScikit, 
+							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.test, 
 							storePath, //pathStoredNN, 
@@ -1389,7 +1405,7 @@ public class TestManager {
 							TrainingManager.getArgumentStrings(Runner.TEST, modelParameters, 
 							noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
 						cmd = new String[]{
-							"python", Runner.scriptPythonPath + Runner.scriptTensorFlow, 
+							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.test,
 							argStrings.get(0),
 							argStrings.get(1)};
@@ -1535,16 +1551,16 @@ public class TestManager {
 		if (dc == DecisionContext.BIDIR) {
 			allVoiceLabels = new ArrayList<List<Double>>();
 			for (List<Integer> l : allPredictedVoices) {
-				allVoiceLabels.add(DataConverter.convertIntoVoiceLabel(l));
+				allVoiceLabels.add(LabelTools.convertIntoVoiceLabel(l));
 			}
 			if (modelDuration && modelDurationAgain) {
 				allDurationLabels = new ArrayList<List<Double>>();
 				for (Rational[] durs : allPredictedDurationsTest) {
 					List<Integer> durations = new ArrayList<Integer>();
 					for (Rational r : durs) {
-						durations.add(DataConverter.getIntegerEncoding(r) - 1);
+						durations.add(LabelTools.getIntegerEncoding(r) - 1);
 					} 
-					allDurationLabels.add(DataConverter.convertIntoDurationLabel(durations));
+					allDurationLabels.add(LabelTools.convertIntoDurationLabel(durations));
 				}
 			}
 		}
@@ -1598,7 +1614,7 @@ public class TestManager {
 			// NB: works in both fwd and bwd mode because indicesPerChord is in bwd order when modelling backwards
 			for (int j = startIndex; j < endIndex; j++) {
 				voicesCurrChord.add(allPredictedVoices.get(j));
-				voicesCurrChordGT.add(DataConverter.convertIntoListOfVoices(groundTruthVoiceLabels.get(j)));
+				voicesCurrChordGT.add(LabelTools.convertIntoListOfVoices(groundTruthVoiceLabels.get(j)));
 			}
 			// When the chord is traversed: add voicesCurrChord to voicesPerChord
 			voicesPerChord.add(voicesCurrChord);
@@ -2129,7 +2145,7 @@ public class TestManager {
 		List<Integer> correctedVoice, boolean containsSustained, boolean containsDouble	) {
 
 		List<Integer> gtVoices = 
-			DataConverter.convertIntoListOfVoices(groundTruthVoiceLabels.get(indexToReset));
+			LabelTools.convertIntoListOfVoices(groundTruthVoiceLabels.get(indexToReset));
 
 		String conflict = "";
 		String type = "";
@@ -2174,7 +2190,7 @@ public class TestManager {
 
 	private String getConflictTextOLD(int indexToReset, List<Integer> oldVoice, 
 		List<Integer> correctedVoice, boolean containsSustained, boolean containsDouble	) {
-		List<Integer> gtVoices = DataConverter.convertIntoListOfVoices(groundTruthVoiceLabels.get(indexToReset));
+		List<Integer> gtVoices = LabelTools.convertIntoListOfVoices(groundTruthVoiceLabels.get(indexToReset));
 		
 		String conflict = "";
 		if (containsSustained && !containsDouble) {
@@ -2741,14 +2757,14 @@ public class TestManager {
 			// allDurationLabels, allVoicesCoDNotes, (allNetworkOutputs), (allNetworkOutputsAdapted)
 			List<Integer> voice = Arrays.asList(new Integer[]{v});
 			allPredictedVoices.add(voice); 
-			allVoiceLabels.set(noteIndex, DataConverter.convertIntoVoiceLabel(voice));
+			allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(voice));
 			if (modelDuration) { 
 				int d = -1; // TODO figure out duration now that there is no network output
 				Rational dAsRat = new Rational(d, Tablature.SRV_DEN);
 				Rational[] dur = new Rational[]{dAsRat}; 
 				allPredictedDurations.add(dur);
 				allDurationLabels.set(noteIndex, 
-					DataConverter.convertIntoDurationLabel(Arrays.asList(new Integer[]{d})));
+					LabelTools.convertIntoDurationLabel(Arrays.asList(new Integer[]{d})));
 				// The element in allVoicesCoDNotes is null by default and only needs to be
 				// reset if the note at noteIndex is a CoD
 				if (voice.size() > 1) {
@@ -3599,7 +3615,7 @@ public class TestManager {
 				if (isScikit) {
 //					s = new String[]{storePath, /*pathStoredNN,*/ m.name(), Runner.fvExt + "app.csv"};
 					// Get imports
-					cmds += PythonInterface.getImports(new File(Runner.scriptPythonPath + Runner.scriptScikit)) + "\r\n";
+					cmds += PythonInterface.getImports(new File(Runner.pythonScriptPath + Runner.scriptScikit)) + "\r\n";
 					// Initialise model
 					cmds += "m = joblib.load('" + storePath + m.name() + ".pkl')" + "\r\n";
 				}
@@ -3618,7 +3634,7 @@ public class TestManager {
 						numFeat /*noteFeatures.get(0).size()*/, -1, storePath, pathTrainedUserModel);
 //					s = new String[]{Runner.scriptPythonPath, Runner.scriptTensorFlow, 
 //						argStrings.get(0), argStrings.get(1)};			
-					String argScriptPath = Runner.scriptPythonPath;
+					String argScriptPath = Runner.pythonScriptPath;
 					String argScript = Runner.scriptTensorFlow;
 					String hyperparamsStr = argStrings.get(0);
 					String pathsExtensionsStr = argStrings.get(1);
@@ -3687,6 +3703,7 @@ public class TestManager {
 //				System.out.println("noteIndexBwd = " + noteIndex);
 //				System.out.println(allVoiceLabels);
 
+//				System.out.println(i);
 				List<List<Double>> fvAndPredLbl = 
 					predictVoices(storePath, minAndMaxFeatureValues, noteIndex, 
 					voiceEntryInfo, modelWeighting, pr);
@@ -3817,7 +3834,7 @@ public class TestManager {
 //							groundTruthTranscription.getChordVoiceLabels(tablature).get(0); 
 							groundTruthTranscription.getChordVoiceLabels().get(0);
 						List<Integer> groundTruthVoiceAssignment = 
-							DataConverter.getVoiceAssignment(groundTruthChordVoiceLabels, Transcription.MAX_NUM_VOICES); 
+							LabelTools.getVoiceAssignment(groundTruthChordVoiceLabels, Transcription.MAX_NUM_VOICES); 
 						if (!groundTruthVoiceAssignment.equals(bestVoiceAssignment)) {
 							bestVoiceAssignment = groundTruthVoiceAssignment;
 							highestNetworkOutput = 1.0;
@@ -3825,8 +3842,8 @@ public class TestManager {
 					}
 				}
 
-				List<List<Double>> predictedChordVoiceLabels = DataConverter.getChordVoiceLabels(bestVoiceAssignment); 
-				List<List<Integer>> predictedChordVoices = DataConverter.getVoicesInChord(predictedChordVoiceLabels); 
+				List<List<Double>> predictedChordVoiceLabels = LabelTools.getChordVoiceLabels(bestVoiceAssignment); 
+				List<List<Integer>> predictedChordVoices = LabelTools.getVoicesInChord(predictedChordVoiceLabels); 
 //				double highestNetworkOutput = Collections.max(currentNetworkOutputs);
 				allHighestNetworkOutputs.add(highestNetworkOutput);
 				allBestVoiceAssignments.add(bestVoiceAssignment);
@@ -4337,13 +4354,13 @@ public class TestManager {
 				predictedDurationCurrentNote = 
 					OutputEvaluator.interpretNetworkOutput(copyOfNetworkOutputCurrentNote,
 					allowCoD, deviationThreshold).get(1);
-				predictedDurationLabel = DataConverter.convertIntoDurationLabel(predictedDurationCurrentNote);
+				predictedDurationLabel = LabelTools.convertIntoDurationLabel(predictedDurationCurrentNote);
 			}
 			if (dc == DecisionContext.BIDIR && !modelDurationAgain) {
 				predictedDurationLabel = allDurationLabels.get(noteIndex); 
 			}
 //			predictedDurationLabel = dataConverter.convertIntoDurationLabel(predictedDurationCurrentNote);
-			predictedDuration = DataConverter.convertIntoDuration(predictedDurationLabel)[0];
+			predictedDuration = LabelTools.convertIntoDuration(predictedDurationLabel)[0];
 			predictedDuration.reduce();
 		}
 
@@ -4531,7 +4548,7 @@ public class TestManager {
 						// 0. Get the metric position and the index in the chord of the previous note
 						Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);	
 						String metPosPrevious = 
-							Utils.getMetricPositionAsString(
+							TimeMeterTools.getMetricPositionAsString(
 							tablature != null ?
 							tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())		
 							:
@@ -4562,7 +4579,7 @@ public class TestManager {
 							}
 							else if (dc == DecisionContext.BIDIR && !modelDurationAgain) {
 								predictedDurationPrevious = 
-									DataConverter.convertIntoDuration(predictedDurationLabelPrevious)[0]; 
+									LabelTools.convertIntoDuration(predictedDurationLabelPrevious)[0]; 
 							}
 							predictedDurationPrevious.reduce();
 							
@@ -4685,7 +4702,7 @@ public class TestManager {
 											// Set metPosNext and indexInChordNext 
 											mt = getMetricTime(noteIndexNext, isTablatureCase);
 											metPosNext = 
-												Utils.getMetricPositionAsString(
+												TimeMeterTools.getMetricPositionAsString(
 												tablature != null ?		
 												tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())
 												:
@@ -4948,7 +4965,7 @@ public class TestManager {
 									// 0. Get the metric position and the index in the chord of the previous note
 									Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
 									String metPosPrevious = 
-										Utils.getMetricPositionAsString(
+										TimeMeterTools.getMetricPositionAsString(
 										tablature != null ?
 										tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())		
 										:
@@ -4972,7 +4989,7 @@ public class TestManager {
 										}
 										else if (dc == DecisionContext.BIDIR && !modelDurationAgain) {
 											predictedDurationPrevious = 
-												DataConverter.convertIntoDuration(predictedDurationLabelPrevious)[0]; 
+												LabelTools.convertIntoDuration(predictedDurationLabelPrevious)[0]; 
 										}
 										predictedDurationPrevious.reduce();
 	
@@ -5098,7 +5115,7 @@ public class TestManager {
 														// Set metPosNext and indexInChordNext 
 														mt = getMetricTime(noteIndexNext, isTablatureCase);
 														metPosNext = 
-															Utils.getMetricPositionAsString(
+															TimeMeterTools.getMetricPositionAsString(
 															tablature != null ?
 															tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())
 															:
@@ -5176,7 +5193,7 @@ public class TestManager {
 										// 4. Redetermine predictedVoicePrevious and reset the corresponding elements in the Lists
 										predictedVoicesPrevious = Arrays.asList(new Integer[]{firstPredictedVoicePrevious});
 										allPredictedVoices.set(noteIndexPreviousBwd, predictedVoicesPrevious);
-										allVoiceLabels.set(noteIndexPrevious, DataConverter.convertIntoVoiceLabel(predictedVoicesPrevious));
+										allVoiceLabels.set(noteIndexPrevious, LabelTools.convertIntoVoiceLabel(predictedVoicesPrevious));
 	
 //										if (isTablatureCase && isNewModel && modelDuration) {//2016
 										if (isTablatureCase /*&& im == Implementation.PHD*/ && modelDuration) {
@@ -5277,7 +5294,7 @@ public class TestManager {
 							// 0. Get the metric position and the index in the chord of the previous note
 							Rational mt = getMetricTime(noteIndexPrevious, isTablatureCase);
 							String metPosPrevious = 
-								Utils.getMetricPositionAsString(
+								TimeMeterTools.getMetricPositionAsString(
 								tablature != null ?
 								tl.getMetricPosition((int) mt.mul(Tablature.SRV_DEN).toDouble())		
 								:
@@ -5382,7 +5399,7 @@ public class TestManager {
 									duration = allPredictedDurations.get(i)[0];
 								}
 								else if (dc == DecisionContext.BIDIR && !modelDurationAgain) {
-									duration = DataConverter.convertIntoDuration(allDurationLabels.get(i))[0];
+									duration = LabelTools.convertIntoDuration(allDurationLabels.get(i))[0];
 								}
 							}
 							// If i == noteIndex, allPredictedDurations does not yet contain a value at index i
@@ -5418,7 +5435,7 @@ public class TestManager {
 									int pitch = basicTabSymbolProperties[i][Tablature.PITCH];
 									Rational onset = new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],
 										Tablature.SRV_DEN);
-									metPoss.add(Utils.getMetricPositionAsString(
+									metPoss.add(TimeMeterTools.getMetricPositionAsString(
 										tablature != null ?
 										tl.getMetricPosition((int) onset.mul(Tablature.SRV_DEN).toDouble())
 										:
@@ -5433,7 +5450,7 @@ public class TestManager {
 											durations.add(allPredictedDurations.get(i)[0]);
 										}
 										else if (dc == DecisionContext.BIDIR && !modelDurationAgain) {
-											durations.add(DataConverter.convertIntoDuration(allDurationLabels.get(i))[0]);
+											durations.add(LabelTools.convertIntoDuration(allDurationLabels.get(i))[0]);
 										}
 									}
 									// If i == noteIndex, allPredictedDurations does not yet contain a value at index i
@@ -5540,7 +5557,7 @@ public class TestManager {
 		if (giveFirst) {
 			if (pm == ProcessingMode.FWD && noteIndex == 0) {
 				List<Double> groundTruthVoiceLabel = groundTruthTranscription.getVoiceLabels().get(noteIndex);
-				List<Integer> groundTruthVoices = DataConverter.convertIntoListOfVoices(groundTruthVoiceLabel);
+				List<Integer> groundTruthVoices = LabelTools.convertIntoListOfVoices(groundTruthVoiceLabel);
 				if (!predictedVoices.equals(groundTruthVoices)) {
 					predictedVoices = groundTruthVoices;
 					double[] correctedPredictedVoices = new double[groundTruthVoiceLabel.size()];
@@ -5555,7 +5572,7 @@ public class TestManager {
 		// 3. predictedVoices (and, if applicable, predictedDurationLabel and allPredictedDurations) now have their 
 		// final value: add to lists
 		allPredictedVoices.add(predictedVoices);
-		allVoiceLabels.set(noteIndex, DataConverter.convertIntoVoiceLabel(predictedVoices));
+		allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(predictedVoices));
 //		if (isTablatureCase && isNewModel && modelDuration) {//2016
 		if (isTablatureCase /*&& im == Implementation.PHD*/ && modelDuration) {
 			if (predictedVoices.size() == 1) {
@@ -5575,7 +5592,7 @@ public class TestManager {
 //			allDurationLabels.set(noteIndex, predictedDurationLabel); OUD
 			// In the unidir case always; in the bidir case only when modelling duration again
 			if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
-				allPredictedDurations.add(DataConverter.convertIntoDuration(predictedDurationLabel));
+				allPredictedDurations.add(LabelTools.convertIntoDuration(predictedDurationLabel));
 				allDurationLabels.set(noteIndex, predictedDurationLabel); // NIEUW
 			}
 		}
@@ -6910,7 +6927,7 @@ public class TestManager {
 					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh).get(0);
 				List<Integer> adaptedVoices = allPredictedVoices.get(i); // HIER OK
 				List<Double> actualVoiceLabel = argGroundTruthVoiceLabels.get(i); // HIER OK
-				List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel);
+				List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
 
 				// Keep track of the conflict reassignments
 				boolean voicesPredictedInitiallyCorrectly = false;
@@ -7044,21 +7061,21 @@ public class TestManager {
 				List<Integer> predictedDurationsAsIndex = 
 					OutputEvaluator.interpretNetworkOutput(output, allowCoD, devThresh).get(1);
 				List<Double> predictedDurationsAsLabel = 
-					DataConverter.convertIntoDurationLabel(predictedDurationsAsIndex);
+					LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
 				Rational[] predictedDurations = 
-					DataConverter.convertIntoDuration(predictedDurationsAsLabel);
+					LabelTools.convertIntoDuration(predictedDurationsAsLabel);
 				for (Rational r : predictedDurations) {
 					r.reduce();
 				}
 					
 				List<Double> predictedDurationLabelAdapted = allPredictedDurationLabels.get(noteIndex); // HIER OK
-				Rational[] adaptedDurations = DataConverter.convertIntoDuration(predictedDurationLabelAdapted); 
+				Rational[] adaptedDurations = LabelTools.convertIntoDuration(predictedDurationLabelAdapted); 
 				for (Rational r : adaptedDurations) {
 					r.reduce();
 				}
 					
 				List<Double> actualDurationLabel = argGroundTruthDurationLabels.get(i); // HIER OK
-				Rational[]	actualDurations = DataConverter.convertIntoDuration(actualDurationLabel);
+				Rational[]	actualDurations = LabelTools.convertIntoDuration(actualDurationLabel);
 				for (Rational r : actualDurations) {
 					r.reduce();
 				}
@@ -7229,7 +7246,7 @@ public class TestManager {
 			dc == DecisionContext.BIDIR && isTablatureCase && modelDuration && modelDurationAgain) {
 			// Get the predicted duration, which will only contain one element (see resolveConflicts())
 			Rational[] predictedDuration = 
-				DataConverter.convertIntoDuration(allDurationLabels.get(noteIndex));
+				LabelTools.convertIntoDuration(allDurationLabels.get(noteIndex));
 			// Reset firstNote's scoreNote with the predicted duration
 			ScoreNote scoreNote = 
 				new ScoreNote(new ScorePitch(firstNote.getMidiPitch()), onsetTime, predictedDuration[0]);
@@ -7290,7 +7307,7 @@ public class TestManager {
 					OutputEvaluator.interpretNetworkOutput(lastNetworkOutput, false, -1.0).get(0);
 				predictedVoices.add(originalVoices.get(0));
 				allPredictedVoices.set(noteIndexBwd, originalVoices);
-				allVoiceLabels.set(noteIndex, DataConverter.convertIntoVoiceLabel(originalVoices));
+				allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(originalVoices));
 
 				if (verbose) {
 					System.out.println("    predicted voice(s) reset to " + originalVoices);
@@ -7412,7 +7429,7 @@ public class TestManager {
 //			if (isTablatureCase && modelDuration) {
 			// Get the predicted duration, which will only contain one element (see resolveConflicts())
 //			Rational[] predictedDuration = dataConverter.convertIntoDuration(allDurationLabels.get(noteIndexBwd)); // FUK 23-6
-			Rational[] predictedDuration = DataConverter.convertIntoDuration(allDurationLabels.get(noteIndex));
+			Rational[] predictedDuration = LabelTools.convertIntoDuration(allDurationLabels.get(noteIndex));
 			// Reset firstNote's scoreNote with the predicted duration
 			ScoreNote scoreNote = new ScoreNote(new ScorePitch(firstNote.getMidiPitch()), onsetTime, predictedDuration[0]);
 			firstNote.setScoreNote(scoreNote);
@@ -7492,7 +7509,7 @@ public class TestManager {
 					OutputEvaluator.interpretNetworkOutput(lastNetworkOutput, false, -1.0).get(0);
 				predictedVoices.add(originalVoices.get(0));
 				allPredictedVoices.set(noteIndexBwd, originalVoices);
-				allVoiceLabels.set(noteIndex, DataConverter.convertIntoVoiceLabel(originalVoices));
+				allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(originalVoices));
 
 //				System.out.println(Arrays.toString(lastNetworkOutput));
 				if (verbose) {
@@ -7585,7 +7602,7 @@ public class TestManager {
 		//         misassign the exact same notes as the trainingManager. In essence, it now 
 		else { // TODO vereenvoudigen!  		
 			List<Double> actualVoiceLabel = groundTruthVoiceLabels.get(noteIndexBwd);
-			List<Integer> actualVoices = DataConverter.convertIntoListOfVoices(actualVoiceLabel); 	  	
+			List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel); 	  	
 			// Create otherNote (which is an exact copy of firstNote and secondNote)
 			Note otherNote = ScorePiece.createNote(firstNote.getMidiPitch(), firstNote.getMetricTime(),
 				firstNote.getMetricDuration(), -1, null);
@@ -7725,7 +7742,7 @@ public class TestManager {
 			// NB: works in both fwd and bwd mode because indicesPerChord is in bwd order when modelling backwards
 			for (int j = startIndex; j < endIndex; j++) {
 				voicesCurrChord.add(allPredictedVoices.get(j));
-				voicesCurrChordGT.add(DataConverter.convertIntoListOfVoices(groundTruthVoiceLabels.get(j)));
+				voicesCurrChordGT.add(LabelTools.convertIntoListOfVoices(groundTruthVoiceLabels.get(j)));
 			}
 			// When the chord is traversed: add voicesCurrChord to voicesPerChord
 			voicesPerChord.add(voicesCurrChord);

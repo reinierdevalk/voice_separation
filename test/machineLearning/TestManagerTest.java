@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import conversion.imports.MIDIImport;
 import data.Dataset;
 import de.uos.fmt.musitech.data.score.NotationStaff;
 import de.uos.fmt.musitech.data.score.NotationSystem;
@@ -16,20 +17,20 @@ import de.uos.fmt.musitech.data.score.ScorePitch;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.data.structure.Piece;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Tablature;
+import external.Transcription;
 import featureExtraction.FeatureGenerator;
-import imports.MIDIImport;
+import internal.core.Encoding;
+import internal.core.ScorePiece;
 import junit.framework.TestCase;
-import representations.Tablature;
-import representations.Transcription;
-import structure.ScorePiece;
-import tbp.Encoding;
 import tools.ToolBox;
+import tools.labels.LabelTools;
+import tools.labels.LabelToolsTest;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.Model;
 import ui.Runner.ProcessingMode;
 import ui.UI;
-import utility.DataConverter;
-import utility.DataConverterTest;
 
 public class TestManagerTest extends TestCase {
 
@@ -54,7 +55,9 @@ public class TestManagerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 		testPaths = new String[]{Runner.encodingsPath + "test/", Runner.midiPath + "test/", 
 			Runner.midiPath + "test/"};
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
@@ -163,7 +166,7 @@ public class TestManagerTest extends TestCase {
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			Rational currentMetricTime = 
 				new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],	Tablature.SRV_DEN);
-			List<Integer> currentPredictedVoices = DataConverter.convertIntoListOfVoices(voiceLabels.get(i));
+			List<Integer> currentPredictedVoices = LabelTools.convertIntoListOfVoices(voiceLabels.get(i));
 			actual.add(TestManager.getMaximumDuration(currentMetricTime, nextMetricTimes.get(i), transcription, 
 				currentPredictedVoices));
 		}
@@ -171,7 +174,7 @@ public class TestManagerTest extends TestCase {
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			Rational currentMetricTime = 
 				new Rational(basicTabSymbolProperties[i][Tablature.ONSET_TIME],	Tablature.SRV_DEN);
-			List<Integer> currentPredictedVoices = DataConverter.convertIntoListOfVoices(voiceLabels.get(i));
+			List<Integer> currentPredictedVoices = LabelTools.convertIntoListOfVoices(voiceLabels.get(i));
 			actual.add(TestManager.getMaximumDuration(currentMetricTime, null, transcription, currentPredictedVoices));
 		}
 
@@ -490,31 +493,31 @@ public class TestManagerTest extends TestCase {
 		// allVoiceLabelsExpected
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
 		// Chord 0
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_4));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_3, V_4));
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_0);
 		// Chord 1
 		allVoiceLabels.add(V_3);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_0));
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_0);
 		// Chord 2
 		allVoiceLabels.add(V_4);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_2));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_3, V_2));
 		allVoiceLabels.add(V_0);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_2));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_2));
 		// Chord 3
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_2));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_2));
 		allVoiceLabels.add(V_2);
 		// Chord 4
 		allVoiceLabels.add(V_0);
 		// Chord 5
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_4, V_2));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_4, V_2));
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_1);
 		allVoiceLabels.add(V_1);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_4));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_4));
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
 		allVoiceLabelsExpected.set(2, V_1);
@@ -1080,31 +1083,31 @@ public class TestManagerTest extends TestCase {
 		// allVoiceLabelsExpected (fwd)
 		List<List<Double>> allVoiceLabels = new ArrayList<List<Double>>();
 		// Chord 5
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_4));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_3, V_4));
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_0);
 		// Chord 4
 		allVoiceLabels.add(V_3);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_0)); 
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_0)); 
 		allVoiceLabels.add(V_2);
 		allVoiceLabels.add(V_0);
 		// Chord 3
 		allVoiceLabels.add(V_4);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_3, V_2));
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_3, V_2));
 		allVoiceLabels.add(V_0);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_1, V_3)); 
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_1, V_3)); 
 		// Chord 2
 		allVoiceLabels.add(V_1);
 		allVoiceLabels.add(V_2);
 		// Chord 1
 		allVoiceLabels.add(V_0);
 		// Chord 0
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_4, V_2)); 
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_4, V_2)); 
 		allVoiceLabels.add(V_3);
 		allVoiceLabels.add(V_1);
 		allVoiceLabels.add(V_1);
-		allVoiceLabels.add(DataConverterTest.combineLabels(V_0, V_4)); 
+		allVoiceLabels.add(LabelToolsTest.combineLabels(V_0, V_4)); 
 
 		List<List<Double>> allVoiceLabelsExpected = new ArrayList<List<Double>>(allVoiceLabels);
 		allVoiceLabelsExpected.set(15, V_4);

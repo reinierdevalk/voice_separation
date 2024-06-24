@@ -5,24 +5,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.data.structure.Piece;
 import de.uos.fmt.musitech.data.structure.container.NoteSequence;
+import external.Tablature;
+import external.Transcription;
 import featureExtraction.FeatureGenerator.Direction;
+import internal.core.Encoding;
+import internal.core.ScorePiece;
 import junit.framework.TestCase;
-import representations.Tablature;
-import representations.Transcription;
-import structure.ScorePiece;
-import tbp.Encoding;
 import tools.ToolBox;
+import tools.labels.LabelTools;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
 import ui.UI;
-import utility.DataConverter;
 
 public class FeatureGeneratorTest extends TestCase {
 
@@ -47,7 +49,9 @@ public class FeatureGeneratorTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 	}
@@ -133,8 +137,8 @@ public class FeatureGeneratorTest extends TestCase {
 		setOfFeatureVectors.add(Arrays.asList(new Double[]{3.0,  2.0, -1.0,  2.0, -3.0, -1.0, 0.0,  3.0, -1.0}));
 		return setOfFeatureVectors;
 	}
-	
-	
+
+
 	public void testGetBasicNoteFeaturesMUSCI() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 
@@ -994,7 +998,7 @@ public class FeatureGeneratorTest extends TestCase {
   		Note currentNote = Tablature.convertTabSymbolToNote(basicTabSymbolProperties, i);
   		List<Double> currentLabel = voiceLabels.get(i);
   		List<Integer> currentVoices = 
-  			DataConverter.convertIntoListOfVoices(currentLabel);
+  			LabelTools.convertIntoListOfVoices(currentLabel);
   		// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
   		for (int j = 0; j < currentVoices.size(); j++) {
   	    int currentVoice = currentVoices.get(j);
@@ -1101,7 +1105,7 @@ public class FeatureGeneratorTest extends TestCase {
 //  		Note currentNote = noteSeq.getNoteAt(i);
   		List<Double> currentLabel = voiceLabels.get(i);
   		List<Integer> currentVoices = 
-  			DataConverter.convertIntoListOfVoices(currentLabel);
+  			LabelTools.convertIntoListOfVoices(currentLabel);
   		// For each voice assigned to the Note
   		// NB: currentVoices.size() will always be 1, as CoDs don't occur in the non-tablature case
   		for (int j = 0; j < currentVoices.size(); j++) {
@@ -5539,7 +5543,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.get(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
@@ -5555,7 +5559,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.get(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
@@ -5571,7 +5575,7 @@ public class FeatureGeneratorTest extends TestCase {
 			Note currentNote = notes.get(i);
 //			Note currentNote = noteSeq.get(i);
 			List<Double> currentLabel = voiceLabels.get(i);
-			List<Integer> currentVoices = DataConverter.convertIntoListOfVoices(currentLabel);
+			List<Integer> currentVoices = LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
@@ -5588,7 +5592,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice (in case of a CoD, the highest, i.e., the voice with the lowest number, will be dealt with first)
 			for (int j = 0; j < currentVoices.size(); j++) {
 				int currentVoice = currentVoices.get(j);
@@ -5967,7 +5971,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice assigned to the Note
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
@@ -5983,7 +5987,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice assigned to the Note
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
@@ -6000,7 +6004,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice assigned to the Note
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {
@@ -6016,7 +6020,7 @@ public class FeatureGeneratorTest extends TestCase {
 //			Note currentNote = noteSeq.getNoteAt(i);
 			List<Double> currentLabel = voiceLabels.get(i);
 			List<Integer> currentVoices = 
-				DataConverter.convertIntoListOfVoices(currentLabel);
+				LabelTools.convertIntoListOfVoices(currentLabel);
 			// For each voice assigned to the Note
 			// NB: currentVoices.size() will always be 1, as CoDs do not occur in the non-tablature case
 			for (int j = 0; j < currentVoices.size(); j++) {

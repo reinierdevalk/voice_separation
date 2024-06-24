@@ -8,19 +8,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import conversion.imports.MIDIImport;
 import data.Dataset;
+import external.Transcription;
 import featureExtraction.MelodyFeatureGenerator;
 import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
-import imports.MIDIImport;
+import internal.core.Encoding;
 import machineLearning.EvaluationManager;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.MelodyPredictor;
 import machineLearning.MelodyPredictor.MelModelType;
-import machineLearning.NNManager;
-import machineLearning.NNManager.ActivationFunction;
-import path.Path;
-import representations.Transcription;
-import tbp.Encoding;
+import machinelearning.NNManager;
+import machinelearning.NNManager.ActivationFunction;
 import tools.ToolBox;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
@@ -33,9 +32,7 @@ import ui.Runner.ProcessingMode;
 import ui.Runner.WeightsInit;
 
 public class UI {
-
-	private static String rootPath = Path.getRootPath();
-	private static String rootPathUser = Path.getRootPathUser();
+	private static String rootPath;
 
 	// Runner settings
 	private static boolean deployTrainedUserModel, skipTraining, trainUserModel, verbose;
@@ -62,7 +59,7 @@ public class UI {
 		
 	// Strings for dataset creation, model training (top) and deployment (bottom)
 	private static String datasetID;
-	private static String datasetIDTrain, datasetName;
+	private static String datasetIDTrain, datasetName, filename;
 
 
 	public static void main(String[] args) throws IOException {
@@ -86,16 +83,16 @@ public class UI {
 			boolean gridSearch = false;
 			useCV = true;
 			estimateEntries = false;
-//			weightsInit = WeightsInit.INIT_FROM_LIST;
-			weightsInit = WeightsInit.INIT_RANDOM;
+			weightsInit = WeightsInit.INIT_FROM_LIST;
+//			weightsInit = WeightsInit.INIT_RANDOM;
 			//
-			datasetID = Dataset.JOSQUIN_INT_4VV;
-			m = Model.N;
-			pm = ProcessingMode.BWD; // NB: bidir case must always be fwd
+			datasetID = Dataset.BACH_INV_3VV;
+			m = Model.D;
+			pm = ProcessingMode.FWD; // NB: bidir case must always be fwd
 			fv = FeatureVector.PHD_D;
 //			expDir = "ISMIR-2018"; // publication + experiment (if applicable)
 //			expDir = "thesis/exp_3.3.1/";
-			expDir = "ISMIR-2019/";
+			expDir = "ISMIR-2018/";
 //			expDirFirstPass = "byrd/byrd-int/4vv/D/bwd/";
 			expDirFirstPass = "thesis/exp_3.1/thesis-int/3vv/N/bwd/";
 			//
@@ -104,13 +101,13 @@ public class UI {
 //			config = Configuration.THREE; // cnf 3; "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
 //			config = Configuration.FOUR; // cnf 4; "4-data_TPM-data_ISM/"; // WAS "4. Output (with prior probability matrix)"
 			//
-//			hyperparams = "HL=2/HLS=66/KP=0.875-no_heur/";
+			hyperparams = "HL=2/HLS=66/KP=0.875-no_heur/";
 //			hyperparams = "cnf=" + config.getStringRep(); // "HLS=" + hiddenLayerSize; "KP=" + keepProbability;
 //			hyperparams = "HLF=1.0/lmb=0.001/";
 //			hyperparams = "eps=0.05/";
 //			hyperparams = "LR=0.003/HL=1/HLS=66/KP=0.875/";
 //			hyperparams = "final/";
-			hyperparams = "";
+//			hyperparams = "";
 			//
 			mmfs = Arrays.asList(new MelodyModelFeature[]{ // used both for MM and ENS
 				MelodyModelFeature.PITCH,
@@ -195,16 +192,16 @@ public class UI {
 					hyperparams = ToolBox.pathify(new String[]{
 						"LR=" + alpha, "HL=" + hiddenLayers, "HLS=" + hiddenLayerSize, 
 						"KP=" + keepProbability});
-					set();
+					set(null);
 				}
 			}
 			else {
-				set();
+				set(null);
 			}
 		}
 		// If deploying a trained model: deduce parameters and settings		
 		// CLI usage:
-		// $ java -cp <classPaths> ui.UI '<modelID>' '<rootPath>' '<verbose>' '<userDefinedName>'
+		// $ java -cp <classPaths> ui.UI '<modelID>' '<rootPath>' '<verbose>' '<userDefinedName>' '<filename>' '<transParams>'
 		//
 		// The class ui.UI takes four arguments: 
 		// - <modelID>			the trained model's ID, consisting of the model, pm, and 
@@ -212,20 +209,35 @@ public class UI {
 		// 						(e.g., N-bwd-bach-WTC-4vv). In case of a bidirectional model, the
 		// 						unidirectional model whose output is used is added, separated
 		// 						by a colon (e.g., N_B-fwd-bach-WTC-4vv:N-bwd-bach-WTC-4vv) 
-		// - <rootPath>			the path containing the user/ dir; fixed to F:/research/data/
-		// 						(optional; can be empty string if pwd is rootPath)
+		// - <rootPath>			the path from which the code is run. Should contain three dirs 
+		//						- user/, containing the input and output files
+		//                      - models/, containing the trained models
+		// 						- code/, containing the code
+		//						Is set to pwd if not provided (empty string) or specified to pwd (dot).
+		//						NB: A special case is the 'dev root path' F:/research/data, which
+		//                      can be used locally for development and testing of a trained model, 
+		//						and which does not require a code/ dir, but instead accesses the code 
+		//						in its default dir F:/research/software/code/eclipse/ 
 		// - <verbose>			true if verbose output is wanted, false if not (optional; can
 		// 						be empty string (i.e., false)) 
 		// - <userDefinedName>  a user-defined name given to the data that is processed 
-		//                      (optional; can be empty string (i.e., none))  
+		//                      (optional; can be empty string (i.e., none))
+		// - <filename>			a specific .tbp file from the user/in/ folder to be transcribed; if not 
+		//						provided, all .tbp files in the folder are transcribed
+		//						(optional; can empty string (i.e., none)
+		// - <transParams>		a string of the transcription parameters, split by |. The parameters are
+		//						-tn (tuning), -k (key), -m (mode), -tb (retain tab), -tp (tab type shown).
+		//						E.g. -tn=A|-k=-2|-m=0|-tb=y|-tp=ILT
 		//
-		// The -cp arg <classPaths> contains all paths to .java (in bin/ dirs) and .jar 
-		// (in lib/ dirs) files, and these paths must be added separately. Depending on the 
+		// The -cp arg <classPaths> contains all paths to .class (in the bin/ dirs) and .jar 
+		// (in the lib/ dirs) files, and these paths must be added separately. Depending on the 
 		// number of dirs in <codePath>, this can result in a very long and repetitive command
-		// $ java -cp '<codePath>/<dir_1>/bin;<codePath>/<dir_1>/lib/*;
+		// $ java -cp '<codePath>/<dir_1>/bin;
+		//             <codePath>/<dir_1>/lib/*;
 		//             ...
-		//             <codePath>/<dir_n>/bin;<codePath>/<dir_n>/lib/*;
-		//        ui.UI <modelID> <rootPath> <verbose> <userDefinedName>
+		//             <codePath>/<dir_n>/bin;
+		//             <codePath>/<dir_n>/lib/*;
+		//        ui.UI <modelID> <rootPath> <verbose> <userDefinedName> <filename> <transParams>
 		//
 		// However, this arg can be generated using the following bash command (to be plugged 
 		// into the java command), which simply adds a 'bin/' and a 'lib/*' extension to *each*
@@ -242,15 +254,15 @@ public class UI {
 		// a. pwd is rootPath (rootPath does not have to be provided as arg)
 		//    $ cd <rootPath>
 		//    $ java -cp $(for p in <codePath>/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done) 
-		//           ui.UI <modelID> '' <verbose> <userDefinedName>
+		//           ui.UI <modelID> '' <verbose> <userDefinedName> <filename> <transParams>
 		//    e.g.,
 		//    $ cd /cygdrive/f/research/data/
 		//    $ java -cp $(for p in F:/research/software/code/eclipse/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done) 
-		//           ui.UI D-bwd-byrd-int-4vv '' '' '' 
+		//           ui.UI D-bwd-byrd-int-4vv '' '' '' <transParams>
 		// b. pwd is not rootPath (rootPath must be provided as arg)
 		//    $ cd <somePath>
 		//    $ java -cp $(for p in <codePath>/* ; do echo -n $p"/bin"";"$p"/lib/*"";" ; done) 
-		//           ui.UI <modelID> <rootPath> <verbose> <userDefinedName>
+		//           ui.UI <modelID> <rootPath> <verbose> <userDefinedName> <filename> <transParams>
 		//  
 		// 2. Example (fictional) CLI command with relative (to the pwd) class paths; folder 
 		//    structure is 
@@ -266,15 +278,15 @@ public class UI {
 		// c. pwd is rootPath (rootPath does not have to be provided as arg)
 		//    $ cd <path>/dirA>/<subdirA>/<dataDir>
 		//    $ java -cp $(for p in <path>/<dirB>/<codeDir>/* ; do echo -n "../../../""<dirB>/<codeDir>/"${p##*/}"/bin"";""../../../""<dirB>/<codeDir>/"${p##*/}"/lib/*"";" ; done) 
-		//           ui.UI <modelID> '' <verbose> <userDefinedName>
+		//           ui.UI <modelID> '' <verbose> <userDefinedName> <filename> <transParams>
 		//    e.g.,
 		//    $ cd /cygdrive/f/research/data/
 		//    $ java -cp $(for p in F:/research/software/code/eclipse/* ; do echo -n "../""software/code/eclipse/"${p##*/}"/bin"";""../""software/code/eclipse/"${p##*/}"/lib/*"";" ; done) 
-		//           ui.UI D-bwd-byrd-int-4vv '' '' ''
+		//           ui.UI D-bwd-byrd-int-4vv '' '' '' <transParams>
 		// d. pwd is not rootPath (rootPath must be provided as arg)
 		//    $ cd <path>/dirC>/<subdirC>/<someDir>
 		//    $ java -cp $(for p in <path>/<dirB>/<codeDir>/* ; do echo -n "../../../""<dirB>/<codeDir>/"${p##*/}"/bin"";""../../../""<dirB>/<codeDir>/"${p##*/}"/lib/*"";" ; done) 
-		//           ui.UI <modelID> <rootPath> <verbose> <userDefinedName>
+		//           ui.UI <modelID> <rootPath> <verbose> <userDefinedName> <filename> <transParams>
 		//
 		// NB: Note the use of ${p##*/} (and not $p, as under 1a. and 1b.) to get only the last 
 		//     dir in p and not the full path. See https://stackoverflow.com/questions/2107945/how-to-loop-over-directories-in-linux 
@@ -285,22 +297,41 @@ public class UI {
 			modelID = args[0].split(":")[0];			
 			modelIDFirstPass = args[0].split(":").length == 1 ? null : args[0].split(":")[1];
 			datasetIDTrain = modelID.split("-")[2] + "-" + modelID.split("-")[3] + "-" + modelID.split("-")[4];
-			rootPath = args[1];
+			// rootPath is the pwd if args[1] is an empty string or a dot; else the string given in args[1].
+			rootPath = new File(args[1]).getCanonicalFile().toString();
+
+//			// Set codePath if rootPath is not F:/research/data/
+//			if (!rootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString())) {
+//				codeRelPath = Path.CODE_DIR;
+//			}
+
+//			// If rootPath is not the local userPath (ROOT_PATH_USER == F:/research/data/)
+//			if (!rootPath.equals("") && !rootPath.equals(Path.ROOT_PATH)) {
+//				rootPathUser = rootPath;
+//			}
+//			System.out.println(rootPath);
+//			System.out.println(codeRelPath);
+//			System.exit(0);
+
 			verbose = Boolean.parseBoolean(args[2]);
 			datasetName = args[3];
 
-			set();
+			filename = new File(args[4]).getName();
+			String transParams = args[5];
+
+//			System.out.println(args[0]);
+//			System.out.println(args[1]);
+//			System.out.println(args[2]);
+//			System.out.println(args[3]);
+//			System.out.println(args[4]);
+//			System.out.println(args[5]);
+
+			Map<String, String> transcriptionParams = new LinkedHashMap<String, String>();
+			for (String s : transParams.split("\\|")) {
+				transcriptionParams.put(s.split("=")[0].trim(), s.split("=")[1].trim());
+			}
+			set(transcriptionParams);
 		}
-	}
-
-
-	private static void setRootPath(String arg) {
-		rootPath = arg;
-	}
-
-
-	public static String getRootPath() {
-		return rootPath; 
 	}
 
 
@@ -308,7 +339,7 @@ public class UI {
 	 * 
 	 * @throws IOException 
 	 */
-	public static void set() throws IOException {
+	public static void set(Map<String, String> transcriptionParams) throws IOException {
 		// 1. Set rootPath and paths to code and data
 		// a. If repeating an existing experiment or conducting a new one 
 		// rootPath is F:/research/, which contains the dirs data/annotated/ (GT data) and 
@@ -318,27 +349,27 @@ public class UI {
 		// and output of the trained model) and models/ (trained models). The paths to the code
 		// are provided via the classPath in the CLI. rootPath need not be provided if the pwd
 		// is rootPath, i.e., F:/research/data/
-		if (deployTrainedUserModel) {
-			// Do nothing if rootPath is rootPathUser; else
-			if (!rootPath.equals(rootPathUser)) {
-				// If <rootPath> arg is empty string: OK if pwd is rootPathUser
-				if (rootPath.equals("")) {
-					// http://stackoverflow.com/questions/2837263/how-do-i-get-the-directory-that-the-currently-executing-jar-file-is-in
-					String pwd = ToolBox.pathify(new String[]{new File("").getAbsolutePath()});
-					if (pwd.equals(rootPathUser)) {
-						rootPath = pwd;
-					}
-					else {
-						throw new RuntimeException("No <rootPath> provided, pwd must be " + rootPathUser);
-					}
-				}
-				// If <rootPath> arg is incorrect
-				else {
-					throw new RuntimeException("Incorrect <rootPath> provided; <rootPath> provided must be " + rootPathUser);
-				}
-			}
-		}
-		setRootPath(ToolBox.pathify(new String[]{rootPath}));
+//		if (deployTrainedUserModel) {
+//			// Do nothing if rootPath is rootPathUser; else
+//			if (!rootPath.equals(rootPathUser)) {
+//				// If <rootPath> arg is empty string: OK if pwd is rootPathUser
+//				if (rootPath.equals("")) {
+//					// http://stackoverflow.com/questions/2837263/how-do-i-get-the-directory-that-the-currently-executing-jar-file-is-in
+//					String pwd = ToolBox.pathify(new String[]{new File("").getAbsolutePath()});
+//					if (pwd.equals(rootPathUser)) {
+//						rootPath = pwd;
+//					}
+//					else {
+//						throw new RuntimeException("No <rootPath> provided, pwd must be " + rootPathUser);
+//					}
+//				}
+//				// If <rootPath> arg is incorrect
+//				else {
+//					throw new RuntimeException("Incorrect <rootPath> provided; <rootPath> provided must be " + rootPathUser);
+//				}
+//			}
+//		}
+//		setRootPath(ToolBox.pathify(new String[]{rootPath}));
 		Runner.setPathsToCodeAndData(rootPath, deployTrainedUserModel);
 
 		// 2. Set dataset(s)
@@ -356,9 +387,16 @@ public class UI {
 				ds.setName(datasetName);
 			}
 			ds.setNumVoices(dsTrain.getNumVoices());
-			ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
-				ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
-				ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION));
+			if (filename.equals("")) {
+				
+				ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
+					ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
+					ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION));
+			}
+			else {
+				String filenameNoExt = filename.substring(0, filename.indexOf("."));
+				ds.addPieceNames(Arrays.asList(filenameNoExt));
+			}
 		}
 
 		// 3. Set paths for storing and retrieving
@@ -549,7 +587,12 @@ public class UI {
 		Runner.setModelParams(modelParams);
 		Runner.setDataset(ds);
 		Runner.setDatasetTrain(dsTrain);
-		Runner.runExperiment(trainUserModel, skipTraining, deployTrainedUserModel, verbose);
+//		System.out.println(Runner.encodingsPath);
+//		System.out.println(ds.getPieceNames());
+//		System.out.println(dsTrain.getName());
+//		System.exit(0);
+//		System.out.println(Arrays.asList(transcriptionParams));
+		Runner.runExperiment(trainUserModel, skipTraining, deployTrainedUserModel, verbose, transcriptionParams);
 	}
 
 }

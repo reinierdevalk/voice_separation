@@ -8,9 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import external.Tablature;
+import external.Transcription;
 import junit.framework.TestCase;
-import representations.Tablature;
-import representations.Transcription;
+import machinelearning.RelativeTrainingExample;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.FeatureVector;
 import ui.Runner.ModellingApproach;
@@ -32,7 +34,9 @@ public class TrainingManagerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Runner.setPathsToCodeAndData(UI.getRootPath(), false);
+		Map<String, String> paths = PathTools.getPaths();
+		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
+//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
 		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
 		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");	
 	}

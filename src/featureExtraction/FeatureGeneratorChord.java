@@ -5,16 +5,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import representations.Tablature;
-import representations.Transcription;
-import structure.ScorePiece;
 import tools.ToolBox;
-import utility.DataConverter;
+import tools.labels.LabelTools;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.data.time.MetricalTimeLine;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Tablature;
+import external.Transcription;
 import featureExtraction.FeatureGenerator.Direction;
+import internal.core.ScorePiece;
 
 public class FeatureGeneratorChord {
 
@@ -319,8 +319,8 @@ public class FeatureGeneratorChord {
 		Arrays.fill(pitchMovements, 0.0);
 
 		// Get the voice labels that go with the given voice assignment; then get the voices
-		List<List<Double>> chordVoiceLabels = DataConverter.getChordVoiceLabels(voiceAssignment);
-		List<List<Integer>> voices = DataConverter.getVoicesInChord(chordVoiceLabels);
+		List<List<Double>> chordVoiceLabels = LabelTools.getChordVoiceLabels(voiceAssignment);
+		List<List<Integer>> voices = LabelTools.getVoicesInChord(chordVoiceLabels);
 
 		// Determine the size of the chord
 		// a. In the tablature case
@@ -457,10 +457,10 @@ public class FeatureGeneratorChord {
 		// 2. If not: calculate pitchVoiceRelation
 		else {
 			List<List<Double>> voiceLabels = 
-				DataConverter.getChordVoiceLabels(voiceAssignment);
+				LabelTools.getChordVoiceLabels(voiceAssignment);
 			List<Integer> pitchesInChord = null;
 			List<List<Integer>> voicesInChord = 
-				DataConverter.getVoicesInChord(voiceLabels);
+				LabelTools.getVoicesInChord(voiceLabels);
 			// 1. Get pitchesInChord and voicesInChord
 			// a. In the tablature case
 			// NB: For the alignment of the voice assigment and the pitches, the exact pitch sequence as in the chord
@@ -575,7 +575,7 @@ public class FeatureGeneratorChord {
 				new ArrayList<List<Double>>(allVoiceLabels.subList(lowestNoteIndex, lowestNoteIndex + chordSize));
 			List<Integer> groundTruthVoiceAssignmentCurrentChord = 
 //				dataConverter.getVoiceAssignment(voiceLabelsCurrentChord, highestNumberOfVoices); 	 
-				DataConverter.getVoiceAssignment(voiceLabelsCurrentChord, Transcription.MAX_NUM_VOICES); 	
+				LabelTools.getVoiceAssignment(voiceLabelsCurrentChord, Transcription.MAX_NUM_VOICES); 	
 			// The ground thruth voice assignment should be the first element in allPossibleVoiceAssignmentsCurrentChord. Thus,
 			// remove it from the List (regardless of its position within) and then re-add it as the first element  
 			allPossibleVoiceAssignmentsCurrentChord.remove(groundTruthVoiceAssignmentCurrentChord);
@@ -798,9 +798,9 @@ public class FeatureGeneratorChord {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			// Get the voices in the chord under the current voice assignment
 			List<List<Double>> currentVoiceLabels = 
-				DataConverter.getChordVoiceLabels(currentVoiceAssignment);
+				LabelTools.getChordVoiceLabels(currentVoiceAssignment);
 			List<List<Integer>> currentVoicesInChord = 
-				DataConverter.getVoicesInChord(currentVoiceLabels);
+				LabelTools.getVoicesInChord(currentVoiceLabels);
 
 			// Insert pitches and voices of sustained previous notes
 			if (btp != null && modelDuration || bnp != null) {
@@ -1041,9 +1041,9 @@ public class FeatureGeneratorChord {
 			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
 		}
 		List<List<Double>> voiceLabels = 
-			DataConverter.getChordVoiceLabels(voiceAssignment);
+			LabelTools.getChordVoiceLabels(voiceAssignment);
 		List<List<Integer>> voicesInChord = 
-			DataConverter.getVoicesInChord(voiceLabels);
+			LabelTools.getVoicesInChord(voiceLabels);
 		// In the non-tablature case: include pitches and voices of sustained previous notes in Lists
 		if (bnp != null) {			  
 			List<List<Integer>> allPitchesAndVoices = 
@@ -1158,9 +1158,9 @@ public class FeatureGeneratorChord {
 			List<Integer> pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
 //			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
 			List<List<Double>> voiceLabels = 
-				DataConverter.getChordVoiceLabels(voiceAssignment);
+				LabelTools.getChordVoiceLabels(voiceAssignment);
 			List<List<Integer>> voicesInChord = 
-				DataConverter.getVoicesInChord(voiceLabels);
+				LabelTools.getVoicesInChord(voiceLabels);
 			// In the non-tablature case: include pitches and voices of sustained previous notes in Lists
 			if (bnp != null) {			  
 				List<List<Integer>> allPitchesAndVoices = 
@@ -1246,9 +1246,9 @@ public class FeatureGeneratorChord {
 			List<Integer> pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
 //			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
 			List<List<Double>> voiceLabels = 
-				DataConverter.getChordVoiceLabels(voiceAssignment);
+				LabelTools.getChordVoiceLabels(voiceAssignment);
 			List<List<Integer>> voicesInChord = 
-				DataConverter.getVoicesInChord(voiceLabels);
+				LabelTools.getVoicesInChord(voiceLabels);
 			// In the non-tablature case: include pitches and voices of sustained previous notes in Lists
 			if (bnp != null) {			  
 				List<List<Integer>> allPitchesAndVoices = 
@@ -1841,9 +1841,9 @@ public class FeatureGeneratorChord {
 		
 	  // Get the voice labels that go with the given voice assignment; then get the voices
 		List<List<Double>> chordVoiceLabels = 
-			DataConverter.getChordVoiceLabels(voiceAssignment);
+			LabelTools.getChordVoiceLabels(voiceAssignment);
 		List<List<Integer>> voices = 
-			DataConverter.getVoicesInChord(chordVoiceLabels);
+			LabelTools.getVoicesInChord(chordVoiceLabels);
 		
 		// Determine the size of the chord
 		// a. In the tablature case
@@ -1954,7 +1954,7 @@ public class FeatureGeneratorChord {
 		for (int i : indicesOfSustainedPreviousNotes) {
 			List<Double> currentVoiceLabel = allVoiceLabels.get(i);
   		List<Integer> currentVoice = 
-  			DataConverter.convertIntoListOfVoices(currentVoiceLabel);
+  			LabelTools.convertIntoListOfVoices(currentVoiceLabel);
   		// currentVoice will contain only one element as CoDs do not occur
   		voicesOfSustainedPreviousNotes.add(currentVoice.get(0));
 		}
@@ -2049,17 +2049,17 @@ public class FeatureGeneratorChord {
 		// 1. Get pitchesInChord and voicesInChord
 		List<Integer> pitchesInChord = null;
 		List<List<Integer>> voicesInChord = null;
-		List<List<Double>> voiceLabels = DataConverter.getChordVoiceLabels(voiceAssignment);
+		List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(voiceAssignment);
 		// a. In the tablature case
 		if (btp != null) {
 			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
-			voicesInChord = DataConverter.getVoicesInChord(voiceLabels);
+			voicesInChord = LabelTools.getVoicesInChord(voiceLabels);
 		}
 		// b. In the non-tablature case
 		if (bnp != null) {			  
 			// Get the pitches and the voices in the chord, including those of sustained previous notes
 			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
-			voicesInChord = DataConverter.getVoicesInChord(voiceLabels);
+			voicesInChord = LabelTools.getVoicesInChord(voiceLabels);
 			List<List<Integer>> allPitchesAndVoices = 
 				Transcription.getAllPitchesAndVoicesInChord(bnp, 
 				pitchesInChord, voicesInChord, allVoiceLabels, lowestNoteIndex);

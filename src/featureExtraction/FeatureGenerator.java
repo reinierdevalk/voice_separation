@@ -10,19 +10,18 @@ import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Tablature;
+import external.Transcription;
 import machineLearning.MelodyPredictor;
-import representations.Tablature;
-import representations.Transcription;
-import structure.metric.Utils;
-import tbp.RhythmSymbol;
-import tbp.Symbol;
+import tbp.symbols.Symbol;
 import tools.ToolBox;
+import tools.labels.LabelTools;
+import tools.music.TimeMeterTools;
 import ui.Runner;
 import ui.Runner.FeatureVector;
 import ui.Runner.Model;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
-import utility.DataConverter;
 
 public class FeatureGenerator {
 
@@ -148,7 +147,7 @@ public class FeatureGenerator {
 			// 6. The metric position of the note within the bar		  
 			Rational metricTime = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
 				Tablature.SRV_DEN);	
-			Rational[] metricPosition = Utils.getMetricPosition(metricTime, meterInfo);
+			Rational[] metricPosition = TimeMeterTools.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
 			// 7-24. The onset time proximity, the pitch proximity and course information for the next NUM_NEXT_CHORDS chords
@@ -183,7 +182,7 @@ public class FeatureGenerator {
 			// 3. The metric position of the note within the bar
 			Rational metricTime = new Rational(bnp[noteIndex][Transcription.ONSET_TIME_NUMER],
 				bnp[noteIndex][Transcription.ONSET_TIME_DENOM]);	
-			Rational[] metricPosition = Utils.getMetricPosition(metricTime, meterInfo);
+			Rational[] metricPosition = TimeMeterTools.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR_NON_TAB] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
 			// 4-15. The onset time proximity and the pitch proximity information for the next NUM_NEXT_CHORDS chords
@@ -593,8 +592,11 @@ public class FeatureGenerator {
 		}
 
 		// 4. Determine the intervals in the chord and add them to allValues 
-		// a. Exluding any sustained previous notes 
+		// a. Exluding any sustained previous notes
 		Collections.sort(newPitchesInChord);
+		if (noteIndex == 665) {
+			System.out.println(newPitchesInChord);
+		}
 		for (int i = 0; i < newPitchesInChord.size() - 1; i++) {
 			int interval = Math.abs(newPitchesInChord.get(i + 1) - newPitchesInChord.get(i));
 			valuesExcl[FIRST_INTERVAL + i] = interval;
@@ -925,7 +927,7 @@ public class FeatureGenerator {
 							btp[i][Tablature.ONSET_TIME] == onsetTimePreviousNote) {		  				
 							// If (one of) the voice(s) the current previous TabSymbol is in the same as the current voice
 							List<Integer> voicesCurrentPreviousTabSymbol = 
-								DataConverter.convertIntoListOfVoices(transcription.getVoiceLabels().get(i));
+								LabelTools.convertIntoListOfVoices(transcription.getVoiceLabels().get(i));
 							if (voicesCurrentPreviousTabSymbol.contains(voiceNumber)) {
 								// If the course of the current previous TabSymbol is the same as that of the note at noteIndex: 
 								// set the appropriate element of voicesWithPreviousNoteOnSameCourse to 1.0 		  				
@@ -1769,7 +1771,7 @@ public class FeatureGenerator {
 							Tablature.SRV_DEN);
 						List<Double> durationLabelCoDNote = durationLabels.get(currentIndex);
 						Rational[] durationsCoDNote = 
-							DataConverter.convertIntoDuration(durationLabelCoDNote);
+							LabelTools.convertIntoDuration(durationLabelCoDNote);
 						Rational offsetTimeLongerCoDNote = onsetTimeCoDNote.add(durationsCoDNote[0]);
 						Rational offsetTimeShorterCoDNote = null;
 						// If durationsCoDNote contains two elements, i.e., if the CoDnotes have different durations:
