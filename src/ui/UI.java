@@ -72,6 +72,8 @@ public class UI {
 
 		// If repeating an existing experiment or conducting a new one: set parameters and settings
 		if (!deployTrainedUserModel) {
+			System.out.println("EXIT FOR SAFETY REASONS -- uncomment below");
+			System.exit(0);
 			
 			// Settings
 			// a. Runner settings
@@ -210,11 +212,11 @@ public class UI {
 		// 						unidirectional model whose output is used is added, separated
 		// 						by a colon (e.g., N_B-fwd-bach-WTC-4vv:N-bwd-bach-WTC-4vv) 
 		// - <rootPath>			the path from which the code is run. Should contain three dirs 
-		//						- user/, containing the input and output files
+		//						- user/, containing the input and output files // TODO tool_data
 		//                      - models/, containing the trained models
-		// 						- code/, containing the code
+		// 						- code/, containing the code // TODO software/code/eclipse (dev) or nothing (user case)
 		//						Is set to pwd if not provided (empty string) or specified to pwd (dot).
-		//						NB: A special case is the 'dev root path' F:/research/data, which
+		//						NB: TODO A special case is the 'dev root path' F:/research/data, which
 		//                      can be used locally for development and testing of a trained model, 
 		//						and which does not require a code/ dir, but instead accesses the code 
 		//						in its default dir F:/research/software/code/eclipse/ 
@@ -226,8 +228,8 @@ public class UI {
 		//						provided, all .tbp files in the folder are transcribed
 		//						(optional; can empty string (i.e., none)
 		// - <transParams>		a string of the transcription parameters, split by |. The parameters are
-		//						-tn (tuning), -k (key), -m (mode), -tb (retain tab), -tp (tab type shown).
-		//						E.g. -tn=A|-k=-2|-m=0|-tb=y|-tp=ILT
+		//						-tn (tuning), -k (key), -m (mode), -tb (retain tab), -tp (tab type shown). TODO names
+		//						E.g. -u=A|-k=-2|-m=0|-t=y|-y=ILT 
 		//
 		// The -cp arg <classPaths> contains all paths to .class (in the bin/ dirs) and .jar 
 		// (in the lib/ dirs) files, and these paths must be added separately. Depending on the 
@@ -319,12 +321,14 @@ public class UI {
 			filename = new File(args[4]).getName();
 			String transParams = args[5];
 
-//			System.out.println(args[0]);
-//			System.out.println(args[1]);
-//			System.out.println(args[2]);
-//			System.out.println(args[3]);
-//			System.out.println(args[4]);
-//			System.out.println(args[5]);
+			System.out.println("modelID: " + modelID); // args[0]
+			System.out.println("modelIDFirstPass: " + modelIDFirstPass); // from args[0]
+			System.out.println("datasetIDTrain: " + datasetIDTrain); // from args[0]
+			System.out.println("rootPath: " + rootPath); // args[1]
+			System.out.println("verbose: " + verbose); // args[2]
+			System.out.println("datasetname: " + datasetName); // args[3]
+			System.out.println("filename: " + filename); // args[4]
+			System.out.println("transParams: " + transParams); // args[5]
 
 			Map<String, String> transcriptionParams = new LinkedHashMap<String, String>();
 			for (String s : transParams.split("\\|")) {
@@ -387,8 +391,7 @@ public class UI {
 				ds.setName(datasetName);
 			}
 			ds.setNumVoices(dsTrain.getNumVoices());
-			if (filename.equals("")) {
-				
+			if (filename.equals("")) {	
 				ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
 					ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
 					ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION));
@@ -397,6 +400,9 @@ public class UI {
 				String filenameNoExt = filename.substring(0, filename.indexOf("."));
 				ds.addPieceNames(Arrays.asList(filenameNoExt));
 			}
+//			System.out.println(ds.getName());
+//			System.out.println(dsTrain.getNumVoices());
+//			System.out.println(filename.substring(0, filename.indexOf(".")));
 		}
 
 		// 3. Set paths for storing and retrieving

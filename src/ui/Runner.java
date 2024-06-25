@@ -785,7 +785,7 @@ public class Runner {
 		for (Map.Entry<String, String> entry : paths.entrySet()) {
 			System.out.println(entry.getKey() + " -- " + entry.getValue());
 		}
-		System.exit(0);
+//		System.exit(0);
 		
 		if (!appliedToNewData) {
 			String codePath = PathTools.getPathString(Arrays.asList(cp));
@@ -827,23 +827,27 @@ public class Runner {
 			boolean isDeploymentDevCase = 
 				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
 //				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
-			System.out.println("HIER");
+			System.out.println("HIER RUNNER");
 			System.out.println(isDeploymentDevCase);
-			System.exit(0);
+//			System.exit(0);
 			String codePath = isDeploymentDevCase ?
 				PathTools.getPathString(Arrays.asList(cp)) :
 //				PathTools.getPathString(Arrays.asList(rp, cp)) :
 //				ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH}) :
-				PathTools.getPathString(Arrays.asList(argRootPath, paths.get("CODE_DIR"))); // TODO paths.get("CODE_DIR") was "code/" 
+				PathTools.getPathString(Arrays.asList(cp));
+//				PathTools.getPathString(Arrays.asList(argRootPath, paths.get("CODE_DIR"))); // TODO paths.get("CODE_DIR") was "code/" 
+			
 			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
 //			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
 			String userPath = PathTools.getPathString(Arrays.asList(argRootPath, "user"));
 //			String userPath = ToolBox.pathify(new String[]{argRootPath, "user/"});
-			encodingsPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
+			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
+//			encodingsPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
 //			encodingsPath = ToolBox.pathify(new String[]{userPath, "in/"});
-			midiPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
+			midiPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
+//			midiPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
 //			midiPath = ToolBox.pathify(new String[]{userPath, "in/"});
-			outPath = PathTools.getPathString(Arrays.asList(userPath, "out"));
+			outPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "out"));
 //			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
 			modelsPath = PathTools.getPathString(Arrays.asList(argRootPath, "models"));
 //			modelsPath = ToolBox.pathify(new String[]{argRootPath, "models/"});
@@ -856,9 +860,19 @@ public class Runner {
 ////				ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR})
 //			);
 			MEIExport.setPythonScriptPath(
-				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
+				PathTools.getPathString(Arrays.asList(codePath, "representations", "py"))	
+//				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
 //				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
 			);
+			
+			System.out.println(pythonScriptPath);
+			System.out.println(encodingsPath);
+			System.out.println(midiPath);
+			System.out.println(outPath);
+			System.out.println(modelsPath);
+			System.out.println(codePath);
+			System.out.println(argRootPath);
+//			System.exit(0);
 		}
 	}
 
