@@ -154,7 +154,7 @@ public class TrainingManager {
 					// Reversed
 					System.out.println("R E V E R S I N G");									
 					Tablature currTabRev = new Tablature(currTab); 
-					currTabRev.augment(-1, -1, "reverse");
+					currTabRev.augment(-1, null, -1, "reverse");
 //					currTabRev.reverse();
 //					Tablature currTabRev = Tablature.reverse(currTab);
 		
@@ -171,7 +171,7 @@ public class TrainingManager {
 					// Deornamented
 					System.out.println("D E O R N A M E N T I N G");										
 					Tablature currTabDeorn = new Tablature(currTab);
-					currTabDeorn.augment(ornThresh, -1, "deornament");
+					currTabDeorn.augment(ornThresh, new ArrayList<Integer>(), -1, "deornament");
 //					currTabDeorn.deornament(ornThresh);
 //					Tablature currTabDeorn = Tablature.deornament(currTab, ornThresh);
 					
@@ -182,7 +182,7 @@ public class TrainingManager {
 					// Reversed and deornamented
 					System.out.println("R E V E R S E  +  D E O R N A M E N T");
 					Tablature currTabDeornRev = new Tablature(currTabDeorn);
-					currTabDeornRev.augment(-1, -1, "reverse");
+					currTabDeornRev.augment(-1, null, -1, "reverse");
 //					currTabDeornRev.reverse();
 
 //					for (int ii = 35; ii < 40; ii++) {

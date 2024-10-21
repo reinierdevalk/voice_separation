@@ -119,6 +119,11 @@ public class TestManager {
 	private String applicationProcess = "";
 	private List<List<List<Integer>>> allObservations;
 	
+
+	public static void main(String[] args) {
+		
+	}
+	
 	public void prepareTesting(String start, Map<String, String> transcriptionParams) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Dataset dataset = Runner.getDataset();
@@ -321,6 +326,8 @@ public class TestManager {
 		if (isTablatureCase) {
 			tablature = dataset.getAllTablatures().get(pieceIndex);
 		}
+//		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+//		System.out.println(Arrays.asList(tablature.getTunings()));
 		groundTruthTranscription = dataset.getAllTranscriptions().get(pieceIndex);
 
 		// Non-voice-related information (derived from tablature or groundTruthTranscription)
@@ -654,13 +661,14 @@ public class TestManager {
 //						new SortedContainer<Marker>();
 				// TODO G-tuning is assumed as default
 				if (deployTrainedUserModel) {
+					// TODO access args 
 					int numAlt = Integer.valueOf(transcriptionParams.get("-k")); // TODO don't hardcode -k
 					int md = Integer.valueOf(transcriptionParams.get("-m")); // TODO don't hardcode -m
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
-					System.out.println(numAlt);
-					System.out.println(md);
-					System.out.println(rra[0]);
-					System.out.println(rra[1]);
+//l					System.out.println(numAlt);
+//l					System.out.println(md);
+//l					System.out.println(rra[0]);
+//l					System.out.println(rra[1]);
 //					System.exit(0);
 					KeyMarker km = new KeyMarker(Rational.ZERO, (long) 0.0);
 					// F minor -- 4640_10_quand_mon_mari_lasso
@@ -752,14 +760,16 @@ public class TestManager {
 				if (tablature != null) {
 					for (boolean grandStaff : new Boolean[]{true, false}) {
 						MEIExport.exportMEIFile(
-							t, tablature,
+							t, 
+							(transcriptionParams.get("-t").equals("y") ? tablature : null),	
+//							tablature,
 	//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
 	//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
 							colInd, 
 							grandStaff,
 							false,
 							/*true,*/
-							new String[]{expPath, "halcyon"}
+							new String[]{expPath, "abtab -- transcriber"}
 							);
 					}
 				}

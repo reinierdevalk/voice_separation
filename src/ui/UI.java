@@ -321,19 +321,24 @@ public class UI {
 			filename = new File(args[4]).getName();
 			String transParams = args[5];
 
-			System.out.println("modelID: " + modelID); // args[0]
-			System.out.println("modelIDFirstPass: " + modelIDFirstPass); // from args[0]
-			System.out.println("datasetIDTrain: " + datasetIDTrain); // from args[0]
-			System.out.println("rootPath: " + rootPath); // args[1]
-			System.out.println("verbose: " + verbose); // args[2]
-			System.out.println("datasetname: " + datasetName); // args[3]
-			System.out.println("filename: " + filename); // args[4]
-			System.out.println("transParams: " + transParams); // args[5]
+//l			System.out.println("modelID: " + modelID); // args[0]
+//l			System.out.println("modelIDFirstPass: " + modelIDFirstPass); // from args[0]
+//l			System.out.println("datasetIDTrain: " + datasetIDTrain); // from args[0]
+//l			System.out.println("rootPath: " + rootPath); // args[1]
+//l			System.out.println("verbose: " + verbose); // args[2]
+//l			System.out.println("datasetname: " + datasetName); // args[3]
+//l			System.out.println("filename: " + filename); // args[4]
+//l			System.out.println("transParams: " + transParams); // args[5]
 
+			// Valid values: k, m
 			Map<String, String> transcriptionParams = new LinkedHashMap<String, String>();
-			for (String s : transParams.split("\\|")) {
-				transcriptionParams.put(s.split("=")[0].trim(), s.split("=")[1].trim());
+			// TODO make method
+			for (String s : transParams.split(",")) {
+				transcriptionParams.put(s.split(" ")[0].trim(), s.split(" ")[1].trim());
 			}
+//			for (String s : transParams.split("\\|")) {
+//				transcriptionParams.put(s.split("=")[0].trim(), s.split("=")[1].trim());
+//			}
 			set(transcriptionParams);
 		}
 	}
@@ -539,6 +544,8 @@ public class UI {
 			// Reset necessary settings
 			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(false));
 			modelParams.put(Runner.WEIGHTS_INIT, (double) WeightsInit.INIT_FROM_LIST.getIntRep());
+		
+//			modelParams.put(Runner.MINI_BATCH_SIZE, (double) miniBatchSize);
 		}
 
 //		for (Entry<String, Double> e : modelParams.entrySet()) {
@@ -582,11 +589,11 @@ public class UI {
 		MelodyPredictor.setMelModelType(MelModelType.SIMPLE_LM);
 		MelodyPredictor.setTermType(mdl.getKylmModelType());
 		EvaluationManager.setMetricsUsed(metricsUsed);
-		System.out.println("storePath              = " + storePath);
-		System.out.println("pathPredTransFirstPass = " + pathPredTransFirstPass);
-		System.out.println("pathTrainedUserModel   = " + pathTrainedUserModel);
-		System.out.println("pathStoredNN           = " + pathStoredNN);
-		System.out.println("pathStoredMM           = " + pathStoredMM);
+//l		System.out.println("storePath              = " + storePath);
+//l		System.out.println("pathPredTransFirstPass = " + pathPredTransFirstPass);
+//l		System.out.println("pathTrainedUserModel   = " + pathTrainedUserModel);
+//l		System.out.println("pathStoredNN           = " + pathStoredNN);
+//l		System.out.println("pathStoredMM           = " + pathStoredMM);
 //		System.exit(0);
 		Runner.setPaths(new String[]{storePath, pathPredTransFirstPass, pathTrainedUserModel, 
 			pathStoredNN, pathStoredMM});
@@ -598,6 +605,7 @@ public class UI {
 //		System.out.println(dsTrain.getName());
 //		System.exit(0);
 //		System.out.println(Arrays.asList(transcriptionParams));
+
 		Runner.runExperiment(trainUserModel, skipTraining, deployTrainedUserModel, verbose, transcriptionParams);
 	}
 

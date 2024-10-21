@@ -639,6 +639,10 @@ public class Runner {
 			return intRep;
 		}
 	};
+	
+	public static void main(String[] args) throws IOException {
+		
+	}
 
 	public static Map<String, Object[]> getEnumKeys(/*ModelType mt*/) {
 		Map<String, Object[]> keys = new LinkedHashMap<String, Object[]>();
@@ -775,6 +779,7 @@ public class Runner {
 
 	public static void setPathsToCodeAndData(String argRootPath, boolean appliedToNewData) throws IOException {
 		Map<String, String> paths = PathTools.getPaths();
+		
 //		String rp = paths.get("ROOT_PATH");
 		String cp = paths.get("CODE_PATH");
 		String tp = paths.get("TEMPLATES_PATH");
@@ -782,9 +787,9 @@ public class Runner {
 //		String dd = paths.get("DAATA_DIR");
 //		String td = paths.get("TEEMPLATES_DIR");
 		
-		for (Map.Entry<String, String> entry : paths.entrySet()) {
-			System.out.println(entry.getKey() + " -- " + entry.getValue());
-		}
+//		for (Map.Entry<String, String> entry : paths.entrySet()) {
+//l			System.out.println(entry.getKey() + " -- " + entry.getValue());
+//		}
 //		System.exit(0);
 		
 		if (!appliedToNewData) {
@@ -817,8 +822,8 @@ public class Runner {
 //				PathTools.getPathString(Arrays.asList(rp, dd, td))	
 //				ToolBox.pathify(new String[]{Path.ROOT_PATH + Path.DATA_DIR, Path.TEMPLATES_DIR})
 //			);
-			MEIExport.setPythonScriptPath(
-				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
+			MEIExport.setPythonPath(
+				PathTools.getPathString(Arrays.asList(codePath, "utils"/*"formats-representations",*/, "py"))
 //				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
 			);
 		}
@@ -827,8 +832,8 @@ public class Runner {
 			boolean isDeploymentDevCase = 
 				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
 //				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
-			System.out.println("HIER RUNNER");
-			System.out.println(isDeploymentDevCase);
+//l			System.out.println("HIER RUNNER");
+//l			System.out.println(isDeploymentDevCase);
 //			System.exit(0);
 			String codePath = isDeploymentDevCase ?
 				PathTools.getPathString(Arrays.asList(cp)) :
@@ -859,19 +864,20 @@ public class Runner {
 //				templatePath
 ////				ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR})
 //			);
-			MEIExport.setPythonScriptPath(
-				PathTools.getPathString(Arrays.asList(codePath, "representations", "py"))	
+			MEIExport.setPythonPath(
+				PathTools.getPathString(Arrays.asList(codePath, "utils"/*"representations"*/, "py"))	
 //				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
 //				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
 			);
-			
-			System.out.println(pythonScriptPath);
-			System.out.println(encodingsPath);
-			System.out.println(midiPath);
-			System.out.println(outPath);
-			System.out.println(modelsPath);
-			System.out.println(codePath);
-			System.out.println(argRootPath);
+			MEIExport.setTemplatesPath(tp);
+
+//l			System.out.println(pythonScriptPath);
+//l			System.out.println(encodingsPath);
+//l			System.out.println(midiPath);
+//l			System.out.println(outPath);
+//l			System.out.println(modelsPath);
+//l			System.out.println(codePath);
+//l			System.out.println(argRootPath);
 //			System.exit(0);
 		}
 	}
