@@ -1,5 +1,11 @@
 package machineLearning;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,9 +18,9 @@ import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.Model;
 import ui.Runner.ModellingApproach;
-import junit.framework.TestCase;
 
-public class EvaluationManagerTest extends TestCase {
+
+public class EvaluationManagerTest {
 	
 	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
 	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
@@ -22,17 +28,16 @@ public class EvaluationManagerTest extends TestCase {
 	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
 	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
+	@Test
 	public void testBreakList() {	
 		List<Integer> list1 = Arrays.asList(new Integer[]{14, 15, 144, 146, 1028});
 		List<Integer> list2 = Arrays.asList(new Integer[]{14, 15, 144, 145, 146, 1027, 1028});
@@ -53,7 +58,8 @@ public class EvaluationManagerTest extends TestCase {
 		assertEquals(expected2, actual2);
 	}
 
-	
+
+	@Test
 	public void testGetAvgStDevTotals() {
 //		List<EvaluationManager.Metric> altCSVTable = Arrays.asList(new EvaluationManager.Metric[]{
 //			EvaluationManager.Metric.MODE, EvaluationManager.Metric.NTW_ERR,
@@ -151,7 +157,9 @@ public class EvaluationManagerTest extends TestCase {
 			}
 		}
 	}
-	
+
+
+	@Test
 	public void testGetMetricsSingleFoldMM() {
 		List<double[]> outputs = new ArrayList<double[]>();
 		outputs.add(new double[]{0.1, 0.2, 0.3, 0.4, 0.3}); // correct
@@ -188,6 +196,7 @@ public class EvaluationManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testAssertCorrectnessMMOutput() {
 		List<Double> voiceLabel = Arrays.asList(new Double[]{0.0, 0.0, 1.0, 0.0, 0.0});
 		List<double[]> outputs = new ArrayList<double[]>();

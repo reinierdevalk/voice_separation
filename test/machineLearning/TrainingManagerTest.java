@@ -1,5 +1,11 @@
 package machineLearning;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,15 +16,13 @@ import java.util.Map;
 
 import external.Tablature;
 import external.Transcription;
-import junit.framework.TestCase;
 import machinelearning.RelativeTrainingExample;
 import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.FeatureVector;
 import ui.Runner.ModellingApproach;
-import ui.UI;
 
-public class TrainingManagerTest extends TestCase {
+public class TrainingManagerTest {
 	
 	private File midiTestpiece1;
 	private File encodingTestpiece1;
@@ -29,24 +33,30 @@ public class TrainingManagerTest extends TestCase {
 	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
 	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
 
+	private double delta;
+
 	TrainingManager tm = new TrainingManager();
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		Map<String, String> paths = PathTools.getPaths();
-		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
-//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
-		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
-		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");	
+	@Before
+	public void setUp() throws Exception {
+		Map<String, String> paths = PathTools.getPaths(true);
+		encodingTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test")) + "testpiece.tbp"
+		);
+		midiTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test")) + "testpiece.mid"
+		);
+		delta = 1e-9;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
+	@Test
 	public void testDeduplicate() {
 		// Toy example: five pieces of 4, 3, 5, 5, and 3 notes
 		List<Integer[]> indivPieceInds = new ArrayList<>();
@@ -203,6 +213,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetDeduplicationInfo() {
 		List<Integer[]> indivPieceInds = new ArrayList<>();
 		indivPieceInds.add(new Integer[]{0, 3});
@@ -270,6 +281,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCreateTrainAndValSet() {
 		// 1. Without augmentation
 		List<List<List<List<Double>>>> expectedsDbl = new ArrayList<List<List<List<Double>>>>();
@@ -437,6 +449,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testReintegrateVldData() {
 		List<double[]> expected = new ArrayList<>();
 		expected.add(new double[]{0}); expected.add(new double[]{1});
@@ -509,13 +522,14 @@ public class TrainingManagerTest extends TestCase {
 			for (int i = 0; i < expected.size(); i++) {
 				assertEquals(expected.get(i).length, actual.get(i).length);
 				for (int j = 0; j < expected.get(i).length; j++) {
-					assertEquals(expected.get(i)[j], actual.get(i)[j]);
+					assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 				}
 			}
 		}
 	}
 
 
+	@Test
 	public void testSmoothenOutputs() {
 		List<double[]> outputs = new ArrayList<double[]>();
 		outputs.add(new double[]{0.1, 0.2, 0.0, 0.4, 0.5});
@@ -528,16 +542,18 @@ public class TrainingManagerTest extends TestCase {
 		expected.add(new double[]{0.1, 0.2, 0.3, 0.4, 0.00001});
 
 		List<double[]> actual = TrainingManager.smoothenOutput(outputs, 0.00001);
+
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
 
 
+	@Test
 	public void testGenerateAllRelativeTrainingExamples() {	
 		// Make allCompleteChordFeatureVectors, a List of three chords each with three fictional chord feature vectors 
 		List<List<List<Double>>> allCompleteChordFeatureVectors = new ArrayList<List<List<Double>>>();
@@ -599,6 +615,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetNumberOfHiddenNeurons() {
 		List<Double> HLFactors = 
 			new ArrayList<Double>(Arrays.asList(new Double[]{0.2, 0.25, 1/3.0, 0.5, 
@@ -625,8 +642,9 @@ public class TrainingManagerTest extends TestCase {
 		}
 		assertEquals(expected, actual);
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateChordDictionary() {
 		Tablature tab = new Tablature(encodingTestpiece1);
 		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -661,6 +679,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateChordDictionaryNonTab() {
 		Transcription trans = new Transcription(midiTestpiece1);
 
@@ -694,6 +713,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateMappingDictionary() {
 		Tablature tab = new Tablature(encodingTestpiece1);
 		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -725,8 +745,9 @@ public class TrainingManagerTest extends TestCase {
 		}
 		assertEquals(expected, actual);
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateMappingDictionaryNonTab() {
 		Transcription trans = new Transcription(midiTestpiece1);
 
@@ -759,6 +780,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateInitialStateMatrix() {
 		Tablature tab = new Tablature(encodingTestpiece1);
 		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -782,6 +804,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateInitialStateMatrixNonTab() {
 		Transcription trans = new Transcription(midiTestpiece1);
 
@@ -804,6 +827,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateObservationProbabilityMatrix() {
 		Tablature tab = new Tablature(encodingTestpiece1);
 		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -872,6 +896,7 @@ public class TrainingManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateObservationProbabilityMatrixNonTab() {
 		Transcription trans = new Transcription(midiTestpiece1);
 
@@ -938,7 +963,8 @@ public class TrainingManagerTest extends TestCase {
 		}
 	}
 
-	
+
+	@Test
 	public void testGenerateTransitionProbabilityMatrix() {
 		Tablature tab = new Tablature(encodingTestpiece1);
 		Transcription trans = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -983,8 +1009,9 @@ public class TrainingManagerTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateTransitionProbabilityMatrixNonTab() {
 		Transcription trans = new Transcription(midiTestpiece1);
 
@@ -1028,6 +1055,5 @@ public class TrainingManagerTest extends TestCase {
 			}
 		}
 	}
-	
 
 }

@@ -1,28 +1,34 @@
 package machineLearning;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
 import de.uos.fmt.musitech.utility.math.Rational;
 
-public class ErrorFractionTest extends TestCase {
+public class ErrorFractionTest {
 	
+	private double delta;
 	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@Before
+	public void setUp() throws Exception {
+		delta = 1e-9;
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
+	@Test
 	public void testToDouble() {
 		ErrorFraction e1 = new ErrorFraction(8, 16);
 		ErrorFraction e2 = new ErrorFraction(1, 5);
@@ -36,12 +42,13 @@ public class ErrorFractionTest extends TestCase {
 		double actual2 = e2.toDouble();
 		double actual3 = e3.toDouble();
 
-		assertEquals(expected1, actual1);
-		assertEquals(expected2, actual2);
-		assertEquals(expected3, actual3);
+		assertEquals(expected1, actual1, delta);
+		assertEquals(expected2, actual2, delta);
+		assertEquals(expected3, actual3, delta);
 	}
 
 
+	@Test
 	public void testToDoubleBig() {
 		ErrorFraction e1 = new ErrorFraction(BigInteger.valueOf(300000), BigInteger.valueOf(600000));
 		ErrorFraction e2 = new ErrorFraction(BigInteger.valueOf(3000000), BigInteger.valueOf(6000000));
@@ -55,12 +62,13 @@ public class ErrorFractionTest extends TestCase {
 		double actual2 = e2.toDoubleBig();
 		double actual3 = e3.toDoubleBig();
 
-		assertEquals(expected1, actual1);
-		assertEquals(expected2, actual2);
-		assertEquals(expected3, actual3);
+		assertEquals(expected1, actual1, delta);
+		assertEquals(expected2, actual2, delta);
+		assertEquals(expected3, actual3, delta);
 	}
 
 
+	@Test
 	public void testToRational() {
 		ErrorFraction e = new ErrorFraction(8, 16);
 
@@ -73,6 +81,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testMultiplyNumerator() {
 		ErrorFraction e1 = new ErrorFraction(8, 16); // new ErrorFraction(56290126, 59696271); 
 		ErrorFraction e2 = new ErrorFraction(3, 41);
@@ -94,6 +103,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testMultiply() {
 		ErrorFraction e1 = new ErrorFraction(8, 16);
 		ErrorFraction e2 = new ErrorFraction(3, 41);
@@ -115,6 +125,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testIsEqual() {
 		ErrorFraction e1 = new ErrorFraction(3, 4);
 		ErrorFraction e2 = new ErrorFraction(3, 4);
@@ -135,6 +146,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testSum() {
 		List<ErrorFraction> list1 = Arrays.asList(new ErrorFraction[]{new ErrorFraction(3, 4), 
 			new ErrorFraction(1, 2), new ErrorFraction(1, 7)});
@@ -156,6 +168,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetWeightedAverage() {
 		ErrorFraction e1 = new ErrorFraction(7, 8); 
 		ErrorFraction e2 = new ErrorFraction(4, 5);
@@ -171,6 +184,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetWeightedAverageBig() {
 		List<ErrorFraction> list = Arrays.asList(new ErrorFraction[]{
 			new ErrorFraction(1, 2), new ErrorFraction(3, 4),
@@ -186,6 +200,7 @@ public class ErrorFractionTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetWeightedAverageAsDouble() {
 		ErrorFraction e1 = new ErrorFraction(7, 8); 
 		ErrorFraction e2 = new ErrorFraction(4, 5);
@@ -196,7 +211,7 @@ public class ErrorFractionTest extends TestCase {
 		double expected = (double) 8 / 30;
 		double actual = ErrorFraction.getWeightedAverageAsDouble(toBeAveraged);
 
-		assertEquals(expected, actual);	 
+		assertEquals(expected, actual, delta);	 
 	}
 
 }

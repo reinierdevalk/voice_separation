@@ -1,41 +1,51 @@
 package data;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
 import tools.path.PathTools;
-import ui.Runner;
 import ui.Runner.ModellingApproach;
 
-public class DatasetTest extends TestCase {
+public class DatasetTest {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		Map<String, String> paths = PathTools.getPaths();
-		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
-//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
+	private String encodingsPath;
+	private String midiPath;
+	private Map<String, String> paths;
+	
+	@Before
+	public void setUp() throws Exception {
+		paths = PathTools.getPaths(true);
+		encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+		midiPath = PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
+	@Test
 	public void testGetNumDataExamples() {
 		List<Integer> expected = Arrays.asList(new Integer[]{3*39, 3*16, 3*40, 3*16});
 
-		String[] paths = new String[]{
-			Runner.encodingsPath + "/test/", Runner.midiPath + "/test/", Runner.midiPath + "/test/"};
+		String[] argPaths = new String[]{
+			encodingsPath + "/test/", 
+			midiPath + "/test/", 
+			midiPath + "/test/"
+		};
 
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
-		ds.populateDataset(null, paths, false);
+		ds.populateDataset(null, paths, argPaths, false);
 		Dataset dsNonTab = new Dataset(Dataset.TEST);
-		dsNonTab.populateDataset(null, paths, false);
+		dsNonTab.populateDataset(null, paths, argPaths, false);
 
 		List<Integer> actual = new ArrayList<Integer>();
 		actual.add(ds.getNumDataExamples(ModellingApproach.N2N));
@@ -50,6 +60,7 @@ public class DatasetTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetIndividualPieceSizes() {		
 		List<List<Integer>> expected = new ArrayList<List<Integer>>(); 
 		// N2N
@@ -61,14 +72,16 @@ public class DatasetTest extends TestCase {
 		// C2C non-tab
 		expected.add(Arrays.asList(new Integer[]{16, 16, 16}));
 
-		String[] paths = 
-			new String[]{Runner.encodingsPath + "test/", Runner.midiPath + "test/", 
-			Runner.midiPath + "test/"};
+		String[] argPaths = new String[]{
+			encodingsPath + "test/", 
+			midiPath + "test/", 
+			midiPath + "test/"
+		};
 
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
-		ds.populateDataset(null, paths, false);
+		ds.populateDataset(null, paths, argPaths, false);
 		Dataset dsNonTab = new Dataset(Dataset.TEST);
-		dsNonTab.populateDataset(null, paths, false);
+		dsNonTab.populateDataset(null, paths, argPaths, false);
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.N2N));
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.C2C));
@@ -85,6 +98,7 @@ public class DatasetTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetBeginIndices() {
 //		// disant (331): 0-330, t=331
 //		// mess (706): (0+331)-(705+331), t=1037 

@@ -13,6 +13,7 @@ import external.Tablature;
 import external.Transcription;
 import internal.core.Encoding;
 import tools.ToolBox;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 
@@ -146,7 +147,8 @@ public class Dataset implements Serializable {
 	}
 
 
-	public void populateDataset(String datasetVersion, String[] altPaths, boolean deployTrainedUserModel) {
+	public void populateDataset(String datasetVersion, Map<String, String> paths, 
+		String[] altPaths, boolean deployTrainedUserModel) {
 		boolean isTablatureCase = isTablatureSet();
 		boolean isTabAsNonTab = isTabAsNonTabSet();
 
@@ -154,9 +156,20 @@ public class Dataset implements Serializable {
 		String argEncodingsPath, argMidiPath;
 		String argTabMidiPath = null;
 		if (altPaths == null) {
-			argEncodingsPath = Runner.encodingsPath;
-			argMidiPath = Runner.midiPath;
-			argTabMidiPath = Runner.midiPath;
+			
+			argEncodingsPath = PathTools.getPathString(
+				Arrays.asList(paths.get("ENCODINGS_PATH"))
+			);
+//			argEncodingsPath = Runner.encodingsPath;
+			argMidiPath = PathTools.getPathString(
+				Arrays.asList(paths.get("MIDI_PATH"))
+			);
+//			argMidiPath = Runner.midiPath;
+			argTabMidiPath = PathTools.getPathString(
+				Arrays.asList(paths.get("MIDI_PATH"))
+			);
+//			argTabMidiPath = Runner.midiPath;
+
 			//argTabMidiPath;
 			if (!deployTrainedUserModel) {
 				String numVoices = getNumVoices() + Runner.voices + "/";
@@ -164,6 +177,7 @@ public class Dataset implements Serializable {
 				argTabMidiPath += ToolBox.pathify(new String[]{getName(), numVoices});
 				argMidiPath += ToolBox.pathify(new String[]{getName(), datasetVersion, numVoices});
 			}
+			// TODO are these paths used when deployTrainedUserModel? If not, remove
 			else {
 				// Ensure that paths end with slash
 				argEncodingsPath = ToolBox.pathify(new String[]{argEncodingsPath});

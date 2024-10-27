@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import conversion.exports.MEIExport;
 import conversion.imports.MIDIImport;
 import data.Dataset;
 import external.Transcription;
@@ -21,6 +22,7 @@ import machineLearning.MelodyPredictor.MelModelType;
 import machinelearning.NNManager;
 import machinelearning.NNManager.ActivationFunction;
 import tools.ToolBox;
+import tools.path.PathTools;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
 import ui.Runner.DecodingAlgorithm;
@@ -63,6 +65,9 @@ public class UI {
 
 
 	public static void main(String[] args) throws IOException {
+		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
+		Map<String, String> paths = PathTools.getPaths(dev);
+
 		// Scenarios
 		//  useCV && !deployTrainedModel: model selection phase
 		//  useCV &&  deployTrainedModel: never
@@ -194,11 +199,11 @@ public class UI {
 					hyperparams = ToolBox.pathify(new String[]{
 						"LR=" + alpha, "HL=" + hiddenLayers, "HLS=" + hiddenLayerSize, 
 						"KP=" + keepProbability});
-					set(null);
+					set(paths, null);
 				}
 			}
 			else {
-				set(null);
+				set(paths, null);
 			}
 		}
 		// If deploying a trained model: deduce parameters and settings		
@@ -339,7 +344,7 @@ public class UI {
 //			for (String s : transParams.split("\\|")) {
 //				transcriptionParams.put(s.split("=")[0].trim(), s.split("=")[1].trim());
 //			}
-			set(transcriptionParams);
+			set(paths, transcriptionParams);
 		}
 	}
 
@@ -348,7 +353,7 @@ public class UI {
 	 * 
 	 * @throws IOException 
 	 */
-	public static void set(Map<String, String> transcriptionParams) throws IOException {
+	public static void set(Map<String, String> paths, Map<String, String> transcriptionParams) throws IOException {
 		// 1. Set rootPath and paths to code and data
 		// a. If repeating an existing experiment or conducting a new one 
 		// rootPath is F:/research/, which contains the dirs data/annotated/ (GT data) and 
@@ -379,7 +384,8 @@ public class UI {
 //			}
 //		}
 //		setRootPath(ToolBox.pathify(new String[]{rootPath}));
-		Runner.setPathsToCodeAndData(rootPath, deployTrainedUserModel);
+
+//		Runner.setPathsToCodeAndData(rootPath, deployTrainedUserModel);
 
 		// 2. Set dataset(s)
 		Dataset dsTrain, ds;
@@ -389,17 +395,20 @@ public class UI {
 		}
 		else {
 			dsTrain = new Dataset(datasetIDTrain);
-			ds = new Dataset(Dataset.isTablatureSet(datasetIDTrain) ? Dataset.USER_TAB : 
-				Dataset.USER);
+			ds = new Dataset(
+				Dataset.isTablatureSet(datasetIDTrain) ? Dataset.USER_TAB : Dataset.USER
+			);
 			// Set name (now default), pieceNames (now empty list), and numVoices (now 0)
 			if (!datasetName.equals("")) {
 				ds.setName(datasetName);
 			}
 			ds.setNumVoices(dsTrain.getNumVoices());
-			if (filename.equals("")) {	
+			if (filename.equals("")) {
 				ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
-					ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
-					ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION));
+					PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"))),
+//					ds.isTablatureSet() ? Runner.encodingsPath : Runner.midiPath),
+					ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION)
+				);
 			}
 			else {
 				String filenameNoExt = filename.substring(0, filename.indexOf("."));
@@ -421,13 +430,13 @@ public class UI {
 		// pathStoredMM:           
 		// a. If repeating an existing experiment or conducting a new one
 		// Path format (* = optional)
-		// - Runner.experimentsPath + publication, *experiment, dataset name, voices, model, 
+		// - EXPERIMENTS_PATH + publication, *experiment, dataset name, voices, model, 
 		//   processing mode, *hyperparams (when not training a user model)
 		//   Examples 
 		//   - F:/research/experiments/thesis/exp_1/bach-WTC/4vv/N/fwd/ (no hyperparams)
 		//   - F:/research/experiments/ISMIR-2018/bach-WTC/4vv/D/fwd/HL=2/HLS=25/KP=0.75/
 		//     (no experiment)
-		// - Runner.modelsPath + model ID (when training a user model; storePath only)
+		// - MODELS_PATH + model ID (when training a user model; storePath only)
 		//   Example
 		//   - F:/research/data/models/D-bwd-byrd-int-4vv/
 		String storePath = null;
@@ -435,23 +444,34 @@ public class UI {
 		String pathTrainedUserModel = null; // null when not deploying trained user model
 		String pathStoredNN = null; // where the weights of the model to reuse are stored (not empty; no files are added); null when not using ensemble model
 		String pathStoredMM = null; // null when not using ensemble model
+		String modelsPath = PathTools.getPathString(Arrays.asList(paths.get("MODELS_PATH")));
+		String templatesPath = PathTools.getPathString(Arrays.asList(paths.get("TEMPLATES_PATH")));
+		// TODO put these two in main()s of all abtab modules
+		MEIExport.setTemplatesPath(templatesPath);
+		MEIExport.setPythonPath(
+			PathTools.getPathString(Arrays.asList(paths.get("CODE_PATH"), "utils", "py"))
+		);
 		if (!deployTrainedUserModel) {
+			String experimentsPath = PathTools.getPathString(
+				Arrays.asList(paths.get("EXPERIMENTS_PATH"))
+			);
+			
 			storePath = !trainUserModel ? 
-				ToolBox.pathify(new String[]{Runner.experimentsPath, 
+				ToolBox.pathify(new String[]{experimentsPath, 
 				expDir, ds.getName(), ds.getNumVoices() + Runner.voices, 
 				m.toString(), pm.getStringRep(), hyperparams}) 
 				: 
-				ToolBox.pathify(new String[]{Runner.modelsPath, 
+				ToolBox.pathify(new String[]{modelsPath, 
 				m.toString() + "-" + pm.getStringRep() + "-" + ds.getDatasetID()});
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
 				pathPredTransFirstPass = 
-					ToolBox.pathify(new String[]{Runner.experimentsPath, expDirFirstPass});
+					ToolBox.pathify(new String[]{experimentsPath, expDirFirstPass});
 			}
 			if (m.getModelType() == ModelType.ENS) {
-				pathStoredNN = ToolBox.pathify(new String[]{Runner.experimentsPath, 
+				pathStoredNN = ToolBox.pathify(new String[]{experimentsPath, 
 					expDirFirstPass, ds.getName(), ds.getNumVoices() + Runner.voices, 
 					Model.N.toString(), pm.getStringRep()});
-				pathStoredMM = ToolBox.pathify(new String[]{Runner.experimentsPath, 
+				pathStoredMM = ToolBox.pathify(new String[]{experimentsPath, 
 					expDirFirstPass, ds.getName(), ds.getNumVoices() + Runner.voices, 
 					m.getMelodyModel().toString()}); 
 			}
@@ -462,14 +482,19 @@ public class UI {
 		//   Examples
 		//   - F:/research/data/user/out/D_B-fwd-byrd-int-4vv/ (current model) 
 		//   - F:/research/data/user/out/D-bwd-byrd-int-4vv/ (first-pass model) 
-		// - Runner.modelsPath + model ID (for the trained model)
+		// - MODELS_PATH + model ID (for the trained model)
 		//   Example
 		//   - F:/research/models/D_B-fwd-byrd-int-4vv/
 		else {
-			storePath = ToolBox.pathify(new String[]{Runner.outPath, modelID});
-			pathTrainedUserModel = ToolBox.pathify(new String[]{Runner.modelsPath, modelID});
+			String op = PathTools.getPathString(
+				Arrays.asList(paths.get("POLYPHONIST_PATH"), "out")
+			);
+			storePath = ToolBox.pathify(new String[]{op, modelID});
+//			storePath = ToolBox.pathify(new String[]{Runner.outPath, modelID});
+			pathTrainedUserModel = ToolBox.pathify(new String[]{modelsPath, modelID});
 			if (modelIDFirstPass != null) {
-				pathPredTransFirstPass = ToolBox.pathify(new String[]{Runner.outPath, modelIDFirstPass});
+				pathPredTransFirstPass = ToolBox.pathify(new String[]{op, modelIDFirstPass});
+//				pathPredTransFirstPass = ToolBox.pathify(new String[]{Runner.outPath, modelIDFirstPass});
 			}
 			
 			// Steps (i) and (ii): train user models
@@ -606,7 +631,9 @@ public class UI {
 //		System.exit(0);
 //		System.out.println(Arrays.asList(transcriptionParams));
 
-		Runner.runExperiment(trainUserModel, skipTraining, deployTrainedUserModel, verbose, transcriptionParams);
+		Runner.runExperiment(
+			trainUserModel, skipTraining, deployTrainedUserModel, verbose, paths, transcriptionParams
+		);
 	}
 
 }

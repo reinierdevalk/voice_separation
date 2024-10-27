@@ -1,5 +1,11 @@
 package machineLearning;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,31 +14,27 @@ import java.util.Map;
 
 import data.Dataset;
 import machineLearning.OutputEvaluator;
-import junit.framework.TestCase;
 import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 import de.uos.fmt.musitech.utility.math.Rational;
 
-public class OutputEvaluatorTest extends TestCase {
+public class OutputEvaluatorTest {
 
-	public OutputEvaluatorTest(String name) {
-		super(name);
+	private double delta;
+	
+	@Before
+	public void setUp() throws Exception {
+		delta = 1e-9;
 	}
 
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-
-
+	@Test
 	public void testDeterminePredictedVoices() {
 		OutputEvaluator.ignoreExceptionForTest = true;
 //		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
@@ -158,6 +160,7 @@ public class OutputEvaluatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testDeterminePredictedDurations() {
 		OutputEvaluator.ignoreExceptionForTest = true;
 
@@ -195,6 +198,7 @@ public class OutputEvaluatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testDetermineBestVoiceAssignment(){
 		// Make a fictional List of network outputs, in which the highest value occurs multiple times  
 		List<Double> networkOutputs = 
@@ -279,6 +283,7 @@ public class OutputEvaluatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testInterpretNetworkOutput() {
 		OutputEvaluator.ignoreExceptionForTest = true;
 //		Map<String, Double> modelParams = new LinkedHashMap<String, Double>();
@@ -526,6 +531,7 @@ public class OutputEvaluatorTest extends TestCase {
 //	}
 
 
+	@Test
 	public void testGetTwoHighestValuesInformation() {
 		// Create test labels 
 		List<Double> output1 = Arrays.asList(new Double[]{0.4, 0.5, 0.6, 0.4, 0.4}); 
@@ -561,13 +567,14 @@ public class OutputEvaluatorTest extends TestCase {
 			for (int j = 0; j < expected.get(i).length; j++) {
 				assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
 				for (int k = 0; k < expected.get(i)[j].length; k++) {
-					assertEquals(expected.get(i)[j][k],  actual.get(i)[j][k]);
+					assertEquals(expected.get(i)[j][k],  actual.get(i)[j][k], delta);
 				}
 			}
 		}
 	}
 
 
+	@Test
 	public void testDeterminePresenceOfCoD() {		
 		// Create testLabels
 		// 1. No CoDs
@@ -654,6 +661,7 @@ public class OutputEvaluatorTest extends TestCase {
 	double wNN = 0.25;
 	double wMM1 = 0.5;
 	double wMM2 = 0.4;
+	@Test
 	public void testCreateCombinedNetworkOutputs() {
 		// Create, for a single note, fictional netw output and two MM outputs
 		double[] netwOutp = new double[]{one, two, three};
@@ -692,12 +700,13 @@ public class OutputEvaluatorTest extends TestCase {
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
 
 
+	@Test
 	public void testCombineNetworkOutputs() {	
 		List<double[]> outputs = new ArrayList<double[]>();
 		outputs.add(new double[]{one, two, three}); // output 0 (= netw outp)
@@ -714,7 +723,7 @@ public class OutputEvaluatorTest extends TestCase {
 
 		assertEquals(expected.length,  actual.length);
 		for (int i = 0; i < expected.length; i++) {
-			assertEquals(expected[i], actual[i]);
+			assertEquals(expected[i], actual[i], delta);
 		}
 	}
 

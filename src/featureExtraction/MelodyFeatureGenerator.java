@@ -4,9 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import n_grams.KylmModel;
 import tools.ToolBox;
+import tools.path.PathTools;
 import ui.Runner;
 import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
@@ -70,19 +72,24 @@ public class MelodyFeatureGenerator {
 //		String set = "fugues_3vv";
 //		List<String> pieceNames = Dataset.getBachFourVoiceFugues();
 //		String set = "fugues_4vv";
-
+		
+		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
+		Map<String, String> paths = PathTools.getPaths(dev);
+		
+		String ep = PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+		String mp = PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
 		for (String s : pieceNames) {		
 			Integer[][] btp = null;
 			File encoding = null;
 			File midi = null;
 			if (!pieceNames.get(0).contains("WTC")) {
-				encoding = new File(Runner.encodingsPath + "intabulations/" + s);
-				midi = new File(Runner.midiPath + "intabulations/" + s);
+				encoding = new File(ep + "intabulations/" + s);
+				midi = new File(mp + "intabulations/" + s);
 //				Tablature tab = new Tablature(encoding);
 //				btp = tab.getBasicTabSymbolProperties();
 			}
 			else {
-				midi = new File(Runner.midiPath + "bach-WTC/thesis/" + s);
+				midi = new File(mp + "bach-WTC/thesis/" + s);
 			}
 			Transcription trans = new Transcription(true, midi, encoding);
 //			Transcription trans = new Transcription(midi, encoding);

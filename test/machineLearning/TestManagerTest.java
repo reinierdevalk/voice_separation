@@ -1,5 +1,11 @@
 package machineLearning;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +28,6 @@ import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import internal.core.Encoding;
 import internal.core.ScorePiece;
-import junit.framework.TestCase;
 import tools.ToolBox;
 import tools.labels.LabelTools;
 import tools.labels.LabelToolsTest;
@@ -30,9 +35,8 @@ import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.Model;
 import ui.Runner.ProcessingMode;
-import ui.UI;
 
-public class TestManagerTest extends TestCase {
+public class TestManagerTest {
 
 	private File encodingTestpiece1; // = new File(Runner.encodingsPathTest+ "testpiece.txt");
 	private File midiTestpiece1; // = new File(Runner.midiPathTest + "testpiece.mid");	
@@ -40,7 +44,8 @@ public class TestManagerTest extends TestCase {
 	private File midiTestResolveConflicts;
 	private File midiTestResolveConflictsNonTab;
 	//	DataConverter dataConverter = new DataConverterTab();
-	String[] testPaths;
+	private String[] testPaths;
+	private Map<String, String> paths;
 	
 	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
 	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
@@ -51,28 +56,45 @@ public class TestManagerTest extends TestCase {
 	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
 	private static final List<Double> HALF = Transcription.createDurationLabel(new Integer[]{16*3});
 	
+	private double delta;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		Map<String, String> paths = PathTools.getPaths();
-		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
-//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
-		testPaths = new String[]{Runner.encodingsPath + "test/", Runner.midiPath + "test/", 
-			Runner.midiPath + "test/"};
-		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
-		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
-		encodingTestResolveConflicts = (new File(Runner.encodingsPath + "test/" + "test_resolve_conflicts.tbp"));
-		midiTestResolveConflicts = new File(Runner.midiPath + "test/" + "test_resolve_conflicts.mid");
-		midiTestResolveConflictsNonTab = new File(Runner.midiPath + "test/" + "test_resolve_conflicts_non_tab.mid");
+	@Before
+	public void setUp() throws Exception {
+		paths = PathTools.getPaths(true);
+		testPaths = new String[]{
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), "test")), 
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), "test")), 
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), "test"))
+		};
+		encodingTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test")) + "testpiece.tbp"
+		);
+		midiTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test")) + "testpiece.mid"
+		);
+		encodingTestResolveConflicts = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test")) + "test_resolve_conflicts.tbp"
+		);
+		midiTestResolveConflicts = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test")) + "test_resolve_conflicts.mid"
+		);
+		midiTestResolveConflictsNonTab = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test")) + "test_resolve_conflicts_non_tab.mid"
+		);
+		delta = 1e-9;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
+	@Test
 	public void testGetMaximumDuration() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -186,6 +208,7 @@ public class TestManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testResolveConflicts() {
 		Encoding enc = new Encoding(encodingTestResolveConflicts);
 
@@ -261,7 +284,7 @@ public class TestManagerTest extends TestCase {
 		
 		// ds
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
-		ds.populateDataset(null, testPaths, false);
+		ds.populateDataset(null, paths, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicTabSymbolProperties and meterInfo
@@ -688,7 +711,8 @@ public class TestManagerTest extends TestCase {
 		for (int i = 0; i < allNetworkOutputsAdaptedExpected.size(); i++) {
 			assertEquals(allNetworkOutputsAdaptedExpected.get(i).length, allNetworkOutputsAdaptedActual.get(i).length);
 			for (int j = 0; j < allNetworkOutputsAdaptedExpected.get(i).length; j++) {
-				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], allNetworkOutputsAdaptedActual.get(i)[j]);
+				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], 
+					allNetworkOutputsAdaptedActual.get(i)[j], delta);
 			}
 		}
 
@@ -732,7 +756,9 @@ public class TestManagerTest extends TestCase {
 		assertEquals(allVoicesCoDNotesExpected.size(), allVoicesCoDNotesActual.size());
 		for (int i = 0; i < allVoicesCoDNotesExpected.size(); i++) {
 			if (allVoicesCoDNotesExpected.get(i) == null) {
-				assertEquals(allVoicesCoDNotesExpected.get(i), allVoicesCoDNotesActual.get(i));
+				assertNull(allVoicesCoDNotesExpected.get(i));
+				assertNull(allVoicesCoDNotesActual.get(i));
+//				assertEquals(allVoicesCoDNotesExpected.get(i), allVoicesCoDNotesActual.get(i));
 			}
 			else {
 				assertEquals(allVoicesCoDNotesExpected.get(i).length,allVoicesCoDNotesActual.get(i).length);
@@ -782,6 +808,7 @@ public class TestManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testResolveConflictsBwd() {
 		Encoding enc = new Encoding(encodingTestResolveConflicts);
 		// Conflicts:
@@ -851,7 +878,7 @@ public class TestManagerTest extends TestCase {
 
 		// ds
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
-		ds.populateDataset(null, testPaths, false);
+		ds.populateDataset(null, paths, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicTabSymbolProperties (fwd) and meterInfo
@@ -1279,7 +1306,8 @@ public class TestManagerTest extends TestCase {
 		for (int i = 0; i < allNetworkOutputsAdaptedExpected.size(); i++) {
 			assertEquals(allNetworkOutputsAdaptedExpected.get(i).length, allNetworkOutputsAdaptedActual.get(i).length);
 			for (int j = 0; j < allNetworkOutputsAdaptedExpected.get(i).length; j++) {
-				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], allNetworkOutputsAdaptedActual.get(i)[j]);
+				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], 
+					allNetworkOutputsAdaptedActual.get(i)[j], delta);
 			}
 		}
 
@@ -1323,7 +1351,9 @@ public class TestManagerTest extends TestCase {
 		assertEquals(allVoicesCoDNotesExpected.size(), allVoicesCoDNotesActual.size());
 		for (int i = 0; i < allVoicesCoDNotesExpected.size(); i++) {
 			if (allVoicesCoDNotesExpected.get(i) == null) {
-				assertEquals(allVoicesCoDNotesExpected.get(i), allVoicesCoDNotesActual.get(i));
+				assertNull(allVoicesCoDNotesExpected.get(i));
+				assertNull(allVoicesCoDNotesActual.get(i));
+//				assertEquals(allVoicesCoDNotesExpected.get(i), allVoicesCoDNotesActual.get(i));
 			}
 			else {
 				assertEquals(allVoicesCoDNotesExpected.get(i).length,allVoicesCoDNotesActual.get(i).length);
@@ -1394,6 +1424,7 @@ public class TestManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testResolveConflictsNonTab() {			
 		// Conflicts:
 		// Chord 1, notes 4-5: type (i) conflict: 
@@ -1459,7 +1490,7 @@ public class TestManagerTest extends TestCase {
 
 		// ds
 		Dataset ds = new Dataset(Dataset.TEST);
-		ds.populateDataset(null, testPaths, false);
+		ds.populateDataset(null, paths, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicNoteProperties
@@ -1668,7 +1699,8 @@ public class TestManagerTest extends TestCase {
 		for (int i = 0; i < allNetworkOutputsAdaptedExpected.size(); i++) {
 			assertEquals(allNetworkOutputsAdaptedExpected.get(i).length, allNetworkOutputsAdaptedActual.get(i).length);
 			for (int j = 0; j < allNetworkOutputsAdaptedExpected.get(i).length; j++) {
-				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], allNetworkOutputsAdaptedActual.get(i)[j]);
+				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], 
+					allNetworkOutputsAdaptedActual.get(i)[j], delta);
 			}
 		}
 
@@ -1730,6 +1762,7 @@ public class TestManagerTest extends TestCase {
 	}
 
 
+	@Test
 	public void testResolveConflictsNonTabBwd() {
 		// Conflicts:
 		// Chord 2, notes 2-4 (10-12 fwd): type (i) conflict: 
@@ -1804,7 +1837,7 @@ public class TestManagerTest extends TestCase {
 
 		// ds
 		Dataset ds = new Dataset(Dataset.TEST);
-		ds.populateDataset(null, testPaths, false);
+		ds.populateDataset(null, paths, testPaths, false);
 		Runner.setDataset(ds);
 		
 		// basicNoteProperties (fwd)
@@ -2025,7 +2058,8 @@ public class TestManagerTest extends TestCase {
 		for (int i = 0; i < allNetworkOutputsAdaptedExpected.size(); i++) {
 			assertEquals(allNetworkOutputsAdaptedExpected.get(i).length, allNetworkOutputsAdaptedActual.get(i).length);
 			for (int j = 0; j < allNetworkOutputsAdaptedExpected.get(i).length; j++) {
-				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], allNetworkOutputsAdaptedActual.get(i)[j]);
+				assertEquals(allNetworkOutputsAdaptedExpected.get(i)[j], 
+					allNetworkOutputsAdaptedActual.get(i)[j], delta);
 			}
 		}
 
@@ -2085,8 +2119,9 @@ public class TestManagerTest extends TestCase {
 			}
 		} 
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateObservations() {
 		TestManager tm = new TestManager();
 		tm.tablature = new Tablature(encodingTestpiece1);
@@ -2120,8 +2155,9 @@ public class TestManagerTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateObservationsNonTab() {
 		TestManager tm = new TestManager();
 		tm.tablature = null;
@@ -2155,7 +2191,9 @@ public class TestManagerTest extends TestCase {
 			}
 		}
 	}
-	
+
+
+	@Test
 	public void testGetVoicesFromMappingIndices() {
 		TestManager tm = new TestManager();
 		

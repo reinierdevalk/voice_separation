@@ -1,5 +1,11 @@
 package machineLearning;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,15 +16,12 @@ import java.util.Map;
 import machineLearning.ErrorCalculator;
 import tools.labels.LabelToolsTest;
 import tools.path.PathTools;
-import ui.Runner;
-import ui.UI;
-import junit.framework.TestCase;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
 import external.Transcription;
 import internal.core.ScorePiece;
 
-public class ErrorCalculatorTest extends TestCase {
+public class ErrorCalculatorTest {
 
 	private File midiTestpiece1;
 	private File encodingTestpiece1;
@@ -32,21 +35,25 @@ public class ErrorCalculatorTest extends TestCase {
 	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
 	private static final List<Double> HALF = Transcription.createDurationLabel(new Integer[]{16*3});
 
+	private double delta;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		Map<String, String> paths = PathTools.getPaths();
-		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
-//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
-		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
-		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
+	@Before
+	public void setUp() throws Exception {
+		Map<String, String> paths = PathTools.getPaths(true);
+		midiTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test")) + "testpiece.mid"
+		);
+		encodingTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test")) + "testpiece.tbp"
+		);
+		delta = 1e-9;
 	}
 
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 	
 	
@@ -242,6 +249,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateAssignmentErrors() {
 		List<List<Integer>> allPredictedVoices = new ArrayList<List<Integer>>();
 		List<List<Double>> groundTruthVoiceLabels = new ArrayList<List<Double>>();
@@ -332,6 +340,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateAssignmentErrorsNonTab() {
 		// Make test values
 		List<Integer[]> equalDurationUnisonsInfo = new ArrayList<Integer[]>();
@@ -435,6 +444,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateAccuracy() {
 		// Tablature case
 		List<List<Integer>> assigErrsTab = getAssignmentErrors().get(0);
@@ -462,6 +472,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateClassificationError() {
 		// Only the first element of assignmentErrors is needed
 		List<List<Integer>> assignmentErrors = new ArrayList<List<Integer>>();
@@ -470,10 +481,12 @@ public class ErrorCalculatorTest extends TestCase {
 		double expected = 0.16;
 		double actual = ErrorCalculator.calculateClassificationError(assignmentErrors);
 
-		assertEquals(expected, actual);
+		
+		assertEquals(expected, actual, delta);
 	}
 
 
+	@Test
 	public void testGetMisassignments() {
 		List<double[]> expected = new ArrayList<double[]>();
 		
@@ -490,16 +503,19 @@ public class ErrorCalculatorTest extends TestCase {
 		actual.add(ErrorCalculator.getMisassignments(getAssignmentErrors().get(0)));
 		actual.add(ErrorCalculator.getMisassignments(getAssignmentErrors().get(1)));
 
+		
+		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}	
 	}
 
 
+	@Test
 	public void testCalculateAvgPrecisionRecallF1() {	  	
 		List<ErrorFraction[][]> expected = new ArrayList<ErrorFraction[][]>();
 
@@ -588,8 +604,9 @@ public class ErrorCalculatorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetPositivesAndNegativesPerVoice() {
 		Transcription transcription = 
 			new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -750,6 +767,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetPositivesAndNegativesPerVoiceNonTab() {
 		Transcription transcription0 = new Transcription(midiTestpiece1);
 		Transcription transcription1 = new Transcription(midiTestpiece1);
@@ -1083,6 +1101,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculatePrecisionRecallF1() {
 		Integer[] truePos = new Integer[]{45, 92};
 		Integer[] falsePos = new Integer[]{15, 253};
@@ -1113,6 +1132,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateAvgSoundnessAndCompleteness() { 		
 		List<ErrorFraction[][]> expected = new ArrayList<ErrorFraction[][]>();
 		// Toy example 1
@@ -1179,6 +1199,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateAvgSoundnessAndCompletenessNonTab() { 		
 		// Determine expected
 		List<ErrorFraction[][]> expected = new ArrayList<ErrorFraction[][]>();
@@ -1246,6 +1267,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateAVC() {
 		List<Double> expected = new ArrayList<Double>();
 		// Toy example 1
@@ -1317,6 +1339,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testCalculateCrossEntropy() {	
 		// Outputs without and with CoDs
 		List<double[]> outputs = new ArrayList<double[]>();
@@ -1352,14 +1375,15 @@ public class ErrorCalculatorTest extends TestCase {
 //		double[] expected = new double[]{-2.0, 12.0, 6.0, 4096.0};
 		
 		double[] actual = ErrorCalculator.calculateCrossEntropy(outputs, labels);
-				
+		
 		assertEquals(expected.length, actual.length);
 		for (int i = 0; i < actual.length; i++) {
-			assertEquals(expected[i], actual[i]);
+			assertEquals(expected[i], actual[i], delta);
 		}		
 	}
 
 
+	@Test
 	public void testAssertCorrectness() {
 		List<List<Integer>> allPredictedVoices = new ArrayList<List<Integer>>();
 		List<List<Integer>> actualVoices = new ArrayList<List<Integer>>();
@@ -1410,6 +1434,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testAssertCorrectnessEDUNotes() {
 		List<Integer> allowedVoices = Arrays.asList(new Integer[]{1, 2});
 		List<List<Integer[]>> predAndAdVoices = new ArrayList<List<Integer[]>>();
@@ -1543,6 +1568,7 @@ public class ErrorCalculatorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testSwapEDUnotes() {
 		List<List<Integer>> notesPerVoicePredicted = new ArrayList<List<Integer>>();
 		notesPerVoicePredicted.add(Arrays.asList(new Integer[]{1, 3, 6, 8, 10, 15, 16, 18}));

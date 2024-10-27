@@ -1,5 +1,11 @@
 package featureExtraction;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,33 +15,34 @@ import java.util.Map;
 import de.uos.fmt.musitech.utility.math.Rational;
 import external.Tablature;
 import external.Transcription;
-import junit.framework.TestCase;
 import tools.path.PathTools;
-import ui.Runner;
 
-public class MelodyFeatureGeneratorTest extends TestCase {
+public class MelodyFeatureGeneratorTest {
 
 	private File encodingTestpiece1;
 	private File midiTestpiece1;
 //	private MelodyFeatureGenerator mfg = new MelodyFeatureGenerator(new FeatureGenerator());
 	private MelodyFeatureGenerator mfg = new MelodyFeatureGenerator();
 	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		Map<String, String> paths = PathTools.getPaths();
-		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
-//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
-		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
-		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
+	@Before
+	public void setUp() throws Exception {
+		Map<String, String> paths = PathTools.getPaths(true);
+		midiTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), "test")) + 
+			"testpiece.mid"
+		);
+		encodingTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), "test")) + 
+			"testpiece.tbp"
+		);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
+	@Test
 	public void testGetMelodyModelFeatureVectors() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -84,6 +91,7 @@ public class MelodyFeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetMelodyModelFeatureVectorsNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 

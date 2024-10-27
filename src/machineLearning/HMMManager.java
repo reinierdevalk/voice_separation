@@ -2,21 +2,25 @@ package machineLearning;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import data.Dataset;
 import de.uos.fmt.musitech.data.structure.Note;
 import external.Tablature;
 import external.Transcription;
 import tools.ToolBox;
+import tools.path.PathTools;
 import ui.Runner;
 
 public class HMMManager {
 
-	public static String HMMPath = Runner.experimentsPath;
+//	public static String HMMPath = Runner.experimentsPath;
 	private static boolean useFullSizeMapping;
 	private static boolean storeAlsoAsSerialised = false;
+	
 	
 	/**
 	 * @param args
@@ -72,8 +76,14 @@ public class HMMManager {
 		String folderName = 
 			"thesis/prl_2/" + ds.getName() + "/" + vv + "/" + "H/" + configuration; // TODO EB
 		
+		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
+		Map<String, String> paths = PathTools.getPaths(dev);
+
+		String ep = paths.get("EXPERIMENTS_PATH");
+		String experimentsPath = PathTools.getPathString(Arrays.asList(ep));
+		
 //		String path = "F:/research/data" + HMMPath + folderName + "/data/";
-		String path = Runner.experimentsPath + folderName + "data/"; 
+		String path = experimentsPath + folderName + "data/"; 
 		System.out.println(path);
 		System.exit(0);
 

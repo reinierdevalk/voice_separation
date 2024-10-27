@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import conversion.exports.MEIExport;
 import data.Dataset;
 import featureExtraction.FeatureGenerator;
 import machineLearning.EvaluationManager;
@@ -38,13 +37,13 @@ public class Runner {
 	// Paths, directory names, and scripts
 	// All paths are set in setPathsToCodeAndData()
 	private static String[] paths;
-	public static String encodingsPath;
-	public static String outPath;
-	public static String midiPath;
-	public static String modelsPath;
+//	public static String encodingsPath;
+//	public static String outPath;
+//	public static String midiPath;
+//	public static String modelsPath;
 	public static String pythonScriptPath;
 	public static String matlabScriptPath;
-	public static String experimentsPath;
+//	public static String experimentsPath;
 	public static String storedDatasetsPath;
 	//
 	public static String output = "out/";
@@ -778,14 +777,18 @@ public class Runner {
 
 
 	public static void setPathsToCodeAndData(String argRootPath, boolean appliedToNewData) throws IOException {
-		Map<String, String> paths = PathTools.getPaths();
+		Map<String, String> paths = PathTools.getPaths(true);
 		
 //		String rp = paths.get("ROOT_PATH");
 		String cp = paths.get("CODE_PATH");
-		String tp = paths.get("TEMPLATES_PATH");
-		String ep = paths.get("EXPERIMENTS_PATH");
+//		String tp = paths.get("TEMPLATES_PATH");
+//		String ep = paths.get("EXPERIMENTS_PATH");
 //		String dd = paths.get("DAATA_DIR");
 //		String td = paths.get("TEEMPLATES_DIR");
+		String codePath = PathTools.getPathString(Arrays.asList(cp));
+		pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+		matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
+		storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
 		
 //		for (Map.Entry<String, String> entry : paths.entrySet()) {
 //l			System.out.println(entry.getKey() + " -- " + entry.getValue());
@@ -793,27 +796,28 @@ public class Runner {
 //		System.exit(0);
 		
 		if (!appliedToNewData) {
-			String codePath = PathTools.getPathString(Arrays.asList(cp));
+//			String codePath = PathTools.getPathString(Arrays.asList(cp));
 //			String codePath = PathTools.getPathString(Arrays.asList(rp, cp));
 //			String codePath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH});
-			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+//			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+
 //			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
-			matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
+//			matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
 //			matlabScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/m/"});
 			//
 //			String dataPath = PathTools.getPathString(Arrays.asList(dp));
 //			String dataPath = PathTools.getPathString(Arrays.asList(rp, dd));
 //			String dataPath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.DATA_DIR});
-			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+//			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
 //			encodingsPath = ToolBox.pathify(new String[]{dataPath, Path.ENCODINGS_PATH});
-			midiPath = PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
+//			midiPath = PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
 //			midiPath = ToolBox.pathify(new String[]{dataPath, Path.MIDI_PATH});
-			storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
+//			storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
 //			storedDatasetsPath = ToolBox.pathify(new String[]{dataPath, "datasets/"});
-			modelsPath = PathTools.getPathString(Arrays.asList(paths.get("MODELS_PATH")));
+//			modelsPath = PathTools.getPathString(Arrays.asList(paths.get("MODELS_PATH")));
 //			modelsPath = ToolBox.pathify(new String[]{dataPath, "models/"});
 			//
-			experimentsPath = PathTools.getPathString(Arrays.asList(ep));
+//			experimentsPath = PathTools.getPathString(Arrays.asList(ep));
 //			experimentsPath = PathTools.getPathString(Arrays.asList(rp, paths.get("EXPEERIMENTS_DIR")));
 //			experimentsPath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.EXPEERIMENTS_DIR});
 			//
@@ -822,63 +826,56 @@ public class Runner {
 //				PathTools.getPathString(Arrays.asList(rp, dd, td))	
 //				ToolBox.pathify(new String[]{Path.ROOT_PATH + Path.DATA_DIR, Path.TEMPLATES_DIR})
 //			);
-			MEIExport.setPythonPath(
-				PathTools.getPathString(Arrays.asList(codePath, "utils"/*"formats-representations",*/, "py"))
-//				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
-			);
+//			MEIExport.setPythonPath(
+//				PathTools.getPathString(Arrays.asList(codePath, "utils", "py"))
+////				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
+//			);
 		}
 		else {
 			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
-			boolean isDeploymentDevCase = 
-				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
-//				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
+//			boolean isDeploymentDevCase = 
+//				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
+////				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
 //l			System.out.println("HIER RUNNER");
 //l			System.out.println(isDeploymentDevCase);
 //			System.exit(0);
-			String codePath = isDeploymentDevCase ?
-				PathTools.getPathString(Arrays.asList(cp)) :
-//				PathTools.getPathString(Arrays.asList(rp, cp)) :
-//				ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH}) :
-				PathTools.getPathString(Arrays.asList(cp));
-//				PathTools.getPathString(Arrays.asList(argRootPath, paths.get("CODE_DIR"))); // TODO paths.get("CODE_DIR") was "code/" 
+//			String codePath = isDeploymentDevCase ?
+//				PathTools.getPathString(Arrays.asList(cp)) :
+////				PathTools.getPathString(Arrays.asList(rp, cp)) :
+////				ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH}) :
+//				PathTools.getPathString(Arrays.asList(cp));
+////				PathTools.getPathString(Arrays.asList(argRootPath, paths.get("CODE_DIR"))); // TODO paths.get("CODE_DIR") was "code/" 
 			
-			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+//			String codePath = PathTools.getPathString(Arrays.asList(cp));
+				
+//			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
 //			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
-			String userPath = PathTools.getPathString(Arrays.asList(argRootPath, "user"));
+//			String userPath = PathTools.getPathString(Arrays.asList(argRootPath, "user"));
 //			String userPath = ToolBox.pathify(new String[]{argRootPath, "user/"});
-			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
+//			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
 //			encodingsPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
 //			encodingsPath = ToolBox.pathify(new String[]{userPath, "in/"});
-			midiPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
+//			midiPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
 //			midiPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
 //			midiPath = ToolBox.pathify(new String[]{userPath, "in/"});
-			outPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "out"));
+//			outPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "out"));
 //			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
-			modelsPath = PathTools.getPathString(Arrays.asList(argRootPath, "models"));
+//			modelsPath = PathTools.getPathString(Arrays.asList(argRootPath, "models"));
 //			modelsPath = ToolBox.pathify(new String[]{argRootPath, "models/"});
 			//
-			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, tp));
+//			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, tp));
 //			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, td));
 //			String templatePath = ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR}); 
 //			MEIExport.setTemplatePath(
 //				templatePath
 ////				ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR})
 //			);
-			MEIExport.setPythonPath(
-				PathTools.getPathString(Arrays.asList(codePath, "utils"/*"representations"*/, "py"))	
-//				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
-//				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
-			);
-			MEIExport.setTemplatesPath(tp);
-
-//l			System.out.println(pythonScriptPath);
-//l			System.out.println(encodingsPath);
-//l			System.out.println(midiPath);
-//l			System.out.println(outPath);
-//l			System.out.println(modelsPath);
-//l			System.out.println(codePath);
-//l			System.out.println(argRootPath);
-//			System.exit(0);
+//			MEIExport.setPythonPath(
+//				PathTools.getPathString(Arrays.asList(codePath, "utils", "py"))
+////				PathTools.getPathString(Arrays.asList(codePath, "formats-representations", "py"))
+////				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
+//			);
+//			MEIExport.setTemplatesPath(tp);
 		}
 	}
 
@@ -911,15 +908,15 @@ public class Runner {
 	}
 
 	public static void runExperiment(boolean trainUserModel, boolean skipTraining, 
-		boolean deployTrainedUserModel, boolean verbose, Map<String, String> transcriptionParams) {
+		boolean deployTrainedUserModel, boolean verbose, Map<String, String> paths,
+		Map<String, String> transcriptionParams) {
 
 		String startPreProc = ToolBox.getTimeStampPrecise();
 		
 		setDeployTrainedUserModel(deployTrainedUserModel);
 		setTrainUserModel(trainUserModel);
 		setVerbose(verbose);
-		
-		
+
 		String[] argPaths = getPaths();
 		Map<String, Double> argModelParams = getModelParams();
 		ModellingApproach ma = 
@@ -940,7 +937,7 @@ public class Runner {
 		if (!deployTrainedUserModel) {
 			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {
-				ds.populateDataset("thesis", null, deployTrainedUserModel);
+				ds.populateDataset("thesis", paths, null, deployTrainedUserModel);
 				ToolBox.storeObjectBinary(ds, datasetFile);
 			}
 			else {
@@ -948,7 +945,7 @@ public class Runner {
 			}
 		}
 		else {
-			ds.populateDataset(null, null, deployTrainedUserModel);
+			ds.populateDataset(null, paths, null, deployTrainedUserModel);
 //			System.out.println(ds.getDatasetID());
 //			System.out.println(ds.getName());
 //			System.out.println(ds.getPieceNames());

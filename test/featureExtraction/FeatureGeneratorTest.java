@@ -1,5 +1,11 @@
 package featureExtraction;
 
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,26 +16,22 @@ import java.util.Map;
 import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
 import de.uos.fmt.musitech.data.structure.Note;
-import de.uos.fmt.musitech.data.structure.Piece;
-import de.uos.fmt.musitech.data.structure.container.NoteSequence;
 import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator.Direction;
 import internal.core.Encoding;
 import internal.core.ScorePiece;
-import junit.framework.TestCase;
 import tools.ToolBox;
 import tools.labels.LabelTools;
 import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
-import ui.UI;
 
-public class FeatureGeneratorTest extends TestCase {
+public class FeatureGeneratorTest {
 
-	private File midiTestpiece1; // = new File(Runner.midiPathTest + "testpiece.mid");
-	private File encodingTestpiece1; // = new File(Runner.encodingsPathTest + "testpiece.txt");
+	private File midiTestpiece1;
+	private File encodingTestpiece1;
 
 	private static final int NUM_FEATURES_SET_A = 8;
 	private static final int NUM_FEATURES_SET_A_NO_TAB_INFO = 4;
@@ -45,28 +47,39 @@ public class FeatureGeneratorTest extends TestCase {
 	private static final List<Double> EIGHTH = Transcription.createDurationLabel(new Integer[]{4*3});
 	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
 
+	private double delta;
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		Map<String, String> paths = PathTools.getPaths();
-		Runner.setPathsToCodeAndData(paths.get("ROOT_PATH"), false);
-//		Runner.setPathsToCodeAndData(Path.ROOT_PATH, false);
-		midiTestpiece1 = new File(Runner.midiPath + "test/" + "testpiece.mid");
-		encodingTestpiece1 = new File(Runner.encodingsPath + "test/" + "testpiece.tbp");
+	@Before
+	public void setUp() throws Exception {
+		Map<String, String> paths = PathTools.getPaths(true);
+		midiTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test")) + "testpiece.mid"
+		);
+		encodingTestpiece1 = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test")) + "testpiece.tbp"
+		);
+		delta = 1e-9;
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@After
+	public void tearDown() throws Exception {
 	}
 
 
 	public void bla() { // TODO wat is dit? Test gen voice labels B model?
 		String pieceName = "Barbetta 1582 - Il nest plaisir";
-		File midiFile = new File(Runner.midiPath + "4vv/" + pieceName);
-		File encodingFile = new File(Runner.encodingsPath + "4vv/" + pieceName + Encoding.EXTENSION);
-		
+		Map<String, String> paths = PathTools.getPaths(true);
+		File midiFile = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"4vv")) + pieceName
+		);
+		File encodingFile = new File(
+			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"4vv")) + pieceName + Encoding.EXTENSION
+		);
+
 		Tablature tab = new Tablature(encodingFile); 
 		Transcription gtTrans = new Transcription(midiFile, encodingFile);
 		
@@ -139,6 +152,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetBasicNoteFeaturesMUSCI() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 
@@ -199,18 +213,21 @@ public class FeatureGeneratorTest extends TestCase {
     for (int i = 0; i < basicTabSymbolProperties.length; i++) {
     	actual.add(FeatureGenerator.getBasicNoteFeaturesMUSCI(basicTabSymbolProperties, null, i));
     }
+    
+    
     	   
     assertEquals(expected.size(), actual.size());
 	  for (int i = 0; i < expected.size(); i++) {
 	  	assertEquals(expected.get(i).length, actual.get(i).length);
 	  	for (int j = 0; j < expected.get(i).length; j++) {
-	  		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+	  		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 	  	}
 	  }
 	}
-  
-  
-  public void testGetBasicNoteFeaturesNonTabMUSCI() {
+
+
+	@Test
+	public void testGetBasicNoteFeaturesNonTabMUSCI() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 
     List<double[]> expected = new ArrayList<double[]>();
@@ -272,16 +289,19 @@ public class FeatureGeneratorTest extends TestCase {
     	actual.add(FeatureGenerator.getBasicNoteFeaturesMUSCI(null, basicNoteProperties, i));
     }
 
+    
+    
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
    	  assertEquals(expected.get(i).length, actual.get(i).length);
     	for (int j = 0; j < expected.get(i).length; j++) {
-    		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+    		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
     	}
     }
 	}
-  
-  
+
+
+	@Test
   public void testGetIndicesOfSustainedPreviousNotesMUSCI() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -335,8 +355,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-  
-  
+
+
+	@Test
   public void testGetPositionWithinChordMUSCI() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 			    
@@ -400,17 +421,20 @@ public class FeatureGeneratorTest extends TestCase {
 	  	actual.add(FeatureGenerator.getPositionWithinChordMUSCI(basicTabSymbolProperties, null, i));
 	  }
 	    	   
+	  
+	  
 		// Assert equality  
 	  assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 		 	for (int j = 0; j < expected.get(i).length; j++) {
-		 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+		 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 		 	}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetPositionWithinChordNonTabMUSCI() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -475,17 +499,19 @@ public class FeatureGeneratorTest extends TestCase {
 	  	actual.add(FeatureGenerator.getPositionWithinChordMUSCI(null, basicNoteProperties, i));
 	  }
     	   
+	  
 	  // Assert equality  
     assertEquals(expected.size(), actual.size());
   	for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);  
   	 	for (int j = 0; j < expected.get(i).length; j++) {
-		 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+		 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 		 	}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetPitchDistancesWithinChordMUSCI() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 			    	  
@@ -549,17 +575,19 @@ public class FeatureGeneratorTest extends TestCase {
 	   	actual.add(FeatureGenerator.getPitchDistancesWithinChordMUSCI(basicTabSymbolProperties, null, i));
 	  }
 	    	   
+	  
 		// Assert equality  
 	  assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 		 	for (int j = 0; j < expected.get(i).length; j++) {
-		 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+		 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 		 	}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetPitchDistancesWithinChordNonTabMUSCI() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -624,17 +652,20 @@ public class FeatureGeneratorTest extends TestCase {
 	   	actual.add(FeatureGenerator.getPitchDistancesWithinChordMUSCI(null, basicNoteProperties, i));
 	  }
     	   
+	  
+	  
 		// Assert equality  
 	  assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 		 	for (int j = 0; j < expected.get(i).length; j++) {
-		 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+		 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 		 	}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetPitchAndTimeProximitiesToAllVoicesMUSCI() {
     Tablature tablature = new Tablature(encodingTestpiece1);
   	Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -760,19 +791,22 @@ public class FeatureGeneratorTest extends TestCase {
   			transcription, currentNote));
   	}
   	
+  	
+  	
   	assertEquals(expected.size(), actual.size());
   	for (int i = 0; i < expected.size(); i++) { // i = noteIndex
   		assertEquals(expected.get(i).length, actual.get(i).length);
   		for (int j = 0; j < expected.get(i).length; j++) { // j = one of the three proximities Arrays
   			assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
   			for (int k = 0; k < expected.get(i)[j].length; k++) { // k = the value of element k in the current proximities Array
-  				assertEquals(expected.get(i)[j][k], actual.get(i)[j][k]);
+  				assertEquals(expected.get(i)[j][k], actual.get(i)[j][k], delta);
   			}
   		}
   	}
 	}
-	
-	
+
+
+	@Test
 	public void testGetPitchAndTimeProximitiesToAllVoicesNonTabMUSCI() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -901,6 +935,8 @@ public class FeatureGeneratorTest extends TestCase {
     	actual.add(FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote));
     }
   
+	
+	
 	  // Assert equality
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) { // i = onsetindex
@@ -908,13 +944,14 @@ public class FeatureGeneratorTest extends TestCase {
     	for (int j = 0; j < expected.get(i).length; j++) { // j = one of the three proximities Arrays
     		assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
     		for (int k = 0; k < expected.get(i)[j].length; k++) { // k = the value of element k in the current proximities Array
-    			assertEquals(expected.get(i)[j][k], actual.get(i)[j][k]);
+    			assertEquals(expected.get(i)[j][k], actual.get(i)[j][k], delta);
     		}
     	}
     }
 	}
-  
-	
+
+
+	@Test
 	public void testGetProximitiesAndMovementToVoiceMUSCI() {
     Tablature tablature = new Tablature(encodingTestpiece1);
   	Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -1008,17 +1045,20 @@ public class FeatureGeneratorTest extends TestCase {
   		}
   	}
   	
+  	
+  	
   	// Assert equality
   	assertEquals(expected.size(), actual.size());
   	for (int i = 0; i < expected.size(); i++) {
   		assertEquals(expected.get(i).length, actual.get(i).length);
   	 	for (int j = 0; j < expected.get(i).length; j++) {
-  	 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+  	 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
   	 	}
   	}
 	}
-	
-	
+
+
+	@Test
 	public void testGetProximitiesAndMovementToVoiceNonTabMUSCI() {    
     Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -1116,17 +1156,20 @@ public class FeatureGeneratorTest extends TestCase {
   		}
   	}
   	
+  	
+  	
   	// Assert equality
   	assertEquals(expected.size(), actual.size());
   	for (int i = 0; i < expected.size(); i++) {
   		assertEquals(expected.get(i).length, actual.get(i).length);
   	 	for (int j = 0; j < expected.get(i).length; j++) {
-  	 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+  	 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
   	 	}
   	}
 	}
-	
-	
+
+
+	@Test
 	public void testGetVoicesAlreadyOccupiedMUSCI() {
     Tablature tablature = new Tablature(encodingTestpiece1);
   	Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -1201,8 +1244,9 @@ public class FeatureGeneratorTest extends TestCase {
   	}
   	assertEquals(expected, actual);
 	}
-	
-	
+
+
+	@Test
 	public void testGetVoicesAlreadyOccupiedNonTabMUSCI() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 	
@@ -1277,8 +1321,9 @@ public class FeatureGeneratorTest extends TestCase {
     }
     assertEquals(expected, actual);
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateAllNoteFeatureVectorsMUSCI() {
     Tablature tablature = new Tablature(encodingTestpiece1);
     Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -1358,8 +1403,9 @@ public class FeatureGeneratorTest extends TestCase {
   		}
   	}
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateAllNoteFeatureVectorsNonTabMUSCI() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -1441,8 +1487,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetBasicNoteFeatures() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 
@@ -1551,16 +1598,19 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.add(FeatureGenerator.getBasicNoteFeatures(basicTabSymbolProperties, null, meterInfo, i));
 		}
 
+		
+		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetBasicNoteFeaturesNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -1670,16 +1720,19 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.add(FeatureGenerator.getBasicNoteFeatures(null, basicNoteProperties, meterInfo, i));
 		}
 
+		
+		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
 
-	
+
+	@Test
 	public void testGetProximitiesAndCourseInfoAhead() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 			
@@ -1852,17 +1905,20 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.add(FeatureGenerator.getProximitiesAndCourseInfoAhead(basicTabSymbolProperties, null, i, 4));
 		}
 		
+		
+		
 		// Assert equality  
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 		 	for (int j = 0; j < expected.get(i).length; j++) {
-		 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+		 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 		 	}
 		}
 	}
 
 
+	@Test
 	public void testGetProximitiesAndCourseInfoAheadNonTab() {  	
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -2205,17 +2261,20 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.add(FeatureGenerator.getProximitiesAndCourseInfoAhead(null, basicNoteProperties, i, 4));
 		}
 		
+		
+		
 		// Assert equality  
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {  
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {  
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetNumberOfNewOnsetsInNextChord() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 
@@ -2293,8 +2352,9 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 		assertEquals(expected, actual);
 	}
-	
-	
+
+
+	@Test
 	public void testGetNumberOfNewOnsetsInNextChordNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -2337,8 +2397,9 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 		assertEquals(expected, actual);
 	}
-	
-	
+
+
+	@Test
 	public void testGetPositionWithinChord() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -2469,18 +2530,21 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.add(FeatureGenerator.getPositionWithinChord(basicTabSymbolProperties, durationLabels, null,
 				Direction.LEFT,	i, true, false));
 		}
-			   
+		
+		
+		
 		// Assert equality  
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 		 	for (int j = 0; j < expected.get(i).length; j++) {
-		 		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+		 		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 		 	}
 		}
 	}
-  
-  
+
+
+	@Test
 	public void testGetPositionWithinChordNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -2546,17 +2610,20 @@ public class FeatureGeneratorTest extends TestCase {
 				basicNoteProperties, null, i, false, false));
 		}
 
+		
+		
 		// Assert equality  
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
-  
-  
+
+
+	@Test
 	public void testGetSizeOfChordInclusive() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -2601,8 +2668,9 @@ public class FeatureGeneratorTest extends TestCase {
 		 	assertEquals(expected.get(i), actual.get(i));
 		}
 	}
-  
-  
+
+
+	@Test
 	public void testGetSizeOfChordInclusiveNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -2647,6 +2715,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetIndexExclusive() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 
@@ -2689,8 +2758,9 @@ public class FeatureGeneratorTest extends TestCase {
 			assertEquals(expected.get(i), actual.get(i));
 		}
 	}
-  
-  
+
+
+	@Test
 	public void testGetIndexExclusiveNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -2732,8 +2802,9 @@ public class FeatureGeneratorTest extends TestCase {
 		 	assertEquals(expected.get(i), actual.get(i));
 		}
 	}
-  
-  
+
+
+	@Test
 	public void testGetIndexInclusive() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -2780,6 +2851,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetIndexInclusiveNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -2903,6 +2975,7 @@ public class FeatureGeneratorTest extends TestCase {
 //	}
 
 
+	@Test
 	public void testGetIntervalsInChord() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -2934,16 +3007,19 @@ public class FeatureGeneratorTest extends TestCase {
 			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
+		
+		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			} 
 		}
 	}
 
 
+	@Test
 	public void testGetIntervalsInChordNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 		
@@ -2975,12 +3051,14 @@ public class FeatureGeneratorTest extends TestCase {
 			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
+		
+		
 		// Assert equality
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			} 
 		}
 	}
@@ -3252,8 +3330,9 @@ public class FeatureGeneratorTest extends TestCase {
 // 	  	}
 // 	  }
 //  }
-	
-	
+
+
+	@Test
 	public void testGetVoicesWithAdjacentNoteOnSameCourse() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -3341,18 +3420,21 @@ public class FeatureGeneratorTest extends TestCase {
 				Direction.RIGHT, i));
 		}   	
 
+		
+		
 		// Assert equality
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
 
 
 	// TWEE gedaan
+	@Test
 	public void testGetPitchAndTimeProximitiesToAllVoices() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -4161,6 +4243,8 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
 				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true));
 		}
+		
+		
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) { // i = noteIndex
@@ -4168,13 +4252,14 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < expected.get(i).length; j++) { // j = one of the three proximities Arrays
 				assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
 				for (int k = 0; k < expected.get(i)[j].length; k++) { // k = the value of element k in the current proximities Array
-					assertEquals(expected.get(i)[j][k], actual.get(i)[j][k]);
+					assertEquals(expected.get(i)[j][k], actual.get(i)[j][k], delta);
 				}
 			}
 		}
 	}
 
 
+	@Test
 	public void testGetPitchAndTimeProximitiesToAllVoicesNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -4856,6 +4941,8 @@ public class FeatureGeneratorTest extends TestCase {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
 				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true));
 		}
+		
+		
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) { // i = onsetindex
@@ -4863,7 +4950,7 @@ public class FeatureGeneratorTest extends TestCase {
 			for (int j = 0; j < expected.get(i).length; j++) { // j = one of the three proximities Arrays
 				assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
 				for (int k = 0; k < expected.get(i)[j].length; k++) { // k = the value of element k in the current proximities Array
-					assertEquals(expected.get(i)[j][k], actual.get(i)[j][k]);
+					assertEquals(expected.get(i)[j][k], actual.get(i)[j][k], delta);
 				}
 			}
 		}
@@ -5179,6 +5266,7 @@ public class FeatureGeneratorTest extends TestCase {
 
 
 	// EEN gedaan
+	@Test
 	public void testGetProximitiesAndMovementToVoiceAll() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -5601,17 +5689,20 @@ public class FeatureGeneratorTest extends TestCase {
 					currentVoiceToCompareTo, currentNote, Direction.LEFT, 3, true));
 			}
 		}
+		
+		
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
 
 
+	@Test
 	public void testGetProximitiesAndMovementToVoiceAllNonTab() {    
 		Transcription transcription = new Transcription(midiTestpiece1);
 		
@@ -6031,16 +6122,19 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 
+		
+		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).length, actual.get(i).length);
 			for (int j = 0; j < expected.get(i).length; j++) {
-				assertEquals(expected.get(i)[j], actual.get(i)[j]);
+				assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
 			}
 		}
 	}
 
 
+	@Test
 	public void testCalculateProximity() {
 	  List<Double> distances = Arrays.asList(new Double[]{499.0, 4.0, 2.0, 1.0, 3/4.0, 1/2.0, 1/4.0,	1/8.0, 
 	  	1/16.0, 1/32.0, 0.0, -1/32.0, -1/16.0, -1/8.0, -1/4.0, -1/2.0, -3/4.0, -1.0, -2.0, -4.0, -499.0});
@@ -6061,8 +6155,9 @@ public class FeatureGeneratorTest extends TestCase {
 	  	assertEquals(expected.get(i), actual.get(i));
 	  }
 	}
-	
-	
+
+
+	@Test
 	public void testGetVoicesAlreadyOccupied() {
 		// a. Unadapted (longer CoDnote in the upper voice)
 		Tablature tablatureA = new Tablature(encodingTestpiece1);
@@ -6326,17 +6421,20 @@ public class FeatureGeneratorTest extends TestCase {
      	  Direction.RIGHT, i, false, false));
    	}
    	 	  	
+   	
+   	
     // Assert equality
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) { 
     	assertEquals(expected.get(i).length, actual.get(i).length);
     	for (int j = 0; j < expected.get(i).length; j++) {
-    		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+    		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
     	}
     }
 	}
-	
-	
+
+
+	@Test
 	public void testGetVoicesAlreadyOccupiedNonTab() {
   	Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -6466,12 +6564,14 @@ public class FeatureGeneratorTest extends TestCase {
     		Direction.RIGHT, i, false, false));
    	}
    		
+   	
+   	
     // Assert equality
     assertEquals(expected.size(), actual.size());
     for (int i = 0; i < expected.size(); i++) {
     	assertEquals(expected.get(i).length, actual.get(i).length);
     	for (int j = 0; j < expected.get(i).length; j++) {
-    		assertEquals(expected.get(i)[j], actual.get(i)[j]);
+    		assertEquals(expected.get(i)[j], actual.get(i)[j], delta);
     	}
     }
 	}
@@ -6793,8 +6893,9 @@ public class FeatureGeneratorTest extends TestCase {
 //  		assertEquals(expected.get(i), actual.get(i));
 //  	}	
 //  }
-	
-	
+
+
+	@Test
 	public void testGenerateNoteFeatureVector() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -6964,6 +7065,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateNoteFeatureVectorNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -7061,8 +7163,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateNoteFeatureVectorDISSFirst() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -7213,7 +7316,8 @@ public class FeatureGeneratorTest extends TestCase {
 		}
 	}
 
-	
+
+	@Test
 	public void testGenerateNoteFeatureVectorDISSFirstNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -7303,8 +7407,10 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
+
+
 	// DRIE gedaan
+	@Test
 	public void testGenerateNoteFeatureVectorDISS() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -7578,6 +7684,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateNoteFeatureVectorDISSNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -7789,8 +7896,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateMelodyFeatureVector() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -7831,8 +7939,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}	
 	}
-		
-		
+
+
+	@Test
 	public void testGetMelodyFeatureVectorNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -7874,6 +7983,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateMelodyFeatureVectors() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 		Transcription transcription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -7943,6 +8053,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateMelodyFeatureVectorsNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -8010,6 +8121,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateBidirectionalNoteFeatureVector() {
 		Tablature tablature = new Tablature(encodingTestpiece1, true);
 		Transcription gtTranscription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -8186,6 +8298,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateBidirectionalNoteFeatureVectorNonTab() {
 		Transcription gtTranscription = new Transcription(midiTestpiece1);
 
@@ -8283,8 +8396,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testGenerateBidirectionalNoteFeatureVectorOLD() {
 		Tablature tablature = new Tablature(encodingTestpiece1, true);
 		Transcription gtTranscription = new Transcription(midiTestpiece1, encodingTestpiece1);
@@ -8409,6 +8523,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGenerateBidirectionalNoteFeatureVectorOLDNonTab() {
 		Transcription gtTranscription = new Transcription(midiTestpiece1);
 
@@ -8511,8 +8626,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testScaleFeatureVector() {		
 		List<Double> fvN2N = getSetOfFeatureVectors().get(1);
 		List<Double> fvC2C = getSetOfFeatureVectors().get(1);
@@ -8555,8 +8671,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testScaleSetOfFeatureVectors() {				
 		List<List<Double>> setN2N = getSetOfFeatureVectors();
 		List<List<Double>> setC2C = getSetOfFeatureVectors();
@@ -8617,8 +8734,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testScaleSetOfSetsOfFeatureVectors() {
 		List<List<List<Double>>> setOfSetsN2N = new ArrayList<List<List<Double>>>();
 		setOfSetsN2N.add(getSetOfFeatureVectors());
@@ -8703,8 +8821,9 @@ public class FeatureGeneratorTest extends TestCase {
 			}
 		}
 	}
-			
-			
+
+
+	@Test
 	public void testGetMinAndMaxValuesSetOfFeatureVectors() {		
 		List<List<Double>> set = getSetOfFeatureVectors();
 
@@ -8731,19 +8850,22 @@ public class FeatureGeneratorTest extends TestCase {
 		actual.add(FeatureGenerator.getMinAndMaxValuesSetOfFeatureVectors(set, 
 			ModellingApproach.C2C));
 		
+		
+		
 		assertEquals(expected.size(), actual.size());
 	    for (int i = 0; i < expected.size(); i++) {
 	    	assertEquals(expected.get(i).length, actual.get(i).length);
 	    	for (int j = 0; j < expected.get(i).length; j++) {
 	    		assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
 	    		for (int k = 0; k < expected.get(i)[j].length; k++) {
-	    			assertEquals(expected.get(i)[j][k], actual.get(i)[j][k]);
+	    			assertEquals(expected.get(i)[j][k], actual.get(i)[j][k], delta);
 	    		}
 	    	}
 	    }
 	}
-	
-	
+
+
+	@Test
 	public void testGetMinAndMaxValuesSetOfSetsOfFeatureVectors() {	
 		List<List<List<Double>>> setOfSets = new ArrayList<List<List<Double>>>();
 		setOfSets.add(getSetOfFeatureVectors());
@@ -8780,19 +8902,21 @@ public class FeatureGeneratorTest extends TestCase {
 //				assertEquals(expected[i][j], actual[i][j]);
 //			}
 //		}
+		
 		assertEquals(expected.size(), actual.size());
 	    for (int i = 0; i < expected.size(); i++) {
 	    	assertEquals(expected.get(i).length, actual.get(i).length);
 	    	for (int j = 0; j < expected.get(i).length; j++) {
 	    		assertEquals(expected.get(i)[j].length, actual.get(i)[j].length);
 	    		for (int k = 0; k < expected.get(i)[j].length; k++) {
-	    			assertEquals(expected.get(i)[j][k], actual.get(i)[j][k]);
+	    			assertEquals(expected.get(i)[j][k], actual.get(i)[j][k], delta);
 	    		}
 	    	}
 	    }
 	}
 
 
+	@Test
 	public void testGetBackwardsMapping() {
 		Tablature tablature = new Tablature(encodingTestpiece1);
 			
@@ -8824,6 +8948,7 @@ public class FeatureGeneratorTest extends TestCase {
 	}
 
 
+	@Test
 	public void testGetBackwardsMappingNonTab() {
 		Transcription transcription = new Transcription(midiTestpiece1);
 
@@ -8853,8 +8978,9 @@ public class FeatureGeneratorTest extends TestCase {
 			assertEquals(expected.get(i), actual.get(i));
 		}
 	}
-	
-	
+
+
+	@Test
 	public void testScaleFeatureVectorCOMPLICATED() {	
 //		// Non-tab only; !useFixedValues
 //		
@@ -9183,8 +9309,9 @@ public class FeatureGeneratorTest extends TestCase {
 //			}
 //		}
 	}
-	
-	
+
+
+	@Test
 	public void testGetMinAndMaxValuesSetOfFeatureVectorsCOMPLICATED() {
 //		 
 //		// Non-tab only; !useFixedValues
