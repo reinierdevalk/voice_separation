@@ -41,10 +41,10 @@ public class Runner {
 //	public static String outPath;
 //	public static String midiPath;
 //	public static String modelsPath;
-	public static String pythonScriptPath;
-	public static String matlabScriptPath;
+//	public static String pythonScriptPath;
+//	public static String matlabScriptPath;
 //	public static String experimentsPath;
-	public static String storedDatasetsPath;
+//	public static String storedDatasetsPath;
 	//
 	public static String output = "out/";
 	//
@@ -638,10 +638,12 @@ public class Runner {
 			return intRep;
 		}
 	};
-	
+
+
 	public static void main(String[] args) throws IOException {
 		
 	}
+
 
 	public static Map<String, Object[]> getEnumKeys(/*ModelType mt*/) {
 		Map<String, Object[]> keys = new LinkedHashMap<String, Object[]>();
@@ -767,28 +769,30 @@ public class Runner {
 	}
 
 	public static int getHighestNumVoicesTraining(boolean deployTrainedUserModel) {
-		int highestNumVoices = getDataset().getHighestNumVoices();
-		if (deployTrainedUserModel) {
-//		if (ToolBox.toBoolean(modelParams.get(DEPLOY_TRAINED_USER_MODEL).intValue())) {
-			highestNumVoices = getDatasetTrain().getNumVoices();
-		}
-		return highestNumVoices;
+//		int highestNumVoices = getDataset().getHighestNumVoices();
+//		if (deployTrainedUserModel) {
+//			highestNumVoices = getDatasetTrain().getNumVoices();
+//		}
+//		return highestNumVoices;	
+		return 
+			!deployTrainedUserModel ? getDataset().getHighestNumVoices() : 
+			getDatasetTrain().getNumVoices();
 	}
 
 
 	public static void setPathsToCodeAndData(String argRootPath, boolean appliedToNewData) throws IOException {
-		Map<String, String> paths = PathTools.getPaths(true);
-		
+//		Map<String, String> paths = PathTools.getPaths(true);
+
 //		String rp = paths.get("ROOT_PATH");
-		String cp = paths.get("CODE_PATH");
+//		String cp = paths.get("CODE_PATH");
 //		String tp = paths.get("TEMPLATES_PATH");
 //		String ep = paths.get("EXPERIMENTS_PATH");
 //		String dd = paths.get("DAATA_DIR");
 //		String td = paths.get("TEEMPLATES_DIR");
-		String codePath = PathTools.getPathString(Arrays.asList(cp));
-		pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
-		matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
-		storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
+//		String codePath = PathTools.getPathString(Arrays.asList(paths.get("CODE_PATH")));
+//		pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
+//		matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
+//		storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
 		
 //		for (Map.Entry<String, String> entry : paths.entrySet()) {
 //l			System.out.println(entry.getKey() + " -- " + entry.getValue());
@@ -836,9 +840,6 @@ public class Runner {
 //			boolean isDeploymentDevCase = 
 //				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
 ////				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
-//l			System.out.println("HIER RUNNER");
-//l			System.out.println(isDeploymentDevCase);
-//			System.exit(0);
 //			String codePath = isDeploymentDevCase ?
 //				PathTools.getPathString(Arrays.asList(cp)) :
 ////				PathTools.getPathString(Arrays.asList(rp, cp)) :
@@ -935,7 +936,9 @@ public class Runner {
 		System.out.println("\ncreating the dataset.");
 		Dataset ds = getDataset();
 		if (!deployTrainedUserModel) {
-			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
+			String dp = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
+			File datasetFile = new File(dp + ds.getDatasetID() + ".ser");
+//			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {
 				ds.populateDataset("thesis", paths, null, deployTrainedUserModel);
 				ToolBox.storeObjectBinary(ds, datasetFile);
@@ -946,22 +949,23 @@ public class Runner {
 		}
 		else {
 			ds.populateDataset(null, paths, null, deployTrainedUserModel);
-//			System.out.println(ds.getDatasetID());
-//			System.out.println(ds.getName());
-//			System.out.println(ds.getPieceNames());
-//			System.out.println(ds.getNumPieces());
-//			System.out.println(ds.getNumVoices());
-//			System.out.println(ds.isTablatureSet());
-//			System.out.println(ds.isTabAsNonTabSet());
-//			System.out.println(ds.getLargestChordSize());
-//			System.out.println(ds.getHighestNumVoices());
-//			System.out.println(ds.getAllEncodingFiles());
-//			System.out.println(ds.getAllMidiFiles());
-//			System.out.println(ds.getAllTablatures());
-//			System.out.println(ds.getAllTranscriptions());
-//			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
-//			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
-//			System.exit(0);
+
+			System.out.println(ds.getDatasetID());
+			System.out.println(ds.getName());
+			System.out.println(ds.getPieceNames());
+			System.out.println(ds.getNumPieces());
+			System.out.println(ds.getNumVoices());
+			System.out.println(ds.isTablatureSet());
+			System.out.println(ds.isTabAsNonTabSet());
+			System.out.println(ds.getLargestChordSize());
+			System.out.println(ds.getHighestNumVoices());
+			System.out.println(ds.getAllEncodingFiles());
+			System.out.println(ds.getAllMidiFiles());
+			System.out.println(ds.getAllTablatures());
+			System.out.println(ds.getAllTranscriptions());
+			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
+			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
+			System.exit(0);
 		}
 		setDataset(ds);
 
@@ -997,13 +1001,13 @@ public class Runner {
 			// 1. Train
 			String startTraining = ToolBox.getTimeStamp();
 			System.out.println("\n>> Starting the training.");
-			new TrainingManager().prepareTraining(null);
+			new TrainingManager().prepareTraining(null, paths);
 			String endTraining = ToolBox.getTimeStamp();
 //			System.exit(0);
 
 			// 2. Test
 			String startTe = ToolBox.getTimeStamp();
-			new TestManager().prepareTesting(startTe, transcriptionParams);
+			new TestManager().prepareTesting(startTe, transcriptionParams, paths);
 			String endEval = ToolBox.getTimeStamp();
 //			System.exit(0);
 			
@@ -1073,7 +1077,7 @@ public class Runner {
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");
 				if (!skipTraining) {
-					new TrainingManager().prepareTraining(startTr);
+					new TrainingManager().prepareTraining(startTr, paths);
 				}
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
@@ -1097,7 +1101,7 @@ public class Runner {
 			else {
 				System.out.println("\napplying the model.");
 			}
-			new TestManager().prepareTesting(startTe, transcriptionParams);
+			new TestManager().prepareTesting(startTe, transcriptionParams, paths);
 
 //			String endEval = ToolBox.getTimeStamp();
 //			System.out.println("### 4. endEval = " + endEval);

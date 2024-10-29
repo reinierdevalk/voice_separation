@@ -301,30 +301,25 @@ public class UI {
 			// User-defined settings				
 			// Get the ID of the trained model now applied and, in the bidir case, the ID
 			// of the first-pass model whose predicted labels are used
-			modelID = args[0].split(":")[0];			
-			modelIDFirstPass = args[0].split(":").length == 1 ? null : args[0].split(":")[1];
+			modelID = args[1].split(":")[0];			
+			modelIDFirstPass = args[1].split(":").length == 1 ? null : args[1].split(":")[1];
 			datasetIDTrain = modelID.split("-")[2] + "-" + modelID.split("-")[3] + "-" + modelID.split("-")[4];
 			// rootPath is the pwd if args[1] is an empty string or a dot; else the string given in args[1].
-			rootPath = new File(args[1]).getCanonicalFile().toString();
+			rootPath = new File(args[2]).getCanonicalFile().toString();
 
 //			// Set codePath if rootPath is not F:/research/data/
 //			if (!rootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString())) {
 //				codeRelPath = Path.CODE_DIR;
 //			}
-
-//			// If rootPath is not the local userPath (ROOT_PATH_USER == F:/research/data/)
-//			if (!rootPath.equals("") && !rootPath.equals(Path.ROOT_PATH)) {
-//				rootPathUser = rootPath;
-//			}
 //			System.out.println(rootPath);
 //			System.out.println(codeRelPath);
 //			System.exit(0);
 
-			verbose = Boolean.parseBoolean(args[2]);
-			datasetName = args[3];
+			verbose = Boolean.parseBoolean(args[3]);
+			datasetName = args[4];
 
-			filename = new File(args[4]).getName();
-			String transParams = args[5];
+			filename = new File(args[5]).getName();
+			String transParams = args[6];
 
 //l			System.out.println("modelID: " + modelID); // args[0]
 //l			System.out.println("modelIDFirstPass: " + modelIDFirstPass); // from args[0]
@@ -394,7 +389,27 @@ public class UI {
 			dsTrain = null;
 		}
 		else {
+			// dsTrain is not populated
 			dsTrain = new Dataset(datasetIDTrain);
+//			System.out.println(dsTrain.getDatasetID());
+//			System.out.println(dsTrain.getName());
+//			System.out.println(dsTrain.getPieceNames());
+//			System.out.println(dsTrain.getNumPieces());
+//			System.out.println(dsTrain.getNumVoices());
+//			System.out.println(dsTrain.isTablatureSet());
+//			System.out.println(dsTrain.isTabAsNonTabSet());
+//			System.out.println(dsTrain.getLargestChordSize());
+//			System.out.println(dsTrain.getHighestNumVoices());
+//			System.out.println(dsTrain.getAllEncodingFiles());
+//			System.out.println(dsTrain.getAllMidiFiles());
+//			System.out.println(dsTrain.getAllTablatures());
+//			System.out.println(dsTrain.getAllTranscriptions());
+//			System.out.println(dsTrain.getNumDataExamples(ModellingApproach.N2N));
+//			System.out.println(dsTrain.getIndividualPieceSizes(ModellingApproach.N2N));
+//			System.out.println("FUUUUCK");
+//			System.exit(0);
+			
+			// ds is populated
 			ds = new Dataset(
 				Dataset.isTablatureSet(datasetIDTrain) ? Dataset.USER_TAB : Dataset.USER
 			);
@@ -414,9 +429,23 @@ public class UI {
 				String filenameNoExt = filename.substring(0, filename.indexOf("."));
 				ds.addPieceNames(Arrays.asList(filenameNoExt));
 			}
+//			System.out.println(ds.getDatasetID());
 //			System.out.println(ds.getName());
-//			System.out.println(dsTrain.getNumVoices());
-//			System.out.println(filename.substring(0, filename.indexOf(".")));
+//			System.out.println(ds.getPieceNames());
+//			System.out.println(ds.getNumPieces());
+//			System.out.println(ds.getNumVoices());
+//			System.out.println(ds.isTablatureSet());
+//			System.out.println(ds.isTabAsNonTabSet());
+//			System.out.println(ds.getLargestChordSize());
+//			System.out.println(ds.getHighestNumVoices());
+//			System.out.println(ds.getAllEncodingFiles());
+//			System.out.println(ds.getAllMidiFiles());
+//			System.out.println(ds.getAllTablatures());
+//			System.out.println(ds.getAllTranscriptions());
+//			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
+//			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
+//			System.out.println("FUUUUCK");
+//			System.exit(0);
 		}
 
 		// 3. Set paths for storing and retrieving
@@ -445,12 +474,9 @@ public class UI {
 		String pathStoredNN = null; // where the weights of the model to reuse are stored (not empty; no files are added); null when not using ensemble model
 		String pathStoredMM = null; // null when not using ensemble model
 		String modelsPath = PathTools.getPathString(Arrays.asList(paths.get("MODELS_PATH")));
-		String templatesPath = PathTools.getPathString(Arrays.asList(paths.get("TEMPLATES_PATH")));
 		// TODO put these two in main()s of all abtab modules
-		MEIExport.setTemplatesPath(templatesPath);
-		MEIExport.setPythonPath(
-			PathTools.getPathString(Arrays.asList(paths.get("CODE_PATH"), "utils", "py"))
-		);
+		MEIExport.setTemplatesPath(PathTools.getPathString(Arrays.asList(paths.get("TEMPLATES_PATH"))));
+		MEIExport.setPythonPath(PathTools.getPathString(Arrays.asList(paths.get("UTILS_PYTHON_PATH"))));
 		if (!deployTrainedUserModel) {
 			String experimentsPath = PathTools.getPathString(
 				Arrays.asList(paths.get("EXPERIMENTS_PATH"))

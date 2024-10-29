@@ -28,6 +28,7 @@ import tbp.symbols.RhythmSymbol;
 import tbp.symbols.Symbol;
 import tools.ToolBox;
 import tools.labels.LabelTools;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.DecisionContext;
 import ui.Runner.FeatureVector;
@@ -71,15 +72,15 @@ public class TrainingManager {
 	int ornThresh = RhythmSymbol.SEMIMINIM.getDuration();
 
 
-	public void prepareTraining(String start) {		
+	public void prepareTraining(String start, Map<String, String> paths) {		
 		Map<String, Double> mp = Runner.getModelParams();
 		boolean useCV = ToolBox.toBoolean(mp.get(Runner.CROSS_VAL).intValue());
 		boolean trainUserModel = Runner.getTrainUserModel();
 		ModellingApproach ma = Runner.ALL_MODELLING_APPROACHES[mp.get(Runner.MODELLING_APPROACH).intValue()];
 		ProcessingMode pm = Runner.ALL_PROC_MODES[mp.get(Runner.PROC_MODE).intValue()];
-		String[] paths = Runner.getPaths();
-		String storePath = paths[0];
-		String pathPredTransFirstPass = paths[1];
+		String[] argPaths = Runner.getPaths();
+		String storePath = argPaths[0];
+		String pathPredTransFirstPass = argPaths[1];
 		Dataset dataset = Runner.getDataset();
 		boolean isTablatureCase = dataset.isTablatureSet();
 		int datasetSize = dataset.getNumPieces();		
@@ -575,16 +576,18 @@ public class TrainingManager {
 			String.valueOf(ToolBox.getTimeDiffPrecise(start, ToolBox.getTimeStampPrecise()));
 		if (!useCV) {
 			String startFoldTr = ToolBox.getTimeStampPrecise();
-			startTrainingProcess(0, allPieces, -1, paths, new String[]{trPreProcTime, startFoldTr});
+			startTrainingProcess(
+				0, allPieces, -1, argPaths, paths, new String[]{trPreProcTime, startFoldTr}
+			);
 		}
 		else {
 			for (int k = 1; k <= datasetSize; k++) {
 				String startFoldTr = ToolBox.getTimeStampPrecise();
 				System.out.println("fold = " + k);
 				// Add foldstring to paths
-				String[] currPaths = new String[paths.length];
-				for (int i = 0; i < paths.length; i++) {
-					String s = paths[i];
+				String[] currPaths = new String[argPaths.length];
+				for (int i = 0; i < argPaths.length; i++) {
+					String s = argPaths[i];
 					if (s != null) {
 						currPaths[i] = s;
 						// Add fold for all cases but MM path for ENS model  
@@ -617,8 +620,10 @@ public class TrainingManager {
 						trainingPieces.add(allPieces.get(l));
 					} // <-- remove the if to fake non-cross-validation
 				}
-				startTrainingProcess(k, trainingPieces, testPieceIndex, currPaths, 
-					new String[]{trPreProcTime, startFoldTr});
+				startTrainingProcess(
+					k, trainingPieces, testPieceIndex, currPaths, paths, 
+					new String[]{trPreProcTime, startFoldTr}
+				);
 			}
 		}
 
@@ -667,7 +672,7 @@ public class TrainingManager {
 	 * @param times 
 	 */
 	private void startTrainingProcess(int fold, List<TablatureTranscriptionPair> trainingPieces, 
-		int testPieceIndex, String[] argPaths, String[] times) {
+		int testPieceIndex, String[] argPaths, Map<String, String> paths, String[] times) {
 		long trPreProcTime = Integer.parseInt(times[0]);
 		String start = times[1];
 
@@ -1406,11 +1411,15 @@ public class TrainingManager {
 					String[] cmd;
 					boolean isScikit = false;
 					boolean smoothen = false;
+					String pp = PathTools.getPathString(
+						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
+					);
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						smoothen = true;
 						cmd = new String[]{
-							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
+							"python", pp + Runner.scriptScikit, 
+//							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.train, 
 							storePath,			
@@ -1423,7 +1432,8 @@ public class TrainingManager {
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
 							allNoteFeatures.size(), storePath, null);
 						cmd = new String[]{
-							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
+							"python", pp + Runner.scriptTensorFlow, 
+//							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.train, 
 							argStrings.get(0), 
 							argStrings.get(1)};

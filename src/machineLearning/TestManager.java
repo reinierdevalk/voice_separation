@@ -46,6 +46,7 @@ import tools.ToolBox;
 import tools.labels.LabelTools;
 import tools.music.PitchKeyTools;
 import tools.music.TimeMeterTools;
+import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
@@ -124,11 +125,11 @@ public class TestManager {
 		
 	}
 	
-	public void prepareTesting(String start, Map<String, String> transcriptionParams) {
+	public void prepareTesting(String start, Map<String, String> transcriptionParams, Map<String, String> paths) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Dataset dataset = Runner.getDataset();
-		String[] paths = Runner.getPaths();
-		String storePath = paths[0]; 
+		String[] argPaths = Runner.getPaths();
+		String storePath = argPaths[0]; 
 
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
@@ -150,15 +151,19 @@ public class TestManager {
 				// 1. Test in test mode (transfer learning or deploy trained bidir user model)
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.BIDIR) {
 //				if (!deployTrainedUserModel) {
-					new TestManager().startTestProcess(k, Runner.TEST, paths, 
-						new String[]{tePreProcTime, startFoldTe}, transcriptionParams); // TODO new tm necessary to reset class vars
+					new TestManager().startTestProcess(
+						k, Runner.TEST, transcriptionParams, argPaths, paths, 
+						new String[]{tePreProcTime, startFoldTe}
+					); // TODO new tm necessary to reset class vars
 				}
 				
 				// 2. Test in application mode (transfer learning or deploy trained unidir user model)
 				String startFoldAppl = ToolBox.getTimeStampPrecise();
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.UNIDIR) {
-					new TestManager().startTestProcess(k, Runner.APPL, paths,  
-						new String[]{null, startFoldAppl}, transcriptionParams); // TODO new tm necessary to reset class vars
+					new TestManager().startTestProcess(
+						k, Runner.APPL, transcriptionParams, argPaths, paths, 
+						new String[]{null, startFoldAppl}						
+					); // TODO new tm necessary to reset class vars
 				}
 			}
 		}
@@ -168,9 +173,9 @@ public class TestManager {
 			for (int k = 1; k <= datasetSize; k++) {
 				String startFoldTe = ToolBox.getTimeStampPrecise();
 				System.out.println("fold = " + k);
-				String[] currentPaths = new String[paths.length];
-				for (int i = 0; i < paths.length; i++) {
-					String s = paths[i];
+				String[] currentPaths = new String[argPaths.length];
+				for (int i = 0; i < argPaths.length; i++) {
+					String s = argPaths[i];
 					if (s != null) {
 						// Add fold for all cases but MM path for ENS model  
 						if (!(mt == ModelType.ENS && i == 2)) {
@@ -187,8 +192,10 @@ public class TestManager {
 				// 1. Test in test mode (previously predicted information is not used in the feature
 				// calculation)
 				TestManager tm = new TestManager();	// necessary to reset class variables
-				tm.startTestProcess(k, Runner.TEST, currentPaths, new String[]{tePreProcTime, 
-					startFoldTe}, transcriptionParams);
+				tm.startTestProcess(
+					k, Runner.TEST, transcriptionParams, currentPaths, paths, 
+					new String[]{tePreProcTime, startFoldTe}
+				);
 
 				// 2. If applicable: test in application mode (previously predicted information is 
 				// used in the feature calculation))
@@ -196,8 +203,10 @@ public class TestManager {
 				if (dc == DecisionContext.UNIDIR && ma != ModellingApproach.HMM && !Runner.ignoreAppl) {
 					tm = new TestManager(); // necessary to reset class variables
 					if (mt != ModelType.MM) {
-						tm.startTestProcess(k, Runner.APPL, currentPaths, 
-							new String[]{null, startFoldAppl}, transcriptionParams);
+						tm.startTestProcess(
+							k, Runner.APPL, transcriptionParams, currentPaths, paths,
+							new String[]{null, startFoldAppl}
+						);
 					}
 				}
 			}
@@ -267,8 +276,8 @@ public class TestManager {
 	 * @param mode
 	 * @param times
 	 */
-	private void startTestProcess(int fold, int mode, String[] argPaths, String[] times, 
-		Map<String, String> transcriptionParams) {
+	private void startTestProcess(int fold, int mode, Map<String, String> transcriptionParams, 
+		String[] argPaths, Map<String, String> paths, String[] times) {
 		long tePreProcTime = 0;
 		if (mode == Runner.TEST) { 
 			tePreProcTime = Integer.parseInt(times[0]);
@@ -571,12 +580,15 @@ public class TestManager {
 			String tstOrAppRec = null;
 			if (mode == Runner.TEST) {
 				if (ma == ModellingApproach.N2N || ma == ModellingApproach.C2C) {
-					testResults = 
-						testInTestMode(fold, minAndMaxFeatureValues, modelWeighting, argPaths);
+					testResults = testInTestMode(
+						fold, minAndMaxFeatureValues, modelWeighting, argPaths, paths
+					);
 				}
 				else if (ma == ModellingApproach.HMM) {
-					testResults = testHMM(fold, storePath, 
-						Runner.ALL_CONFIGS[modelParameters.get(Runner.CONFIG).intValue()]);
+					testResults = testHMM(
+						fold, storePath, paths, 
+						Runner.ALL_CONFIGS[modelParameters.get(Runner.CONFIG).intValue()]
+					);
 				}
 				tstOrAppRec = Runner.test;
 				if (dc == DecisionContext.BIDIR || ma == ModellingApproach.HMM) {
@@ -584,8 +596,9 @@ public class TestManager {
 				}
 			}
 			else if (mode == Runner.APPL){
-				testResults = 
-					testInApplicationMode(fold, minAndMaxFeatureValues, modelWeighting,	argPaths);
+				testResults = testInApplicationMode(
+					fold, minAndMaxFeatureValues, modelWeighting, argPaths, paths
+				);
 				tstOrAppRec = Runner.application;
 
 //				// Reset STM
@@ -1084,7 +1097,7 @@ public class TestManager {
 	}
 
 
-	private List<List<List<Integer>>> testHMM(int fold, String path, Configuration config) {		
+	private List<List<List<Integer>>> testHMM(int fold, String path, Map<String, String> paths, Configuration config) {		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 
 		// Generate and store observations.csv so that they can be read by evaluate_HMM.m
@@ -1094,11 +1107,16 @@ public class TestManager {
 		ToolBox.storeListOfListsAsCSVFile(observations, 
 			new File(path + Runner.observations + ".csv"));
 
+		String mp = PathTools.getPathString(
+			Arrays.asList(paths.get("VOICE_SEP_MATLAB_PATH"))
+		);
+		
 		// Create the Matlab command
 		String cmd = "matlab -wait -nosplash -nodesktop -r \"";
-		cmd += "code_path = '" + Runner.matlabScriptPath + "'; ";
+		cmd += "code_path = '" + mp + "'; ";
+//		cmd += "code_path = '" + Runner.matlabScriptPath + "'; ";
 		cmd += "exp_path = '" + Paths.get(path).getParent().toString().replace("\\", "/") + "/" + "'; ";
-		cmd += "addpath(genpath(code_path)); "; // make all dirs in the code path availalbe to Matlab
+		cmd += "addpath(genpath(code_path)); "; // make all dirs in the code path available to Matlab
 		cmd += "addpath(genpath(exp_path)); "; // make all dirs in the experiment path available to Matlab
 		// NB: the order of the elements in fileNamesList must be the same as in the MATLAB code
 		String fileNamesList = "{" +
@@ -1205,7 +1223,7 @@ public class TestManager {
 	 * @return
 	 */
 	private List<List<List<Integer>>> testInTestMode(int fold, double[][] minAndMaxFeatureValues,
-		List<Double> modelWeighting, String[] argPaths) {
+		List<Double> modelWeighting, String[] argPaths, Map<String, String> paths) {
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
@@ -1399,10 +1417,14 @@ public class TestManager {
 					// Apply the model
 					String[] cmd;
 					boolean isScikit = false;
-					// For scikit
+					String pp = PathTools.getPathString(
+						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
+					);
+					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						cmd = new String[]{
-							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
+							"python", pp + Runner.scriptScikit, 
+//							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.test, 
 							storePath, //pathStoredNN, 
@@ -1415,7 +1437,8 @@ public class TestManager {
 							TrainingManager.getArgumentStrings(Runner.TEST, modelParameters, 
 							noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
 						cmd = new String[]{
-							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
+							"python", pp + Runner.scriptTensorFlow,
+//							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.test,
 							argStrings.get(0),
 							argStrings.get(1)};
@@ -3468,7 +3491,7 @@ public class TestManager {
 	 * @return
 	 */
 	private List<List<List<Integer>>> testInApplicationMode(int fold, double[][] minAndMaxFeatureValues, 
-		List<Double> modelWeighting, String[] argPaths) {
+		List<Double> modelWeighting, String[] argPaths, Map<String, String> paths) {
 		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 		
@@ -3616,16 +3639,19 @@ public class TestManager {
 		if (ma == ModellingApproach.N2N) {  
 			Process pr = null;
 			if (mt == ModelType.DNN || mt == ModelType.OTHER) {
-				boolean isScikit = false;
-
 				// Create commands to pass to IPython
 				String cmds = "";
-				// For scikit
-//				String[] s;
+				boolean isScikit = false;
+				String pp = PathTools.getPathString(
+					Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
+				);
+				// For scikit (ISMIR 2017)
+//				String[] s; 		
 				if (isScikit) {
 //					s = new String[]{storePath, /*pathStoredNN,*/ m.name(), Runner.fvExt + "app.csv"};
 					// Get imports
-					cmds += PythonInterface.getImports(new File(Runner.pythonScriptPath + Runner.scriptScikit)) + "\r\n";
+					cmds += PythonInterface.getImports(new File(pp + Runner.scriptScikit)) + "\r\n";
+//					cmds += PythonInterface.getImports(new File(Runner.pythonScriptPath + Runner.scriptScikit)) + "\r\n";
 					// Initialise model
 					cmds += "m = joblib.load('" + storePath + m.name() + ".pkl')" + "\r\n";
 				}
@@ -3643,8 +3669,9 @@ public class TestManager {
 						TrainingManager.getArgumentStrings(Runner.APPL, modelParameters, 
 						numFeat /*noteFeatures.get(0).size()*/, -1, storePath, pathTrainedUserModel);
 //					s = new String[]{Runner.scriptPythonPath, Runner.scriptTensorFlow, 
-//						argStrings.get(0), argStrings.get(1)};			
-					String argScriptPath = Runner.pythonScriptPath;
+//						argStrings.get(0), argStrings.get(1)};
+					String argScriptPath = pp;
+//					String argScriptPath = Runner.pythonScriptPath;
 					String argScript = Runner.scriptTensorFlow;
 					String hyperparamsStr = argStrings.get(0);
 					String pathsExtensionsStr = argStrings.get(1);

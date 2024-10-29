@@ -97,8 +97,12 @@ public class Dataset implements Serializable {
 		ALL_PIECENAMES.put(BACH_INV_2VV, getBachInv2vv());
 		ALL_PIECENAMES.put(BACH_INV_3VV, getBachInv3vv());
 		ALL_PIECENAMES.put(TEST, getTest());
-		ALL_PIECENAMES.put(USER_TAB, new ArrayList<>());
-		ALL_PIECENAMES.put(USER, new ArrayList<>());
+//		ALL_PIECENAMES.put(USER_TAB, new ArrayList<>());
+//		ALL_PIECENAMES.put(USER, new ArrayList<>());
+	}
+	
+	
+	public static void main(String[] args) {
 	}
 
 
@@ -107,22 +111,36 @@ public class Dataset implements Serializable {
 
 
 	public Dataset(String id) {
+		// ID
 		this.datasetID = id;
-		// name is the datasetID without the voice information 
+
+		// name (datasetID without the voice information) 
 		if (id.endsWith(Runner.voices)) {
 			this.name = id.substring(0, id.lastIndexOf("-"));
 		}
 		else {
 			this.name = id;
 		}
-		this.pieceNames = ALL_PIECENAMES.get(id);
+
+		// pieceNames
+		if (ALL_PIECENAMES.containsKey(id)) {
+			this.pieceNames = ALL_PIECENAMES.get(id);
+		}
+		else {
+			this.pieceNames = new ArrayList<>();
+		}
+
+		// numVoices
 		if (id.endsWith(Runner.voices)) {
-			this.numVoices = 
-				Integer.parseInt(id.substring(id.indexOf(Runner.voices) - 1, id.indexOf(Runner.voices)));
+			this.numVoices = Integer.parseInt(
+				id.substring(id.indexOf(Runner.voices) - 1, id.indexOf(Runner.voices))
+			);
 		}
 		else  {
 			this.numVoices = 0;
 		}
+
+		// isTablatureSet, isTabAsNonTabSet 
 		if (isTablatureSet(id)) {
 			this.isTablatureSet = true;
 			this.isTabAsNonTabSet = false;
@@ -135,7 +153,8 @@ public class Dataset implements Serializable {
 			this.isTablatureSet = false;
 			this.isTabAsNonTabSet = false;
 		}
-		// The variables below are set in populateDataset()
+
+		// Variables initialised here and set in populateDataset()
 		largestChordSize = -1;
 		highestNumVoices = -1;
 		if (this.isTablatureSet) {
@@ -155,22 +174,39 @@ public class Dataset implements Serializable {
 		// Set paths
 		String argEncodingsPath, argMidiPath;
 		String argTabMidiPath = null;
-		if (altPaths == null) {
-			
-			argEncodingsPath = PathTools.getPathString(
-				Arrays.asList(paths.get("ENCODINGS_PATH"))
-			);
+		if (altPaths == null) {	
+			if (!deployTrainedUserModel) {
+				argEncodingsPath = PathTools.getPathString(
+					Arrays.asList(paths.get("ENCODINGS_PATH"))
+				);
+			}
+			else {
+				argEncodingsPath = PathTools.getPathString(
+					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
+				);
+			}
 //			argEncodingsPath = Runner.encodingsPath;
-			argMidiPath = PathTools.getPathString(
-				Arrays.asList(paths.get("MIDI_PATH"))
-			);
+
+			if (!deployTrainedUserModel) {
+				argMidiPath = PathTools.getPathString(
+					Arrays.asList(paths.get("MIDI_PATH"))
+				);
+			}
+			else {
+				argMidiPath = PathTools.getPathString(
+					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
+				);
+			}
 //			argMidiPath = Runner.midiPath;
-			argTabMidiPath = PathTools.getPathString(
-				Arrays.asList(paths.get("MIDI_PATH"))
-			);
+
+			if (!deployTrainedUserModel) {
+				argTabMidiPath = PathTools.getPathString(
+					Arrays.asList(paths.get("MIDI_PATH"))
+				);
+			}
 //			argTabMidiPath = Runner.midiPath;
 
-			//argTabMidiPath;
+			// argTabMidiPath;
 			if (!deployTrainedUserModel) {
 				String numVoices = getNumVoices() + Runner.voices + "/";
 				argEncodingsPath += ToolBox.pathify(new String[]{getName(), numVoices});
