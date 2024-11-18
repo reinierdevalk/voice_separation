@@ -2559,7 +2559,7 @@ public class FeatureGenerator {
 
 		Transcription.verifyCase(btp, bnp);
 		
-		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
+		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 //		ModelType mt = m.getModelType();
 //		DecisionContext dc = m.getDecisionContext(); 
 		boolean modelDuration = m.getModelDuration();		

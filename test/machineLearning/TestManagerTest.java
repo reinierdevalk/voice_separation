@@ -1489,7 +1489,7 @@ public class TestManagerTest {
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(Dataset.TEST);
+		Dataset ds = new Dataset(Dataset.TEST_MIDI);
 		ds.populateDataset(null, paths, testPaths, false);
 		Runner.setDataset(ds);
 		
@@ -1836,7 +1836,7 @@ public class TestManagerTest {
 		Runner.setModelParams(modelParameters);
 
 		// ds
-		Dataset ds = new Dataset(Dataset.TEST);
+		Dataset ds = new Dataset(Dataset.TEST_MIDI);
 		ds.populateDataset(null, paths, testPaths, false);
 		Runner.setDataset(ds);
 		

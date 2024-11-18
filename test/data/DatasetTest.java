@@ -44,7 +44,7 @@ public class DatasetTest {
 
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, paths, argPaths, false);
-		Dataset dsNonTab = new Dataset(Dataset.TEST);
+		Dataset dsNonTab = new Dataset(Dataset.TEST_MIDI);
 		dsNonTab.populateDataset(null, paths, argPaths, false);
 
 		List<Integer> actual = new ArrayList<Integer>();
@@ -64,13 +64,13 @@ public class DatasetTest {
 	public void testGetIndividualPieceSizes() {		
 		List<List<Integer>> expected = new ArrayList<List<Integer>>(); 
 		// N2N
-		expected.add(Arrays.asList(new Integer[]{39, 39, 39}));
+		expected.add(Arrays.asList(39, 39, 39));
 		// C2C
-		expected.add(Arrays.asList(new Integer[]{16, 16, 16}));
+		expected.add(Arrays.asList(16, 16, 16));
 		// N2N non-tab
-		expected.add(Arrays.asList(new Integer[]{40, 40, 40}));
+		expected.add(Arrays.asList(40, 40, 40));
 		// C2C non-tab
-		expected.add(Arrays.asList(new Integer[]{16, 16, 16}));
+		expected.add(Arrays.asList(16, 16, 16));
 
 		String[] argPaths = new String[]{
 			encodingsPath + "test/", 
@@ -80,7 +80,7 @@ public class DatasetTest {
 
 		Dataset ds = new Dataset(Dataset.TEST_TAB);
 		ds.populateDataset(null, paths, argPaths, false);
-		Dataset dsNonTab = new Dataset(Dataset.TEST);
+		Dataset dsNonTab = new Dataset(Dataset.TEST_MIDI);
 		dsNonTab.populateDataset(null, paths, argPaths, false);
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.N2N));

@@ -46,10 +46,10 @@ public class Runner {
 //	public static String experimentsPath;
 //	public static String storedDatasetsPath;
 	//
-	public static String output = "out/";
+	public static final String OUTPUT_DIR = "out/";
 	//
-	public static String scriptScikit = "model_scikit.py";
-	public static String scriptTensorFlow = "model_tensorflow.py";
+	//public static String scriptScikit = "model_scikit.py";
+	//public static String scriptTensorFlow = "model_tensorflow.py";
 
 	// Naming conventions
 	// Abbreviate all metrics and self-defined names/terms, using 
@@ -119,17 +119,34 @@ public class Runner {
 	private static boolean deployTrainedUserModel;
 	private static boolean verbose;
 	
+	private Map<String, Integer> fvNames = new LinkedHashMap<String, Integer>();
+	{ 
+		fvNames.put("ISMIR_2013", 0);
+		fvNames.put("EM_2015", 1);
+		fvNames.put("PhD", 2);
+		fvNames.put("PhD, A", 3);
+		fvNames.put("PhD, B", 4);
+		fvNames.put("PhD, C", 5);
+		fvNames.put("PhD, D", 6);
+		fvNames.put("PhD, D_star", 7);
+		fvNames.put("CMA_2016", 8);
+		fvNames.put("ISMIR_2017", 9);
+		fvNames.put("ISMIR_2018", 10);
+	}
+	
 	// Keys
 	// Enums
 	public static final String MODELLING_APPROACH = "modelling approach";
 	public static final String MODEL = "model";
+//	public static final String MODEL_FIRST_PASS = "model first pass";
 	private static final String MODEL_TYPE = "model_type";
 	public static final String PROC_MODE = "processing mode";
+//	public static final String PROC_MODE_FIRST_PASS = "processing mode first pass";
 	public static final String FEAT_VEC = "feature vector";
 	private static final String DECISION_CONTEXT = "decision context";
 	public static final String WEIGHTS_INIT = "weights initialisation";
 	// ints
-	public static final String MINI_BATCH_SIZE = "mini batch";
+	public static final String MINI_BATCH_SIZE = "mini batch size";
 	public static final String VALIDATION_PERC = "validation percentage";
 	public static final String SEED = "seed";
 	public static final String DECISION_CONTEXT_SIZE = "decision context size";
@@ -145,6 +162,7 @@ public class Runner {
 	public static final String NS_ENC_SINGLE_DIGIT = "n values";
 //	public static final String NEIGHBOURS = "neighbours";
 //	public static final String TREES = "decision trees";
+	// Strings
 	
 	// DNN
 	public static final String EPOCHS = "epochs";
@@ -373,7 +391,18 @@ public class Runner {
 
 		public Model getMelodyModel() {
 			return melodyModel;
-		}	
+		}
+
+		public static Model getModel(String s) {
+			if (s != null) {
+				for (Model m : Model.values()) { 
+					if (m.getStringRep().equals(s)) {
+						return m;
+					}
+				}
+			}
+			return null;
+		}
 	};
 
 	
@@ -454,14 +483,25 @@ public class Runner {
 		public int getIntRep() {
 			return intRep;
 		}
+
+		public static ProcessingMode getProcessingMode(String s) {
+			if (s != null) {
+				for (ProcessingMode pm : ProcessingMode.values()) { 
+					if (pm.getStringRep().equals(s)) {
+						return pm;
+					}
+				}
+			}
+			return null;
+		}
 	};
 
 
 	public static enum Configuration {
-		ONE("1", true, true, 0), 
-		TWO("2", true, false, 1), 
-		THREE("3", false ,true, 2), 
-		FOUR("4", false, false, 3);  
+		ONE("1", true, true, 0), // "1-uni_TPM-uni_ISM/"; // WAS "1. Output (with uniform priors and transitions)"
+		TWO("2", true, false, 1), // "2-uni_TPM-data_ISM/"; // WAS "2. Output (with prior probability matrix and uniform transitions)" 
+		THREE("3", false ,true, 2), // "3-data_TPM-uni_ISM/"; // WAS "3. Output (with uniform priors)"
+		FOUR("4", false, false, 3); // "4-data_TPM-data_ISM/"; // WAS "4. Output (with prior probability matrix)" 
 
 		private String asString;
 		private boolean uniformTPM;
@@ -512,22 +552,17 @@ public class Runner {
 			}
 			return desc;
 		}
-	}
 
-
-	private Map<String, Integer> fvNames = new LinkedHashMap<String, Integer>();
-	{ 
-		fvNames.put("ISMIR_2013", 0);
-		fvNames.put("EM_2015", 1);
-		fvNames.put("PhD", 2);
-		fvNames.put("PhD, A", 3);
-		fvNames.put("PhD, B", 4);
-		fvNames.put("PhD, C", 5);
-		fvNames.put("PhD, D", 6);
-		fvNames.put("PhD, D_star", 7);
-		fvNames.put("CMA_2016", 8);
-		fvNames.put("ISMIR_2017", 9);
-		fvNames.put("ISMIR_2018", 10);
+		public static Configuration getConfiguration(String s) {
+			if (s != null) {
+				for (Configuration c : Configuration.values()) { 
+					if (c.getStringRep().equals(s)) {
+						return c;
+					}
+				}
+			}
+			return null;
+		}
 	}
 
 
@@ -559,6 +594,17 @@ public class Runner {
 
 		public int getIntRep() {
 			return intRep;
+		}
+
+		public static FeatureVector getFeatureVector(String s) {
+			if (s != null) {
+				for (FeatureVector fv : FeatureVector.values()) { 
+					if (fv.getStringRep().equals(s)) {
+						return fv;
+					}
+				}
+			}
+			return null;
 		}
 	};
 
@@ -636,6 +682,17 @@ public class Runner {
 		
 		public int getIntRep() {
 			return intRep;
+		}
+
+		public static DecodingAlgorithm getDecodingAlgorithm(String s) {
+			if (s != null) {
+				for (DecodingAlgorithm d : DecodingAlgorithm.values()) { 
+					if (d.getStringRep().equals(s)) {
+						return d;
+					}
+				}
+			}
+			return null;
 		}
 	};
 
@@ -946,26 +1003,42 @@ public class Runner {
 			else {
 				ds = ToolBox.getStoredObjectBinary(new Dataset(), datasetFile);
 			}
+//			System.out.println(ds.getDatasetID());
+//			System.out.println(ds.getName());
+//			System.out.println(ds.getPiecenames());
+//			System.out.println(ds.getNumPieces());
+//			System.out.println(ds.getNumVoices());
+//			System.out.println(ds.isTablatureSet());
+//			System.out.println(ds.isTabAsNonTabSet());
+//			System.out.println(ds.getLargestChordSize());
+//			System.out.println(ds.getHighestNumVoices());
+//			System.out.println(ds.getAllEncodingFiles());
+//			System.out.println(ds.getAllMidiFiles());
+//			System.out.println(ds.getAllTablatures());
+//			System.out.println(ds.getAllTranscriptions());
+//			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
+//			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
+//			System.exit(0);
 		}
 		else {
 			ds.populateDataset(null, paths, null, deployTrainedUserModel);
 
-			System.out.println(ds.getDatasetID());
-			System.out.println(ds.getName());
-			System.out.println(ds.getPieceNames());
-			System.out.println(ds.getNumPieces());
-			System.out.println(ds.getNumVoices());
-			System.out.println(ds.isTablatureSet());
-			System.out.println(ds.isTabAsNonTabSet());
-			System.out.println(ds.getLargestChordSize());
-			System.out.println(ds.getHighestNumVoices());
-			System.out.println(ds.getAllEncodingFiles());
-			System.out.println(ds.getAllMidiFiles());
-			System.out.println(ds.getAllTablatures());
-			System.out.println(ds.getAllTranscriptions());
-			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
-			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
-			System.exit(0);
+//			System.out.println(ds.getDatasetID());
+//			System.out.println(ds.getName());
+//			System.out.println(ds.getPiecenames());
+//			System.out.println(ds.getNumPieces());
+//			System.out.println(ds.getNumVoices());
+//			System.out.println(ds.isTablatureSet());
+//			System.out.println(ds.isTabAsNonTabSet());
+//			System.out.println(ds.getLargestChordSize());
+//			System.out.println(ds.getHighestNumVoices());
+//			System.out.println(ds.getAllEncodingFiles());
+//			System.out.println(ds.getAllMidiFiles());
+//			System.out.println(ds.getAllTablatures());
+//			System.out.println(ds.getAllTranscriptions());
+//			System.out.println(ds.getNumDataExamples(ModellingApproach.N2N));
+//			System.out.println(ds.getIndividualPieceSizes(ModellingApproach.N2N));
+//			System.exit(0);
 		}
 		setDataset(ds);
 
@@ -1079,17 +1152,15 @@ public class Runner {
 				if (!skipTraining) {
 					new TrainingManager().prepareTraining(startTr, paths);
 				}
+				if (trainUserModel) {
+					ToolBox.storeTextFile(EvaluationManager.getDataAndParamsInfo(Runner.TRAIN, -1),
+						new File(storePath + modelParameters + ".txt"));
+					ToolBox.storeObjectBinary(modelParams, new File(storePath + modelParameters + ".ser"));
+					System.exit(0);
+				}
 //				endTraining = ToolBox.getTimeStamp();
 //				System.out.println("### 2. endTraining = " + endTraining);
 			}
-			if (trainUserModel) {
-//			if (ToolBox.toBoolean(argModelParams.get(TRAIN_USER_MODEL).intValue())) {
-				ToolBox.storeTextFile(EvaluationManager.getDataAndParamsInfo(Runner.TRAIN, -1),
-					new File(storePath + modelParameters + ".txt"));
-				ToolBox.storeObjectBinary(modelParams, new File(storePath + modelParameters + ".ser"));
-				System.exit(0);
-			}
-//			System.exit(0);
 
 			// 2. Evaluate
 			String startTe = ToolBox.getTimeStampPrecise();

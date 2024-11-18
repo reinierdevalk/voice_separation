@@ -37,7 +37,7 @@ public class HMMManager {
 //		String id = DatasetID.WTC_4VV;
 		Dataset ds = new Dataset(id);
 		boolean isTablatureCase = ds.isTablatureSet();  
-		List<String> pieceNames = ds.getPieceNames(); 
+		List<String> pieceNames = ds.getPiecenames(); 
 		String vv = ds.getNumVoices() + Runner.voices;
 		// b. Create a folder in results/HMM/ for the current occasion and the current experiment (optional) 
 		String occasion = "Thesis - Copy 1/";
@@ -123,7 +123,7 @@ public class HMMManager {
 	private void generateDictionariesAndMatrices(Dataset dataset, String path, /*int boost,*/ 
 		int highestNumberOfVoicesAssumed) {
 		
-		List<String> pieceNames = dataset.getPieceNames();
+		List<String> pieceNames = dataset.getPiecenames();
 
 		// 1. Get the pieces
 //		// NB: The tablature tuning is normalised to G

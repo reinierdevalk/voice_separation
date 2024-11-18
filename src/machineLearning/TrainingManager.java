@@ -125,7 +125,7 @@ public class TrainingManager {
 
 		// Create the complete training set
 		List<TablatureTranscriptionPair> allPieces = new ArrayList<TablatureTranscriptionPair>();
-		List<String> pieceNames = dataset.getPieceNames();
+		List<String> pieceNames = dataset.getPiecenames();
 		List<Integer> pieceSizes = dataset.getIndividualPieceSizes(ma);
 		List<List<List<Double>>> voiceLabelsGTPerPiece = new ArrayList<List<List<Double>>>();
 		System.out.println("pieceSizes: " + pieceSizes);
@@ -245,10 +245,10 @@ public class TrainingManager {
 					if (bidirAsInThesis) {
 						String foldStr = 
 							"fold_" + ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex));
-						predTranscr = 
-							ToolBox.getStoredObjectBinary(new Transcription(), 
-							new File(pathPredTransFirstPass + Runner.output + foldStr + 
-							"-" + currPieceName + ".ser"));
+						predTranscr = ToolBox.getStoredObjectBinary(
+							new Transcription(), new File(pathPredTransFirstPass + Runner.OUTPUT_DIR + 
+							foldStr + "-" + currPieceName + ".ser")
+						);
 					}
 					else {
 						predTranscr = null;
@@ -755,7 +755,7 @@ public class TrainingManager {
 					pieceSizes.add(currTrans.getNumberOfNotes());
 				}
 				
-				int indexInAll = dataset.getPieceNames().indexOf(currTrans.getName());
+				int indexInAll = dataset.getPiecenames().indexOf(currTrans.getName());
 				if (verbose) System.out.println("i = " + i);
 //				if (verbose) System.out.println("piece = " + currTab.getName());
 				if (verbose) System.out.println("piece = " + currTrans.getName());
@@ -1418,7 +1418,7 @@ public class TrainingManager {
 					if (isScikit) {
 						smoothen = true;
 						cmd = new String[]{
-							"python", pp + Runner.scriptScikit, 
+							"python", pp + paths.get("SCIKIT_SCRIPT"), 
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.train, 
@@ -1432,7 +1432,7 @@ public class TrainingManager {
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
 							allNoteFeatures.size(), storePath, null);
 						cmd = new String[]{
-							"python", pp + Runner.scriptTensorFlow, 
+							"python", pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.train, 
 							argStrings.get(0), 

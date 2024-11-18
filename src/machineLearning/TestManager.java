@@ -55,6 +55,7 @@ import ui.Runner.Model;
 import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
+import ui.UI;
 
 public class TestManager {	
 	// 1. Created before testing: data and derived information // TODO make all fields that are protected private (only needed in TestManagerTest) and create get()-methods
@@ -326,7 +327,7 @@ public class TestManager {
 		String pathStoredNN = argPaths[3];
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
-		String testPieceName = dataset.getPieceNames().get(pieceIndex);
+		String testPieceName = dataset.getPiecenames().get(pieceIndex);
 		prcRcl += "fold = " + fold + "; piece = " + testPieceName;
 		
 		System.out.println("... processing " + testPieceName + " ...");
@@ -485,7 +486,7 @@ public class TestManager {
 					predictedTranscription =	
 						ToolBox.getStoredObjectBinary(new Transcription(), 
 						new File((new File(pathPredTransFirstPass)).getParent() + "/" + 
-						Runner.output + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
+						Runner.OUTPUT_DIR + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
 						"-" + testPieceName + ".ser"));
 				}
 				else {
@@ -675,8 +676,8 @@ public class TestManager {
 				// TODO G-tuning is assumed as default
 				if (deployTrainedUserModel) {
 					// TODO access args 
-					int numAlt = Integer.valueOf(transcriptionParams.get("-k")); // TODO don't hardcode -k
-					int md = Integer.valueOf(transcriptionParams.get("-m")); // TODO don't hardcode -m
+					int numAlt = Integer.valueOf(transcriptionParams.get(UI.KEY));
+					int md = Integer.valueOf(transcriptionParams.get(UI.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
 //l					System.out.println(numAlt);
 //l					System.out.println(md);
@@ -750,11 +751,11 @@ public class TestManager {
 
 				String dir;
 				if (useCV) {
-					dir = new File(storePath).getParent() + "/" + Runner.output + "fold_" +	
+					dir = new File(storePath).getParent() + "/" + Runner.OUTPUT_DIR + "fold_" +	
 						ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + "-"; 
 				}
 				else {
-					dir = !deployTrainedUserModel ? storePath + Runner.output : storePath;
+					dir = !deployTrainedUserModel ? storePath + Runner.OUTPUT_DIR : storePath;
 				}
 				if (!deployTrainedUserModel) {
 					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
@@ -774,7 +775,7 @@ public class TestManager {
 					for (boolean grandStaff : new Boolean[]{true, false}) {
 						MEIExport.exportMEIFile(
 							t, 
-							(transcriptionParams.get("-t").equals("y") ? tablature : null),	
+							(!deployTrainedUserModel ? tablature : (transcriptionParams.get(UI.TABLATURE).equals("y") ? tablature : null)),	
 //							tablature,
 	//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
 	//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
@@ -782,6 +783,7 @@ public class TestManager {
 							grandStaff,
 							false,
 							/*true,*/
+							paths,
 							new String[]{expPath, "abtab -- transcriber"}
 							);
 					}
@@ -1261,7 +1263,7 @@ public class TestManager {
 		String pathStoredMM = argPaths[4];
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
-		String testPieceName = dataset.getPieceNames().get(pieceIndex);
+		String testPieceName = dataset.getPiecenames().get(pieceIndex);
 		prcRcl += " -- tst" + "\r\n";
 
 		// 1.  Calculate features, get networkoutputs, determine predicted voices (and durations)
@@ -1423,7 +1425,7 @@ public class TestManager {
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						cmd = new String[]{
-							"python", pp + Runner.scriptScikit, 
+							"python", pp + paths.get("SCIKIT_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.test, 
@@ -1437,7 +1439,7 @@ public class TestManager {
 							TrainingManager.getArgumentStrings(Runner.TEST, modelParameters, 
 							noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
 						cmd = new String[]{
-							"python", pp + Runner.scriptTensorFlow,
+							"python", pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.test,
 							argStrings.get(0),
@@ -2342,7 +2344,7 @@ public class TestManager {
 	 *         as element 1: the predicted label for the note
 	 */
 	private List<List<Double>> predictVoices(String path, double[][] minAndMaxFeatureValues, int noteIndex, 
-		List<List<Integer>> voiceEntryInfo, List<Double> modelWeighting, Process pr) {
+		List<List<Integer>> voiceEntryInfo, List<Double> modelWeighting, Map<String, String> paths, Process pr) {
 
 		List<List<Double>> fvPredLbl = new ArrayList<>();
 
@@ -2636,8 +2638,10 @@ public class TestManager {
 				}				
 				fvPredLbl.add(currentNoteFeatureVector);
 
-				String fvAsStr = currentNoteFeatureVector.toString();			
-				String scriptName = Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py"));
+				String fvAsStr = currentNoteFeatureVector.toString();
+				String script = paths.get("TENSORFLOW_SCRIPT");
+				String scriptName = script.substring(0, script.indexOf(".py"));
+//				String scriptName = Runner.scriptTensorFlow.substring(0, Runner.scriptTensorFlow.indexOf(".py"));
 				cmds += 
 					(deployTrainedUserModel ? "sess = tf.InteractiveSession()" + "\r\n" : "") +
 //					(deployTrainedUserModel ? scriptName + ".start_sess()" + "\r\n" : "") +
@@ -3650,7 +3654,7 @@ public class TestManager {
 				if (isScikit) {
 //					s = new String[]{storePath, /*pathStoredNN,*/ m.name(), Runner.fvExt + "app.csv"};
 					// Get imports
-					cmds += PythonInterface.getImports(new File(pp + Runner.scriptScikit)) + "\r\n";
+					cmds += PythonInterface.getImports(new File(pp + paths.get("SCIKIT_SCRIPT"))) + "\r\n";
 //					cmds += PythonInterface.getImports(new File(Runner.pythonScriptPath + Runner.scriptScikit)) + "\r\n";
 					// Initialise model
 					cmds += "m = joblib.load('" + storePath + m.name() + ".pkl')" + "\r\n";
@@ -3672,7 +3676,8 @@ public class TestManager {
 //						argStrings.get(0), argStrings.get(1)};
 					String argScriptPath = pp;
 //					String argScriptPath = Runner.pythonScriptPath;
-					String argScript = Runner.scriptTensorFlow;
+					String argScript = paths.get("TENSORFLOW_SCRIPT");
+//					String argScript = Runner.scriptTensorFlow;
 					String hyperparamsStr = argStrings.get(0);
 					String pathsExtensionsStr = argStrings.get(1);
 					String module = argScript.substring(0, argScript.indexOf(".py"));
@@ -3743,7 +3748,7 @@ public class TestManager {
 //				System.out.println(i);
 				List<List<Double>> fvAndPredLbl = 
 					predictVoices(storePath, minAndMaxFeatureValues, noteIndex, 
-					voiceEntryInfo, modelWeighting, pr);
+					voiceEntryInfo, modelWeighting, paths, pr);
 				// Add the note to the predicted voices
 				addNote(noteIndex);
 				// Set the adapted voice labels to the Transcription 

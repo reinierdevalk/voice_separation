@@ -23,7 +23,7 @@ public class Dataset implements Serializable {
 	
 	private String datasetID;
 	private String name;
-	private List<String> pieceNames;
+	private List<String> piecenames;
 	private int numVoices;
 	private boolean isTablatureSet;
 	private boolean isTabAsNonTabSet;
@@ -35,22 +35,23 @@ public class Dataset implements Serializable {
 	private List<Transcription> allTranscriptions;
 
 	// Dataset naming
+	// Each Dataset has a name that consists of three elements, separated by dashes: <a>-<b>-<n>vv
 	// - tablature datasets have an element of COMPOSITIONS (surrounded by dashes, e.g., 
 	//   "-int-") or "-tab" in their name
 	// - tab-as-non-tab datasets have "_ANT" in their name
 	// - non-tablature datasets have neither in their name
-	// - if the number of voices <n> is known, the name must end with "-<n>vv"
+	// - the name must end with "-<n>vv"
 	// a. Tablature datasets
 	public static final String THESIS_INT_3VV = "thesis-int-3vv"; // TODO thesis-int
 	public static final String THESIS_INT_4VV = "thesis-int-4vv";
 	public static final String THESIS_INT_5VV = "thesis-int-5vv";
 	public static final String JOSQUIN_INT_4VV = "josquin-int-4vv";	
 	public static final String BYRD_INT_4VV = "byrd-int-4vv";
-	public static final String THESIS_INT_IMI_4VV = "thesis-int-imi-4vv";
-	public static final String THESIS_INT_IMI_SHORT_4VV = "thesis-int-imi_short-4vv";
-	public static final String THESIS_INT_SEMI_4VV = "thesis-int-semi-4vv";
-	public static final String THESIS_INT_FREE_4VV = "thesis-int-free-4vv";
-	public static final String THESIS_INT_FREE_MORE_4VV = "thesis-int-free_more-4vv";
+	public static final String THESIS_INT_IMI_4VV = "thesis-int_imi-4vv";
+	public static final String THESIS_INT_IMI_SHORT_4VV = "thesis-int_imi_short-4vv";
+	public static final String THESIS_INT_SEMI_4VV = "thesis-int_semi-4vv";
+	public static final String THESIS_INT_FREE_4VV = "thesis-int_free-4vv";
+	public static final String THESIS_INT_FREE_MORE_4VV = "thesis-int_free_more-4vv";
 	public static final String TEST_TAB = "test-tab";	
 	public static final String USER_TAB = "user-tab";
 	// b. Tab-as-non-tab datasets
@@ -58,11 +59,11 @@ public class Dataset implements Serializable {
 	public static final String THESIS_INT_ANT_4VV = "thesis";
 	public static final String THESIS_INT_ANT_5VV = "thesis-int_ANT-5vv";
 	public static final String BYRD_INT_ANT_4VV = "byrd-int_ANT-4vv";
-	public static final String THESIS_INT_IMI_ANT_4VV = "thesis-int-imi_ANT-4vv";
-	public static final String THESIS_INT_IMI_SHORT_ANT_4VV = "thesis-int-imi_short_ANT-4vv";
-	public static final String THESIS_INT_SEMI_ANT_4VV = "thesis-int-semi_ANT-4vv";
-	public static final String THESIS_INT_FREE_ANT_4VV = "thesis-int-free_ANT-4vv";
-	public static final String THESIS_INT_FREE_MORE_ANT_4VV = "thesis-int-free_more_ANT-4vv";
+	public static final String THESIS_INT_IMI_ANT_4VV = "thesis-int_imi_ANT-4vv";
+	public static final String THESIS_INT_IMI_SHORT_ANT_4VV = "thesis-int_imi_short_ANT-4vv";
+	public static final String THESIS_INT_SEMI_ANT_4VV = "thesis-int_semi_ANT-4vv";
+	public static final String THESIS_INT_FREE_ANT_4VV = "thesis-int_free_ANT-4vv";
+	public static final String THESIS_INT_FREE_MORE_ANT_4VV = "thesis-int_free_more_ANT-4vv";
 	// c. Non-tablature datasets
 	public static final String BACH_INV_2VV = "bach-inv-2vv";
 	public static final String BACH_INV_3VV = "bach-inv-3vv";
@@ -70,11 +71,11 @@ public class Dataset implements Serializable {
 	public static final String BACH_WTC_3VV = "bach-WTC-3vv";
 	public static final String BACH_WTC_4VV = "bach-WTC-4vv";
 	public static final String BACH_WTC_5VV = "bach-WTC-5vv";
-	public static final String TEST = "test";
-	public static final String USER = "user";
+	public static final String TEST_MIDI = "test-MIDI";
+	public static final String USER_MIDI = "user-MIDI";
 
 	private static final List<String> TAB_COMPOSITIONS = Arrays.asList(new String[]{
-		"int", "fnt", "rcr"});
+		"int", "fnt", "rcr"}); // intabulation, fantasia, ricercare
 	private static final List<String> COMPOSITIONS = Arrays.asList(new String[]{
 		"inv"});
 
@@ -96,9 +97,14 @@ public class Dataset implements Serializable {
 		ALL_PIECENAMES.put(BACH_WTC_5VV, getBachWTC5vv());
 		ALL_PIECENAMES.put(BACH_INV_2VV, getBachInv2vv());
 		ALL_PIECENAMES.put(BACH_INV_3VV, getBachInv3vv());
-		ALL_PIECENAMES.put(TEST, getTest());
-//		ALL_PIECENAMES.put(USER_TAB, new ArrayList<>());
-//		ALL_PIECENAMES.put(USER, new ArrayList<>());
+		ALL_PIECENAMES.put(TEST_MIDI, getTest());
+		ALL_PIECENAMES.put(USER_TAB, null);
+		ALL_PIECENAMES.put(USER_MIDI, null);
+	}
+
+
+	public static void setUserPiecenames(String key, List<String> argPiecenames) {
+		ALL_PIECENAMES.put(key, argPiecenames);
 	}
 	
 	
@@ -115,30 +121,32 @@ public class Dataset implements Serializable {
 		this.datasetID = id;
 
 		// name (datasetID without the voice information) 
-		if (id.endsWith(Runner.voices)) {
-			this.name = id.substring(0, id.lastIndexOf("-"));
-		}
-		else {
-			this.name = id;
-		}
-
-		// pieceNames
-		if (ALL_PIECENAMES.containsKey(id)) {
-			this.pieceNames = ALL_PIECENAMES.get(id);
-		}
-		else {
-			this.pieceNames = new ArrayList<>();
-		}
+//		if (id.endsWith(Runner.voices)) {
+		this.name = id.substring(0, id.lastIndexOf("-"));
+//		}
+//		else {
+//			this.name = id;
+//		}
 
 		// numVoices
-		if (id.endsWith(Runner.voices)) {
-			this.numVoices = Integer.parseInt(
-				id.substring(id.indexOf(Runner.voices) - 1, id.indexOf(Runner.voices))
-			);
-		}
-		else  {
-			this.numVoices = 0;
-		}
+//		if (id.endsWith(Runner.voices)) {
+		this.numVoices = Integer.parseInt(
+			id.substring(id.lastIndexOf("-") + 1, id.lastIndexOf("-") + 2)
+//			id.substring(id.indexOf(Runner.voices) - 1, id.indexOf(Runner.voices))
+		);
+//		}
+//		else  {
+//			this.numVoices = 0;
+//		}
+
+		// pieceNames		
+		this.piecenames = ALL_PIECENAMES.get(id.startsWith(USER_TAB) || id.startsWith(USER_MIDI) ? name : id);
+//		if (ALL_PIECENAMES.containsKey(id)) {
+//			this.pieceNames = ALL_PIECENAMES.get(id);
+//		}
+//		else if (id.startsWith(USER_TAB) || id.startsWith(USER_MIDI)) {
+//			this.pieceNames = ALL_PIECENAMES.get(name);
+//		}
 
 		// isTablatureSet, isTabAsNonTabSet 
 		if (isTablatureSet(id)) {
@@ -227,7 +235,7 @@ public class Dataset implements Serializable {
 		}
 
 		// Set remaining class variables 
-		for (String currPieceName : getPieceNames()) {
+		for (String currPieceName : getPiecenames()) {
 			System.out.println("... creating " + currPieceName + " ...");
 			// Get Tablature and Transcription
 			File encodingFile = null;
@@ -303,18 +311,18 @@ public class Dataset implements Serializable {
 		this.name = s;
 	}
 
-	public List<String> getPieceNames() {
-		return pieceNames;
+	public List<String> getPiecenames() {
+		return piecenames;
 	}
 
-	public void addPieceNames(List<String> l) {
-		for (String s : l) {
-			pieceNames.add(s);
-		}
-	}
+//	public void addPiecenames(List<String> l) {
+//		for (String s : l) {
+//			piecenames.add(s);
+//		}
+//	}
 
 	public int getNumPieces() {
-		return pieceNames.size();
+		return piecenames.size();
 	}
 
 	public int getNumVoices() {
@@ -976,7 +984,7 @@ public class Dataset implements Serializable {
 	private Dataset(DatasetID id) {
 		// Set high-level information
 		this.datasetIDOrig = id;
-		this.pieceNames = id.getPieceNames();
+		this.piecenames = id.getPieceNames();
 		this.numVoices = id.getNumVoices();
 		this.isTablatureSet = id.isTablatureSet();
 		this.isTabAsNonTabSet = id.isTabAsNonTabSet();	

@@ -76,7 +76,8 @@ public class EvaluationManager {
 			Runner.CROSS_VAL, 
 			Runner.MODEL_DURATION_AGAIN,
 			Runner.AVERAGE_PROX,
-			Runner.ISMIR_2018
+			Runner.ISMIR_2018,
+			Runner.SNU
 //			Runner.DEPLOY_TRAINED_USER_MODEL,
 //			Runner.TRAIN_USER_MODEL,
 //			Runner.VERBOSE,
@@ -195,7 +196,7 @@ public class EvaluationManager {
 		Dataset dataset = Runner.getDataset();
 		StringBuffer dataAndParams = new StringBuffer();
 		
-		List<String> allPieceNames = dataset.getPieceNames();
+		List<String> allPieceNames = dataset.getPiecenames();
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
