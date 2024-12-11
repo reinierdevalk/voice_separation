@@ -336,11 +336,11 @@ public class ErrorCalculator {
 	// TODO test
 	public static List<ErrorFraction[]> calculatePrecisionRecallF1PerVoice(List<List<Integer>> 
 		allPredictedVoices, List<List<Double>> groundTruthVoiceLabels, List<Integer[]> EDUInfo, 
-		int highestNumVoices) {
+		int highestNumVoices, int maxNumVoices) {
 		
 		List<List<List<Integer>>> errorsPerVoice = 
 			getPositivesAndNegativesPerVoice(allPredictedVoices, groundTruthVoiceLabels, 
-			EDUInfo, highestNumVoices);
+			EDUInfo, highestNumVoices, maxNumVoices);
 		
 		List<ErrorFraction[]> ef = new ArrayList<>();
 		for (int i = 0; i < highestNumVoices; i++) {
@@ -370,10 +370,11 @@ public class ErrorCalculator {
 	// TESTED for both tablature- and non-tablature case (through getPositivesAndNegativesPerVoice());
 	//  deals with EDU correctly
 	public static ErrorFraction[][] calculateAvgPrecisionRecallF1(List<List<Integer>> allPredictedVoices, 
-		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> EDUInfo, int highestNumVoices) {
+		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> EDUInfo, int highestNumVoices, int maxNumVoices) {
 
-		List<List<List<Integer>>> errorsPerVoice = getPositivesAndNegativesPerVoice(allPredictedVoices, 
-			groundTruthVoiceLabels, EDUInfo, highestNumVoices);
+		List<List<List<Integer>>> errorsPerVoice = getPositivesAndNegativesPerVoice(
+			allPredictedVoices, groundTruthVoiceLabels, EDUInfo, highestNumVoices, maxNumVoices
+		);
 
 		ErrorFraction[][] prcRclF1 = new ErrorFraction[2][3];
 		
@@ -435,7 +436,7 @@ public class ErrorCalculator {
 	// TESTED for both tablature- and non-tablature case; deals with EDU correctly
 	static List<List<List<Integer>>> getPositivesAndNegativesPerVoice(List<List<Integer>> allPredictedVoices, 
 		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> equalDurationUnisonsInfo,
-		int highestNumberOfVoices) {
+		int highestNumberOfVoices, int maxNumVoices) {
 
 		final int TRUE_POS = 0;
 		final int FALSE_POS = 1;
@@ -454,7 +455,8 @@ public class ErrorCalculator {
 		// First turn allPredictedVoices into a List of voice labels
 		List<List<Double>> predictedVoiceLabels = new ArrayList<List<Double>>();
 		for (int i = 0; i < allPredictedVoices.size(); i++) {
-			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(allPredictedVoices.get(i));
+			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(
+				allPredictedVoices.get(i), maxNumVoices); // Schmier
 			predictedVoiceLabels.add(currentPredictedVoiceLabel);
 		}
 		List<List<Integer>> notesPerVoicePredicted = Transcription.listNotesPerVoice(predictedVoiceLabels);
@@ -632,7 +634,7 @@ public class ErrorCalculator {
 	// TESTED for both tablature- and non-tablature case; deals with EDU correctly
 	public static ErrorFraction[][] calculateAvgSoundnessAndCompleteness(List<List<Integer>> allPredictedVoices, 
 		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> equalDurationUnisonsInfo,
-		int highestNumberOfVoices) {
+		int highestNumberOfVoices, int maxNumVoices) {
 		ErrorFraction[][] soundnessAndCompleteness = new ErrorFraction[2][2];
 	
 		// 1. Get the notes per voice
@@ -641,7 +643,8 @@ public class ErrorCalculator {
 		// Get the notes per voice as predicted
 		List<List<Double>> predictedVoiceLabels = new ArrayList<List<Double>>();
 		for (int i = 0; i < allPredictedVoices.size(); i++) {
-			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(allPredictedVoices.get(i));
+			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(
+				allPredictedVoices.get(i), maxNumVoices); // Schmier
 			predictedVoiceLabels.add(currentPredictedVoiceLabel);
 		}
 		List<List<Integer>> notesPerVoicePredicted = Transcription.listNotesPerVoice(predictedVoiceLabels);
@@ -760,7 +763,7 @@ public class ErrorCalculator {
 	// TESTED; deals with EDU correctly
 	public static double calculateAVC(List<List<Integer>> allPredictedVoices, 
 		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> equalDurationUnisonsInfo, 
-		int highestNumberOfVoices) {
+		int highestNumberOfVoices, int maxNumVoices) {
 		
 //		List<Rational> voiceConsistenciesForEachVoice = new ArrayList<Rational>();
 		List<Double> voiceConsistenciesForEachVoiceDouble = new ArrayList<Double>();
@@ -771,7 +774,8 @@ public class ErrorCalculator {
 		// Get the notes per voice as predicted
 		List<List<Double>> predictedVoiceLabels = new ArrayList<List<Double>>();
 		for (int i = 0; i < allPredictedVoices.size(); i++) {
-			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(allPredictedVoices.get(i));
+			List<Double> currentPredictedVoiceLabel = LabelTools.convertIntoVoiceLabel(
+				allPredictedVoices.get(i), maxNumVoices); // Schmier
 			predictedVoiceLabels.add(currentPredictedVoiceLabel);
 		}
 		List<List<Integer>> notesPerVoicePredicted = Transcription.listNotesPerVoice(predictedVoiceLabels);

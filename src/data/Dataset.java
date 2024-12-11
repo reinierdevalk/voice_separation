@@ -11,9 +11,9 @@ import java.util.Map;
 import conversion.imports.MIDIImport;
 import external.Tablature;
 import external.Transcription;
+import interfaces.CLInterface;
 import internal.core.Encoding;
 import tools.ToolBox;
-import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 
@@ -52,7 +52,6 @@ public class Dataset implements Serializable {
 	public static final String THESIS_INT_SEMI_4VV = "thesis-int_semi-4vv";
 	public static final String THESIS_INT_FREE_4VV = "thesis-int_free-4vv";
 	public static final String THESIS_INT_FREE_MORE_4VV = "thesis-int_free_more-4vv";
-	public static final String TEST_TAB = "test-tab";	
 	public static final String USER_TAB = "user-tab";
 	// b. Tab-as-non-tab datasets
 	public static final String THESIS_INT_ANT_3VV = "thesis-int_ANT-3vv";
@@ -71,13 +70,17 @@ public class Dataset implements Serializable {
 	public static final String BACH_WTC_3VV = "bach-WTC-3vv";
 	public static final String BACH_WTC_4VV = "bach-WTC-4vv";
 	public static final String BACH_WTC_5VV = "bach-WTC-5vv";
-	public static final String TEST_MIDI = "test-MIDI";
 	public static final String USER_MIDI = "user-MIDI";
-
+	// d. Test and user
+	public static final String TEST = "test";
+	public static final String USER = "user";
+	public static final String TEST_TAB = "test-tab";
+	public static final String TEST_MIDI = "test-MIDI";
+	
 	private static final List<String> TAB_COMPOSITIONS = Arrays.asList(new String[]{
 		"int", "fnt", "rcr"}); // intabulation, fantasia, ricercare
 	private static final List<String> COMPOSITIONS = Arrays.asList(new String[]{
-		"inv"});
+		"inv"}); // invention
 
 	private static final Map<String, List<String>> ALL_PIECENAMES = new LinkedHashMap<String, List<String>>();
 	static {		
@@ -86,7 +89,7 @@ public class Dataset implements Serializable {
 		ALL_PIECENAMES.put(THESIS_INT_5VV, getThesisInt5vv());
 		ALL_PIECENAMES.put(JOSQUIN_INT_4VV, getJosquinInt4vv());
 		ALL_PIECENAMES.put(BYRD_INT_4VV, getByrdInt4vv());
-		ALL_PIECENAMES.put(TEST_TAB, getTest());
+//		ALL_PIECENAMES.put(TEST_TAB, getTest());
 		ALL_PIECENAMES.put(THESIS_INT_ANT_3VV, getThesisInt3vv());
 		ALL_PIECENAMES.put(THESIS_INT_ANT_4VV, getThesisInt4vv());
 		ALL_PIECENAMES.put(THESIS_INT_ANT_5VV, getThesisInt5vv());
@@ -100,6 +103,7 @@ public class Dataset implements Serializable {
 		ALL_PIECENAMES.put(TEST_MIDI, getTest());
 		ALL_PIECENAMES.put(USER_TAB, null);
 		ALL_PIECENAMES.put(USER_MIDI, null);
+		ALL_PIECENAMES.put(TEST_TAB, null);
 	}
 
 
@@ -116,40 +120,17 @@ public class Dataset implements Serializable {
 	}
 
 
-	public Dataset(String id) {
-		// ID
+	public Dataset(String id, boolean argIsTablatureSet) {
+		// Variables initialised and set here
 		this.datasetID = id;
-
-		// name (datasetID without the voice information) 
-//		if (id.endsWith(Runner.voices)) {
-		this.name = id.substring(0, id.lastIndexOf("-"));
-//		}
-//		else {
-//			this.name = id;
-//		}
-
-		// numVoices
-//		if (id.endsWith(Runner.voices)) {
+		this.name = id.substring(0, id.lastIndexOf("-")); // id w/o voice information
 		this.numVoices = Integer.parseInt(
 			id.substring(id.lastIndexOf("-") + 1, id.lastIndexOf("-") + 2)
-//			id.substring(id.indexOf(Runner.voices) - 1, id.indexOf(Runner.voices))
 		);
-//		}
-//		else  {
-//			this.numVoices = 0;
-//		}
-
-		// pieceNames		
-		this.piecenames = ALL_PIECENAMES.get(id.startsWith(USER_TAB) || id.startsWith(USER_MIDI) ? name : id);
-//		if (ALL_PIECENAMES.containsKey(id)) {
-//			this.pieceNames = ALL_PIECENAMES.get(id);
-//		}
-//		else if (id.startsWith(USER_TAB) || id.startsWith(USER_MIDI)) {
-//			this.pieceNames = ALL_PIECENAMES.get(name);
-//		}
-
-		// isTablatureSet, isTabAsNonTabSet 
-		if (isTablatureSet(id)) {
+		this.piecenames = ALL_PIECENAMES.get(
+			id.startsWith("user") || id.startsWith("test") ? name : id
+		);
+		if (argIsTablatureSet) {
 			this.isTablatureSet = true;
 			this.isTabAsNonTabSet = false;
 		}
@@ -165,7 +146,7 @@ public class Dataset implements Serializable {
 		// Variables initialised here and set in populateDataset()
 		largestChordSize = -1;
 		highestNumVoices = -1;
-		if (this.isTablatureSet) {
+		if (argIsTablatureSet) {
 			allEncodingFiles = new ArrayList<>();
 			allTablatures = new ArrayList<>();
 		}
@@ -174,67 +155,36 @@ public class Dataset implements Serializable {
 	}
 
 
-	public void populateDataset(String datasetVersion, Map<String, String> paths, 
-		String[] altPaths, boolean deployTrainedUserModel) {
+	public void populateDataset(Map<String, String> paths, boolean deployTrainedUserModel) {
 		boolean isTablatureCase = isTablatureSet();
 		boolean isTabAsNonTab = isTabAsNonTabSet();
 
 		// Set paths
 		String argEncodingsPath, argMidiPath;
 		String argTabMidiPath = null;
-		if (altPaths == null) {	
-			if (!deployTrainedUserModel) {
-				argEncodingsPath = PathTools.getPathString(
-					Arrays.asList(paths.get("ENCODINGS_PATH"))
-				);
-			}
-			else {
-				argEncodingsPath = PathTools.getPathString(
-					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
-				);
-			}
-//			argEncodingsPath = Runner.encodingsPath;
-
-			if (!deployTrainedUserModel) {
-				argMidiPath = PathTools.getPathString(
-					Arrays.asList(paths.get("MIDI_PATH"))
-				);
-			}
-			else {
-				argMidiPath = PathTools.getPathString(
-					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
-				);
-			}
-//			argMidiPath = Runner.midiPath;
-
-			if (!deployTrainedUserModel) {
-				argTabMidiPath = PathTools.getPathString(
-					Arrays.asList(paths.get("MIDI_PATH"))
-				);
-			}
-//			argTabMidiPath = Runner.midiPath;
-
-			// argTabMidiPath;
-			if (!deployTrainedUserModel) {
-				String numVoices = getNumVoices() + Runner.voices + "/";
-				argEncodingsPath += ToolBox.pathify(new String[]{getName(), numVoices});
-				argTabMidiPath += ToolBox.pathify(new String[]{getName(), numVoices});
-				argMidiPath += ToolBox.pathify(new String[]{getName(), datasetVersion, numVoices});
-			}
-			// TODO are these paths used when deployTrainedUserModel? If not, remove
-			else {
-				// Ensure that paths end with slash
-				argEncodingsPath = ToolBox.pathify(new String[]{argEncodingsPath});
-				argMidiPath = ToolBox.pathify(new String[]{argMidiPath});
-			}
+		if (!deployTrainedUserModel) {
+			String numVoices = getNumVoices() + Runner.voices + "/";
+			String name = getName();
+			argEncodingsPath = CLInterface.getPathString(
+				Arrays.asList(paths.get("ENCODINGS_PATH"), name, numVoices)
+			);
+			argMidiPath = CLInterface.getPathString(
+				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
+			);
+			argTabMidiPath = CLInterface.getPathString(
+				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
+			);
 		}
 		else {
-			argEncodingsPath = altPaths[0];
-			argTabMidiPath = altPaths[1];
-			argMidiPath = altPaths[2];
+			argEncodingsPath = CLInterface.getPathString(
+				Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
+			);
+			argMidiPath = CLInterface.getPathString(
+				Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
+			);
 		}
 
-		// Set remaining class variables 
+		// Set remaining class variables
 		for (String currPieceName : getPiecenames()) {
 			System.out.println("... creating " + currPieceName + " ...");
 			// Get Tablature and Transcription

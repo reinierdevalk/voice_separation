@@ -11,8 +11,8 @@ import data.Dataset;
 import de.uos.fmt.musitech.data.structure.Note;
 import external.Tablature;
 import external.Transcription;
+import interfaces.CLInterface;
 import tools.ToolBox;
-import tools.path.PathTools;
 import ui.Runner;
 
 public class HMMManager {
@@ -35,7 +35,8 @@ public class HMMManager {
 		String id = Dataset.THESIS_INT_4VV; 
 //		String id = DatasetID.WTC_3VV;
 //		String id = DatasetID.WTC_4VV;
-		Dataset ds = new Dataset(id);
+		boolean isTabDataset = true;
+		Dataset ds = new Dataset(id, isTabDataset);
 		boolean isTablatureCase = ds.isTablatureSet();  
 		List<String> pieceNames = ds.getPiecenames(); 
 		String vv = ds.getNumVoices() + Runner.voices;
@@ -77,10 +78,10 @@ public class HMMManager {
 			"thesis/prl_2/" + ds.getName() + "/" + vv + "/" + "H/" + configuration; // TODO EB
 		
 		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
-		Map<String, String> paths = PathTools.getPaths(dev);
+		Map<String, String> paths = CLInterface.getPaths(dev);
 
 		String ep = paths.get("EXPERIMENTS_PATH");
-		String experimentsPath = PathTools.getPathString(Arrays.asList(ep));
+		String experimentsPath = CLInterface.getPathString(Arrays.asList(ep));
 		
 //		String path = "F:/research/data" + HMMPath + folderName + "/data/";
 		String path = experimentsPath + folderName + "data/"; 
@@ -88,7 +89,8 @@ public class HMMManager {
 		System.exit(0);
 
 		if (generate) {
-			hMMManager.generateDictionariesAndMatrices(new Dataset(id), path, /*boost,*/ highestNumberOfVoicesAssumed); // TODO EB
+			hMMManager.generateDictionariesAndMatrices(new Dataset(id, isTabDataset), path, /*boost,*/ 
+			highestNumberOfVoicesAssumed, Transcription.MAX_NUM_VOICES); // TODO EB
 		}
 		else {
 //			hMMManager.evaluate(folderName, vv, /*boost, outputFolder,*/ configuration,
@@ -121,7 +123,7 @@ public class HMMManager {
 	 * @param highestNumberOfVoicesAssumed Determines the size of the mappings.
 	 */
 	private void generateDictionariesAndMatrices(Dataset dataset, String path, /*int boost,*/ 
-		int highestNumberOfVoicesAssumed) {
+		int highestNumberOfVoicesAssumed, int maxNumVoices) {
 		
 		List<String> pieceNames = dataset.getPiecenames();
 
@@ -156,8 +158,8 @@ public class HMMManager {
 		// b. The mapping dictionary
 		List<List<Integer>> mappingDictionary = null; // generateMappingDictionary(pieces, highestNumberOfVoicesAssumed);
 		if (useFullSizeMapping) { 
-			if (highestNumberOfVoicesAssumed < Transcription.MAX_NUM_VOICES) {
-				int diff = Transcription.MAX_NUM_VOICES - highestNumberOfVoicesAssumed; 
+			if (highestNumberOfVoicesAssumed < maxNumVoices) { // Schmier 
+				int diff = maxNumVoices - highestNumberOfVoicesAssumed; // Schmier
 				for (List<Integer> l : mappingDictionary) {
 					for (int i = 0; i < diff; i++) {
 						l.add(-1);

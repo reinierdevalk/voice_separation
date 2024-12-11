@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +36,7 @@ import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
+import interfaces.CLInterface;
 import interfaces.PythonInterface;
 import internal.core.Encoding;
 import internal.core.ScorePiece;
@@ -46,8 +48,8 @@ import tools.ToolBox;
 import tools.labels.LabelTools;
 import tools.music.PitchKeyTools;
 import tools.music.TimeMeterTools;
-import tools.path.PathTools;
 import ui.Runner;
+import ui.UI;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
 import ui.Runner.FeatureVector;
@@ -55,7 +57,6 @@ import ui.Runner.Model;
 import ui.Runner.ModelType;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
-import ui.UI;
 
 public class TestManager {	
 	// 1. Created before testing: data and derived information // TODO make all fields that are protected private (only needed in TestManagerTest) and create get()-methods
@@ -126,11 +127,13 @@ public class TestManager {
 		
 	}
 	
-	public void prepareTesting(String start, Map<String, String> transcriptionParams, Map<String, String> paths) {
+	public void prepareTesting(String start, Map<String, String> transcriptionParams, Map<String, String> paths,
+		Map<String, String> runnerPaths) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Dataset dataset = Runner.getDataset();
-		String[] argPaths = Runner.getPaths();
-		String storePath = argPaths[0]; 
+//		String[] runnerPaths = Runner.getPaths();
+		String storePath = runnerPaths.get(UI.STORE_PATH);
+//		String storePath = runnerPaths[0]; 
 
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
@@ -153,7 +156,7 @@ public class TestManager {
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.BIDIR) {
 //				if (!deployTrainedUserModel) {
 					new TestManager().startTestProcess(
-						k, Runner.TEST, transcriptionParams, argPaths, paths, 
+						k, Runner.TEST, transcriptionParams, paths, runnerPaths, 
 						new String[]{tePreProcTime, startFoldTe}
 					); // TODO new tm necessary to reset class vars
 				}
@@ -162,7 +165,7 @@ public class TestManager {
 				String startFoldAppl = ToolBox.getTimeStampPrecise();
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.UNIDIR) {
 					new TestManager().startTestProcess(
-						k, Runner.APPL, transcriptionParams, argPaths, paths, 
+						k, Runner.APPL, transcriptionParams, paths, runnerPaths,  
 						new String[]{null, startFoldAppl}						
 					); // TODO new tm necessary to reset class vars
 				}
@@ -174,27 +177,38 @@ public class TestManager {
 			for (int k = 1; k <= datasetSize; k++) {
 				String startFoldTe = ToolBox.getTimeStampPrecise();
 				System.out.println("fold = " + k);
-				String[] currentPaths = new String[argPaths.length];
-				for (int i = 0; i < argPaths.length; i++) {
-					String s = argPaths[i];
-					if (s != null) {
+				// Add fold string to new deep copy of runnerPaths (to prevent concatenation of fold strings)
+				Map<String, String> runnerPathsCopy = new LinkedHashMap<String, String>();
+				runnerPathsCopy.putAll(runnerPaths);
+				for (Map.Entry<String, String> entry : runnerPathsCopy.entrySet()) {
+					String val = entry.getValue();
+					if (val != null) {
 						// Add fold for all cases but MM path for ENS model  
-						if (!(mt == ModelType.ENS && i == 2)) {
-							currentPaths[i] = 
-								s.concat("fold_").concat(ToolBox.zerofy(k, 
-								ToolBox.maxLen(k))).concat("/");
-						}
-						else {
-							currentPaths[i] = s;
+						if (!(mt == ModelType.ENS && entry.getKey().equals(UI.TRAINED_USER_MODEL_PATH))) {
+							entry.setValue(val + "fold_" + ToolBox.zerofy(k, ToolBox.maxLen(k)) + "/");
 						}
 					}
 				}
+//				String[] currentPaths = new String[runnerPaths.length];
+//				for (int i = 0; i < runnerPaths.length; i++) {
+//					String s = runnerPaths[i];
+//					if (s != null) {
+//						// Add fold for all cases but MM path for ENS model  
+//						if (!(mt == ModelType.ENS && i == 2)) {
+//							currentPaths[i] = 
+//								s.concat("fold_").concat(ToolBox.zerofy(k, ToolBox.maxLen(k))).concat("/");
+//						}
+//						else {
+//							currentPaths[i] = s;
+//						}
+//					}
+//				}
 				
 				// 1. Test in test mode (previously predicted information is not used in the feature
 				// calculation)
 				TestManager tm = new TestManager();	// necessary to reset class variables
 				tm.startTestProcess(
-					k, Runner.TEST, transcriptionParams, currentPaths, paths, 
+					k, Runner.TEST, transcriptionParams, paths, runnerPathsCopy, 
 					new String[]{tePreProcTime, startFoldTe}
 				);
 
@@ -205,7 +219,7 @@ public class TestManager {
 					tm = new TestManager(); // necessary to reset class variables
 					if (mt != ModelType.MM) {
 						tm.startTestProcess(
-							k, Runner.APPL, transcriptionParams, currentPaths, paths,
+							k, Runner.APPL, transcriptionParams, paths, runnerPathsCopy, 
 							new String[]{null, startFoldAppl}
 						);
 					}
@@ -228,6 +242,8 @@ public class TestManager {
 		DecisionContext dc = m.getDecisionContext();
 		ActivationFunction af = 
 			NNManager.ALL_ACT_FUNCT[modelParameters.get(NNManager.ACT_FUNCTION).intValue()];
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
 
 		// Determine number of hidden neurons and output neurons
 		int numHiddenNeurons = 
@@ -243,15 +259,15 @@ public class TestManager {
 //				numHiddenNeurons = FeatureGenerator.NUM_FEATURES_HL_ABC_NON_TAB;
 //			}
 //		}
-		int numOutputNeurons = Transcription.MAX_NUM_VOICES;
+		int numOutputNeurons = mnv;
 		if (ma == ModellingApproach.N2N) {
 			if (isTablatureCase && modelDuration) {	
 				if (dc == DecisionContext.UNIDIR) {
-					numOutputNeurons += Transcription.MAX_TABSYMBOL_DUR;
+					numOutputNeurons += mtsd;
 				}
 				else if (dc == DecisionContext.BIDIR) {
 					if (modelDurationAgain) {
-						numOutputNeurons += Transcription.MAX_TABSYMBOL_DUR;
+						numOutputNeurons += mtsd; // Schmier
 					}
 				}
 			}
@@ -273,12 +289,14 @@ public class TestManager {
 	/**
 	 * 
 	 * @param fold Fold number when using cross-validation; piece index when not.
-	 * @param argPaths
 	 * @param mode
+	 * @param transcriptionParams
+	 * @param paths
+	 * @param runnerPaths
 	 * @param times
 	 */
 	private void startTestProcess(int fold, int mode, Map<String, String> transcriptionParams, 
-		String[] argPaths, Map<String, String> paths, String[] times) {
+		Map<String, String> paths, Map<String, String> runnerPaths, String[] times) {
 		long tePreProcTime = 0;
 		if (mode == Runner.TEST) { 
 			tePreProcTime = Integer.parseInt(times[0]);
@@ -308,7 +326,9 @@ public class TestManager {
 		ProcessingMode pm = 
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
-
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
+		
 //		FeatureVector featVec = 
 //			Runner.ALL_FEATURE_VECTORS[modelParameters.get(Runner.FEAT_VEC).intValue()];
 		List<Integer> sliceIndices = null;
@@ -321,10 +341,14 @@ public class TestManager {
 			ns = ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 		}
 
-		String storePath = argPaths[0];
-		String pathPredTransFirstPass = argPaths[1];
-		String pathTrainedUserModel = argPaths[2];
-		String pathStoredNN = argPaths[3];
+		String storePath = runnerPaths.get(UI.STORE_PATH);
+//		String storePath = argPaths[0];
+		String pathPredTransFirstPass = runnerPaths.get(UI.FIRST_PASS_PATH);
+//		String pathPredTransFirstPass = argPaths[1];
+		String pathTrainedUserModel = runnerPaths.get(UI.TRAINED_USER_MODEL_PATH);
+//		String pathTrainedUserModel = argPaths[2];
+		String pathStoredNN = runnerPaths.get(UI.STORED_NN_PATH);
+//		String pathStoredNN = argPaths[3];
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
 		String testPieceName = dataset.getPiecenames().get(pieceIndex);
@@ -582,7 +606,7 @@ public class TestManager {
 			if (mode == Runner.TEST) {
 				if (ma == ModellingApproach.N2N || ma == ModellingApproach.C2C) {
 					testResults = testInTestMode(
-						fold, minAndMaxFeatureValues, modelWeighting, argPaths, paths
+						fold, minAndMaxFeatureValues, modelWeighting, paths, runnerPaths 
 					);
 				}
 				else if (ma == ModellingApproach.HMM) {
@@ -598,7 +622,7 @@ public class TestManager {
 			}
 			else if (mode == Runner.APPL){
 				testResults = testInApplicationMode(
-					fold, minAndMaxFeatureValues, modelWeighting, argPaths, paths
+					fold, minAndMaxFeatureValues, modelWeighting, paths, runnerPaths 
 				);
 				tstOrAppRec = Runner.application;
 
@@ -676,8 +700,8 @@ public class TestManager {
 				// TODO G-tuning is assumed as default
 				if (deployTrainedUserModel) {
 					// TODO access args 
-					int numAlt = Integer.valueOf(transcriptionParams.get(UI.KEY));
-					int md = Integer.valueOf(transcriptionParams.get(UI.MODE));
+					int numAlt = Integer.valueOf(transcriptionParams.get(CLInterface.KEY));
+					int md = Integer.valueOf(transcriptionParams.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
 //l					System.out.println(numAlt);
 //l					System.out.println(md);
@@ -775,15 +799,16 @@ public class TestManager {
 					for (boolean grandStaff : new Boolean[]{true, false}) {
 						MEIExport.exportMEIFile(
 							t, 
-							(!deployTrainedUserModel ? tablature : (transcriptionParams.get(UI.TABLATURE).equals("y") ? tablature : null)),	
-//							tablature,
-	//						(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
-	//						t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
+							tablature,
+//							(!deployTrainedUserModel ? tablature : (transcriptionParams.get(CLInterface.TABLATURE).equals("y") ? tablature : null)),	
+//							(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
+//							t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
 							colInd, 
 							grandStaff,
 							false,
 							/*true,*/
 							paths,
+							transcriptionParams,
 							new String[]{expPath, "abtab -- transcriber"}
 							);
 					}
@@ -795,7 +820,7 @@ public class TestManager {
 				List<List<Integer>> assigErrs = testResults.get(0);
 				ErrorFraction[] evalNN = 
 					EvaluationManager.getMetricsSingleFold(assigErrs, testResults.get(1), 
-					ntwOutputsForCE, groundTruthVoiceLabels, equalDurationUnisonsInfo, true);
+					ntwOutputsForCE, groundTruthVoiceLabels, equalDurationUnisonsInfo, true, mnv);
 
 				// Details
 				boolean applUnidirCase = (dc == DecisionContext.UNIDIR && mode == Runner.APPL); 
@@ -820,7 +845,7 @@ public class TestManager {
 						conflictInfo = 
 							getConflictInfo(conflictIndices, allPredictedVoices, 
 							allDurationLabels, equalDurationUnisonsInfo, allNetworkOutputs,
-							groundTruths, backwardsMapping);
+							groundTruths, backwardsMapping, mnv, mtsd);
 					}
 				}
 				String[][] detailsArr = EvaluationManager.getOutputDetails(
@@ -839,7 +864,9 @@ public class TestManager {
 					allPossibleVoiceAssignmentsAllChords,
 					allBestVoiceAssignments,
 					allHighestNetworkOutputs,
-					assigErrs
+					assigErrs,
+					mnv,
+					mtsd
 				);
 				
 				ToolBox.storeTextFile(ToolBox.createCSVTableString(detailsArr), 
@@ -946,7 +973,7 @@ public class TestManager {
 								String[][] detailsArrTr = 
 									ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(storePath + 
 									Runner.details + "-" + Runner.train + ".csv")));
-								String detailsTr = EvaluationManager.listDetails(detailsArrTr, null);
+								String detailsTr = EvaluationManager.listDetails(detailsArrTr, null, mnv, mtsd);
 								ToolBox.storeTextFile(detailsTr, f);
 			//				}
 						}
@@ -961,7 +988,7 @@ public class TestManager {
 								ToolBox.retrieveCSVTable(ToolBox.readTextFile(
 								new File(storePath + Runner.details + "-" + Runner.test + ".csv")));
 							String detailsTe = 
-								EvaluationManager.listDetails(detailsArrTe, null);
+								EvaluationManager.listDetails(detailsArrTe, null, mnv, mtsd);
 							ToolBox.storeTextFile(detailsTe, new File(storePath + 
 								Runner.details + "-" + Runner.test + ".txt"));
 						}
@@ -984,7 +1011,7 @@ public class TestManager {
 							ToolBox.retrieveCSVTable(ToolBox.readTextFile(new File(storePath + 
 							Runner.details + "-" + Runner.application + ".csv")));
 						// conflictsRec is null for H model
-						String detailsApp = EvaluationManager.listDetails(detailsArrApp, conflictRec);
+						String detailsApp = EvaluationManager.listDetails(detailsArrApp, conflictRec, mnv, mtsd);
 						ToolBox.storeTextFile(detailsApp, new File(storePath + 
 							Runner.details + "-" + Runner.application + ".txt"));
 //						if (applUnidirCase) {
@@ -1089,10 +1116,13 @@ public class TestManager {
 	// TESTED
 	List<List<Integer>> getVoicesFromMappingIndices(List<Integer> mappingIndices) { 
 //		List<List<Integer>> mappingDictionary) {
+		int mnv = Transcription.MAX_NUM_VOICES;
+
 		List<List<Integer>> allVoices = new ArrayList<List<Integer>>();
 		for (int index : mappingIndices) {
-			List<List<Double>> currChordVoiceLabels = 
-				LabelTools.getChordVoiceLabels(mappingDictionary.get(index));
+			List<List<Double>> currChordVoiceLabels = LabelTools.getChordVoiceLabels(
+				mappingDictionary.get(index), mnv
+			);
 			allVoices.addAll(LabelTools.getVoicesInChord(currChordVoiceLabels));    	
 		}
 		return allVoices;
@@ -1102,6 +1132,8 @@ public class TestManager {
 	private List<List<List<Integer>>> testHMM(int fold, String path, Map<String, String> paths, Configuration config) {		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 
+		int mnv = Transcription.MAX_NUM_VOICES;
+		
 		// Generate and store observations.csv so that they can be read by evaluate_HMM.m
 		// TODO Ideally, the observations should not be stored and then loaded inside the Matlab
 		// script, but given directly as input to the Matlab script
@@ -1109,7 +1141,7 @@ public class TestManager {
 		ToolBox.storeListOfListsAsCSVFile(observations, 
 			new File(path + Runner.observations + ".csv"));
 
-		String mp = PathTools.getPathString(
+		String mp = CLInterface.getPathString(
 			Arrays.asList(paths.get("VOICE_SEP_MATLAB_PATH"))
 		);
 		
@@ -1184,7 +1216,7 @@ public class TestManager {
 		allPredictedVoices = getVoicesFromMappingIndices(predictedIndices);
 		allVoiceLabels = new ArrayList<List<Double>>();
 		for (List<Integer> l : allPredictedVoices) {
-			allVoiceLabels.add(LabelTools.convertIntoVoiceLabel(l));
+			allVoiceLabels.add(LabelTools.convertIntoVoiceLabel(l, mnv));
 		}
 
 		// Get test results
@@ -1201,10 +1233,11 @@ public class TestManager {
 	private double[][] testMM(MelodyPredictor mp, int i) {
 //		MelodyPredictor mp = allMelodyPredictors.get(i);
 		Map<String, Double> modelParameters = Runner.getModelParams();
+		int mnv = Transcription.MAX_NUM_VOICES;
 		
 		List<double[]> melodyModelOutputs = 
 			FeatureGenerator.generateAllMMOutputs(modelParameters, basicTabSymbolProperties, 
-			basicNoteProperties, groundTruthTranscription, chordSizes, mp);
+			basicNoteProperties, groundTruthTranscription, chordSizes, mp, mnv);
 		allMelodyModelOutputsPerModel.set(i, melodyModelOutputs);		
 		// Evaluate
 		double[][] evalNum = EvaluationManager.getMetricsSingleFoldMM(melodyModelOutputs, 
@@ -1219,13 +1252,15 @@ public class TestManager {
 	 * Tests the network in test mode, where the features are generated using the ground truth voice assignments.
 	 * Returns the assignment errors.
 	 * 
-	 * @param modelParameters
+	 * @param fold
 	 * @param minAndMaxFeatureValues
-	 * @param pieceName
+	 * @param modelWeighting
+	 * @param paths
+	 * @param runnerPaths
 	 * @return
 	 */
 	private List<List<List<Integer>>> testInTestMode(int fold, double[][] minAndMaxFeatureValues,
-		List<Double> modelWeighting, String[] argPaths, Map<String, String> paths) {
+		List<Double> modelWeighting, Map<String, String> paths, Map<String, String> runnerPaths) {
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
@@ -1244,7 +1279,9 @@ public class TestManager {
 			ToolBox.toBoolean(modelParameters.get(Runner.ESTIMATE_ENTRIES).intValue());
 		boolean useCV = ToolBox.toBoolean(modelParameters.get(Runner.CROSS_VAL).intValue());
 		boolean isTablatureCase = dataset.isTablatureSet();
-		
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
+
 		List<Integer> sliceIndices = null;
 		if (mt == ModelType.MM || mt == ModelType.ENS) {
 			sliceIndices = 
@@ -1256,11 +1293,16 @@ public class TestManager {
 		}
 		
 		// Set paths
-		String storePath = argPaths[0];
-		String pathPredTransFirstPass = argPaths[1];
-		String pathTrainedUserModel = argPaths[2];
-		String pathStoredNN = argPaths[3];
-		String pathStoredMM = argPaths[4];
+		String storePath = runnerPaths.get(UI.STORE_PATH);
+//		String storePath = argPaths[0];
+		String pathPredTransFirstPass = runnerPaths.get(UI.FIRST_PASS_PATH);
+//		String pathPredTransFirstPass = argPaths[1];
+		String pathTrainedUserModel = runnerPaths.get(UI.TRAINED_USER_MODEL_PATH);
+//		String pathTrainedUserModel = argPaths[2];
+		String pathStoredNN = runnerPaths.get(UI.STORED_NN_PATH);
+//		String pathStoredNN = argPaths[3];
+		String pathStoredMM = runnerPaths.get(UI.STORED_MM_PATH);
+//		String pathStoredMM = argPaths[4];
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
 		String testPieceName = dataset.getPiecenames().get(pieceIndex);
@@ -1279,7 +1321,7 @@ public class TestManager {
 					noteFeatures = 
 						FeatureGenerator.generateAllNoteFeatureVectors(modelParameters, 
 						basicTabSymbolProperties, groundTruthVoicesCoDNotes, basicNoteProperties, 
-						groundTruthTranscription, groundTruthLabels, meterInfo, chordSizes);
+						groundTruthTranscription, groundTruthLabels, meterInfo, chordSizes, mnv);
 				}
 				else {
 					boolean doThis = false;
@@ -1347,8 +1389,7 @@ public class TestManager {
 					noteFeatures = 
 						FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(modelParameters,
 						basicTabSymbolProperties, predictedVoicesCoDNotes, basicNoteProperties, 
-						predictedTranscription, predictedLabels, meterInfo, chordSizes 
-						/*, modelDuration, decisionContextSize*/);
+						predictedTranscription, predictedLabels, meterInfo, chordSizes, mnv);
 				}
 //				}
 				boolean isMuSci = false; // TODO
@@ -1359,7 +1400,7 @@ public class TestManager {
 					noteFeatures = 
 						FeatureGenerator.generateAllNoteFeatureVectorsMUSCI(basicTabSymbolProperties,
 						basicNoteProperties, groundTruthTranscription, featureSetUsedForTraining,
-						useTablatureInformation);
+						useTablatureInformation, mnv);
 				}
 				noteFeatures = FeatureGenerator.scaleSetOfFeatureVectors(noteFeatures, 
 					minAndMaxFeatureValues,	ma);
@@ -1384,10 +1425,11 @@ public class TestManager {
 			else if (ma == ModellingApproach.C2C) {
 				List<List<List<Integer>>> orderedVoiceAssignments = 
 					FeatureGeneratorChord.getOrderedVoiceAssignments(basicTabSymbolProperties,
-					basicNoteProperties, groundTruthVoiceLabels, highestNumVoicesTraining);
+					basicNoteProperties, groundTruthVoiceLabels, highestNumVoicesTraining, mnv);
 				chordFeatures = 
 					FeatureGeneratorChord.generateAllChordFeatureVectors(basicTabSymbolProperties, 
-					basicNoteProperties, groundTruthTranscription, meterInfo, orderedVoiceAssignments);
+					basicNoteProperties, groundTruthTranscription, meterInfo, orderedVoiceAssignments,
+					mnv);
 				chordFeatures = FeatureGenerator.scaleSetOfSetsOfFeatureVectors(chordFeatures, 
 					minAndMaxFeatureValues, ma);
 			} 
@@ -1419,7 +1461,7 @@ public class TestManager {
 					// Apply the model
 					String[] cmd;
 					boolean isScikit = false;
-					String pp = PathTools.getPathString(
+					String pp = CLInterface.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
 					// For scikit (ISMIR 2017)
@@ -1435,9 +1477,10 @@ public class TestManager {
 					}
 					// For TensorFlow
 					else {
-						List<String> argStrings = 
-							TrainingManager.getArgumentStrings(Runner.TEST, modelParameters, 
-							noteFeatures.get(0).size(), -1, storePath, pathTrainedUserModel);
+						List<String> argStrings = TrainingManager.getArgumentStrings(
+							Runner.TEST, modelParameters, noteFeatures.get(0).size(), -1, 
+							storePath, pathTrainedUserModel, mnv
+						);
 						cmd = new String[]{
 							"python", pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
@@ -1505,7 +1548,7 @@ public class TestManager {
 					OutputEvaluator.createAllHighestNetworkOutputs(allNetwOutpAllChords);
 				allPossibleVoiceAssignmentsAllChords = 
 					FeatureGeneratorChord.getOrderedVoiceAssignments(basicTabSymbolProperties,
-					basicNoteProperties, groundTruthVoiceLabels, highestNumVoicesTraining);
+					basicNoteProperties, groundTruthVoiceLabels, highestNumVoicesTraining, mnv);
 				allBestVoiceAssignments = 
 					OutputEvaluator.createAllBestVoiceAssignments(allNetwOutpAllChords,
 					allPossibleVoiceAssignmentsAllChords);
@@ -1513,11 +1556,11 @@ public class TestManager {
 
 			// c. Determine the predicted voices and durations
 			allPredictedVoices = OutputEvaluator.determinePredictedVoices(modelParameters, 
-				allNetworkOutputs, allBestVoiceAssignments);
+				allNetworkOutputs, allBestVoiceAssignments, mnv);
 			if (dc == DecisionContext.UNIDIR && modelDuration || dc == DecisionContext.BIDIR && modelDuration &&
 				modelDurationAgain) {
 				allPredictedDurationsTest = OutputEvaluator.determinePredictedDurations(modelParameters, 
-					allNetworkOutputs, allBestVoiceAssignments);
+					allNetworkOutputs, allBestVoiceAssignments, mnv, mtsd);
 			}
 		}
 		else if (mt == ModelType.ENS) {
@@ -1547,11 +1590,11 @@ public class TestManager {
 
 			// b. Determine the predicted voices and durations
 			allPredictedVoices = OutputEvaluator.determinePredictedVoices(modelParameters, 
-				allCombinedOutputs, allBestVoiceAssignments);
+				allCombinedOutputs, allBestVoiceAssignments, mnv);
 			if (dc == DecisionContext.UNIDIR && modelDuration || dc == DecisionContext.BIDIR && modelDuration
 				&& modelDurationAgain) {
 				allPredictedDurationsTest = OutputEvaluator.determinePredictedDurations(modelParameters, 
-					allCombinedOutputs, allBestVoiceAssignments);
+					allCombinedOutputs, allBestVoiceAssignments, mnv, mtsd);
 			}
 		}
 
@@ -1586,16 +1629,16 @@ public class TestManager {
 		if (dc == DecisionContext.BIDIR) {
 			allVoiceLabels = new ArrayList<List<Double>>();
 			for (List<Integer> l : allPredictedVoices) {
-				allVoiceLabels.add(LabelTools.convertIntoVoiceLabel(l));
+				allVoiceLabels.add(LabelTools.convertIntoVoiceLabel(l, mnv));
 			}
 			if (modelDuration && modelDurationAgain) {
 				allDurationLabels = new ArrayList<List<Double>>();
 				for (Rational[] durs : allPredictedDurationsTest) {
 					List<Integer> durations = new ArrayList<Integer>();
 					for (Rational r : durs) {
-						durations.add(LabelTools.getIntegerEncoding(r) - 1);
+						durations.add(LabelTools.getIntegerEncoding(r, mtsd) - 1);
 					} 
-					allDurationLabels.add(LabelTools.convertIntoDurationLabel(durations));
+					allDurationLabels.add(LabelTools.convertIntoDurationLabel(durations, mtsd));
 				}
 			}
 		}
@@ -2352,7 +2395,9 @@ public class TestManager {
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
 		boolean avgProc = ToolBox.toBoolean(modelParameters.get(Runner.AVERAGE_PROX).intValue());
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
-
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
+		
 //		List<Integer> sliceIndices = 
 //			ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
 //		List<Integer> ns = 
@@ -2433,15 +2478,15 @@ public class TestManager {
 				FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
 				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, pm, featVec,
-				decisionContextSize, avgProc);
+				decisionContextSize, avgProc, mnv);
 		}
 		else {
 			// NB: allDurationLabels, allVoicesCoDNotes, and allVoiceLabels are predicted (see testInApplicationMode())
 			currentNoteFeatureVector = 
 				FeatureGenerator.generateBidirectionalNoteFeatureVector(basicTabSymbolProperties,
 				allDurationLabels, allVoicesCoDNotes, basicNoteProperties, newTranscription, 
-				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration,
-				decisionContextSize, avgProc);
+				currentNote, allVoiceLabels, meterInfo, noteIndex, modelDuration, decisionContextSize, 
+				avgProc, mnv);
 		}
 		if (mt == ModelType.ENS) {
 //			currentNoteFeatureVector = featureGenerator.generateNoteFeatureVectorPlus(basicTabSymbolProperties,
@@ -2457,7 +2502,7 @@ public class TestManager {
 				MelodyPredictor currMp = allMelodyPredictors.get(i);
 				double[] currentMelodyModelOutput = 
 					FeatureGenerator.generateMelodyModelOutput(basicTabSymbolProperties, basicNoteProperties, 
-					newTranscription, currentNote, highestNumVoicesTraining, currMp);
+					newTranscription, currentNote, highestNumVoicesTraining, currMp, mnv);
 				allMelodyModelOutputsPerModel.get(i).add(currentMelodyModelOutput);
 				currentMelodyModelOutputs.add(currentMelodyModelOutput);
 			}
@@ -2473,7 +2518,7 @@ public class TestManager {
 			boolean useTablatureInformation = FeatureGenerator.tabInfoSwitch; // TODO
 			currentNoteFeatureVector = FeatureGenerator.generateNoteFeatureVectorMUSCI(basicTabSymbolProperties,
 				basicNoteProperties, newTranscription, currentNote, noteIndex, featureSetUsedForTraining,
-				useTablatureInformation); 
+				useTablatureInformation, mnv); 
 		}
 //		FeatureGenerator.scaleFeatureVector(currentNoteFeatureVector, minAndMaxFeatureValues, ExperimentRunner.NOTE_TO_NOTE);
 		currentNoteFeatureVector = FeatureGenerator.scaleFeatureVector(currentNoteFeatureVector, 
@@ -2492,7 +2537,7 @@ public class TestManager {
 			if (noteIndex % 50 == 0) {
 				System.out.println("processing note " + noteIndex);
 			}
-			currentNetworkOutput = new double[Transcription.MAX_NUM_VOICES];
+			currentNetworkOutput = new double[mnv];
 			boolean isFinalNote = false;
 			if (pm == ProcessingMode.FWD) {
 				isFinalNote = 
@@ -2777,7 +2822,7 @@ public class TestManager {
 			// and, if mt == ModelType.ENS: allCombinedOutputs, allMelodyModelOutputsPerModel
 			// .set(): -
 			noteFeatures.add(null);
-			double[] outp = new double[Transcription.MAX_NUM_VOICES];
+			double[] outp = new double[mnv];
 			Arrays.fill(outp, 0.0);
 			outp[v] = 1.0;
 			allNetworkOutputs.add(outp);
@@ -2794,14 +2839,14 @@ public class TestManager {
 			// allDurationLabels, allVoicesCoDNotes, (allNetworkOutputs), (allNetworkOutputsAdapted)
 			List<Integer> voice = Arrays.asList(new Integer[]{v});
 			allPredictedVoices.add(voice); 
-			allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(voice));
+			allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(voice, mnv));
 			if (modelDuration) { 
 				int d = -1; // TODO figure out duration now that there is no network output
 				Rational dAsRat = new Rational(d, Tablature.SRV_DEN);
 				Rational[] dur = new Rational[]{dAsRat}; 
 				allPredictedDurations.add(dur);
 				allDurationLabels.set(noteIndex, 
-					LabelTools.convertIntoDurationLabel(Arrays.asList(new Integer[]{d})));
+					LabelTools.convertIntoDurationLabel(Arrays.asList(new Integer[]{d}), mtsd));
 				// The element in allVoicesCoDNotes is null by default and only needs to be
 				// reset if the note at noteIndex is a CoD
 				if (voice.size() > 1) {
@@ -3489,13 +3534,15 @@ public class TestManager {
 	 * Tests the network in application mode, where the features are generated using the voice
 	 * assignments created incrementally by the network. Returns the assignment errors. 
 	 *
-	 * @param trainingSettingsAndParameters
+	 * @param fold
 	 * @param minAndMaxFeatureValues
-	 * @param useTablatureInformation
+	 * @param modelWeighting
+	 * @param paths
+	 * @param runnerPaths
 	 * @return
 	 */
 	private List<List<List<Integer>>> testInApplicationMode(int fold, double[][] minAndMaxFeatureValues, 
-		List<Double> modelWeighting, String[] argPaths, Map<String, String> paths) {
+		List<Double> modelWeighting, Map<String, String> paths, Map<String, String> runnerPaths) {
 		
 		List<List<List<Integer>>> testResults = new ArrayList<List<List<Integer>>>();
 		
@@ -3517,6 +3564,8 @@ public class TestManager {
 		boolean estimateEntries = 
 			ToolBox.toBoolean(modelParameters.get(Runner.ESTIMATE_ENTRIES).intValue());
 		List<Integer> sliceIndices = null;
+		int mnv = Transcription.MAX_NUM_VOICES;
+		
 		if (mt == ModelType.MM || mt == ModelType.ENS) {
 			sliceIndices = 
 				ToolBox.decodeListOfIntegers(modelParameters.get(Runner.SLICE_IND_ENC_SINGLE_DIGIT).intValue(), 1);
@@ -3531,10 +3580,14 @@ public class TestManager {
 		int numTestExamples = dataset.getIndividualPieceSizes(ma).get(pieceIndex);
 		
 		// Set paths
-		String storePath = argPaths[0];
-		String pathTrainedUserModel = argPaths[2];
-		String pathStoredNN = argPaths[3];
-		String pathStoredMM = argPaths[4];
+		String storePath = runnerPaths.get(UI.STORE_PATH);
+//		String storePath = argPaths[0];
+		String pathTrainedUserModel = runnerPaths.get(UI.TRAINED_USER_MODEL_PATH);
+//		String pathTrainedUserModel = argPaths[2];
+		String pathStoredNN = runnerPaths.get(UI.STORED_NN_PATH);
+//		String pathStoredNN = argPaths[3];
+		String pathStoredMM = runnerPaths.get(UI.STORED_MM_PATH);
+//		String pathStoredMM = argPaths[4];
 
 		prcRcl += " -- app" + "\r\n";
 
@@ -3646,7 +3699,7 @@ public class TestManager {
 				// Create commands to pass to IPython
 				String cmds = "";
 				boolean isScikit = false;
-				String pp = PathTools.getPathString(
+				String pp = CLInterface.getPathString(
 					Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 				);
 				// For scikit (ISMIR 2017)
@@ -3669,9 +3722,9 @@ public class TestManager {
 //						numFeat = 61; // zondag
 //					}
 
-					List<String> argStrings = 
-						TrainingManager.getArgumentStrings(Runner.APPL, modelParameters, 
-						numFeat /*noteFeatures.get(0).size()*/, -1, storePath, pathTrainedUserModel);
+					List<String> argStrings = TrainingManager.getArgumentStrings(
+						Runner.APPL, modelParameters, numFeat, -1, storePath, 
+						pathTrainedUserModel, mnv);
 //					s = new String[]{Runner.scriptPythonPath, Runner.scriptTensorFlow, 
 //						argStrings.get(0), argStrings.get(1)};
 					String argScriptPath = pp;
@@ -3822,9 +3875,9 @@ public class TestManager {
 				}
 
 				// 2. Determine all possible voice assignments for the chord and add them to allPossibleVoiceAssignmentsEntirePiece 
-				List<List<Integer>> currentAllPossibleVoiceAssignments = 
-					FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolProperties, 
-					basicNoteProperties, allVoiceLabels, lowestNoteIndex, highestNumVoicesTraining);
+				List<List<Integer>> currentAllPossibleVoiceAssignments = FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(
+					basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, lowestNoteIndex, highestNumVoicesTraining, 
+					mnv);
 //				allPossibleVoiceAssignmentsEntirePiece.add(currentAllPossibleVoiceAssignments); 6 maart 
 				allPossibleVoiceAssignmentsAllChords.add(currentAllPossibleVoiceAssignments);
 
@@ -3846,7 +3899,7 @@ public class TestManager {
 //						newTranscription, meterInfo, lowestNoteIndex, currentVoiceAssignment);
 					List<Double> currentChordFeatureVector = 
 						FeatureGeneratorChord.generateChordFeatureVectorDISS(basicTabSymbolProperties, basicNoteProperties,
-						newTranscription, meterInfo, lowestNoteIndex, currentVoiceAssignment);
+						newTranscription, meterInfo, lowestNoteIndex, currentVoiceAssignment, mnv);
 
 //					FeatureGenerator.scaleFeatureVector(currentChordFeatureVector, minAndMaxFeatureValues, learningApproach);
 					currentChordFeatureVector = FeatureGenerator.scaleFeatureVector(currentChordFeatureVector, 
@@ -3876,7 +3929,7 @@ public class TestManager {
 //							groundTruthTranscription.getChordVoiceLabels(tablature).get(0); 
 							groundTruthTranscription.getChordVoiceLabels().get(0);
 						List<Integer> groundTruthVoiceAssignment = 
-							LabelTools.getVoiceAssignment(groundTruthChordVoiceLabels, Transcription.MAX_NUM_VOICES); 
+							LabelTools.getVoiceAssignment(groundTruthChordVoiceLabels, mnv); 
 						if (!groundTruthVoiceAssignment.equals(bestVoiceAssignment)) {
 							bestVoiceAssignment = groundTruthVoiceAssignment;
 							highestNetworkOutput = 1.0;
@@ -3884,7 +3937,9 @@ public class TestManager {
 					}
 				}
 
-				List<List<Double>> predictedChordVoiceLabels = LabelTools.getChordVoiceLabels(bestVoiceAssignment); 
+				List<List<Double>> predictedChordVoiceLabels = LabelTools.getChordVoiceLabels(
+					bestVoiceAssignment, mnv
+				); 
 				List<List<Integer>> predictedChordVoices = LabelTools.getVoicesInChord(predictedChordVoiceLabels); 
 //				double highestNetworkOutput = Collections.max(currentNetworkOutputs);
 				allHighestNetworkOutputs.add(highestNetworkOutput);
@@ -4346,10 +4401,12 @@ public class TestManager {
 	// TESTED for both tablature- (non-dur and dur) and non-tablature case; for both fwd and bwd model
 	void resolveConflicts(double[] copyOfNetworkOutputCurrentNote, int noteIndex) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
-		boolean isTablatureCase = Runner.getDataset().isTablatureSet();		
+		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		DecisionContext dc = m.getDecisionContext(); 
 		boolean modelDuration = m.getModelDuration();
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
 
 		ProcessingMode pm = 
 			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
@@ -4360,7 +4417,7 @@ public class TestManager {
 		
 		boolean allowCoD = ToolBox.toBoolean(modelParameters.get(Runner.SNU).intValue());
 		double deviationThreshold = -1-0;
-		if (Runner.getDataset().isTablatureSet()) {
+		if (isTablatureCase) {
 			deviationThreshold = modelParameters.get(Runner.DEV_THRESHOLD);
 		}
 		Timeline tl = tablature != null? tablature.getEncoding().getTimeline() : null;
@@ -4384,7 +4441,7 @@ public class TestManager {
 		// 1. Get the predicted voices, and, if applicable, the predicted duration and durationLabel
 		List<Integer> predictedVoices = 
 			OutputEvaluator.interpretNetworkOutput(copyOfNetworkOutputCurrentNote, 
-			allowCoD, deviationThreshold).get(0);
+			allowCoD, deviationThreshold, mnv).get(0);
 		List<Integer> originalPredictedVoices = new ArrayList<Integer>(predictedVoices);
 		
 		int firstPredictedVoice = predictedVoices.get(0);
@@ -4395,8 +4452,8 @@ public class TestManager {
 			if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
 				predictedDurationCurrentNote = 
 					OutputEvaluator.interpretNetworkOutput(copyOfNetworkOutputCurrentNote,
-					allowCoD, deviationThreshold).get(1);
-				predictedDurationLabel = LabelTools.convertIntoDurationLabel(predictedDurationCurrentNote);
+					allowCoD, deviationThreshold, mnv).get(1);
+				predictedDurationLabel = LabelTools.convertIntoDurationLabel(predictedDurationCurrentNote, mtsd);
 			}
 			if (dc == DecisionContext.BIDIR && !modelDurationAgain) {
 				predictedDurationLabel = allDurationLabels.get(noteIndex); 
@@ -4668,8 +4725,9 @@ public class TestManager {
 								// 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 								int maxDurAsInt = 
 								  	maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
-								predictedDurationLabelPrevious = 
-									Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+								predictedDurationLabelPrevious = LabelTools.createDurationLabel(
+									new Integer[]{maxDurAsInt}, mtsd
+								);
 //								predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 								allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 								predictedDurationPrevious = maxDurPrevious;
@@ -4776,8 +4834,9 @@ public class TestManager {
 									// 4. Redetermine predictedDurationLabel and offsetTime
 									Rational maxDur = metricTimeNext.sub(metricTime);
 									int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-									predictedDurationLabel = 
-										Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+									predictedDurationLabel = LabelTools.createDurationLabel(
+										new Integer[]{maxDurAsInt}, mtsd
+									);
 //									predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 									predictedDuration = maxDur;
 									predictedDuration.reduce();
@@ -4920,7 +4979,7 @@ public class TestManager {
 							// represent a voice not yet taken by a previous note
 							predictedVoices = 
 								OutputEvaluator.interpretNetworkOutput(copyOfNetworkOutputCurrentNote, 
-								allowCoD, deviationThreshold).get(0);
+								allowCoD, deviationThreshold, mnv).get(0);
 							firstPredictedVoice = predictedVoices.get(0);
 							
 							// 20.03.2018: hack added to avoid having a non-existing voice being
@@ -4936,7 +4995,7 @@ public class TestManager {
 								allNetworkOutputsAdapted.set(noteIndexBwd, copyOfNetworkOutputCurrentNote);
 								predictedVoices = 
 									OutputEvaluator.interpretNetworkOutput(copyOfNetworkOutputCurrentNote, 
-									allowCoD, deviationThreshold).get(0);
+									allowCoD, deviationThreshold, mnv).get(0);
 								firstPredictedVoice = predictedVoices.get(0);
 								conflictsRecord = 
 									conflictsRecord.concat("hack at note " + String.valueOf(noteIndexBwd) + 
@@ -5077,8 +5136,9 @@ public class TestManager {
 											// 4. Redetermine predictedDurationLabelPrevious and reset the corresponding elements in the Lists
 											int maxDurAsInt = 
 												maxDurPrevious.getNumer() *	(Tablature.SRV_DEN / maxDurPrevious.getDenom());
-											predictedDurationLabelPrevious = 
-												Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+											predictedDurationLabelPrevious = LabelTools.createDurationLabel(
+												new Integer[]{maxDurAsInt}, mtsd
+											);
 //											predictedDurationLabelPrevious = Transcription.createDurationLabel(maxDurAsInt);
 											allDurationLabels.set(noteIndexPrevious, predictedDurationLabelPrevious);
 											predictedDurationPrevious = maxDurPrevious;	
@@ -5188,8 +5248,9 @@ public class TestManager {
 												// 4. Redetermine predictedDurationLabel and offsetTime
 												Rational maxDur = metricTimeNext.sub(metricTime);
 												int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-												predictedDurationLabel = 
-													Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+												predictedDurationLabel = LabelTools.createDurationLabel(
+													new Integer[]{maxDurAsInt}, mtsd
+												);
 //												predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 												predictedDuration = maxDur;
 												predictedDuration.reduce();
@@ -5235,7 +5296,7 @@ public class TestManager {
 										// 4. Redetermine predictedVoicePrevious and reset the corresponding elements in the Lists
 										predictedVoicesPrevious = Arrays.asList(new Integer[]{firstPredictedVoicePrevious});
 										allPredictedVoices.set(noteIndexPreviousBwd, predictedVoicesPrevious);
-										allVoiceLabels.set(noteIndexPrevious, LabelTools.convertIntoVoiceLabel(predictedVoicesPrevious));
+										allVoiceLabels.set(noteIndexPrevious, LabelTools.convertIntoVoiceLabel(predictedVoicesPrevious, mnv));
 	
 //										if (isTablatureCase && isNewModel && modelDuration) {//2016
 										if (isTablatureCase /*&& im == Implementation.PHD*/ && modelDuration) {
@@ -5532,8 +5593,9 @@ public class TestManager {
 	
 										// 2. Reset allDurationLabels, allPredictedDurations, and allNotes 
 										int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-										List<Double> predictedDurationLabelAdapted = 
-											Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+										List<Double> predictedDurationLabelAdapted = LabelTools.createDurationLabel(
+											new Integer[]{maxDurAsInt}, mtsd
+										);
 //										List<Double> predictedDurationLabelAdapted = Transcription.createDurationLabel(maxDurAsInt);
 										allDurationLabels.set(i, predictedDurationLabelAdapted);
 										if (dc == DecisionContext.UNIDIR || dc == DecisionContext.BIDIR && modelDurationAgain) {
@@ -5551,8 +5613,9 @@ public class TestManager {
 										// Adapt predictedDurationLabel and predictedDuration
 										Rational maxDur = onsetTimeNextChord.sub(onset);
 										int maxDurAsInt = maxDur.getNumer() * (Tablature.SRV_DEN / maxDur.getDenom());
-										predictedDurationLabel = 
-											Transcription.createDurationLabel(new Integer[]{maxDurAsInt});
+										predictedDurationLabel = LabelTools.createDurationLabel(
+											new Integer[]{maxDurAsInt}, mtsd
+										);
 //										predictedDurationLabel = Transcription.createDurationLabel(maxDurAsInt);
 										predictedDuration = maxDur;
 										predictedDuration.reduce();
@@ -5614,7 +5677,7 @@ public class TestManager {
 		// 3. predictedVoices (and, if applicable, predictedDurationLabel and allPredictedDurations) now have their 
 		// final value: add to lists
 		allPredictedVoices.add(predictedVoices);
-		allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(predictedVoices));
+		allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(predictedVoices, mnv));
 //		if (isTablatureCase && isNewModel && modelDuration) {//2016
 		if (isTablatureCase /*&& im == Implementation.PHD*/ && modelDuration) {
 			if (predictedVoices.size() == 1) {
@@ -6919,7 +6982,7 @@ public class TestManager {
 	private static List<List<List<Integer>>> getConflictInfo(List<List<Integer>> conflictIndices, 
 		List<List<Integer>> allPredictedVoices,	List<List<Double>> allPredictedDurationLabels, 
 		List<Integer[]> argEqualDurationUnisonsInfo, List<double[]> argAllNetworkOutputs, 
-		List<List<List<Double>>> groundTruths, List<Integer> backwardsMapping) {
+		List<List<List<Double>>> groundTruths, List<Integer> backwardsMapping, int maxNumVoices, int maxTabSymDur) {
 
 		List<List<Double>> argGroundTruthVoiceLabels = groundTruths.get(0);
 		List<List<Double>> argGroundTruthDurationLabels = groundTruths.get(1);
@@ -6964,9 +7027,9 @@ public class TestManager {
 			
 //				double[] output = argAllNetworkOutputs.get(i); // HIER OK
 				double[] outputArray = 
-					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
+					Arrays.copyOfRange(output, 0, maxNumVoices); // Schmier
 				List<Integer> predictedVoices = 
-					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh).get(0);
+					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh, maxNumVoices).get(0);
 				List<Integer> adaptedVoices = allPredictedVoices.get(i); // HIER OK
 				List<Double> actualVoiceLabel = argGroundTruthVoiceLabels.get(i); // HIER OK
 				List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
@@ -7003,7 +7066,7 @@ public class TestManager {
 						double[] outputNextNote = argAllNetworkOutputs.get(i + 1); // HIER OK
 						int voicePredInitiallyUpperNote = 
 							OutputEvaluator.interpretNetworkOutput(outputNextNote, allowCoD,
-							devThresh).get(0).get(0);
+							devThresh, maxNumVoices).get(0).get(0);
 						int adaptedVoiceLowerNote = adaptedVoices.get(0);
 						int adaptedVoiceUpperNote = allPredictedVoices.get(i + 1).get(0); // HIER OK
 						if (voicePredInitiallyLowerNote != adaptedVoiceLowerNote) {
@@ -7101,9 +7164,9 @@ public class TestManager {
 				}
 				
 				List<Integer> predictedDurationsAsIndex = 
-					OutputEvaluator.interpretNetworkOutput(output, allowCoD, devThresh).get(1);
+					OutputEvaluator.interpretNetworkOutput(output, allowCoD, devThresh, maxNumVoices).get(1);
 				List<Double> predictedDurationsAsLabel = 
-					LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
+					LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex, maxTabSymDur);
 				Rational[] predictedDurations = 
 					LabelTools.convertIntoDuration(predictedDurationsAsLabel);
 				for (Rational r : predictedDurations) {
@@ -7265,6 +7328,7 @@ public class TestManager {
 		boolean modelDurationAgain = 
 			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
+		int mnv = Transcription.MAX_NUM_VOICES;
 
 		// Determine noteIndexBwd, which is needed when using the bwd model for the lists in
 		// bwd order. When using the fwd model, it will always be the same as noteIndex
@@ -7346,10 +7410,10 @@ public class TestManager {
 				// Get the voices that go with lastNetworkOutput and reset allPredictedVoices and 
 				// allVoiceLabels, which were set to a non-existing voice in resolveConflicts() 
 				List<Integer> originalVoices = 
-					OutputEvaluator.interpretNetworkOutput(lastNetworkOutput, false, -1.0).get(0);
+					OutputEvaluator.interpretNetworkOutput(lastNetworkOutput, false, -1.0, mnv).get(0);
 				predictedVoices.add(originalVoices.get(0));
 				allPredictedVoices.set(noteIndexBwd, originalVoices);
-				allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(originalVoices));
+				allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(originalVoices, mnv));
 
 				if (verbose) {
 					System.out.println("    predicted voice(s) reset to " + originalVoices);
@@ -7433,12 +7497,12 @@ public class TestManager {
 	 * @param highestNumberOfVoicesTraining
 	 */
 	private void addNoteOLD(int highestNumberOfVoicesTraining, int noteIndex) {
-
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()]; 
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext(); 
 		boolean modelDuration = m.getModelDuration();
+		int mnv = Transcription.MAX_NUM_VOICES;
 		
 //		DatasetID di = 
 //			Dataset.ALL_DATASET_IDS[modelParameters.get(Dataset.DATASET_ID).intValue()];
@@ -7548,10 +7612,10 @@ public class TestManager {
 				// Get the voices that go with lastNetworkOutput and reset allPredictedVoices and 
 				// allVoiceLabels, which were set to a non-existing voice in resolveConflicts() 
 				List<Integer> originalVoices = 
-					OutputEvaluator.interpretNetworkOutput(lastNetworkOutput, false, -1.0).get(0);
+					OutputEvaluator.interpretNetworkOutput(lastNetworkOutput, false, -1.0, mnv).get(0);
 				predictedVoices.add(originalVoices.get(0));
 				allPredictedVoices.set(noteIndexBwd, originalVoices);
-				allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(originalVoices));
+				allVoiceLabels.set(noteIndex, LabelTools.convertIntoVoiceLabel(originalVoices, mnv));
 
 //				System.out.println(Arrays.toString(lastNetworkOutput));
 				if (verbose) {

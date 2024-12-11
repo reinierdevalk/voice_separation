@@ -10,6 +10,7 @@ import java.util.Map;
 
 import data.Dataset;
 import featureExtraction.FeatureGenerator;
+import interfaces.CLInterface;
 import machineLearning.EvaluationManager;
 import machineLearning.MelodyPredictor;
 import machineLearning.TestManager;
@@ -17,7 +18,6 @@ import machineLearning.TrainingManager;
 import machinelearning.NNManager;
 import n_grams.KylmModel;
 import tools.ToolBox;
-import tools.path.PathTools;
 
 public class Runner {
 
@@ -35,8 +35,8 @@ public class Runner {
 	private static Dataset datasetTrain;
 
 	// Paths, directory names, and scripts
-	// All paths are set in setPathsToCodeAndData()
-	private static String[] paths;
+//	// All paths are set in setPathsToCodeAndData()
+//	private static String[] paths;
 //	public static String encodingsPath;
 //	public static String outPath;
 //	public static String midiPath;
@@ -777,13 +777,13 @@ public class Runner {
 		return modelParams;
 	}
 
-	public static void setPaths(String[] arg) {
-		paths = arg;
-	}
+//	public static void setPaths(String[] arg) {
+//		paths = arg;
+//	}
 
-	public static String[] getPaths() {
-		return paths;
-	}
+//	public static String[] getPaths() {
+//		return paths;
+//	}
 
 	public static void setDataset(Dataset ds) {
 		dataset = ds;
@@ -966,16 +966,20 @@ public class Runner {
 	}
 
 	public static void runExperiment(boolean trainUserModel, boolean skipTraining, 
-		boolean deployTrainedUserModel, boolean verbose, Map<String, String> paths,
-		Map<String, String> transcriptionParams) {
+		boolean deployTrainedUserModel, boolean verbose, Map<String, String> paths, 
+		Map<String, String> runnerPaths, Map<String, String> transcriptionParams, 
+		Map<String, Double> modelParams, Dataset[] datasets, int maxNumVoices) {
 
 		String startPreProc = ToolBox.getTimeStampPrecise();
-		
+
+		setModelParams(modelParams);
+		setDataset(datasets[0]);
+		setDatasetTrain(datasets[1]);
 		setDeployTrainedUserModel(deployTrainedUserModel);
 		setTrainUserModel(trainUserModel);
 		setVerbose(verbose);
 
-		String[] argPaths = getPaths();
+//		String[] argPaths = getPaths();
 		Map<String, Double> argModelParams = getModelParams();
 		ModellingApproach ma = 
 			ALL_MODELLING_APPROACHES[argModelParams.get(MODELLING_APPROACH).intValue()];	
@@ -993,11 +997,11 @@ public class Runner {
 		System.out.println("\ncreating the dataset.");
 		Dataset ds = getDataset();
 		if (!deployTrainedUserModel) {
-			String dp = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
+			String dp = CLInterface.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
 			File datasetFile = new File(dp + ds.getDatasetID() + ".ser");
 //			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {
-				ds.populateDataset("thesis", paths, null, deployTrainedUserModel);
+				ds.populateDataset(paths, deployTrainedUserModel);
 				ToolBox.storeObjectBinary(ds, datasetFile);
 			}
 			else {
@@ -1021,7 +1025,7 @@ public class Runner {
 //			System.exit(0);
 		}
 		else {
-			ds.populateDataset(null, paths, null, deployTrainedUserModel);
+			ds.populateDataset(paths, deployTrainedUserModel);
 
 //			System.out.println(ds.getDatasetID());
 //			System.out.println(ds.getName());
@@ -1065,22 +1069,25 @@ public class Runner {
 		// If only the MM is trained and tested
 		if (mt == ModelType.MM) {				
 			int n = argModelParams.get(Runner.N).intValue();
-			String path = argPaths[0];
+			String path = runnerPaths.get(UI.STORE_PATH);
+//			String path = runnerPaths[0];
+//			String path = argPaths[0];
 			path = path.concat("n=").concat(String.valueOf(n)).concat("/");
-			argPaths[0] = path;
-			setPaths(argPaths);			
-
+			runnerPaths.put(UI.STORE_PATH, path);
+//			runnerPaths[0] = path;
+//			argPaths[0] = path;
+//			setPaths(argPaths);
 
 			// 1. Train
 			String startTraining = ToolBox.getTimeStamp();
 			System.out.println("\n>> Starting the training.");
-			new TrainingManager().prepareTraining(null, paths);
+			new TrainingManager().prepareTraining(null, paths, runnerPaths);
 			String endTraining = ToolBox.getTimeStamp();
 //			System.exit(0);
 
 			// 2. Test
 			String startTe = ToolBox.getTimeStamp();
-			new TestManager().prepareTesting(startTe, transcriptionParams, paths);
+			new TestManager().prepareTesting(startTe, transcriptionParams, paths, runnerPaths);
 			String endEval = ToolBox.getTimeStamp();
 //			System.exit(0);
 			
@@ -1106,10 +1113,12 @@ public class Runner {
 		// If only the NN, a combined model, or the HMM is trained and tested
 		else {
 			boolean isTablatureCase = ds.isTablatureSet();
-			String storePath = argPaths[0];
+			String storePath = runnerPaths.get(UI.STORE_PATH);
+//			String storePath = runnerPaths[0];
+//			String storePath = argPaths[0];
 			
 			// Determine scaling settings
-			FeatureGenerator.determineScalingSettings(ma, isTablatureCase); // TODO fix hardcoded nums
+			FeatureGenerator.determineScalingSettings(ma, isTablatureCase, maxNumVoices); // TODO fix hardcoded nums
 
 //			double lmbd = argModelParams.get(NNManager.REGULARISATION_PARAMETER);
 //			String lmbdAsString = ToolBox.convertToStringNoTrailingZeros(lmbd);
@@ -1150,7 +1159,7 @@ public class Runner {
 //				System.out.println("### 1. startTraining = " + startTraining);
 				System.out.println("\nstarting the training.");
 				if (!skipTraining) {
-					new TrainingManager().prepareTraining(startTr, paths);
+					new TrainingManager().prepareTraining(startTr, paths, runnerPaths);
 				}
 				if (trainUserModel) {
 					ToolBox.storeTextFile(EvaluationManager.getDataAndParamsInfo(Runner.TRAIN, -1),
@@ -1172,7 +1181,7 @@ public class Runner {
 			else {
 				System.out.println("\napplying the model.");
 			}
-			new TestManager().prepareTesting(startTe, transcriptionParams, paths);
+			new TestManager().prepareTesting(startTe, transcriptionParams, paths, runnerPaths);
 
 //			String endEval = ToolBox.getTimeStamp();
 //			System.out.println("### 4. endEval = " + endEval);

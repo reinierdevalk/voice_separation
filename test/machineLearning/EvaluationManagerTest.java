@@ -15,6 +15,7 @@ import java.util.Map;
 import data.Dataset;
 import external.Transcription;
 import tools.ToolBox;
+import tools.labels.LabelTools;
 import ui.Runner;
 import ui.Runner.Model;
 import ui.Runner.ModellingApproach;
@@ -22,14 +23,22 @@ import ui.Runner.ModellingApproach;
 
 public class EvaluationManagerTest {
 	
-	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
-	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
-	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
-	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
-	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
+	private List<Double> v0;
+	private List<Double> v1;
+	private List<Double> v2;
+	private List<Double> v3;
+	private List<Double> v4;
+	private int mnv;
 
 	@Before
 	public void setUp() throws Exception {
+		mnv = Transcription.MAX_NUM_VOICES;
+
+		v0 = LabelTools.createVoiceLabel(new Integer[]{0}, mnv);
+		v1 = LabelTools.createVoiceLabel(new Integer[]{1}, mnv);
+		v2 = LabelTools.createVoiceLabel(new Integer[]{2}, mnv);
+		v3 = LabelTools.createVoiceLabel(new Integer[]{3}, mnv);
+		v4 = LabelTools.createVoiceLabel(new Integer[]{4}, mnv);
 	}
 
 	@After
@@ -78,7 +87,7 @@ public class EvaluationManagerTest {
 		});
 		EvaluationManager.setCsvLegend(altCSVTable);
 //		Runner.setDataset(new Dataset(DatasetID.TESTPIECE_SET));
-		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV));
+		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV, false));
 		
 		// modelParameters
 		Map<String, Double> modelParameters = new HashMap<String, Double>();
@@ -170,9 +179,9 @@ public class EvaluationManagerTest {
 		outputs.add(new double[]{0.1, 0.2, 0.3, 0.1, 0.3}); // incorrect 
 		
 		List<List<Double>> labels = new ArrayList<List<Double>>();
-		labels.add(V_3); labels.add(V_3);
-		labels.add(V_3); labels.add(V_3);
-		labels.add(V_3); labels.add(V_3);
+		labels.add(v3); labels.add(v3);
+		labels.add(v3); labels.add(v3);
+		labels.add(v3); labels.add(v3);
 		
 		double[][] expected = new double[2][6];
 		double a = Math.log(0.4) / Math.log(2);

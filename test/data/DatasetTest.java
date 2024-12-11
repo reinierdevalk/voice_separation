@@ -6,25 +6,37 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import interfaces.CLInterface;
+import ui.Runner.ModellingApproach;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import tools.path.PathTools;
-import ui.Runner.ModellingApproach;
-
 public class DatasetTest {
 
+	private File encodingTestpiece;
+	private File midiTestpiece;
 	private String encodingsPath;
 	private String midiPath;
 	private Map<String, String> paths;
 	
 	@Before
 	public void setUp() throws Exception {
-		paths = PathTools.getPaths(true);
-		encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
-		midiPath = PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
+		paths = CLInterface.getPaths(true);
+		encodingsPath = CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+		midiPath = CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
+		
+		encodingTestpiece = new File(
+			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test/5vv/")) + "testpiece.tbp"
+		);
+		midiTestpiece = new File(
+			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test/5vv/")) + "testpiece.mid"
+		);
 	}
 
 	@After
@@ -36,16 +48,12 @@ public class DatasetTest {
 	public void testGetNumDataExamples() {
 		List<Integer> expected = Arrays.asList(new Integer[]{3*39, 3*16, 3*40, 3*16});
 
-		String[] argPaths = new String[]{
-			encodingsPath + "/test/", 
-			midiPath + "/test/", 
-			midiPath + "/test/"
-		};
-
-		Dataset ds = new Dataset(Dataset.TEST_TAB);
-		ds.populateDataset(null, paths, argPaths, false);
-		Dataset dsNonTab = new Dataset(Dataset.TEST_MIDI);
-		dsNonTab.populateDataset(null, paths, argPaths, false);
+		String p = encodingTestpiece.getName().substring(0, encodingTestpiece.getName().lastIndexOf("."));
+		Dataset.setUserPiecenames(Dataset.TEST, Arrays.asList(p, p, p));
+		Dataset ds = new Dataset(Dataset.TEST + "-5vv", true);
+		ds.populateDataset(paths, false);
+		Dataset dsNonTab = new Dataset(Dataset.TEST + "-5vv", false);
+		dsNonTab.populateDataset(paths, false);
 
 		List<Integer> actual = new ArrayList<Integer>();
 		actual.add(ds.getNumDataExamples(ModellingApproach.N2N));
@@ -72,16 +80,12 @@ public class DatasetTest {
 		// C2C non-tab
 		expected.add(Arrays.asList(16, 16, 16));
 
-		String[] argPaths = new String[]{
-			encodingsPath + "test/", 
-			midiPath + "test/", 
-			midiPath + "test/"
-		};
-
-		Dataset ds = new Dataset(Dataset.TEST_TAB);
-		ds.populateDataset(null, paths, argPaths, false);
-		Dataset dsNonTab = new Dataset(Dataset.TEST_MIDI);
-		dsNonTab.populateDataset(null, paths, argPaths, false);
+		String p = encodingTestpiece.getName().substring(0, encodingTestpiece.getName().lastIndexOf("."));
+		Dataset.setUserPiecenames(Dataset.TEST, Arrays.asList(p, p, p));
+		Dataset ds = new Dataset(Dataset.TEST + "-5vv", true);
+		ds.populateDataset(paths, false);
+		Dataset dsNonTab = new Dataset(Dataset.TEST + "-5vv", false);
+		dsNonTab.populateDataset(paths, false);
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.N2N));
 		actual.add(ds.getIndividualPieceSizes(ModellingApproach.C2C));

@@ -18,14 +18,19 @@ import tools.ToolBox;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 import de.uos.fmt.musitech.utility.math.Rational;
+import external.Transcription;
 
 public class OutputEvaluatorTest {
 
 	private double delta;
+	private int mnv;
+	private int mtsd;
 	
 	@Before
 	public void setUp() throws Exception {
 		delta = 1e-9;
+		mnv = Transcription.MAX_NUM_VOICES;
+		mtsd = Transcription.MAX_TABSYMBOL_DUR;
 	}
 
 
@@ -130,25 +135,25 @@ public class OutputEvaluatorTest {
 		// N2N
 		modelParameters.put(Runner.MODELLING_APPROACH, (double) ModellingApproach.N2N.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
-		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV)); // to keep deviationThreshold at default -1
+		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV, false)); // to keep deviationThreshold at default -1
 		modelParameters.put(Runner.DEV_THRESHOLD, 0.05);
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
-			getTestOutputs(), null));
+			getTestOutputs(), null, mnv));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(Dataset.THESIS_INT_4VV)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(Dataset.THESIS_INT_4VV, true)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, 
-			getTestOutputs(), null));
+			getTestOutputs(), null, mnv));
 		// C2C
 		modelParameters.put(Runner.MODELLING_APPROACH, 
 			(double) ModellingApproach.C2C.getIntRep());
 		modelParameters.put(Runner.SNU, 0.0);
-		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV)); // to keep deviationThreshold at default -1
+		Runner.setDataset(new Dataset(Dataset.BACH_WTC_4VV, false)); // to keep deviationThreshold at default -1
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
-			testMappingsNoCoD));
+			testMappingsNoCoD, mnv));
 		modelParameters.put(Runner.SNU, 1.0);
-		Runner.setDataset(new Dataset(Dataset.THESIS_INT_4VV)); // to set deviationThreshold
+		Runner.setDataset(new Dataset(Dataset.THESIS_INT_4VV, true)); // to set deviationThreshold
 		actual.addAll(OutputEvaluator.determinePredictedVoices(modelParameters, null, 
-			testMappingsCoD));
+			testMappingsCoD, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -186,7 +191,7 @@ public class OutputEvaluatorTest {
 
 		List<Rational[]> actual = 
 			OutputEvaluator.determinePredictedDurations(modelParameters, 
-			testOutputsWithDur, null);
+			testOutputsWithDur, null, mnv, mtsd);
 		
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -401,12 +406,12 @@ public class OutputEvaluatorTest {
 		List<List<List<Integer>>> actual = new ArrayList<List<List<Integer>>>();
 		for (double[] output : testOutputs) {
 			for (double dt : devThresh) {
-				actual.add(OutputEvaluator.interpretNetworkOutput(output, false, dt));
+				actual.add(OutputEvaluator.interpretNetworkOutput(output, false, dt, mnv));
 			}
 		}
 		for (double[] output : testOutputs) {
 			for (double dt : devThresh) {
-				actual.add(OutputEvaluator.interpretNetworkOutput(output, true, dt));
+				actual.add(OutputEvaluator.interpretNetworkOutput(output, true, dt, mnv));
 			}
 		}
 

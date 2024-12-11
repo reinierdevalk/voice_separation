@@ -323,7 +323,7 @@ public class EvaluationManager {
 	public static ErrorFraction[] getMetricsSingleFold(List<List<Integer>> assignmentErrors, 
 		List<List<Integer>> allPredictedVoices, List<double[]> ntwOutputsForCE, 
 		List<List<Double>> groundTruthVoiceLabels, List<Integer[]> equalDurationUnisonsInfo,
-		boolean isTestOrAppMode) {
+		boolean isTestOrAppMode, int maxNumVoices) {
 
 		ErrorFraction[] results = new ErrorFraction[10];
 		Arrays.fill(results, null);
@@ -354,9 +354,10 @@ public class EvaluationManager {
 //		System.out.println(highestNumberOfVoices);
 		
 		// Added 28.01.2020 to print prc and rcl per voice for tablature (only in test/app mode)
-		List<ErrorFraction[]> prf = 
-			ErrorCalculator.calculatePrecisionRecallF1PerVoice(allPredictedVoices, 
-			groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices);
+		List<ErrorFraction[]> prf = ErrorCalculator.calculatePrecisionRecallF1PerVoice(
+			allPredictedVoices, groundTruthVoiceLabels,	equalDurationUnisonsInfo, 
+			highestNumberOfVoices, maxNumVoices
+		);
 		if (isTestOrAppMode) {
 			for (int i = 0; i < prf.size(); i++) {
 				ErrorFraction[] curr = prf.get(i);
@@ -376,19 +377,24 @@ public class EvaluationManager {
 		// prc, rcl, snd, cmp, AVC, cre
 		if (!isTablatureCase) {
 			ErrorFraction[] precRec = 
-				ErrorCalculator.calculateAvgPrecisionRecallF1(allPredictedVoices, 
-				groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices)[0];
+				ErrorCalculator.calculateAvgPrecisionRecallF1(
+					allPredictedVoices, groundTruthVoiceLabels,	equalDurationUnisonsInfo, 
+					highestNumberOfVoices, maxNumVoices
+				)[0];
 			results[PRC_IND] = precRec[0];
 			results[RCL_IND] = precRec[1];
 		}
-		ErrorFraction[] sndCmp = 
-			ErrorCalculator.calculateAvgSoundnessAndCompleteness(allPredictedVoices, 
-			groundTruthVoiceLabels,	equalDurationUnisonsInfo, highestNumberOfVoices)[0];
+		ErrorFraction[] sndCmp = ErrorCalculator.calculateAvgSoundnessAndCompleteness(
+			allPredictedVoices, groundTruthVoiceLabels,	equalDurationUnisonsInfo, 
+			highestNumberOfVoices, maxNumVoices
+		)[0];
 		results[SND_IND] = sndCmp[0];
 		results[CMP_IND] = sndCmp[1];	
 		if (!isTablatureCase) {	// TODO or if (metricsUsed.contains(Metric.AVC))?
-			double avc = ErrorCalculator.calculateAVC(allPredictedVoices, 
-				groundTruthVoiceLabels, equalDurationUnisonsInfo, highestNumberOfVoices);
+			double avc = ErrorCalculator.calculateAVC(
+				allPredictedVoices, groundTruthVoiceLabels, equalDurationUnisonsInfo, 
+				highestNumberOfVoices, maxNumVoices
+			);
 			results[AVC_IND] = new ErrorFraction(avc);
 		}
 		if (metricsUsed.contains(Metric.CRE)) {
@@ -1379,8 +1385,7 @@ public class EvaluationManager {
 	}
 	
 	
-	public static String listDetails(String[][] detailsArr, String conflictRec/*,
-		List<List<Integer>> conflictIndices, List<List<List<Integer>>> conflictInfo*/) {
+	public static String listDetails(String[][] detailsArr, String conflictRec, int maxNumVoices, int maxTabSymDur) {
 		
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Model m = Runner.ALL_MODELS[modelParameters.get(Runner.MODEL).intValue()];
@@ -1395,11 +1400,12 @@ public class EvaluationManager {
 			(dc == DecisionContext.UNIDIR && argModelDuration || 
 			dc == DecisionContext.BIDIR && argModelDuration && argModelDurationAgain);
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
-		int labelSize = Transcription.MAX_NUM_VOICES;
+		int labelSize = maxNumVoices; // Schmier
 		int numTabsForModelOutput = 5;
 		int mappingSize = 1;
 		if (modelDur) {
-			labelSize += Transcription.MAX_TABSYMBOL_DUR; 
+			labelSize += maxTabSymDur; // Schmier
+//			labelSize += Transcription.MAX_TABSYMBOL_DUR; // Schmier
 			numTabsForModelOutput = 33;
 		}
 		if (ma == ModellingApproach.C2C || ma == ModellingApproach.HMM) {
@@ -1674,7 +1680,9 @@ public class EvaluationManager {
 		List<List<List<Integer>>> argPossibleVoiceAssignmentsAllChords,
 		List<List<Integer>> argAllBestVoiceAssignments, // is predictedMappings in HMM case
 		List<Double> argAllHighestNetworkOutputs, // is predictedIndices in HMM case
-		List<List<Integer>> assigErrs
+		List<List<Integer>> assigErrs,
+		int maxNumVoices,
+		int maxTabSymDur
 		) { 
 
 		Map<String, Double> modelParameters = Runner.getModelParams();
@@ -1833,14 +1841,13 @@ public class EvaluationManager {
 				// b. Predicted				
 				// 1. (Original) network output
 				double[] output = argAllNetworkOutputs.get(i); // HIER OK
-				double[] outputVoice = 
-					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
+				double[] outputVoice = Arrays.copyOfRange(output, 0, maxNumVoices); // Schmier
 				// Determine the predicted voices, i.e., the voice predicted pre-conflict (NN only)
 				// or pre-combining (combined model). In both cases, they must thus NOT be retrieved
 				// from allPredictedVoices.
-				List<Integer> predictedVoices = 
-					OutputEvaluator.interpretNetworkOutput(outputVoice, allowCoD, 
-					deviationThreshold).get(0);
+				List<Integer> predictedVoices = OutputEvaluator.interpretNetworkOutput(
+					outputVoice, allowCoD, deviationThreshold, maxNumVoices
+				).get(0);
 
 				curr.add(String.valueOf(predictedVoices.get(0)));
 				if (predictedVoices.size() == 2) {
@@ -1880,7 +1887,8 @@ public class EvaluationManager {
 					// Determine the predicted voices, i.e., the voices predicted pre-combining. 
 					// They must thus NOT be retrieved from allPredictedVoices
 					List<Integer> currPredVoices = OutputEvaluator.interpretNetworkOutput(currCombOutp,
-						allowCoD, deviationThreshold).get(0);
+						allowCoD, deviationThreshold, maxNumVoices
+					).get(0);
 					voiceInfo.append(getDetailsLine("combined output", currCombOutp, 
 						currPredVoices, null, null, null, dfOutp));
 				}
@@ -1949,11 +1957,11 @@ public class EvaluationManager {
 					}
 					
 					// b. Predicted
-					List<Integer> predictedDurationsAsIndex = 
-						OutputEvaluator.interpretNetworkOutput(output, allowCoD, 
-						deviationThreshold).get(1);
+					List<Integer> predictedDurationsAsIndex = OutputEvaluator.interpretNetworkOutput(
+						output, allowCoD, deviationThreshold, maxNumVoices
+					).get(1);
 					List<Double> predictedDurationsAsLabel = 
-						LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
+						LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex, maxTabSymDur);
 					List<Rational> predictedDurations = 
 						Arrays.asList(LabelTools.convertIntoDuration(predictedDurationsAsLabel));
 					// NB: predictedDurations will have only one element as currently only one 
@@ -2049,8 +2057,9 @@ public class EvaluationManager {
 					bestEval = 
 						possibleVoiceAssignmentsCurrentChord.indexOf(bestVoiceAssignment);
 				}
-				List<List<Double>> bestChordLabels = 
-					LabelTools.getChordVoiceLabels(bestVoiceAssignment);
+				List<List<Double>> bestChordLabels = LabelTools.getChordVoiceLabels(
+					bestVoiceAssignment, maxNumVoices // Schmier
+				);
 				List<List<Integer>> predictedChordVoices = 
 					LabelTools.getVoicesInChord(bestChordLabels);
 				// HMM: highestNetworkOutput = predictedIndex
@@ -2185,7 +2194,9 @@ public class EvaluationManager {
 		List<List<List<Double>>> argGroundTruthChordVoiceLabels,
 		List<List<List<Integer>>> argPossibleVoiceAssignmentsAllChords,
 		List<List<Integer>> argAllBestVoiceAssignments,
-		List<Double> argAllHighestNetworkOutputs
+		List<Double> argAllHighestNetworkOutputs,
+		int maxNumVoices,
+		int maxTabSymDur
 		) { 
 
 		List<List<Double>> argGroundTruthVoiceLabels = groundTruths.get(0);
@@ -2259,14 +2270,13 @@ public class EvaluationManager {
 				// Predicted voice label(s)				
 				// a. (Original) network output
 				double[] output = argAllNetworkOutputs.get(i); // HIER OK
-				double[] outputVoice = 
-					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
+				double[] outputVoice = Arrays.copyOfRange(output, 0, maxNumVoices); // Schmier
 				// Determine the predicted voices, i.e., the voice predicted pre-conflict (NN only)
 				// or pre-combining (combined model). In both cases, they must thus NOT be retrieved
 				// from allPredictedVoices.
-				List<Integer> predictedVoices = 
-					OutputEvaluator.interpretNetworkOutput(outputVoice, allowCoD, 
-					deviationThreshold).get(0);
+				List<Integer> predictedVoices = OutputEvaluator.interpretNetworkOutput(
+					outputVoice, allowCoD, deviationThreshold, maxNumVoices
+				).get(0);
 				voiceInfo.append(getDetailsLine("model output", outputVoice, predictedVoices,
 					null, null,	null, decFormOutput));
 
@@ -2295,8 +2305,9 @@ public class EvaluationManager {
 					double[] currCombOutp = argAllCombinedOutputs.get(i); 
 					// Determine the predicted voices, i.e., the voices predicted pre-combining. 
 					// They must thus NOT be retrieved from allPredictedVoices
-					List<Integer> currPredVoices = OutputEvaluator.interpretNetworkOutput(currCombOutp,
-						allowCoD, deviationThreshold).get(0);
+					List<Integer> currPredVoices = OutputEvaluator.interpretNetworkOutput(
+						currCombOutp,allowCoD, deviationThreshold, maxNumVoices
+					).get(0);
 					voiceInfo.append(getDetailsLine("combined output", currCombOutp, 
 						currPredVoices, null, null, null, decFormOutput));
 				}
@@ -2325,18 +2336,18 @@ public class EvaluationManager {
 
 					// Predicted duration label
 					double[] outputDur = Arrays.copyOfRange(output, 
-						Transcription.MAX_NUM_VOICES, output.length);
+						maxNumVoices, output.length); // Schmier
 					String[] predictedDurationLabel = new String[outputDur.length]; 
 					for (int j = 0; j < outputDur.length; j++) {
 						String df = decFormOutput.format(outputDur[j]);
 						predictedDurationLabel[j] = df;
 					}
 
-					List<Integer> predictedDurationsAsIndex = 
-						OutputEvaluator.interpretNetworkOutput(output, allowCoD, 
-						deviationThreshold).get(1);
+					List<Integer> predictedDurationsAsIndex = OutputEvaluator.interpretNetworkOutput(
+						output, allowCoD, deviationThreshold, maxNumVoices
+					).get(1);
 					List<Double> predictedDurationsAsLabel = 
-						LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
+						LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex, maxTabSymDur);
 					List<Rational> predictedDurations = 
 						Arrays.asList(LabelTools.convertIntoDuration(predictedDurationsAsLabel));
 					// NB: predictedDurations will have only one element as currently only one 
@@ -2464,7 +2475,9 @@ public class EvaluationManager {
 				List<Integer> bestVoiceAssignment = argAllBestVoiceAssignments.get(i);
 				List<List<Integer>> possibleVoiceAssignmentsCurrentChord = argPossibleVoiceAssignmentsAllChords.get(i);
 				int bestEval = possibleVoiceAssignmentsCurrentChord.indexOf(bestVoiceAssignment);
-				List<List<Double>> bestChordLabels = LabelTools.getChordVoiceLabels(bestVoiceAssignment);
+				List<List<Double>> bestChordLabels = LabelTools.getChordVoiceLabels(
+					bestVoiceAssignment, maxNumVoices // Schmier
+				);
 				List<List<Integer>> predictedChordVoices = LabelTools.getVoicesInChord(bestChordLabels);
 				double highestNetworkOutput = argAllHighestNetworkOutputs.get(i);
 
@@ -2850,7 +2863,8 @@ public class EvaluationManager {
 	private static List<List<List<Integer>>> getConflictInfo(List<List<Integer>> conflictIndices, 
 		List<List<Integer>> allPredictedVoices,	List<List<Double>> allPredictedDurationLabels, 
 		List<Integer[]> argEqualDurationUnisonsInfo, List<double[]> argAllNetworkOutputs, 
-		List<List<List<Double>>> groundTruths, List<Integer> backwardsMapping) {
+		List<List<List<Double>>> groundTruths, List<Integer> backwardsMapping, int maxNumVoices, 
+		int maxTabSymDur) {
 
 		List<List<Double>> argGroundTruthVoiceLabels = groundTruths.get(0);
 		List<List<Double>> argGroundTruthDurationLabels = groundTruths.get(1);
@@ -2894,10 +2908,10 @@ public class EvaluationManager {
 				}
 			
 //				double[] output = argAllNetworkOutputs.get(i); // HIER OK
-				double[] outputArray = 
-					Arrays.copyOfRange(output, 0, Transcription.MAX_NUM_VOICES);
-				List<Integer> predictedVoices = 
-					OutputEvaluator.interpretNetworkOutput(outputArray, allowCoD, devThresh).get(0);
+				double[] outputArray = Arrays.copyOfRange(output, 0, maxNumVoices); // Schmier
+				List<Integer> predictedVoices = OutputEvaluator.interpretNetworkOutput(
+					outputArray, allowCoD, devThresh, maxNumVoices
+				).get(0);
 				List<Integer> adaptedVoices = allPredictedVoices.get(i); // HIER OK
 				List<Double> actualVoiceLabel = argGroundTruthVoiceLabels.get(i); // HIER OK
 				List<Integer> actualVoices = LabelTools.convertIntoListOfVoices(actualVoiceLabel);
@@ -2932,9 +2946,9 @@ public class EvaluationManager {
 					double[] outputNextNote = argAllNetworkOutputs.get(i + 1); // HIER OK
 //						boolean allowCoD = false;						
 //						double devThresh = -1.0;
-						int voicePredInitiallyUpperNote = 
-							OutputEvaluator.interpretNetworkOutput(outputNextNote, allowCoD,
-							devThresh).get(0).get(0);
+						int voicePredInitiallyUpperNote = OutputEvaluator.interpretNetworkOutput(
+							outputNextNote, allowCoD, devThresh, maxNumVoices
+						).get(0).get(0);
 						int adaptedVoiceLowerNote = adaptedVoices.get(0);
 						int adaptedVoiceUpperNote = allPredictedVoices.get(i + 1).get(0); // HIER OK
 						// Determine for both EDUnotes whether the predicted and adapted voices are correct
@@ -3013,10 +3027,11 @@ public class EvaluationManager {
 					durConflFound = true;
 				}
 				
-				List<Integer> predictedDurationsAsIndex = 
-					OutputEvaluator.interpretNetworkOutput(output, allowCoD, devThresh).get(1);
+				List<Integer> predictedDurationsAsIndex = OutputEvaluator.interpretNetworkOutput(
+					output, allowCoD, devThresh, maxNumVoices
+				).get(1);
 				List<Double> predictedDurationsAsLabel = 
-					LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex);
+					LabelTools.convertIntoDurationLabel(predictedDurationsAsIndex, maxTabSymDur);
 				Rational[] predictedDurations = 
 					LabelTools.convertIntoDuration(predictedDurationsAsLabel);
 				for (Rational r : predictedDurations) {
@@ -3164,7 +3179,7 @@ public class EvaluationManager {
 	private static List<List<Integer>> updateConflictIndices(List<List<Integer>> conflictIndicesLists, 
 		List<List<Integer>> allPredictedVoices, List<Integer[]> argEqualDurationUnisonsInfo, 
 		List<double[]> argAllNetworkOutputs, List<List<Integer>> predAdapActVoices, 
-		List<Rational[]> predAdapActDur, int numNotes, int i) {
+		List<Rational[]> predAdapActDur, int numNotes, int i, int maxNumVoices) {
 
 		List<Integer> indicesOfCorrToCorr = conflictIndicesLists.get(0);
 		List<Integer> indicesOfCorrToIncorr = conflictIndicesLists.get(1);
@@ -3207,9 +3222,8 @@ public class EvaluationManager {
 					double[] outputNextNote = argAllNetworkOutputs.get(i + 1); // HIER OK
 					boolean allowCoD = false;
 					double deviationThreshold  =-1.0;
-					int voicePredInitiallyUpperNote = 
-						OutputEvaluator.interpretNetworkOutput(outputNextNote, allowCoD,
-					  	deviationThreshold).get(0).get(0);
+					int voicePredInitiallyUpperNote = OutputEvaluator.interpretNetworkOutput(
+						outputNextNote, allowCoD, deviationThreshold, maxNumVoices).get(0).get(0);
 					int adaptedVoiceLowerNote = adaptedVoices.get(0);
 					int adaptedVoiceUpperNote = allPredictedVoices.get(i + 1).get(0); // HIER OK
 					// Determine for both EDUnotes whether the predicted and adapted voices are correct

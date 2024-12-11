@@ -51,13 +51,13 @@ public class FeatureGeneratorChord {
 	 * @return
 	 */
 	// TESTED (for both tablature- and non-tablature case)
-	static List<Double> getNoteSpecificFeaturesChord(Integer[][] btp, Integer[][] bnp, /*Transcription transcription,*/
-		List<Integer[]> meterInfo, int lowestNoteIndex /*boolean useTablatureInformation*/) {
+	static List<Double> getNoteSpecificFeaturesChord(Integer[][] btp, Integer[][] bnp,
+		List<Integer[]> meterInfo, int lowestNoteIndex, int maxNumVoices) {
 		
 		Transcription.verifyCase(btp, bnp);
 	  List<Double> features = new ArrayList<Double>();
 	  
-		for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
+		for (int i = 0; i < maxNumVoices; i++) { // Schmier
 			// a. In the tablature case
 		  if (btp != null) {
 			  int numNotesInChord = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
@@ -140,7 +140,7 @@ public class FeatureGeneratorChord {
 	 */
 	// TESTED for both tablature- and non-tablature case
 	static List<Double> getChordLevelFeaturesChord(Integer[][] btp, Integer[][] bnp, /*Transcription transcription,*/ 
-		List<Integer[]> meterInfo, int lowestNoteIndex) {
+		List<Integer[]> meterInfo, int lowestNoteIndex, int maxNumVoices) {
 		
 		Transcription.verifyCase(btp, bnp);
 		List<Double> features = new ArrayList<Double>();
@@ -167,7 +167,7 @@ public class FeatureGeneratorChord {
     	if (modelDuration) {
     	  // TODO give durationLabels value 	
     	}
-    	double[] intervals = FeatureGenerator.getIntervalsInChord(btp, durationLabels, bnp, lowestNoteIndex);
+    	double[] intervals = FeatureGenerator.getIntervalsInChord(btp, durationLabels, bnp, lowestNoteIndex, maxNumVoices);
     	for (Double d : intervals) {
     	  features.add(d);
     	}
@@ -202,7 +202,7 @@ public class FeatureGeneratorChord {
     	// 2. Metric position
     	features.add(basicNoteFeaturesAsArray[FeatureGenerator.POSITION_WITHIN_BAR_NON_TAB]);
     	// 3-6. Intervals
-    	double[] intervals = FeatureGenerator.getIntervalsInChord(btp, null, bnp, lowestNoteIndex);
+    	double[] intervals = FeatureGenerator.getIntervalsInChord(btp, null, bnp, lowestNoteIndex, maxNumVoices);
     	for (Double d : intervals) {
     	  features.add(d);
     	}
@@ -239,16 +239,17 @@ public class FeatureGeneratorChord {
 	 * @return
 	 */
 	// TESTED
-	double[] getVoicesWithAdjacentNoteOnSameCourse(Integer[][] btp, Transcription transcription, int lowestNoteIndex) {
+	double[] getVoicesWithAdjacentNoteOnSameCourse(Integer[][] btp, Transcription transcription, 
+		int lowestNoteIndex, int maxNumVoices) {
 		
-		double[] voicesWithAdjacentNotes = new double[Transcription.MAX_NUM_VOICES];
+		double[] voicesWithAdjacentNotes = new double[maxNumVoices]; // Schmier
 		Arrays.fill(voicesWithAdjacentNotes, -1.0);
 					
 	  int numNotesInChord = btp[lowestNoteIndex][Tablature.CHORD_SIZE_AS_NUM_ONSETS];
 	  for (int i = 0; i < numNotesInChord; i++) {
 	  	int noteIndex = lowestNoteIndex + i;
 	  	double[] voicesWithAdjacentNoteOnSameCourse = 
-	  		FeatureGenerator.getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, Direction.LEFT, noteIndex); // TODO Change Direction.LEFT into method argument
+	  		FeatureGenerator.getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, Direction.LEFT, noteIndex, maxNumVoices); // TODO Change Direction.LEFT into method argument
 	  	for (int j = 0; j < voicesWithAdjacentNoteOnSameCourse.length; j++) {
 	  		if (voicesWithAdjacentNoteOnSameCourse[j] == 1.0) {
   		 		voicesWithAdjacentNotes[j] = i;
@@ -285,16 +286,16 @@ public class FeatureGeneratorChord {
 	 */
 	// TESTED (for both tablature- and non-tablature case)
 	static double[] getProximitiesAndMovementsOfChord(Integer[][] btp, Integer[][] bnp, Transcription transcription,
-		int lowestNoteIndex, List<Integer> voiceAssignment) { 	
+		int lowestNoteIndex, List<Integer> voiceAssignment, int maxNumVoices) { 	
 
 		Transcription.verifyCase(btp, bnp);
 
 		// Create the proximity arrays and initialise with all -1.0 (when the voice is not active in the chord)  
-		double[] pitchProx = new double[Transcription.MAX_NUM_VOICES];
+		double[] pitchProx = new double[maxNumVoices]; // Schmier
 		Arrays.fill(pitchProx, -1.0);
-		double[] interOnsetProx = new double[Transcription.MAX_NUM_VOICES];
+		double[] interOnsetProx = new double[maxNumVoices]; // Schmier
 		Arrays.fill(interOnsetProx, -1.0);
-		double[] offsetOnsetProx = new double[Transcription.MAX_NUM_VOICES];
+		double[] offsetOnsetProx = new double[maxNumVoices]; // Schmier
 		Arrays.fill(offsetOnsetProx, -1.0);
 
 		// Create the pitch movements array and initialise with all 0.0 (when the voice is not active in the chord)
@@ -315,11 +316,13 @@ public class FeatureGeneratorChord {
 		//   (b) has no new note in the chord but is sustained; 
 		//   (c) has a new note in the chord, which is the first note in that voice; 
 		//   (d) has a new note in the chord that is of the same pitch as the previous note in that voice
-		double[] pitchMovements = new double[Transcription.MAX_NUM_VOICES];
+		double[] pitchMovements = new double[maxNumVoices]; // Schmier
 		Arrays.fill(pitchMovements, 0.0);
 
 		// Get the voice labels that go with the given voice assignment; then get the voices
-		List<List<Double>> chordVoiceLabels = LabelTools.getChordVoiceLabels(voiceAssignment);
+		List<List<Double>> chordVoiceLabels = LabelTools.getChordVoiceLabels(
+			voiceAssignment, maxNumVoices // Schmier
+		);
 		List<List<Integer>> voices = LabelTools.getVoicesInChord(chordVoiceLabels);
 
 		// Determine the size of the chord
@@ -393,12 +396,12 @@ public class FeatureGeneratorChord {
 	 */
 	// TESTED for both tablature- and non-tablature case
 	static List<Double> getVoicesAlreadyOccupied(Integer[][] btp, List<List<Double>> durationLabels, List<Integer[]> 
-	  voicesCoDNotes,	Integer[][] bnp, Transcription transcription, int lowestNoteIndex) {
+	  voicesCoDNotes,	Integer[][] bnp, Transcription transcription, int lowestNoteIndex, int maxNumVoices) {
 	  
 		Transcription.verifyCase(btp, bnp);
 		
 		List<Double> voicesAlreadyAssigned = new ArrayList<Double>();
-	  for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
+	  for (int i = 0; i < maxNumVoices; i++) { // Schmier
 		  voicesAlreadyAssigned.add(0.0);
 	  }
 	  
@@ -428,7 +431,7 @@ public class FeatureGeneratorChord {
 	 */ 
 	// TESTED (for both tablature- and non-tablature case)
 	static double getPitchVoiceRelationInChord(Integer[][] btp, Integer[][] bnp, List<List<Double>> allVoiceLabels,
-		int lowestNoteIndex, List<Integer> voiceAssignment) {
+		int lowestNoteIndex, List<Integer> voiceAssignment, int maxNumVoices) {
 		
 		Transcription.verifyCase(btp, bnp);
 		
@@ -456,8 +459,9 @@ public class FeatureGeneratorChord {
 		}
 		// 2. If not: calculate pitchVoiceRelation
 		else {
-			List<List<Double>> voiceLabels = 
-				LabelTools.getChordVoiceLabels(voiceAssignment);
+			List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(
+				voiceAssignment, maxNumVoices // Schmier
+			);
 			List<Integer> pitchesInChord = null;
 			List<List<Integer>> voicesInChord = 
 				LabelTools.getVoicesInChord(voiceLabels);
@@ -534,7 +538,7 @@ public class FeatureGeneratorChord {
 	 */
   // TESTED (for both tablature- and non-tablature case) (not with concrete numbers)
 	public static List<List<List<Integer>>> getOrderedVoiceAssignments(Integer[][] btp, Integer[][] bnp,
-		List<List<Double>> allVoiceLabels, int highestNumberOfVoices){	
+		List<List<Double>> allVoiceLabels, int highestNumberOfVoices, int maxNumVoices){	
 				
 		Transcription.verifyCase(btp, bnp);
 				
@@ -568,14 +572,15 @@ public class FeatureGeneratorChord {
 			List<List<Integer>> allPossibleVoiceAssignmentsCurrentChord = 
 //				enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolProperties,	basicNoteProperties, allVoiceLabels,
 //				lowestNoteIndex, highestNumberOfVoices);
-				FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(btp, bnp, allVoiceLabels, lowestNoteIndex, 
-					highestNumberOfVoices);
+				FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(
+					btp, bnp, allVoiceLabels, lowestNoteIndex, highestNumberOfVoices, maxNumVoices
+			);
 			// Determine the ground truth voice assignment
 			List<List<Double>> voiceLabelsCurrentChord = 
 				new ArrayList<List<Double>>(allVoiceLabels.subList(lowestNoteIndex, lowestNoteIndex + chordSize));
 			List<Integer> groundTruthVoiceAssignmentCurrentChord = 
 //				dataConverter.getVoiceAssignment(voiceLabelsCurrentChord, highestNumberOfVoices); 	 
-				LabelTools.getVoiceAssignment(voiceLabelsCurrentChord, Transcription.MAX_NUM_VOICES); 	
+				LabelTools.getVoiceAssignment(voiceLabelsCurrentChord, maxNumVoices); // Schmier	
 			// The ground thruth voice assignment should be the first element in allPossibleVoiceAssignmentsCurrentChord. Thus,
 			// remove it from the List (regardless of its position within) and then re-add it as the first element  
 			allPossibleVoiceAssignmentsCurrentChord.remove(groundTruthVoiceAssignmentCurrentChord);
@@ -625,12 +630,14 @@ public class FeatureGeneratorChord {
 	 * @param bnp
 	 * @param allVoiceLabels
 	 * @param lowestNoteIndex 
-	 * @param maxVoiceNumber
+	 * @param maxVoiceNumber The maximum number of voices in the piece or dataset.
+	 * @param maxNumVoicesTrans The allowed maximum number of voices for a Transcription 
+	 *        (as set in <code>Transcription.MAX_NUM_VOICES</code>).   
 	 * @return 
 	 */
 	// TESTED (for both tablature- and non-tablature case)
 	public static List<List<Integer>> enumerateVoiceAssignmentPossibilitiesForChord(Integer[][] btp, Integer[][] bnp,
-		List<List<Double>> allVoiceLabels, int lowestNoteIndex, int maxVoiceNumber) { 
+		List<List<Double>> allVoiceLabels, int lowestNoteIndex, int maxVoiceNumber, int maxNumVoicesTrans) { 
 
 		Transcription.verifyCase(btp, bnp);
 		boolean modelDuration = false; // Jukedeck
@@ -797,8 +804,9 @@ public class FeatureGeneratorChord {
 			
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			// Get the voices in the chord under the current voice assignment
-			List<List<Double>> currentVoiceLabels = 
-				LabelTools.getChordVoiceLabels(currentVoiceAssignment);
+			List<List<Double>> currentVoiceLabels = LabelTools.getChordVoiceLabels(
+				currentVoiceAssignment, maxNumVoicesTrans // Schmier
+			);
 			List<List<Integer>> currentVoicesInChord = 
 				LabelTools.getVoicesInChord(currentVoiceLabels);
 
@@ -852,12 +860,12 @@ public class FeatureGeneratorChord {
 //		  "than allowed (" + maxNumberOfVoiceCrossingPairsAllowed + ") filtered out");
 //		System.out.println("--> " + voiceAssignments.size() + " voice assignments remain after filtering");
 
-		// 5. If necessary: make each voice assignment size Transcription.MAXIMUM_NUMBER_OF_VOICES
+		// 5. If necessary: make each voice assignment size Transcription.MAX_NUM_VOICES
 		List<List<Integer>> voiceAssignmentsFinal = new ArrayList<List<Integer>>();
-		if (maxVoiceNumber < Transcription.MAX_NUM_VOICES) {
+		if (maxVoiceNumber < maxNumVoicesTrans) { // Schmier
 			for (List<Integer> l : voiceAssignments) {
 				List<Integer> finalVoiceAssignment = new ArrayList<Integer>(l); 
-				for (int i = maxVoiceNumber; i < Transcription.MAX_NUM_VOICES; i++) {
+				for (int i = maxVoiceNumber; i < maxNumVoicesTrans; i++) { // Schmier
 					finalVoiceAssignment.add(-1);
 				}
 				voiceAssignmentsFinal.add(finalVoiceAssignment);
@@ -867,7 +875,6 @@ public class FeatureGeneratorChord {
 			voiceAssignmentsFinal = voiceAssignments;
 		}
 
-		// 6. Return voiceAssignments
 		return voiceAssignmentsFinal;
 	}
 	
@@ -987,23 +994,23 @@ public class FeatureGeneratorChord {
 	 */
 	// TESTED for both tablature- and non-tablature case
 	public List<Double> generateChordFeatureVector(Integer[][] btp, Integer[][] bnp, Transcription 
-		transcription, List<Integer[]> meterInfo, int lowestNoteIndex, List<Integer> voiceAssignment) { 
+		transcription, List<Integer[]> meterInfo, int lowestNoteIndex, List<Integer> voiceAssignment, int maxNumVoices) { 
 
 		Transcription.verifyCase(btp, bnp);
 		List<Double> chordFeatureVector = new ArrayList<Double>();
 
 		// 1. Note-specific features
-		List<Double> noteSpec = getNoteSpecificFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex);
+		List<Double> noteSpec = getNoteSpecificFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex, maxNumVoices);
 		chordFeatureVector.addAll(noteSpec);
 		// 2. Chord-level features
 		List<Double> chordLevel = 
-			getChordLevelFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex);
+			getChordLevelFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex, maxNumVoices);
 		chordFeatureVector.addAll(chordLevel);
 
 		// 3. Polyphonic embedding features
 		// 1. Voices with adjacent note on same course
 		if (btp != null) {
-			double[] voicesWithAdjNoteOnSameCourse = getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, lowestNoteIndex);
+			double[] voicesWithAdjNoteOnSameCourse = getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, lowestNoteIndex, maxNumVoices);
 			for (Double d : voicesWithAdjNoteOnSameCourse) {
 				chordFeatureVector.add(d);
 			}
@@ -1012,24 +1019,24 @@ public class FeatureGeneratorChord {
 		List<Double> proximitiesAndMovements = new ArrayList<Double>();
 
 //		double[] p = getAverageProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment);
-		double[] p = getProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment);
+		double[] p = getProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment, maxNumVoices);
 		for (double d : p) {
 			proximitiesAndMovements.add(d);
 		}
 		chordFeatureVector.addAll(proximitiesAndMovements);
 		// 3. Voices already occupied TODO Enable sustained notes for tablature case
 		if (btp != null) {
-			for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
+			for (int i = 0; i < maxNumVoices; i++) { // Schmier
 				chordFeatureVector.add(0.0);
 			}
 		}
 		else {
-			chordFeatureVector.addAll(getVoicesAlreadyOccupied(btp, null, null, bnp, transcription, lowestNoteIndex)); 
+			chordFeatureVector.addAll(getVoicesAlreadyOccupied(btp, null, null, bnp, transcription, lowestNoteIndex, maxNumVoices)); 
 		}
 		// 4. Pitch-voice relation TODO Enable sustained notes for tablature case
 		List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
 		List<Double> pitchVoiceRelation = Arrays.asList(new Double[]{getPitchVoiceRelationInChord(btp, bnp, 
-			allVoiceLabels, lowestNoteIndex, voiceAssignment)});
+			allVoiceLabels, lowestNoteIndex, voiceAssignment, maxNumVoices)});
 		chordFeatureVector.addAll(pitchVoiceRelation);
 		// 5-7. Voice crossing information TODO Enable sustained notes for tablature case
 		List<Double> voiceCrossingInfo = new ArrayList<Double>();
@@ -1040,8 +1047,9 @@ public class FeatureGeneratorChord {
 		else {
 			pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
 		}
-		List<List<Double>> voiceLabels = 
-			LabelTools.getChordVoiceLabels(voiceAssignment);
+		List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(
+			voiceAssignment, maxNumVoices // Schmier
+		);
 		List<List<Integer>> voicesInChord = 
 			LabelTools.getVoicesInChord(voiceLabels);
 		// In the non-tablature case: include pitches and voices of sustained previous notes in Lists
@@ -1100,7 +1108,7 @@ public class FeatureGeneratorChord {
 	 */
 	// TESTED for both tablature- and non-tablature case
 	public static List<Double> generateChordFeatureVectorDISS(Integer[][] btp, Integer[][] bnp, Transcription 
-		transcription, List<Integer[]> meterInfo, int lowestNoteIndex, List<Integer> voiceAssignment) { 
+		transcription, List<Integer[]> meterInfo, int lowestNoteIndex, List<Integer> voiceAssignment, int maxNumVoices) { 
 
 		Transcription.verifyCase(btp, bnp);
 		List<Double> chordFeatureVector = new ArrayList<Double>();
@@ -1108,18 +1116,18 @@ public class FeatureGeneratorChord {
 		// a. In the tablature case
 		if (btp != null) {
 			// 1. Note-specific features
-			List<Double> noteSpec = getNoteSpecificFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex);
+			List<Double> noteSpec = getNoteSpecificFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex, maxNumVoices);
 			chordFeatureVector.addAll(noteSpec.subList(1, 6));
 			chordFeatureVector.addAll(noteSpec.subList(7, 12));
 			chordFeatureVector.addAll(noteSpec.subList(13, 18));
 			chordFeatureVector.addAll(noteSpec.subList(19, 24));
-			if (Transcription.MAX_NUM_VOICES == 5) {
+			if (maxNumVoices == 5) { // Schmier
 				chordFeatureVector.addAll(noteSpec.subList(25, 30)); // HIERRR
 			}
 
 			// 2. Chord-level features
 			List<Double> chordLevel = 
-				getChordLevelFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex);
+				getChordLevelFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex, maxNumVoices);
 			chordFeatureVector.addAll(chordLevel.subList(0, 2));
 			chordFeatureVector.addAll(chordLevel.subList(3, chordLevel.size()));
 
@@ -1134,14 +1142,14 @@ public class FeatureGeneratorChord {
 			// 1. Proximities and movements TODO Enable sustained notes for tablature case
 			List<Double> proximitiesAndMovements = new ArrayList<Double>();
 //			double[] p = getAverageProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment);
-			double[] p = getProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment);
+			double[] p = getProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment, maxNumVoices);
 			for (double d : p) {
 				proximitiesAndMovements.add(d);
 			}
 			chordFeatureVector.addAll(proximitiesAndMovements);
 			// 2. Voices already occupied TODO Enable sustained notes for tablature case
 //			if (btp != null) {
-			for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
+			for (int i = 0; i < maxNumVoices; i++) { // Schmier
 				chordFeatureVector.add(0.0);
 			}
 //			}
@@ -1151,14 +1159,15 @@ public class FeatureGeneratorChord {
 			// 4. Pitch-voice relation TODO Enable sustained notes for tablature case
 			List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
 			List<Double> pitchVoiceRelation = Arrays.asList(new Double[]{getPitchVoiceRelationInChord(btp, bnp, 
-				allVoiceLabels, lowestNoteIndex, voiceAssignment)});
+				allVoiceLabels, lowestNoteIndex, voiceAssignment, maxNumVoices)});
 			chordFeatureVector.addAll(pitchVoiceRelation);
 			// 5-7. Voice crossing information TODO Enable sustained notes for tablature case
 			List<Double> voiceCrossingInfo = new ArrayList<Double>();
 			List<Integer> pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
 //			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
-			List<List<Double>> voiceLabels = 
-				LabelTools.getChordVoiceLabels(voiceAssignment);
+			List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(
+				voiceAssignment, maxNumVoices // Schmier
+			);
 			List<List<Integer>> voicesInChord = 
 				LabelTools.getVoicesInChord(voiceLabels);
 			// In the non-tablature case: include pitches and voices of sustained previous notes in Lists
@@ -1203,18 +1212,18 @@ public class FeatureGeneratorChord {
 		// b. In the non-tablature case
 		else {
 			// 1. Note-specific features
-			List<Double> noteSpec = getNoteSpecificFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex);
+			List<Double> noteSpec = getNoteSpecificFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex, maxNumVoices);
 			chordFeatureVector.addAll(noteSpec.subList(1, 4));
 			chordFeatureVector.addAll(noteSpec.subList(5, 8));
 			chordFeatureVector.addAll(noteSpec.subList(9, 12));
 			chordFeatureVector.addAll(noteSpec.subList(13, 16));
-			if (Transcription.MAX_NUM_VOICES == 5) {
+			if (maxNumVoices == 5) { // Schmier
 				chordFeatureVector.addAll(noteSpec.subList(17, 20));
 			}
 
 			// 2. Chord-level features
 			List<Double> chordLevel = 
-				getChordLevelFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex);
+				getChordLevelFeaturesChord(btp, bnp, /*transcription,*/ meterInfo, lowestNoteIndex, maxNumVoices);
 			chordFeatureVector.add(chordLevel.get(0));
 			chordFeatureVector.addAll(chordLevel.subList(2, chordLevel.size()));
 
@@ -1222,7 +1231,7 @@ public class FeatureGeneratorChord {
 			// 1. Proximities and movements
 			List<Double> proximitiesAndMovements = new ArrayList<Double>();
 //				double[] p = getAverageProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment);
-			double[] p = getProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment);
+			double[] p = getProximitiesAndMovementsOfChord(btp, bnp, transcription, lowestNoteIndex, voiceAssignment, maxNumVoices);
 			for (double d : p) {
 				proximitiesAndMovements.add(d);
 			}
@@ -1234,19 +1243,20 @@ public class FeatureGeneratorChord {
 //				}
 //			}
 //			else {
-			chordFeatureVector.addAll(getVoicesAlreadyOccupied(btp, null, null, bnp, transcription, lowestNoteIndex)); 
+			chordFeatureVector.addAll(getVoicesAlreadyOccupied(btp, null, null, bnp, transcription, lowestNoteIndex, maxNumVoices)); 
 //			}
 			// 3. Pitch-voice relation
 			List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
 			List<Double> pitchVoiceRelation = Arrays.asList(new Double[]{getPitchVoiceRelationInChord(btp, bnp, 
-				allVoiceLabels, lowestNoteIndex, voiceAssignment)});
+				allVoiceLabels, lowestNoteIndex, voiceAssignment, maxNumVoices)});
 			chordFeatureVector.addAll(pitchVoiceRelation);
 			// 4-6. Voice crossing information
 			List<Double> voiceCrossingInfo = new ArrayList<Double>();
 			List<Integer> pitchesInChord = Transcription.getPitchesInChord(bnp, lowestNoteIndex);
 //			List<Integer> pitchesInChord = FeatureGenerator.getPitchesInChord(btp, bnp, lowestNoteIndex);
-			List<List<Double>> voiceLabels = 
-				LabelTools.getChordVoiceLabels(voiceAssignment);
+			List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(
+				voiceAssignment, maxNumVoices // Schmier
+			);
 			List<List<Integer>> voicesInChord = 
 				LabelTools.getVoicesInChord(voiceLabels);
 			// In the non-tablature case: include pitches and voices of sustained previous notes in Lists
@@ -1306,7 +1316,7 @@ public class FeatureGeneratorChord {
 	 * @return
 	 */	
 	private static List<List<Double>> generateChordFeatureVectors(Integer[][] btp, Integer[][] bnp, Transcription
-		transcription, List<Integer[]> meterInfo, int lowestNoteIndex, List<List<Integer>> orderedVoiceAssignments) {
+		transcription, List<Integer[]> meterInfo, int lowestNoteIndex, List<List<Integer>> orderedVoiceAssignments, int maxNumVoices) {
 				
 		Transcription.verifyCase(btp, bnp);	
 		List<List<Double>> chordFeatureVectors = new ArrayList<List<Double>>();
@@ -1323,7 +1333,7 @@ public class FeatureGeneratorChord {
 //	 		List<Double> currentChordFeatureVector = 
 //	 			generateChordFeatureVector(btp, bnp, transcription,	meterInfo, lowestNoteIndex,	va);
 	 		List<Double> currentChordFeatureVector = 
-		 		generateChordFeatureVectorDISS(btp, bnp, transcription,	meterInfo, lowestNoteIndex,	va);
+		 		generateChordFeatureVectorDISS(btp, bnp, transcription,	meterInfo, lowestNoteIndex,	va, maxNumVoices);
 	 		chordFeatureVectors.add(currentChordFeatureVector);	
 	 	}	
 	 	
@@ -1343,7 +1353,7 @@ public class FeatureGeneratorChord {
 	 */
 	public static List<List<List<Double>>> generateAllChordFeatureVectors(Integer[][] btp,	Integer[][] bnp, 
 		Transcription transcription, List<Integer[]> meterInfo, List<List<List<Integer>>> 
-		orderedVoiceAssignments/*, int highestNumberOfVoices*/) {
+		orderedVoiceAssignments, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 		List<List<List<Double>>> allChordFeatureVectors = new ArrayList<List<List<Double>>>();
@@ -1372,7 +1382,7 @@ public class FeatureGeneratorChord {
 //				largestChordSizeTraining, highestNumberOfVoicesTraining, orderedVoiceAssignmentsCurrentChord, 
 //				useTablatureInformation);
 			List<List<Double>> currentChordFeatureVectors = generateChordFeatureVectors(btp, bnp, transcription, 
-				meterInfo, lowestNoteIndex, orderedVoiceAssignmentsCurrentChord);
+				meterInfo, lowestNoteIndex, orderedVoiceAssignmentsCurrentChord, maxNumVoices);
 			allChordFeatureVectors.add(currentChordFeatureVectors);
 
 //			lowestNoteIndex += chordSize;  		
@@ -1408,7 +1418,7 @@ public class FeatureGeneratorChord {
 	
 	public List<List<List<Double>>> generateAllChordFeatureVectorsOLD(Integer[][] btp,	Integer[][] bnp, 
 			Transcription transcription, List<Integer[]> meterInfo, /*List<List<List<Integer>>> 
-			orderedVoiceAssignments,*/ int highestNumberOfVoices) {
+			orderedVoiceAssignments,*/ int highestNumberOfVoices, int maxNumVoices) {
 
 			Transcription.verifyCase(btp, bnp);
 			List<List<List<Double>>> allChordFeatureVectors = new ArrayList<List<List<Double>>>();
@@ -1426,7 +1436,7 @@ public class FeatureGeneratorChord {
 			// NB: pre-set voiceLabels possible because this method is only used in training and test mode 
 			List<List<Double>> voiceLabels = transcription.getVoiceLabels();
 			List<List<List<Integer>>> orderedVoiceAssignments =	
-				getOrderedVoiceAssignments(btp, bnp, voiceLabels, highestNumberOfVoices);
+				getOrderedVoiceAssignments(btp, bnp, voiceLabels, highestNumberOfVoices, maxNumVoices);
 			
 			// For each chord: generate the set of feature vectors and add those to allChordFeatureVectors  
 			int lowestNoteIndex = 0;
@@ -1437,7 +1447,7 @@ public class FeatureGeneratorChord {
 //					largestChordSizeTraining, highestNumberOfVoicesTraining, orderedVoiceAssignmentsCurrentChord, 
 //					useTablatureInformation);
 				List<List<Double>> currentChordFeatureVectors = generateChordFeatureVectors(btp, bnp, transcription, 
-					meterInfo, lowestNoteIndex, orderedVoiceAssignmentsCurrentChord);
+					meterInfo, lowestNoteIndex, orderedVoiceAssignmentsCurrentChord, maxNumVoices);
 				allChordFeatureVectors.add(currentChordFeatureVectors);
 
 //				lowestNoteIndex += chordSize;  		
@@ -1807,7 +1817,8 @@ public class FeatureGeneratorChord {
 	 */
 	// TESTED (for both tablature- and non-tablature case)
 	double[] getAverageProximitiesAndMovementsOfChord(Integer[][] btp, Integer[][] bnp,	Transcription 
-		transcription, /*int highestNumberOfVoicesTraining,*/ int lowestNoteIndex, List<Integer> voiceAssignment) { 	
+		transcription, /*int highestNumberOfVoicesTraining,*/ int lowestNoteIndex, List<Integer> voiceAssignment,
+		int maxNumVoices) { 	
 			
 		Transcription.verifyCase(btp, bnp);
 		
@@ -1835,13 +1846,14 @@ public class FeatureGeneratorChord {
 		//   (b) has no new onset in the chord but is sustained; 
 		//   (c) has a new onset in the chord, which is the first onset in that voice; 
 		//   (d) has a new onset in the chord that is of the same pitch as the previous onset in that voice
-		double[] pitchMovements = new double[Transcription.MAX_NUM_VOICES];
+		double[] pitchMovements = new double[maxNumVoices]; // Schmier
 //		double[] pitchMovements = new double[highestNumberOfVoicesTraining];
 		Arrays.fill(pitchMovements, 0.0);
 		
 	  // Get the voice labels that go with the given voice assignment; then get the voices
-		List<List<Double>> chordVoiceLabels = 
-			LabelTools.getChordVoiceLabels(voiceAssignment);
+		List<List<Double>> chordVoiceLabels = LabelTools.getChordVoiceLabels(
+			voiceAssignment, maxNumVoices // Schmier
+		);
 		List<List<Integer>> voices = 
 			LabelTools.getVoicesInChord(chordVoiceLabels);
 		
@@ -1891,7 +1903,7 @@ public class FeatureGeneratorChord {
 		}
 	  
 		// Create, set, and return averagePitchAndTimeProximities
-		double[] averagePitchAndTimeProximities = new double[3 + Transcription.MAX_NUM_VOICES];
+		double[] averagePitchAndTimeProximities = new double[3 + maxNumVoices]; // Schmier
 //	  double[] averagePitchAndTimeProximities = new double[3 + highestNumberOfVoicesTraining];
 	  averagePitchAndTimeProximities[0] = ToolBox.getAverage(pitchProximities); 
 		averagePitchAndTimeProximities[1] = ToolBox.getAverage(interOnsetTimeProximities);
@@ -2023,7 +2035,7 @@ public class FeatureGeneratorChord {
 	// TESTED
 	List<Double> generateVariableChordFeatureVector(Integer[][] btp, Integer[][] bnp,
 		Transcription transcription, int lowestNoteIndex, int highestNumberOfVoicesTraining, 
-		List<Integer> voiceAssignment) {
+		List<Integer> voiceAssignment, int maxNumVoices) {
 		List<Double> variableChordFeatureVector = new ArrayList<Double>();
 
 		Transcription.verifyCase(btp, bnp);
@@ -2031,7 +2043,7 @@ public class FeatureGeneratorChord {
 		// Add average pitch and time proximities information and pitch movements
 		double [] averagePitchAndTimeProxOfChord = 
 			getAverageProximitiesAndMovementsOfChord(btp, 
-			bnp, transcription, /*highestNumberOfVoicesTraining,*/ lowestNoteIndex, voiceAssignment);
+			bnp, transcription, /*highestNumberOfVoicesTraining,*/ lowestNoteIndex, voiceAssignment, maxNumVoices);
 		variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[0]);
 		variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[1]);
 		variableChordFeatureVector.add(averagePitchAndTimeProxOfChord[2]);
@@ -2043,13 +2055,15 @@ public class FeatureGeneratorChord {
 //		List<List<Double>> allVoiceLabels = transcription.getMostRecentVoiceLabels();
 		List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
 		variableChordFeatureVector.add(getPitchVoiceRelationInChord(btp, bnp, 
-			allVoiceLabels, lowestNoteIndex, voiceAssignment));
+			allVoiceLabels, lowestNoteIndex, voiceAssignment, maxNumVoices));
 
 		// Add voice crossing information
 		// 1. Get pitchesInChord and voicesInChord
 		List<Integer> pitchesInChord = null;
 		List<List<Integer>> voicesInChord = null;
-		List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(voiceAssignment);
+		List<List<Double>> voiceLabels = LabelTools.getChordVoiceLabels(
+			voiceAssignment, maxNumVoices // Schmier
+		);
 		// a. In the tablature case
 		if (btp != null) {
 			pitchesInChord = Tablature.getPitchesInChord(btp, lowestNoteIndex);
@@ -2112,7 +2126,8 @@ public class FeatureGeneratorChord {
   // TESTED through testing generateCompleteChordFeatureVectorsMUSCI()
 	public List<Double> generateCompleteChordFeatureVectorMUSCI(Integer[][] basicTabSymbolProperties, Integer[][]
 		basicNoteProperties, Transcription transcription, int lowestNoteIndex, int largestChordSizeTraining, 
-		int highestNumberOfVoicesTraining, List<Integer> voiceAssignment,	boolean useTablatureInformation) { // TODO Activate argument useTablatureInformation
+		int highestNumberOfVoicesTraining, List<Integer> voiceAssignment, boolean useTablatureInformation,
+		int maxNumVoices) { // TODO Activate argument useTablatureInformation
 						
 		Transcription.verifyCase(basicTabSymbolProperties, basicNoteProperties);
 			
@@ -2125,7 +2140,7 @@ public class FeatureGeneratorChord {
 			basicNoteProperties, allVoiceLabels, largestChordSizeTraining, highestNumberOfVoicesTraining, lowestNoteIndex, useTablatureInformation);
 		// Generate the variable feature vector
 		List<Double> variableChordFeatureVector = generateVariableChordFeatureVector(basicTabSymbolProperties, 
-			basicNoteProperties, transcription, lowestNoteIndex, highestNumberOfVoicesTraining, voiceAssignment);
+			basicNoteProperties, transcription, lowestNoteIndex, highestNumberOfVoicesTraining, voiceAssignment, maxNumVoices);
 
 		// Create and return the complete chord feature vector
 		completeChordFeatureVector.addAll(constantChordFeatureVector);
@@ -2151,7 +2166,7 @@ public class FeatureGeneratorChord {
 	private List<List<Double>> generateCompleteChordFeatureVectorsMUSCI(Integer[][] basicTabSymbolProperties, 
 		Integer[][] basicNoteProperties, Transcription transcription, int lowestNoteIndex, int largestChordSizeTraining, 
 		int highestNumberOfVoicesTraining, List<List<Integer>> orderedVoiceAssignmentPossibilitiesCurrentChord, 
-		boolean useTablatureInformation) {
+		boolean useTablatureInformation, int maxNumVoices) {
 				
 		Transcription.verifyCase(basicTabSymbolProperties, basicNoteProperties);
 		
@@ -2164,7 +2179,7 @@ public class FeatureGeneratorChord {
 	 		List<Integer> currentVoiceAssignment = orderedVoiceAssignmentPossibilitiesCurrentChord.get(i);
 	 		List<Double> currentCompleteChordFeatureVector = generateCompleteChordFeatureVectorMUSCI(basicTabSymbolProperties, 
 	 			basicNoteProperties, transcription, lowestNoteIndex, largestChordSizeTraining, highestNumberOfVoicesTraining, 
-	 			currentVoiceAssignment,	useTablatureInformation);
+	 			currentVoiceAssignment,	useTablatureInformation, maxNumVoices);
 	 		completeChordFeatureVectors.add(currentCompleteChordFeatureVector);	
 	 	}	
 	 	
@@ -2185,7 +2200,7 @@ public class FeatureGeneratorChord {
 	// TESTED (for both tablature- and non-tablature case)
 	public List<List<List<Double>>> generateAllCompleteChordFeatureVectorsMUSCI(Integer[][] basicTabSymbolProperties,
 		Integer[][] basicNoteProperties, Transcription transcription, int largestChordSizeTraining, 
-		int highestNumberOfVoicesTraining, boolean useTablatureInformation) {
+		int highestNumberOfVoicesTraining, boolean useTablatureInformation, int maxNumVoices) {
 	
 		Transcription.verifyCase(basicTabSymbolProperties, basicNoteProperties);
 		
@@ -2207,8 +2222,8 @@ public class FeatureGeneratorChord {
 //  	List<List<Double>> voiceLabels = transcription.getMostRecentVoiceLabels(); 
 		List<List<Double>> voiceLabels = transcription.getVoiceLabels();
   	List<List<List<Integer>>> orderedVoiceAssignmentPossibilitiesAllChords = 
-  		getOrderedVoiceAssignments(basicTabSymbolProperties, basicNoteProperties,	voiceLabels, 
-  		highestNumberOfVoicesTraining);
+  		getOrderedVoiceAssignments(basicTabSymbolProperties, basicNoteProperties, voiceLabels, 
+  		highestNumberOfVoicesTraining, maxNumVoices);
   	
   	// For each chord: generate the list of complete feature vectors and add those to allCompleteChordFeatureVectors  
 		int lowestNoteIndex = 0;
@@ -2235,9 +2250,9 @@ public class FeatureGeneratorChord {
   		}
   		List<List<Integer>> orderedVoiceAssignmentPossibilitiesCurrentChord = 
   			orderedVoiceAssignmentPossibilitiesAllChords.get(i);
-  	  List<List<Double>> currentCompleteChordFeatureVectors =	generateCompleteChordFeatureVectorsMUSCI(basicTabSymbolProperties, 
+  	  List<List<Double>> currentCompleteChordFeatureVectors = generateCompleteChordFeatureVectorsMUSCI(basicTabSymbolProperties, 
   	  	basicNoteProperties, transcription, lowestNoteIndex, largestChordSizeTraining, highestNumberOfVoicesTraining, 
-  	  	orderedVoiceAssignmentPossibilitiesCurrentChord, useTablatureInformation);
+  	  	orderedVoiceAssignmentPossibilitiesCurrentChord, useTablatureInformation, maxNumVoices);
   	  allCompleteChordFeatureVectors.add(currentCompleteChordFeatureVectors);
   	  lowestNoteIndex += chordSize;
 		}

@@ -93,7 +93,7 @@ public class OutputEvaluator {
 	 */
 	// TESTED (for both N2N and C2C)
 	public static List<List<Integer>> determinePredictedVoices(Map<String, Double> modelParameters, 
-		List<double[]> argAllNetworkOutputs, List<List<Integer>> argAllBestMappings) { 
+		List<double[]> argAllNetworkOutputs, List<List<Integer>> argAllBestMappings, int maxNumVoices) { 
 
 //		List<List<List<Integer>>> allPredictedVoicesAndDurations = new ArrayList<List<List<Integer>>>();
 		List<List<Integer>> allPredictedVoices = new ArrayList<List<Integer>>();
@@ -129,7 +129,7 @@ public class OutputEvaluator {
 //				List<Integer> predictedVoices = outputEvaluator.interpretNetworkOutput(predictedLabel, allowCoD, 
 //				deviationThreshold).get(0);
 				allPredictedVoices.add(interpretNetworkOutput(predictedLabel, allowCoD, 
-					deviationThreshold).get(0));
+					deviationThreshold, maxNumVoices).get(0));
 //				// b. If applicable: get the predicted duration(s) and add them to allPredictedDurations
 //				if (predictedLabel.length > EncogNNManager.MAX_NUM_VOICES_N2N) {
 //				if (predictedLabel.length > Transcription.MAXIMUM_NUMBER_OF_VOICES) {
@@ -188,8 +188,9 @@ public class OutputEvaluator {
 				List<Integer> predictedBestMapping = argAllBestMappings.get(i);
 				// d. Convert predictedBestMapping into a List of voices, and add it to 
 				// allPredictedVoices
-				List<List<Double>> predictedChordVoiceLabels = 
-					LabelTools.getChordVoiceLabels(predictedBestMapping); 
+				List<List<Double>> predictedChordVoiceLabels = LabelTools.getChordVoiceLabels(
+					predictedBestMapping, maxNumVoices // Schmier
+				); 
 				List<List<Integer>> predictedChordVoices = 
 					LabelTools.getVoicesInChord(predictedChordVoiceLabels); 
 				allPredictedVoices.addAll(predictedChordVoices);
@@ -212,7 +213,7 @@ public class OutputEvaluator {
 	 */
 	// TODO test
 	public static List<Rational[]> determinePredictedDurations(Map<String, Double> modelParameters,
-		List<double[]> argAllNetworkOutputs, List<List<Integer>> argAllBestVoiceAssignments) { 
+		List<double[]> argAllNetworkOutputs, List<List<Integer>> argAllBestVoiceAssignments, int maxNumVoices, int maxTabSymDur) { 
 
 //		List<List<List<Integer>>> allPredictedDurations = new ArrayList<List<List<Integer>>>();
 //		List<List<Integer>> allPredictedVoices = new ArrayList<List<Integer>>();
@@ -246,9 +247,10 @@ public class OutputEvaluator {
 //				allPredictedDurations.add(interpretNetworkOutput(predictedLabel,
 //					allowCoD, deviationThreshold).get(1));
 //				System.out.println(Arrays.toString(predictedLabel));
-				List<Integer> predDur = 
-					interpretNetworkOutput(predictedLabel, allowCoD, deviationThreshold).get(1);
-				List<Double> durLabel = LabelTools.convertIntoDurationLabel(predDur);
+				List<Integer> predDur = interpretNetworkOutput(
+					predictedLabel, allowCoD, deviationThreshold, maxNumVoices
+				).get(1);
+				List<Double> durLabel = LabelTools.convertIntoDurationLabel(predDur, maxTabSymDur);
 				allPredictedDurations.add(LabelTools.convertIntoDuration(durLabel));
 //				}
 			}
@@ -577,7 +579,7 @@ public class OutputEvaluator {
 	 */
 	// TESTED
 	public static List<List<Integer>> interpretNetworkOutput(double[] networkOutput, 
-		boolean allowCoD, double deviationThreshold) { 
+		boolean allowCoD, double deviationThreshold, int maxNumVoices) { 
 		List<List<Integer>> predictedValues = new ArrayList<List<Integer>>();
 
 		// 0. Split networkOutput into a list representing the predicted voice(s) and the
@@ -585,7 +587,7 @@ public class OutputEvaluator {
 		List<Double> outputVoices = new ArrayList<Double>();
 		List<Double> outputDuration = new ArrayList<Double>();
 		for (int i = 0; i < networkOutput.length; i++) {
-			if (i < Transcription.MAX_NUM_VOICES) {
+			if (i < maxNumVoices) { // Schmier
 				outputVoices.add(networkOutput[i]);
 			}
 			else {
@@ -706,7 +708,7 @@ public class OutputEvaluator {
 
 		// b. For the network output representing the duration (if any)
 		List<Integer> predictedDurations = null; 
-		if (networkOutput.length > Transcription.MAX_NUM_VOICES) {
+		if (networkOutput.length > maxNumVoices) { // Schmier
 			predictedDurations = new ArrayList<Integer>();
 			// Get the position of highestValue and add that to predictedDurations. If 
 			// highestValue appears more than once, its first occurrence is returned. 

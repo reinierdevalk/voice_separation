@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
+import interfaces.CLInterface;
 import interfaces.PythonInterface;
 import machinelearning.NNManager;
 import machinelearning.RelativeTrainingExample;
@@ -28,8 +30,8 @@ import tbp.symbols.RhythmSymbol;
 import tbp.symbols.Symbol;
 import tools.ToolBox;
 import tools.labels.LabelTools;
-import tools.path.PathTools;
 import ui.Runner;
+import ui.UI;
 import ui.Runner.DecisionContext;
 import ui.Runner.FeatureVector;
 import ui.Runner.Model;
@@ -72,15 +74,17 @@ public class TrainingManager {
 	int ornThresh = RhythmSymbol.SEMIMINIM.getDuration();
 
 
-	public void prepareTraining(String start, Map<String, String> paths) {		
+	public void prepareTraining(String start, Map<String, String> paths, Map<String, String> runnerPaths) {		
 		Map<String, Double> mp = Runner.getModelParams();
 		boolean useCV = ToolBox.toBoolean(mp.get(Runner.CROSS_VAL).intValue());
 		boolean trainUserModel = Runner.getTrainUserModel();
 		ModellingApproach ma = Runner.ALL_MODELLING_APPROACHES[mp.get(Runner.MODELLING_APPROACH).intValue()];
 		ProcessingMode pm = Runner.ALL_PROC_MODES[mp.get(Runner.PROC_MODE).intValue()];
-		String[] argPaths = Runner.getPaths();
-		String storePath = argPaths[0];
-		String pathPredTransFirstPass = argPaths[1];
+//		String[] runnerPaths = Runner.getPaths();
+		String storePath = runnerPaths.get(UI.STORE_PATH);
+//		String storePath = runnerPaths[0];
+		String pathPredTransFirstPass = runnerPaths.get(UI.FIRST_PASS_PATH);
+//		String pathPredTransFirstPass = runnerPaths[1];
 		Dataset dataset = Runner.getDataset();
 		boolean isTablatureCase = dataset.isTablatureSet();
 		int datasetSize = dataset.getNumPieces();		
@@ -96,6 +100,7 @@ public class TrainingManager {
 		boolean bidirAsInThesis = true;
 		boolean firstPassIsBwd = // TODO add mFirstPass and pmFirstPass to UI
 			dc == DecisionContext.BIDIR && pathPredTransFirstPass.contains("bwd");
+		int mnv = Transcription.MAX_NUM_VOICES;
 
 		classificationErrorsAllFolds = new ArrayList<>();
 		classificationErrorsValAllFolds = new ArrayList<>();
@@ -357,7 +362,7 @@ public class TrainingManager {
 								mp, currBTP, currVoicesCoDNotes, currBNP, currTrans, 
 								isTablatureCase && modelDuration ? currVoiceDurLabels : currVoiceLabels,
 //								currLabels, 
-								currMeterInfo, currChordSizes);
+								currMeterInfo, currChordSizes, mnv);
 						}
 						else {
 							currNoteFeatures = 
@@ -365,7 +370,7 @@ public class TrainingManager {
 								mp, currBTP, currVoicesCoDNotes, currBNP, currTrans, 
 								isTablatureCase && modelDuration ? currVoiceDurLabels : currVoiceLabels,
 //								currLabels,
-								currMeterInfo, currChordSizes);
+								currMeterInfo, currChordSizes, mnv);
 						}
 						noteFeaturesPerPiece.add(currNoteFeatures);
 					}
@@ -394,12 +399,12 @@ public class TrainingManager {
 				// Possible voice assignments 
 				List<List<List<Integer>>> currPossibleVoiceAssignmentsAllChords =
 					FeatureGeneratorChord.getOrderedVoiceAssignments(currBTP, currBNP,
-					currVoiceLabels, highestNumberOfVoices);
+					currVoiceLabels, highestNumberOfVoices, mnv);
 				possibleVoiceAssignmentsAllChordsPerPiece.add(currPossibleVoiceAssignmentsAllChords);
 				// Features
 				List<List<List<Double>>> currentChordFeatures =  
 					FeatureGeneratorChord.generateAllChordFeatureVectors(currBTP,
-					currBNP, currTrans, currMeterInfo, currPossibleVoiceAssignmentsAllChords);
+					currBNP, currTrans, currMeterInfo, currPossibleVoiceAssignmentsAllChords, mnv);
 				chordFeaturesPerPiece.add(currentChordFeatures);
 			}
 		}
@@ -551,15 +556,15 @@ public class TrainingManager {
 
 		// Create the chord and mapping dictionaries
 		if (ma == ModellingApproach.HMM) {
-			highestNumVoicesAssumed = Transcription.MAX_NUM_VOICES;
+			highestNumVoicesAssumed = mnv;
 			boolean useFullSizeMapping = false;
 			chordDictionary = generateChordDictionary(allPieces);
 			ToolBox.storeListOfListsAsCSVFile(chordDictionary, new File(storePath + Runner.chordDict + ".csv"));
 //			ToolBox.storeObjectBinary(chordDictionary, new File(paths[0] + Runner.chordDict + ".ser"));
 			mappingDictionary = generateMappingDictionary(allPieces, highestNumVoicesAssumed);
 			if (useFullSizeMapping) { 
-				if (highestNumVoicesAssumed < Transcription.MAX_NUM_VOICES) {
-					int diff = Transcription.MAX_NUM_VOICES - highestNumVoicesAssumed; 
+				if (highestNumVoicesAssumed < mnv) {
+					int diff = mnv - highestNumVoicesAssumed; 
 					for (List<Integer> l : mappingDictionary) {
 						for (int i = 0; i < diff; i++) {
 							l.add(-1);
@@ -577,25 +582,36 @@ public class TrainingManager {
 		if (!useCV) {
 			String startFoldTr = ToolBox.getTimeStampPrecise();
 			startTrainingProcess(
-				0, allPieces, -1, argPaths, paths, new String[]{trPreProcTime, startFoldTr}
+				0, allPieces, -1, paths, runnerPaths, new String[]{trPreProcTime, startFoldTr}
 			);
 		}
 		else {
 			for (int k = 1; k <= datasetSize; k++) {
 				String startFoldTr = ToolBox.getTimeStampPrecise();
 				System.out.println("fold = " + k);
-				// Add foldstring to paths
-				String[] currPaths = new String[argPaths.length];
-				for (int i = 0; i < argPaths.length; i++) {
-					String s = argPaths[i];
-					if (s != null) {
-						currPaths[i] = s;
+				// Add fold string to new deep copy of runnerPaths (to prevent concatenation of fold strings)
+				Map<String, String> runnerPathsCopy = new LinkedHashMap<String, String>();
+				runnerPathsCopy.putAll(runnerPaths);
+				for (Map.Entry<String, String> entry : runnerPathsCopy.entrySet()) {
+					String val = entry.getValue();
+					if (val != null) {
 						// Add fold for all cases but MM path for ENS model  
-						if (!(mt == ModelType.ENS && i == 2)) {
-							currPaths[i] += "fold_" + ToolBox.zerofy(k, ToolBox.maxLen(k)) + "/";
+						if (!(mt == ModelType.ENS && entry.getKey().equals(UI.TRAINED_USER_MODEL_PATH))) {
+							entry.setValue(val + "fold_" + ToolBox.zerofy(k, ToolBox.maxLen(k)) + "/");
 						}
 					}
 				}
+//				String[] currPaths = new String[runnerPaths.length];
+//				for (int i = 0; i < runnerPaths.length; i++) {
+//					String s = runnerPaths[i];
+//					if (s != null) {
+//						currPaths[i] = s;
+//						// Add fold for all cases but MM path for ENS model  
+//						if (!(mt == ModelType.ENS && i == 2)) {
+//							currPaths[i] += "fold_" + ToolBox.zerofy(k, ToolBox.maxLen(k)) + "/";
+//						}
+//					}
+//				}
 
 				// Make the training set for the current fold
 				int testPieceIndex = datasetSize - k;
@@ -621,7 +637,7 @@ public class TrainingManager {
 					} // <-- remove the if to fake non-cross-validation
 				}
 				startTrainingProcess(
-					k, trainingPieces, testPieceIndex, currPaths, paths, 
+					k, trainingPieces, testPieceIndex, paths, runnerPathsCopy, 
 					new String[]{trPreProcTime, startFoldTr}
 				);
 			}
@@ -666,13 +682,14 @@ public class TrainingManager {
 	/**
 	 * 
 	 * @param fold Fold number when using cross-validation; 0 when not.
-	 * @param testPieceIndex 
 	 * @param trainingPieces
-	 * @param argPaths
+	 * @param testPieceIndex 
+	 * @param paths
+	 * @param runnerPaths
 	 * @param times 
 	 */
 	private void startTrainingProcess(int fold, List<TablatureTranscriptionPair> trainingPieces, 
-		int testPieceIndex, String[] argPaths, Map<String, String> paths, String[] times) {
+		int testPieceIndex, Map<String, String> paths, Map<String, String> runnerPaths, String[] times) {
 		long trPreProcTime = Integer.parseInt(times[0]);
 		String start = times[1];
 
@@ -702,10 +719,15 @@ public class TrainingManager {
 		List<Integer> ns = 
 			mt == ModelType.ENS ? ToolBox.decodeListOfIntegers(
 			modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1) : null;
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
 
-		String storePath = argPaths[0];
-		String pathStoredNN = argPaths[3];
-		String pathStoredMM = argPaths[4];
+		String storePath = runnerPaths.get(UI.STORE_PATH);
+//		String storePath = argPaths[0];
+		String pathStoredNN = runnerPaths.get(UI.STORED_NN_PATH);
+//		String pathStoredNN = argPaths[3];
+		String pathStoredMM = runnerPaths.get(UI.STORED_MM_PATH);
+//		String pathStoredMM = argPaths[4];
 
 		// 1. Initialise the superlists representing the entire training set
 		// a. For N2N
@@ -909,14 +931,14 @@ public class TrainingManager {
 									FeatureGenerator.generateAllNoteFeatureVectors(
 									modelParameters, 
 									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels, 
-									currMeterInfo, currChordSizes);
+									currMeterInfo, currChordSizes, mnv);
 							}
 							else {
 								currNoteFeatures = 
 									FeatureGenerator.generateAllBidirectionalNoteFeatureVectors(
 									modelParameters,
 									currBTP, currVoicesCoDNotes, currBNP, currTrans, currLabels,
-									currMeterInfo, currChordSizes);
+									currMeterInfo, currChordSizes, mnv);
 							}
 							noteFeaturesPerPiece.set(indexInAll, currNoteFeatures);
 						}
@@ -1088,7 +1110,7 @@ public class TrainingManager {
 						System.exit(0);
 						currPossibleVoiceAssignmentsAllChords =
 							FeatureGeneratorChord.getOrderedVoiceAssignments(currBTP, currBNP,
-							currVoiceLabels, highestNumberOfVoices);
+							currVoiceLabels, highestNumberOfVoices, mnv);
 						possibleVoiceAssignmentsAllChordsPerPiece.set(indexInAll, currPossibleVoiceAssignmentsAllChords);	
 					}
 
@@ -1102,9 +1124,9 @@ public class TrainingManager {
 					else {
 						System.out.println("=======================================");
 						System.exit(0);
-						currentChordFeatures =  
-							FeatureGeneratorChord.generateAllChordFeatureVectors(currBTP,
-							currBNP, currTrans, currMeterInfo, currPossibleVoiceAssignmentsAllChords);
+						currentChordFeatures = FeatureGeneratorChord.generateAllChordFeatureVectors(
+							currBTP, currBNP, currTrans, currMeterInfo, currPossibleVoiceAssignmentsAllChords, mnv
+						);
 						chordFeaturesPerPiece.set(indexInAll, currentChordFeatures);
 					}
 
@@ -1139,10 +1161,10 @@ public class TrainingManager {
 				}
 				for (List<Double> l : allLabels) {
 					voiceLabelsForGTs.add(new ArrayList<Double>(
-						l.subList(0, Transcription.MAX_NUM_VOICES)));
+						l.subList(0, mnv)));
 					if (modelDuration && dc == DecisionContext.UNIDIR) {
 						durLabelsForGTs.add(new ArrayList<Double>(
-							l.subList(Transcription.MAX_NUM_VOICES, l.size())));
+							l.subList(mnv, l.size())));
 					}
 				}
 			}
@@ -1411,7 +1433,7 @@ public class TrainingManager {
 					String[] cmd;
 					boolean isScikit = false;
 					boolean smoothen = false;
-					String pp = PathTools.getPathString(
+					String pp = CLInterface.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
 					// For scikit (ISMIR 2017)
@@ -1430,7 +1452,7 @@ public class TrainingManager {
 					else {
 						List<String> argStrings = 
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
-							allNoteFeatures.size(), storePath, null);
+							allNoteFeatures.size(), storePath, null, mnv);
 						cmd = new String[]{
 							"python", pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
@@ -1454,7 +1476,7 @@ public class TrainingManager {
 					networkOutputs = predictedOutputs;
 					predictedVoices = 
 						OutputEvaluator.determinePredictedVoices(modelParameters, 
-						predictedOutputs, null);
+						predictedOutputs, null, mnv);
 					assignmentErrors = 
 						ErrorCalculator.calculateAssignmentErrors(predictedVoices, 
 						groundTruths.get(0), null, null, allEDUInfo);
@@ -1617,7 +1639,7 @@ public class TrainingManager {
 				// Set networkOutputs, predictedVoices, and assignmentErrors
 				networkOutputs = originalNetworkOutputs;
 				predictedVoices = OutputEvaluator.determinePredictedVoices(modelParameters, 
-					combinedOutputs, allBestVoiceAss);
+					combinedOutputs, allBestVoiceAss, mnv);
 				assignmentErrors = 
 					ErrorCalculator.calculateAssignmentErrors(predictedVoices, 
 					groundTruths.get(0), null, null, allEDUInfo);
@@ -1658,7 +1680,9 @@ public class TrainingManager {
 				allVoiceAssignmentPossibilities,	
 				allBestVoiceAss,	
 				allHighestNetwOutp,
-				assignmentErrors
+				assignmentErrors,
+				mnv,
+				mtsd
 			);
 			ToolBox.storeTextFile(ToolBox.createCSVTableString(detailsArr), 
 				new File(storePath + Runner.details + "-" + Runner.train + ".csv"));
@@ -1666,7 +1690,7 @@ public class TrainingManager {
 			// 4. Create csv table(s)
 			ErrorFraction[] evalNN = 
 				EvaluationManager.getMetricsSingleFold(assignmentErrors, predictedVoices,
-				ntwOutputsForCE, groundTruths.get(0), allEDUInfo, false);
+				ntwOutputsForCE, groundTruths.get(0), allEDUInfo, false, mnv);
 			evalNN[EvaluationManager.NTW_ERR_IND] = new ErrorFraction(netwErr);
 			boolean isForDur = false;
 			int iter = 1;
@@ -1741,7 +1765,7 @@ public class TrainingManager {
 					}
 					List<double[]> currentMelodyModelOutputs = 
 						FeatureGenerator.generateAllMMOutputs(modelParameters, currentBTP, 
-						currentBNP, currTrans, currentChordSizes, mp);
+						currentBNP, currTrans, currentChordSizes, mp, mnv);
 					allMelodyModelOutputsPerModel.get(i).addAll(currentMelodyModelOutputs);
 					// Reset the short-term model for the current piece
 					mp.resetSTM();
@@ -1791,6 +1815,8 @@ public class TrainingManager {
 		List<double[]> predOutpVld, List<double[]> yVld,
 		List<double[]> predictedOutputsComb, List<List<Double>> yComb) {
 
+		int mnv = Transcription.MAX_NUM_VOICES;
+
 		int numCombEx = yComb.size();
 		// The arguments predictedOutputsComb and yComb are in fwd order; predOutpVld and
 		// yVld are in bwd order (if applicable)
@@ -1832,10 +1858,10 @@ public class TrainingManager {
 				if (!detailsLine[corrInd+1].equals("")) {
 					corr.add(Integer.parseInt(detailsLine[corrInd+1]));
 				}
-				List<Double> label = LabelTools.convertIntoVoiceLabel(corr);
+				List<Double> label = LabelTools.convertIntoVoiceLabel(corr, mnv);
 				// Get predicted output
 				List<Double> predOutp = new ArrayList<>();
-				for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
+				for (int i = 0; i < mnv; i++) {
 					predOutp.add(Double.parseDouble(detailsLine[outpInd + i]));
 				}
 				// Check index of highest value
@@ -2061,6 +2087,8 @@ public class TrainingManager {
 			Runner.ALL_WEIGHTS_INIT[modelParameters.get(Runner.WEIGHTS_INIT).intValue()];
 		int maxMetaCycles = modelParameters.get(Runner.META_CYCLES).intValue();
 		int valPerc = modelParameters.get(Runner.VALIDATION_PERC).intValue();
+		int mnv = Transcription.MAX_NUM_VOICES;
+		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
 
 		NNManager nm = new NNManager();
 		nm.initialiseNetwork(af, layerSizes);
@@ -2185,7 +2213,7 @@ public class TrainingManager {
 			// trained network
 			List<List<Integer>> currentAllPredictedVoices = 
 				OutputEvaluator.determinePredictedVoices(modelParameters, 
-				argAllNetworkOutputs, argAllBestVoiceAssignments);
+				argAllNetworkOutputs, argAllBestVoiceAssignments, mnv);
 //			List<List<Integer>> currentAllPredictedVoicesVal = null;
 //			if (valPerc != 0) {
 //				currentAllPredictedVoicesVal = 
@@ -2198,7 +2226,7 @@ public class TrainingManager {
 			if (argGTDurLabels != null) { 
 				currentAllPredictedDurations = 
 					OutputEvaluator.determinePredictedDurations(modelParameters, 
-					argAllNetworkOutputs, argAllBestVoiceAssignments);
+					argAllNetworkOutputs, argAllBestVoiceAssignments, mnv, mtsd);
 //				if (valPerc != 0) {
 //					currentAllPredictedDurationsVal = 
 //						OutputEvaluator.determinePredictedDurations(modelParameters, 
@@ -2223,12 +2251,12 @@ public class TrainingManager {
 					nm.createAllNetworkOutputs(validationData.get(0));
 				List<List<Integer>> currentAllPredictedVoicesVal = 
 					OutputEvaluator.determinePredictedVoices(modelParameters, 
-					argAllNetworkOutputsVal, argAllBestVoiceAssignments);
+					argAllNetworkOutputsVal, argAllBestVoiceAssignments, mnv);
 				List<Rational[]> currentAllPredictedDurationsVal = null;
 				if (argGTDurLabels != null) {
 					currentAllPredictedDurationsVal = 
 						OutputEvaluator.determinePredictedDurations(modelParameters, 
-						argAllNetworkOutputsVal, argAllBestVoiceAssignments);
+						argAllNetworkOutputsVal, argAllBestVoiceAssignments, mnv, mtsd);
 				}
 				List<List<Integer>> currAssignmentErrorsVal = 
 					ErrorCalculator.calculateAssignmentErrors(currentAllPredictedVoicesVal, 
@@ -2705,7 +2733,7 @@ public class TrainingManager {
 
 
 	public static List<String> getArgumentStrings(int mode, Map<String, Double> modelParameters, int numFeatures, 
-		int numTrainingExamples, String storePath, String pathTrainedUserModel) {
+		int numTrainingExamples, String storePath, String pathTrainedUserModel, int maxNumVoices) {
 
 		WeightsInit wi = Runner.ALL_WEIGHTS_INIT[modelParameters.get(Runner.WEIGHTS_INIT).intValue()];
 		int mbSize = modelParameters.get(Runner.MINI_BATCH_SIZE).intValue();
@@ -2721,7 +2749,7 @@ public class TrainingManager {
 				"[" + numFeatures + " " + 
 				(modelParameters.get(Runner.HIDDEN_LAYER_SIZE).intValue() + 
 				" ").repeat(modelParameters.get(Runner.NUM_HIDDEN_LAYERS).intValue()) + 
-				Transcription.MAX_NUM_VOICES + "]",
+				maxNumVoices + "]", // Schmier
 			"val_perc=" + (trn ? modelParameters.get(Runner.VALIDATION_PERC).intValue() : "-1"),
 			"mini_batch_size=" + (trn ? (mbSize == -1 ? numTrainingExamples : mbSize) : "-1"),
 			"epochs=" + (trn ? modelParameters.get(Runner.EPOCHS).intValue() : "-1"), 

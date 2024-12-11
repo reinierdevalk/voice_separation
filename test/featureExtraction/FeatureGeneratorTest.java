@@ -19,11 +19,11 @@ import de.uos.fmt.musitech.data.structure.Note;
 import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator.Direction;
+import interfaces.CLInterface;
 import internal.core.Encoding;
 import internal.core.ScorePiece;
 import tools.ToolBox;
 import tools.labels.LabelTools;
-import tools.path.PathTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
@@ -44,23 +44,31 @@ public class FeatureGeneratorTest {
 	private static final int NUM_FEATURES_SET_C_NON_TAB = 4 + 3 + 3 + 15;
 	private static final int NUM_FEATURES_SET_D_NON_TAB = 4 + 3 + 3 + 15 + 5 ;
 	
-	private static final List<Double> EIGHTH = Transcription.createDurationLabel(new Integer[]{4*3});
-	private static final List<Double> QUARTER = Transcription.createDurationLabel(new Integer[]{8*3});
+	private List<Double> eighth;
+	private List<Double> quarter;
 
 	private double delta;
-
+	int mnv;
+	int mtsd;
+	
 	@Before
 	public void setUp() throws Exception {
-		Map<String, String> paths = PathTools.getPaths(true);
+		delta = 1e-9;
+		mnv = Transcription.MAX_NUM_VOICES;
+		mtsd = Transcription.MAX_TABSYMBOL_DUR;
+
+		eighth = LabelTools.createDurationLabel(new Integer[]{4*3}, mtsd);
+		quarter = LabelTools.createDurationLabel(new Integer[]{8*3}, mtsd);
+
+		Map<String, String> paths = CLInterface.getPaths(true);
 		midiTestpiece1 = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
-			"test")) + "testpiece.mid"
+			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test/5vv/")) + "testpiece.mid"
 		);
 		encodingTestpiece1 = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
-			"test")) + "testpiece.tbp"
+			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test/5vv/")) + "testpiece.tbp"
 		);
-		delta = 1e-9;
 	}
 
 	@After
@@ -70,13 +78,13 @@ public class FeatureGeneratorTest {
 
 	public void bla() { // TODO wat is dit? Test gen voice labels B model?
 		String pieceName = "Barbetta 1582 - Il nest plaisir";
-		Map<String, String> paths = PathTools.getPaths(true);
+		Map<String, String> paths = CLInterface.getPaths(true);
 		File midiFile = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"4vv")) + pieceName
 		);
 		File encodingFile = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"4vv")) + pieceName + Encoding.EXTENSION
 		);
 
@@ -788,7 +796,7 @@ public class FeatureGeneratorTest {
   	for (int i = 0; i < basicTabSymbolProperties.length; i++) {
   		Note currentNote = Tablature.convertTabSymbolToNote(basicTabSymbolProperties, i);
   		actual.add(FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, 
-  			transcription, currentNote));
+  			transcription, currentNote, mnv));
   	}
   	
   	
@@ -932,7 +940,7 @@ public class FeatureGeneratorTest {
 //	for (int i = 0; i < noteSeq.size(); i++) {
     	Note currentNote = notes.get(i);
 //    	Note currentNote = noteSeq.get(i);
-    	actual.add(FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote));
+    	actual.add(FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote, mnv));
     }
   
 	
@@ -1231,7 +1239,7 @@ public class FeatureGeneratorTest {
   	List<List<Double>> actual = new ArrayList<List<Double>>();
   	Integer[][] basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
   	for (int i = 0; i < basicTabSymbolProperties.length; i++) {
-  		actual.add(FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(basicTabSymbolProperties, null, i, transcription));
+  		actual.add(FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(basicTabSymbolProperties, null, i, transcription, mnv));
   	}
   	
   	// Assert equality
@@ -1308,7 +1316,7 @@ public class FeatureGeneratorTest {
     List<List<Double>> actual = new ArrayList<List<Double>>();
     Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
     for (int i = 0; i < basicNoteProperties.length; i++) {
-    	actual.add(FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(null, basicNoteProperties, i, transcription));
+    	actual.add(FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(null, basicNoteProperties, i, transcription, mnv));
     }
   
     // Assert equality
@@ -1356,14 +1364,14 @@ public class FeatureGeneratorTest {
   	  }
   	  Note currentNote = Tablature.convertTabSymbolToNote(basicTabSymbolProperties, i);
   	  double[][] currentPitchAndTimeProximities = 
-  	  	FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote);	
+  	  	FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote, mnv);	
   	  for (int j = 0; j < currentPitchAndTimeProximities.length; j++) {
   	  	for (int k = 0; k < currentPitchAndTimeProximities[j].length; k++) {
   	  		currentExpectedFeatureSetD.add(currentPitchAndTimeProximities[j][k]);
   	  	}
   	  }
   	  List<Double> currentVoicesAlreadyOccupied = 
-  	  	FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(basicTabSymbolProperties, null, i, transcription);
+  	  	FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(basicTabSymbolProperties, null, i, transcription, mnv);
   	  currentExpectedFeatureSetD.addAll(currentVoicesAlreadyOccupied);
   	  
   	  // 2. Use currentExpectedFeatureSetD to determine the expected onset features for featureSets A-C; then add 
@@ -1388,7 +1396,7 @@ public class FeatureGeneratorTest {
     for (int i = FeatureGenerator.FEATURE_SET_A; i <= FeatureGenerator.FEATURE_SET_D; i++) {
 	  	int currentFeatureSet = i;  	  		
     	actual.add(FeatureGenerator.generateAllNoteFeatureVectorsMUSCI(basicTabSymbolProperties,
-    		null, transcription, currentFeatureSet, true));	  
+    		null, transcription, currentFeatureSet, true, mnv));	  
     }
     
     // Assert equality
@@ -1440,14 +1448,14 @@ public class FeatureGeneratorTest {
 			Note currentNote = notes.get(i);
 //			Note currentNote = noteSeq.getNoteAt(i);
 			double[][] currentPitchAndTimeProximities = 
-				FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote);	
+				FeatureGenerator.getPitchAndTimeProximitiesToAllVoicesMUSCI(null, transcription, currentNote, mnv);	
 			for (int j = 0; j < currentPitchAndTimeProximities.length; j++) {
 				for (int k = 0; k < currentPitchAndTimeProximities[j].length; k++) {
 					currentExpectedFeatureSetD.add(currentPitchAndTimeProximities[j][k]);
 				}
 			}
 			List<Double> currentVoicesAlreadyOccupied = 
-				FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(null, basicNoteProperties, i, transcription);
+				FeatureGenerator.getVoicesAlreadyOccupiedMUSCI(null, basicNoteProperties, i, transcription, mnv);
 			currentExpectedFeatureSetD.addAll(currentVoicesAlreadyOccupied);
   	  
 			// 2. Use currentExpectedFeatureSetD to determine the expected note features for featureSets A-C; then 
@@ -1472,7 +1480,7 @@ public class FeatureGeneratorTest {
 		for (int i = FeatureGenerator.FEATURE_SET_A; i <= FeatureGenerator.FEATURE_SET_D; i++) {
 			int currentFeatureSet = i;
 			actual.add(FeatureGenerator.generateAllNoteFeatureVectorsMUSCI(null, basicNoteProperties, 
-				transcription, currentFeatureSet, true));	  
+				transcription, currentFeatureSet, true, mnv));	  
 		}
     
 		// Assert equality
@@ -2522,13 +2530,13 @@ public class FeatureGeneratorTest {
 //		FeatureGenerator.setModelDuration(false);
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			actual.add(FeatureGenerator.getPositionWithinChord(basicTabSymbolProperties, durationLabels, null, 
-				Direction.LEFT, i, false, false));
+				Direction.LEFT, i, false, false, mnv));
 		}
 		// b. Modelling duration
 //		FeatureGenerator.setModelDuration(true);
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			actual.add(FeatureGenerator.getPositionWithinChord(basicTabSymbolProperties, durationLabels, null,
-				Direction.LEFT,	i, true, false));
+				Direction.LEFT,	i, true, false, mnv));
 		}
 		
 		
@@ -2607,7 +2615,7 @@ public class FeatureGeneratorTest {
 		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
 		for (int i = 0; i < basicNoteProperties.length; i++) {
 			actual.add(FeatureGenerator.getPositionWithinChord(null, null, 
-				basicNoteProperties, null, i, false, false));
+				basicNoteProperties, null, i, false, false, mnv));
 		}
 
 		
@@ -3003,7 +3011,7 @@ public class FeatureGeneratorTest {
 		List<List<Double>> durationLabels = transcription.getDurationLabels();
 		int lowestNoteIndex = 0;
 		for (int i = 0; i < tablature.getChords().size(); i++) {
-			actual.add(FeatureGenerator.getIntervalsInChord(basicTabSymbolProperties, durationLabels, null,	lowestNoteIndex));
+			actual.add(FeatureGenerator.getIntervalsInChord(basicTabSymbolProperties, durationLabels, null,	lowestNoteIndex, mnv));
 			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
@@ -3047,7 +3055,7 @@ public class FeatureGeneratorTest {
 		Integer[][] basicNoteProperties = transcription.getBasicNoteProperties();
 		int lowestNoteIndex = 0;
 		for (int i = 0; i < transcription.getChords().size(); i++) {
-			actual.add(FeatureGenerator.getIntervalsInChord(null, null, basicNoteProperties, lowestNoteIndex));
+			actual.add(FeatureGenerator.getIntervalsInChord(null, null, basicNoteProperties, lowestNoteIndex, mnv));
 			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
@@ -3411,13 +3419,13 @@ public class FeatureGeneratorTest {
 		// a. Direction.LEFT
 		for (int i = 0; i < basicTabSymbolProperties.length; i++) {
 			actual.add(FeatureGenerator.getVoicesWithAdjacentNoteOnSameCourse(basicTabSymbolProperties,	transcription,
-				Direction.LEFT, i)); 
+				Direction.LEFT, i, mnv)); 
 		}
 		// b. Direction.RIGHT
 		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(tablature.getNumberOfNotesPerChord());
 		for (int i : backwardsMapping) {
 			actual.add(FeatureGenerator.getVoicesWithAdjacentNoteOnSameCourse(basicTabSymbolProperties,	transcription, 
-				Direction.RIGHT, i));
+				Direction.RIGHT, i, mnv));
 		}   	
 
 		
@@ -4211,18 +4219,18 @@ public class FeatureGeneratorTest {
 		// Not modelling duration
 		for (int i = 0; i < btp.length; i++) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 1, false, mnv));
 		}
 		// Modelling duration
 		for (int i = 0; i < btp.length; i++) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, true, false, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, true, false, 1, false, mnv));
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		// Not modelling duration
 		for (int i = 0; i < btp.length; i++) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, false, mnv));
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = 
@@ -4230,18 +4238,18 @@ public class FeatureGeneratorTest {
 		// Using the bwd model
 		for (int i : backwardsMapping) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.RIGHT, false, false, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.RIGHT, false, false, 1, false, mnv));
 		}
 		// Using the bi-directional model
 		for (int i : backwardsMapping) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.RIGHT, true, true, 1, false));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.RIGHT, true, true, 1, false, mnv));
 		}
 		// d. Direction.LEFT (decisionContextSize = 3, averaged)		
 		// Not modelling duration
 		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 14, 15, 16, 17, 18})) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(btp, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true));
+				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true, mnv));
 		}
 		
 		
@@ -4918,7 +4926,7 @@ public class FeatureGeneratorTest {
 			Note currentNote = notes.get(i);
 //			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, currentNote, Direction.LEFT, false, false, 1, false));
+				transcription, currentNote, Direction.LEFT, false, false, 1, false, mnv));
 		}
 		// b. Direction.LEFT (decisionContextSize = 3)
 		for (int i = 0; i < notes.size(); i++) {
@@ -4926,7 +4934,7 @@ public class FeatureGeneratorTest {
 			Note currentNote = notes.get(i);
 //			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, currentNote, Direction.LEFT, false, false, 3, false));
+				transcription, currentNote, Direction.LEFT, false, false, 3, false, mnv));
 		}
 		// c. Direction.RIGHT (decisionContextSize = 1)
 		List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(transcription.getNumberOfNewNotesPerChord());
@@ -4934,12 +4942,12 @@ public class FeatureGeneratorTest {
 			Note currentNote = notes.get(i);
 //			Note currentNote = noteSeq.get(i);
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, currentNote, Direction.RIGHT, false, false, 1, false));
+				transcription, currentNote, Direction.RIGHT, false, false, 1, false, mnv));
 		}
 		// d. Direction.LEFT (decisionContextSize = 3, averaged)
 		for (int i : Arrays.asList(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17, 18, 19})) {
 			actual.addAll(FeatureGenerator.getPitchAndTimeProximitiesToAllVoices(null, 
-				transcription, notes.get(i) /*noteSeq.get(i)*/, Direction.LEFT, false, false, 3, true));
+				transcription, notes.get(i), Direction.LEFT, false, false, 3, true, mnv));
 		}
 		
 		
@@ -6175,14 +6183,14 @@ public class FeatureGeneratorTest {
   	Transcription transcriptionC = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesC = transcriptionC.getVoicesSNU();
    	List<List<Double>> durationLabelsC = transcriptionC.getDurationLabels();
-   	List<Double> durLab12C = QUARTER;
+   	List<Double> durLab12C = quarter;
    	durationLabelsC.set(12, durLab12C);
     // d. CoDNotes of equal duration (eighth)
   	Tablature tablatureD = new Tablature(encodingTestpiece1);
   	Transcription transcriptionD = new Transcription(midiTestpiece1, encodingTestpiece1);
   	List<Integer[]> voicesCoDNotesD = transcriptionD.getVoicesSNU();
    	List<List<Double>> durationLabelsD = transcriptionD.getDurationLabels();
-   	List<Double> durLab12D = EIGHTH;
+   	List<Double> durLab12D = eighth;
    	durationLabelsD.set(12, durLab12D);
    		
    	List<Tablature> allTablatures = Arrays.asList(new Tablature[]{tablatureA, tablatureB,	tablatureC,	tablatureD});
@@ -6395,7 +6403,7 @@ public class FeatureGeneratorTest {
   	  for (int j = 0; j < currentBasicTabSymbolProperties.length; j++) {
    	  	actual.add(FeatureGenerator.getVoicesAlreadyOccupied(currentBasicTabSymbolProperties, 
      	    currentDurationLabels, currentVoicesCoDNotes, null, currentVoiceLabels, 
-     	    Direction.LEFT, j, false, false));
+     	    Direction.LEFT, j, false, false, mnv));
    	  }
    	}
     // Modelling duration
@@ -6408,7 +6416,7 @@ public class FeatureGeneratorTest {
   	  for (int j = 0; j < currentBasicTabSymbolProperties.length; j++) {
    	  	actual.add(FeatureGenerator.getVoicesAlreadyOccupied(currentBasicTabSymbolProperties, 
      	    currentDurationLabels, currentVoicesCoDNotes, null, currentVoiceLabels, 
-     	    Direction.LEFT, j, true, false));
+     	    Direction.LEFT, j, true, false, mnv));
    	  }
    	}
     // b. Direction.RIGHT (tablatureA only; note durations 'from the left' only make a difference in the fwd 
@@ -6418,7 +6426,7 @@ public class FeatureGeneratorTest {
    	for (int i : backwardsMapping) {
    		actual.add(FeatureGenerator.getVoicesAlreadyOccupied(tablatureA.getBasicTabSymbolProperties(), 
      	  durationLabelsA, voicesCoDNotesA, null, transcriptionA.getVoiceLabels(), 
-     	  Direction.RIGHT, i, false, false));
+     	  Direction.RIGHT, i, false, false, mnv));
    	}
    	 	  	
    	
@@ -6555,13 +6563,13 @@ public class FeatureGeneratorTest {
    	// a. Direction.LEFT
   	for (int i = 0; i < basicNoteProperties.length; i++) {
   		actual.add(FeatureGenerator.getVoicesAlreadyOccupied(null, null, null, basicNoteProperties, voiceLabels,
-  			Direction.LEFT,	i, false, false));
+  			Direction.LEFT,	i, false, false, mnv));
   	}
   	// b. Direction.RIGHT
    	List<Integer> backwardsMapping = FeatureGenerator.getBackwardsMapping(transcription.getNumberOfNewNotesPerChord());
    	for (int i : backwardsMapping) {
    		actual.add(FeatureGenerator.getVoicesAlreadyOccupied(null, null, null, basicNoteProperties, voiceLabels,
-    		Direction.RIGHT, i, false, false));
+    		Direction.RIGHT, i, false, false, mnv));
    	}
    		
    	
@@ -7028,32 +7036,32 @@ public class FeatureGeneratorTest {
 		// Not modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, false, false, 1));
+			meterInfo, 6, false, false, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, false, false, 1));
+			meterInfo, 23, false, false, 1, mnv));
 		// Modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, true, false, 1));
+			meterInfo, 6, true, false, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, true, false, 1));
+			meterInfo, 23, true, false, 1, mnv));
 		// b. Bwd model
 		// Not modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, false, true, 1));
+			meterInfo, 6, false, true, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, false, true, 1));
+			meterInfo, 23, false, true, 1, mnv));
 		// Modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, true, true, 1));
+			meterInfo, 6, true, true, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVector(basicTabSymbolProperties, 
 			durationLabels,	voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, true, true, 1));
+			meterInfo, 23, true, true, 1, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7146,14 +7154,14 @@ public class FeatureGeneratorTest {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		// a. Fwd model	  
 		actual.add(FeatureGenerator.generateNoteFeatureVector(null,	null, null, basicNoteProperties, 
-			transcription, note7, voiceLabels, meterInfo, 7, true, false, 1)); // value of argModelDuration irrelevant
+			transcription, note7, voiceLabels, meterInfo, 7, true, false, 1, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVector(null,	null, null, basicNoteProperties,
-			transcription, note24, voiceLabels, meterInfo, 24, true, false, 1)); // value of argModelDuration irrelevant
+			transcription, note24, voiceLabels, meterInfo, 24, true, false, 1, mnv)); // value of argModelDuration irrelevant
 		// b. Bwd model
 		actual.add(FeatureGenerator.generateNoteFeatureVector(null,	null, null, basicNoteProperties, 
-			transcription, note7, voiceLabels, meterInfo, 7, true, true, 1)); // value of argModelDuration irrelevant
+			transcription, note7, voiceLabels, meterInfo, 7, true, true, 1, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVector(null,	null, null, basicNoteProperties,
-			transcription, note24, voiceLabels, meterInfo, 24, true, true, 1)); // value of argModelDuration irrelevant
+			transcription, note24, voiceLabels, meterInfo, 24, true, true, 1, mnv)); // value of argModelDuration irrelevant
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7280,32 +7288,32 @@ public class FeatureGeneratorTest {
 		// Not modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties,
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, false, false, 1));		
+			meterInfo, 6, false, false, 1, mnv));		
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, false, false, 1));
+			meterInfo, 23, false, false, 1, mnv));
 		// Modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties,
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, true, false, 1));
+			meterInfo, 6, true, false, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, true, false, 1));
+			meterInfo, 23, true, false, 1, mnv));
 		// b. Bwd model
 		// Not modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties,
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, false, true, 1));
+			meterInfo, 6, false, true, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties,
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, false, true, 1));
+			meterInfo, 23, false, true, 1, mnv));
 		// Modelling duration
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, 
-			meterInfo, 6, true, true, 1));
+			meterInfo, 6, true, true, 1, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, 
-			meterInfo, 23, true, true, 1));
+			meterInfo, 23, true, true, 1, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7387,17 +7395,17 @@ public class FeatureGeneratorTest {
 		// a. Fwd model	  
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			false, 1)); // value of argModelDuration irrelevant
+			false, 1, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			false, 1)); // value of argModelDuration irrelevant
+			false, 1, mnv)); // value of argModelDuration irrelevant
 		// b. Bwd model
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			true, 1)); // value of argModelDuration irrelevant
+			true, 1, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISSFirst(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			true, 1)); // value of argModelDuration irrelevant
+			true, 1, mnv)); // value of argModelDuration irrelevant
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7633,46 +7641,46 @@ public class FeatureGeneratorTest {
 		// Not modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo, 
-			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));		
+			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false, mnv));		
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));
+			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 		// Not modelling duration (decisionContextSize = 3)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo, 
-			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false));		
+			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false, mnv));		
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false));
+			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false, mnv));
 		// Not modelling duration (decisionContextSize = 3, averaged)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true));
+			6, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties,	
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true));
+			23, false, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true, mnv));
 		// Modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));
+			6, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false));
+			23, true, ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 		// b. Bwd model
 		// Not modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
+			6, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
+			23, false, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 		// Modelling duration (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note6, voiceLabels, meterInfo,
-			6, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
+			6, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(basicTabSymbolProperties, 
 			durationLabels, voicesCoDNotes, null, transcription, note23, voiceLabels, meterInfo,
-			23, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false));
+			23, true, ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -7860,33 +7868,33 @@ public class FeatureGeneratorTest {
 		// (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 1, false, mnv)); // value of argModelDuration irrelevant
 		// (decisionContextSize = 3)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, false, mnv)); // value of argModelDuration irrelevant
 		// (decisionContextSize = 3, averaged)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true)); // value of argModelDuration irrelevant
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true)); // value of argModelDuration irrelevant		
+			ProcessingMode.FWD, Runner.FeatureVector.PHD_D, 3, true, mnv)); // value of argModelDuration irrelevant		
 		
 		// b. Bwd model
 		// (decisionContextSize = 1)
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note7, voiceLabels, meterInfo, 7, true, 
-			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
+			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false, mnv)); // value of argModelDuration irrelevant
 		actual.add(FeatureGenerator.generateNoteFeatureVectorDISS(null, null, null, 
 			basicNoteProperties, transcription, note24, voiceLabels, meterInfo, 24, true, 
-			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false)); // value of argModelDuration irrelevant
+			ProcessingMode.BWD, Runner.FeatureVector.PHD_D, 1, false, mnv)); // value of argModelDuration irrelevant
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -8132,15 +8140,15 @@ public class FeatureGeneratorTest {
 //		List<Integer[]> predVoicesCoDNotes = gtTranscription.getVoicesCoDNotes();
 		// Chord 0: note 0 becomes CoD (voices 3 and 4) of length 1/8; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 1.0, 1.0}));
-		predDurationLabels.set(0, EIGHTH);
+		predDurationLabels.set(0, eighth);
 //		predDurationLabels.set(0, Transcription.createDurationLabel(4));
 		Collections.swap(predVoiceLabels, 2, 3);
 		// Chord 1: note 6 gets length 1/8
-		predDurationLabels.set(6, EIGHTH);
+		predDurationLabels.set(6, eighth);
 //		predDurationLabels.set(6, Transcription.createDurationLabel(4));
 		// Chord 3: notes 9 and 10 swap voice and note 10 gets length 1/8
 		Collections.swap(predVoiceLabels, 9, 10);
-		predDurationLabels.set(10, EIGHTH);
+		predDurationLabels.set(10, eighth);
 //		predDurationLabels.set(10, Transcription.createDurationLabel(4));
 
 		// Create predicted Transcription
@@ -8276,17 +8284,17 @@ public class FeatureGeneratorTest {
 		boolean modelDuration = false;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1, false));
+			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1, false, mnv));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1, false));
+			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1, false, mnv));
 		modelDuration = true;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1, false));
+			predTranscription, note6, predVoiceLabels, meterInfo, 6, modelDuration, 1, false, mnv));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1, false));
+			predTranscription, note23, predVoiceLabels, meterInfo, 23, modelDuration, 1, false, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -8383,10 +8391,10 @@ public class FeatureGeneratorTest {
 		boolean modelDuration = false;
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(null, null, null,
 			basicNoteProperties, predictedTranscription, note7, predVoiceLabels, meterInfo,
-			7, modelDuration, 1, false));
+			7, modelDuration, 1, false, mnv));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVector(null, null, null, 
 			basicNoteProperties, predictedTranscription, note24, predVoiceLabels, meterInfo, 
-			24, modelDuration, 1, false));
+			24, modelDuration, 1, false, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -8409,15 +8417,15 @@ public class FeatureGeneratorTest {
 //		List<Integer[]> predVoicesCoDNotes = gtTranscription.getVoicesCoDNotes();
 		// Chord 0: note 0 becomes CoD (voices 3 and 4) of length 1/8; notes 2 and 3 swap voice 
 		predVoiceLabels.set(0, Arrays.asList(new Double[]{0.0, 0.0, 0.0, 1.0, 1.0}));
-		predDurationLabels.set(0, EIGHTH);
+		predDurationLabels.set(0, eighth);
 //		predDurationLabels.set(0, Transcription.createDurationLabel(4));
 		Collections.swap(predVoiceLabels, 2, 3);
 		// Chord 1: note 6 gets length 1/8
-		predDurationLabels.set(6, EIGHTH);
+		predDurationLabels.set(6, eighth);
 //		predDurationLabels.set(6, Transcription.createDurationLabel(4));
 		// Chord 3: notes 9 and 10 swap voice and note 10 gets length 1/8
 		Collections.swap(predVoiceLabels, 9, 10);
-		predDurationLabels.set(10, EIGHTH);
+		predDurationLabels.set(10, eighth);
 //		predDurationLabels.set(10, Transcription.createDurationLabel(4));
 
 		// Create predicted Transcription
@@ -8508,10 +8516,10 @@ public class FeatureGeneratorTest {
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS();
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predictedTranscription, note6, predVoiceLabels, meterInfo, 6, 1, false));
+			predictedTranscription, note6, predVoiceLabels, meterInfo, 6, 1, false, mnv));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(
 			basicTabSymbolProperties, predDurationLabels, predVoicesCoDNotes, null, 
-			predictedTranscription, note23, predVoiceLabels, meterInfo, 23, 1, false));
+			predictedTranscription, note23, predVoiceLabels, meterInfo, 23, 1, false, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -8613,10 +8621,10 @@ public class FeatureGeneratorTest {
 		List<Integer[]> meterInfo = gtTranscription.getMeterInfo();
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(null, null, 
 			null, basicNoteProperties, predictedTranscription, note7, predVoiceLabels, 
-			meterInfo, 7, 1, false));
+			meterInfo, 7, 1, false, mnv));
 		actual.add(FeatureGenerator.generateBidirectionalNoteFeatureVectorOLD(null, null, 
 			null, basicNoteProperties, predictedTranscription, note24, predVoiceLabels, 
-			meterInfo, 24, 1, false));
+			meterInfo, 24, 1, false, mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {

@@ -12,6 +12,7 @@ import data.Dataset;
 import external.Transcription;
 import featureExtraction.MelodyFeatureGenerator;
 import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
+import interfaces.CLInterface;
 import machineLearning.EvaluationManager;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.MelodyPredictor;
@@ -19,7 +20,7 @@ import machineLearning.MelodyPredictor.MelModelType;
 import machinelearning.NNManager;
 import machinelearning.NNManager.ActivationFunction;
 import tools.ToolBox;
-import tools.path.PathTools;
+
 import tools.text.StringTools;
 import ui.Runner.Configuration;
 import ui.Runner.DecisionContext;
@@ -33,71 +34,32 @@ import ui.Runner.WeightsInit;
 
 public class UI {
 
-//	// Runner settings
-//	private static boolean deployTrainedUserModel, skipTraining, trainUserModel, verbose;
-
-//	// Settings and hyperparameters, model training
-//	private static boolean useCV, estimateEntries, modelDurationAgain, averageProx;
-//	private static double lambda, hiddenLayerFactor, epsilon, keepProbability, C, 
-//		alpha, deviationThreshold;
-//	private static int hiddenLayers, hiddenLayerSize, n, neighbours, trees, cycles, 
-//		maxMetaCycles, decisionContextSize, epochs, miniBatchSize, validationPercentage, seed;
-//	private static Model m;
-//	private static ProcessingMode pm;
-//	private static FeatureVector fv;
-//	private static Configuration config;
-//	private static WeightsInit weightsInit;
-//	private static ActivationFunction activationFunc;
-//	private static DecodingAlgorithm decodingAlg;
-//	private static List<MelodyModelFeature> mmfs;
-//	private static List<Integer> ns;
-	
-	// Strings for path creation, model training (top) and deployment (bottom)
-//	private static String modelDevDir, datasetDir, modelDir, hyperparamsDir, expDirFirstPass, 
-//		expDirFirstPassMM, userModelDir;
-//	private static String modelID, modelIDFirstPass;
-	
 	private static enum Mode {MODEL_DEV, USER_MODEL_TRAINING, INFERENCE};
 	private static Mode mode;
 	private static boolean repeat;
 	private static final String MODEL_PARAMS_KEY = "model_parameters";
 	private static final String DATASET_KEY = "dataset";
-	
-	public final static String TUNING = "-u";
-	public final static String KEY = "-k";
-	public final static String MODE = "-m";
-	public final static String STAFF = "-s";
-	public final static String TABLATURE = "-t";
-	public final static String TYPE = "-y";
-	public final static String FILE = "-f";
-	public final static String MODEL = "-o";
-	public final static String VERBOSE = "-v";
-	
 
-//	// Strings for dataset creation, model training (top) and deployment (bottom)
-//	private static String datasetID;
-//	private static String datasetIDTrain, datasetName, filename;
-	
-//	private static final Map<String, String> EXPERIMENT_DIRS_FIRST_PASS = new LinkedHashMap<String, String>();
-//    static {
-//    	EXPERIMENT_DIRS_FIRST_PASS.put("N-bwd-thesis-int-3vv", "thesis/exp_3.1/");
-//    	EXPERIMENT_DIRS_FIRST_PASS.put("N-fwd-thesis-int-4vv", "thesis/exp_1/");
-//    	EXPERIMENT_DIRS_FIRST_PASS.put("N-bwd-bach-WTC-3vv", "thesis/exp_3.1/");
-//    	EXPERIMENT_DIRS_FIRST_PASS.put("N-bwd-bach-WTC-4vv", "thesis/exp_3.1/");
-//    	EXPERIMENT_DIRS_FIRST_PASS.put("N_prime-bwd-thesis-int-3vv", "thesis/exp_3.2/");
-//    	EXPERIMENT_DIRS_FIRST_PASS.put("N_prime-bwd-thesis-int-4vv", "thesis/exp_3.2/");
-//    }
-
+	public final static String STORE_PATH = "STORE_PATH";
+	public final static String FIRST_PASS_PATH = "FIRST_PASS_PATH";
+	public final static String TRAINED_USER_MODEL_PATH = "TRAINED_USER_MODEL_PATH";
+	public final static String STORED_NN_PATH = "STORED_NN_PATH";
+	public final static String STORED_MM_PATH = "STORED_MM_PATH";
 
 	public static void main(String[] args) throws IOException {
 		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
-		Map<String, String> paths = PathTools.getPaths(dev);
+		Map<String, String> paths = CLInterface.getPaths(dev);
+		
+//		for (Map.Entry<String, String> entry : paths.entrySet()) {
+//			System.out.println(entry.getKey() + " -- " + entry.getValue());
+//		}
+//		System.exit(0);
 
 		if (args.length != 0) {
 			mode = Mode.INFERENCE;
 		}
 
-		String[] runnerPaths;
+		Map<String, String> runnerPaths;
 		Dataset[] datasets;
 		Map<String, Double> modelParams;
 		List<Metric> metricsUsed;
@@ -110,14 +72,16 @@ public class UI {
 			String hyperparamsDir = null; 
 			String userModelDir = null;
 
+			System.exit(0);
+			
 			// Choose mode and set variables
 			// a. MODEL-DEV case
 			mode = Mode.MODEL_DEV;
 			repeat = true;
 			gridSearch = false;
 			skipTraining = false;
-			modelDevDir = "thesis/exp_3.3.1/" + "thesis-int/3vv/" + "B/fwd/";
-//			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
+//			modelDevDir = "thesis/exp_3.3.1/" + "thesis-int/3vv/" + "B/fwd/";
+			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
 			hyperparamsDir = "";
 //			hyperparamsDir = "HL=2/HLS=66/KP=0.875-no_heur/"; 
 //			hyperparamsDir = "cnf=" + config.getStringRep();
@@ -133,7 +97,7 @@ public class UI {
 			// verbose = true;
 
 			// Get paths, datasets, modelParams, and metrics
-			String jsonPath = PathTools.getPathString(
+			String jsonPath = CLInterface.getPathString(
 				mode == Mode.MODEL_DEV ? Arrays.asList(paths.get("EXPERIMENTS_PATH"), modelDevDir + hyperparamsDir) :
 				Arrays.asList(paths.get("MODELS_PATH"), userModelDir)
 			);
@@ -171,7 +135,7 @@ public class UI {
 					double keepProbability = combination.get(2);
 					modelParams.put(Runner.KEEP_PROB, keepProbability);
 
-					hyperparamsDir = PathTools.getPathString(Arrays.asList(
+					hyperparamsDir = CLInterface.getPathString(Arrays.asList(
 						"LR=" + alpha, 
 						"HL=" + hiddenLayers, 
 						"HLS=" + hiddenLayerSize, 
@@ -276,69 +240,62 @@ public class UI {
 			String[] opts = args[1].split(" ");
 			String[] defaultVals = args[2].split(" ");
 			String[] userOptsVals = !args[3].equals("") ? args[3].split(",") : new String[]{};
-			System.out.println(Arrays.asList(userOptsVals));
-			System.exit(0);
 
-			// TODO to CLI handling class in utils
-			List<Object> parsed = ToolBox.parseCLIArgs(
-				opts, defaultVals, userOptsVals, PathTools.getPathString(
+			List<Object> parsed = CLInterface.parseCLIArgs(
+				opts, defaultVals, userOptsVals, CLInterface.getPathString(
 					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")) 
 			);
 			cliOptsVals = (Map<String, String>) parsed.get(0);
 			List<String> pieces = (List<String>) parsed.get(1);
 
-			String modelID = cliOptsVals.get(MODEL);
-			boolean isTablatureSet = Dataset.isTablatureSet(modelID);
-			verbose = cliOptsVals.get(VERBOSE).equals("y") ? true : false;
+			verbose = cliOptsVals.get(CLInterface.VERBOSE).equals("y") ? true : false;
 
 //			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
 //				System.out.println(entry.getKey() + " -- " + entry.getValue());
 //			}
 //			pieces.forEach(s -> System.out.println(s));
-
+			
 			// Get paths, datasets, modelParams, and metrics
-			String jsonPath = PathTools.getPathString(
-				Arrays.asList(paths.get("MODELS_PATH"), modelID)		 
+			String jsonPath = CLInterface.getPathString(
+				Arrays.asList(paths.get("MODELS_PATH"), cliOptsVals.get(CLInterface.MODEL))		 
 			);
 			Map<String, Map<String, String>> paramsFromJson = StringTools.readJSONFile(
 				jsonPath + paths.get("MODEL_PARAMETERS")
 			);
 			runnerPaths = getPaths(paramsFromJson, paths, jsonPath);
-			Dataset.setUserPiecenames(
-				isTablatureSet ? Dataset.USER_TAB : Dataset.USER_MIDI, pieces
-			);
+			Dataset.setUserPiecenames(Dataset.USER, pieces);
 			datasets = getDatasets(paramsFromJson, paths);
 			modelParams = getModelParameters(paramsFromJson, runnerPaths);
 			metricsUsed = getMetrics(paramsFromJson);
 		}
+
+		// Make args for setters args for runExperiment(), or make the variables superfluous 
 		Model m = Runner.ALL_MODELS[modelParams.get(Runner.MODEL).intValue()]; 
 		Transcription.setMaxNumVoices((m.getModellingApproach() == ModellingApproach.N2N) ? 5 : 4);
 		MelodyPredictor.setMelModelType(MelModelType.SIMPLE_LM);
 		MelodyPredictor.setTermType(m.getKylmModelType());
 		EvaluationManager.setMetricsUsed(metricsUsed);
-		System.out.println("storePath              = " + runnerPaths[0]);
-		System.out.println("pathPredTransFirstPass = " + runnerPaths[1]);
-		System.out.println("pathTrainedUserModel   = " + runnerPaths[2]);
-		System.out.println("pathStoredNN           = " + runnerPaths[3]);
-		System.out.println("pathStoredMM           = " + runnerPaths[4]);
+		
+		System.out.println("dataset                 = " + datasets[0].getPiecenames());
+		System.out.println("datasetTrain            = " + (datasets[1] == null ? datasets[1] : datasets[1].getName()));
+		System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
+		System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
+		System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
+		System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
+		System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
 //		System.exit(0);
-		Runner.setPaths(new String[]{
-			runnerPaths[0], runnerPaths[1], runnerPaths[2], runnerPaths[3], runnerPaths[4]
-		});
-		Runner.setModelParams(modelParams);
-		Runner.setDataset(datasets[0]);
-		Runner.setDatasetTrain(datasets[1]);
-//		System.out.println(datasets[0].getPieceNames());
-//		System.out.println(datasets[1].getName());
-//		System.exit(0);
-
+		
 		Runner.runExperiment(
-			mode == Mode.USER_MODEL_TRAINING,
-			skipTraining,
+			mode == Mode.USER_MODEL_TRAINING, 
+			skipTraining, 
 			mode == Mode.INFERENCE,
 			verbose, 
 			paths, 
-			cliOptsVals
+			runnerPaths, 
+			cliOptsVals,
+			modelParams,
+			datasets,
+			Transcription.MAX_NUM_VOICES
 		);
 	}
 
@@ -355,8 +312,10 @@ public class UI {
 	}
 
 
-	public static String[] getPaths(Map<String, Map<String, String>> paramsFromJson, 
+	public static Map<String, String> getPaths(Map<String, Map<String, String>> paramsFromJson, 
 		Map<String, String> paths, String jsonPath) {
+		Map<String, String> runnerPaths = new LinkedHashMap<String, String>();
+		
 		// storePath:              where the output of the model currently run is stored 
 		//                         (empty; files are added)
 		//						   --> all Modes
@@ -395,17 +354,17 @@ public class UI {
 			// pathFirstPass, pathStoredNN, pathStoredMM
 			if (mode == Mode.MODEL_DEV) {
 				if (m.getDecisionContext() == DecisionContext.BIDIR) {
-					pathFirstPass = PathTools.getPathString(Arrays.asList(expPath, dirFirstPass));
+					pathFirstPass = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPass));
 				}
 				if (m.getModelType() == ModelType.ENS) {
-					pathStoredNN = PathTools.getPathString(Arrays.asList(expPath, dirFirstPass));
-					pathStoredMM = PathTools.getPathString(Arrays.asList(expPath, dirFirstPassMM));
+					pathStoredNN = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPass));
+					pathStoredMM = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPassMM));
 				}
 			}
 			else {
 				if (m.getDecisionContext() == DecisionContext.BIDIR) {
-					pathFirstPass = PathTools.getPathString(Arrays.asList(modelsPath, modelIDFirstPass));
-//					pathFirstPass = PathTools.getPathString(Arrays.asList(expPath, dirFirstPass));
+					pathFirstPass = CLInterface.getPathString(Arrays.asList(modelsPath, modelIDFirstPass));
+//					pathFirstPass = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPass));
 				}
 				if (m.getModelType() == ModelType.ENS) {
 					pathStoredNN = ""; // not implemented
@@ -414,7 +373,7 @@ public class UI {
 			}
 		}
 		else {
-			String polyPath = PathTools.getPathString(Arrays.asList(
+			String polyPath = CLInterface.getPathString(Arrays.asList(
 				paths.get("POLYPHONIST_PATH"), Runner.OUTPUT_DIR
 			));
 //			String modelsPath = paths.get("MODELS_PATH");
@@ -422,12 +381,12 @@ public class UI {
 			String modelIDFirstPass = params.get("model_ID_first_pass");
 
 			// storePath
-			storePath = PathTools.getPathString(Arrays.asList(polyPath, modelID)); // current model; ex. bidir case: .../transcriber/out/D_B-fwd-byrd-int-4vv/
+			storePath = CLInterface.getPathString(Arrays.asList(polyPath, modelID)); // current model; ex. bidir case: .../transcriber/out/D_B-fwd-byrd-int-4vv/
 			
 			// pathFirstPass, pathTrainedUserModel 
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
-//				pathFirstPass = PathTools.getPathString(Arrays.asList(modelsPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../models/D-bwd-byrd-int-4vv/
-				pathFirstPass = PathTools.getPathString(Arrays.asList(polyPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../transcriber/out/D-bwd-byrd-int-4vv/
+//				pathFirstPass = CLInterface.getPathString(Arrays.asList(modelsPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../models/D-bwd-byrd-int-4vv/
+				pathFirstPass = CLInterface.getPathString(Arrays.asList(polyPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../transcriber/out/D-bwd-byrd-int-4vv/
 			}
 			pathTrainedUserModel = jsonPath; // trained model; ex. bidir case: .../models/D_B-fwd-byrd-int-4vv/
 
@@ -444,13 +403,13 @@ public class UI {
 			// step (iv)  : apply the trained bidir model from (ii), using the labels predicted in (iii)
 			//              --> store results in transcriber/polyphonic/out/<B_model_ID>; pathFirstPass == transcriber/polyphonic/out/<model_ID>
 		}
-		return new String[]{
-			storePath,
-			pathFirstPass,
-			pathTrainedUserModel,
-			pathStoredNN,
-			pathStoredMM	
-		};
+
+		runnerPaths.put(STORE_PATH, storePath);
+		runnerPaths.put(FIRST_PASS_PATH, pathFirstPass);
+		runnerPaths.put(TRAINED_USER_MODEL_PATH, pathTrainedUserModel);
+		runnerPaths.put(STORED_NN_PATH, pathStoredNN);
+		runnerPaths.put(STORED_MM_PATH, pathStoredMM);
+		return runnerPaths;
 	}
 
 
@@ -459,22 +418,20 @@ public class UI {
 		Dataset dsTrain = null;
 		if (mode != Mode.INFERENCE) {
 			String datasetID = paramsFromJson.get(DATASET_KEY).get("dataset_ID");
-			ds = new Dataset(datasetID);
+			ds = new Dataset(datasetID, Dataset.isTablatureSet(datasetID));
 		}
 		else {
-			// Get the modelID of the trained model
+			// Get the modelID of the trained model; get the ID of the dataset trained on
 			String modelIDTrain = getModelID(paramsFromJson);
 			String[] s = modelIDTrain.split("-");
+			String datasetIDTrain = String.join("-", Arrays.asList(s[2], s[3], s[4]));
 
 			// ds (will be populated)
-			String datasetID = String.join(
-				"-", (Dataset.isTablatureSet(modelIDTrain) ? Dataset.USER_TAB : Dataset.USER_MIDI), s[4]
-			);
-			ds = new Dataset(datasetID);
+			String datasetID = String.join("-", Dataset.USER, s[4]);
+			ds = new Dataset(datasetID, Dataset.isTablatureSet(datasetIDTrain));
 
 			// dsTrain (will not be populated)
-			String datasetIDTrain = String.join("-", Arrays.asList(s[2], s[3], s[4]));
-			dsTrain = new Dataset(datasetIDTrain);
+			dsTrain = new Dataset(datasetIDTrain, Dataset.isTablatureSet(datasetIDTrain));
 		}
 
 		return new Dataset[]{ds, dsTrain};
@@ -482,7 +439,7 @@ public class UI {
 
 
 	public static Map<String, Double> getModelParameters(Map<String, Map<String, String>> paramsFromJson, 
-		String[] runnerPaths) {
+		Map<String, String> runnerPaths) {
 		Map<String, Double> mp = new LinkedHashMap<String, Double>();
 		if (mode != Mode.INFERENCE) {
 			Map<String, String> params = paramsFromJson.get(MODEL_PARAMS_KEY);
@@ -567,7 +524,7 @@ public class UI {
 			mp.put(Runner.CROSS_VAL, (double) ToolBox.toInt((mode == Mode.USER_MODEL_TRAINING) ? false : true));
 			mp.put(Runner.WEIGHTS_INIT, (double) (mode == Mode.MODEL_DEV && repeat ? WeightsInit.INIT_FROM_LIST : WeightsInit.INIT_RANDOM).getIntRep());
 			mp.put(Runner.SNU, (double) ToolBox.toInt(Dataset.isTablatureSet(paramsFromJson.get(DATASET_KEY).get("dataset_ID"))));
-			mp.put(Runner.ISMIR_2018, (double) ToolBox.toInt(mode == Mode.MODEL_DEV && runnerPaths[0].contains("ISMIR-2018")));
+			mp.put(Runner.ISMIR_2018, (double) ToolBox.toInt(mode == Mode.MODEL_DEV && runnerPaths.get(STORE_PATH).contains("ISMIR-2018")));
 //			mp.put(Runner.ISMIR_2018, (double) ToolBox.toInt(modelDevDir.startsWith("ISMIR-2018")));
 			mp.put(Runner.MODELLING_APPROACH, (double) m.getModellingApproach().getIntRep());
 
@@ -614,7 +571,9 @@ public class UI {
 		}
 		else {
 			mp = ToolBox.getStoredObjectBinary(
-				new LinkedHashMap<String, Double>(), new File(runnerPaths[2] + Runner.modelParameters + ".ser")
+				new LinkedHashMap<String, Double>(), new File(
+					runnerPaths.get(TRAINED_USER_MODEL_PATH) + Runner.modelParameters + ".ser"
+				)
 			);
 			mp.put(Runner.CROSS_VAL, (double) ToolBox.toInt(false));
 			mp.put(Runner.WEIGHTS_INIT, (double) WeightsInit.INIT_FROM_LIST.getIntRep());

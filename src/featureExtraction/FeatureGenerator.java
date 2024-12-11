@@ -489,13 +489,13 @@ public class FeatureGenerator {
 	 */
 	// TESTED for both tablature- (non-dur and dur) and non-tablature case; for fwd (= bwd) model
 	static double[] getPositionWithinChord(Integer[][] btp, List<List<Double>> durationLabels,	Integer[][] bnp,
-		Direction direction, int noteIndex, boolean modelDuration, boolean isBidirectional ) {
+		Direction direction, int noteIndex, boolean modelDuration, boolean isBidirectional, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 
-		double[] valuesExcl = new double[4 + (Transcription.MAX_NUM_VOICES - 1)];
+		double[] valuesExcl = new double[4 + (maxNumVoices - 1)]; // Schmier
 		Arrays.fill(valuesExcl, -1.0);
-		double[] valuesIncl = new double[4 + (Transcription.MAX_NUM_VOICES - 1)];
+		double[] valuesIncl = new double[4 + (maxNumVoices - 1)]; // Schmier
 		Arrays.fill(valuesIncl, -1.0);
 
 		final int CHORD_SIZE = 0;
@@ -605,7 +605,7 @@ public class FeatureGenerator {
 		if ((btp != null && !isBidirectional && direction == Direction.LEFT && modelDuration) || 
 			(btp != null && isBidirectional && modelDuration) || bnp != null) { // EEND +  && modelDuration
 //			if ((basicTabSymbolProperties != null && !modelBackward && modelDuration) || basicNoteProperties != null) {
-			double[] intervalsIncl = getIntervalsInChord(btp, durationLabels, bnp, lowestNoteIndex);
+			double[] intervalsIncl = getIntervalsInChord(btp, durationLabels, bnp, lowestNoteIndex, maxNumVoices);
 			for (int i = 0; i < intervalsIncl.length; i++) {
 				valuesIncl[FIRST_INTERVAL + i] = intervalsIncl[i];
 			}
@@ -834,12 +834,12 @@ public class FeatureGenerator {
 	 */
 	// TESTED (for both tablature- and non-tablature case)
 	static double[] getIntervalsInChord(Integer[][] btp, List<List<Double>> durationLabels, Integer[][] bnp, 
-		int lowestNoteIndex) {
+		int lowestNoteIndex, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 
 		// 0. Initialise intervalsInChord with all -1.0s
-		double[] intervalsInChord = new double[Transcription.MAX_NUM_VOICES - 1];
+		double[] intervalsInChord = new double[maxNumVoices - 1]; // Schmier
 		Arrays.fill(intervalsInChord, -1.0);
 
 		// 1. List the pitches in the chord
@@ -889,17 +889,17 @@ public class FeatureGenerator {
 	 */
 	// TESTED for both fwd and bwd model
 	static double[] getVoicesWithAdjacentNoteOnSameCourse(Integer[][] btp, Transcription transcription, 
-		Direction direction, int noteIndex) {
+		Direction direction, int noteIndex, int maxNumVoices) {
 
 		// Initialise voicesWithPreviousNoteOnSameCourse with only 0.0s
-		double[] voicesWithPreviousNoteOnSameCourse = new double[Transcription.MAX_NUM_VOICES];
+		double[] voicesWithPreviousNoteOnSameCourse = new double[maxNumVoices]; // Schmier
 		Arrays.fill(voicesWithPreviousNoteOnSameCourse, 0.0);
 
 		Note currentNote = Tablature.convertTabSymbolToNote(btp, noteIndex); 
 		int courseCurrentNote = btp[noteIndex][Tablature.COURSE];
 
 		// For all theoretically possible voices 
-		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
+		for (int voiceNumber = 0; voiceNumber < maxNumVoices; voiceNumber++) { // Schmier
 			// If the transcription contains the voice with voiceNumber: find the previous note in that voice
 			if (voiceNumber < transcription.getScorePiece().getScore().size()) {
 				NotationVoice currentVoice = 
@@ -1106,7 +1106,7 @@ public class FeatureGenerator {
 	 // TESTED for both tablature- (non-dur and dur) and non-tablature case; for both fwd and bwd model
 	public static List<double[][]> getPitchAndTimeProximitiesToAllVoices(Integer[][] btp, 
 		Transcription transcription, Note currentNote, Direction direction, boolean modelDuration, 
-		boolean isBidirectional, int decisionContextSize, boolean averageProxAndMvmts) {
+		boolean isBidirectional, int decisionContextSize, boolean averageProxAndMvmts, int maxNumVoices) {
 
 		// decisionContextSize == 1 && averageProxAndMvmts == false : thesis case
 		// decisionContextSize == 1 && averageProxAndMvmts == true  : short new case
@@ -1125,7 +1125,7 @@ public class FeatureGenerator {
 			// Initialise with the default values also used when a note is the first
 			// one in a voice (see getProximitiesAndMovementToVoice()). The elements that 
 			// correspond with voices not in the transcription retain these values  
-			double[][] r = new double[includeMvmts ? 4 : 3][Transcription.MAX_NUM_VOICES];
+			double[][] r = new double[includeMvmts ? 4 : 3][maxNumVoices]; // Schmier
 			for (double[] d : r) {
 				Arrays.fill(d, -1.0);
 			}
@@ -1141,7 +1141,7 @@ public class FeatureGenerator {
 		}
 
 		// Traverse all the theoretically possible voices 
-		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
+		for (int voiceNumber = 0; voiceNumber < maxNumVoices; voiceNumber++) { // Schmier
 			// a. If transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
 			if (voiceNumber < transcription.getScorePiece().getScore().size()) {
@@ -1729,12 +1729,12 @@ public class FeatureGenerator {
 	// TESTED for both tablature- (non-dur and dur) and non-tablature case; for both fwd and bwd model
 	public static double[] getVoicesAlreadyOccupied(Integer[][] btp, List<List<Double>> durationLabels, 
 		List<Integer[]>	voicesCoDNotes, Integer[][] bnp, List<List<Double>> voiceLabels, 
-		Direction direction, int noteIndex, boolean modelDuration, boolean isBidirectional) {
+		Direction direction, int noteIndex, boolean modelDuration, boolean isBidirectional, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 
 		// Create voicesAlreadyOccupied and initialise it with only 0.0s
-		double[] voicesAlreadyOccupied = new double[Transcription.MAX_NUM_VOICES];
+		double[] voicesAlreadyOccupied = new double[maxNumVoices]; // Schmier
 		Arrays.fill(voicesAlreadyOccupied, 0.0);
 
 		// a. In the tablature case
@@ -1853,7 +1853,7 @@ public class FeatureGenerator {
 	static List<Double> generateNoteFeatureVector(Integer[][] btp, List<List<Double>> durationLabels, 
 		List<Integer[]> voicesCoDNotes, Integer[][] bnp, Transcription transcription, Note currentNote,
 		List<List<Double>> voiceLabels, List<Integer[]> meterInfo, int noteIndex, boolean argModelDuration,
-		boolean argModelBackward, int decisionContextSize) { 
+		boolean argModelBackward, int decisionContextSize, int maxNumVoices) { 
 	
 		Transcription.verifyCase(btp, bnp);
 
@@ -1876,19 +1876,19 @@ public class FeatureGenerator {
 		// 2. Tablature + duration features
 		double[] tabDurFeatures = 
 			getPositionWithinChord(btp, durationLabels, bnp, direction, noteIndex,
-			argModelDuration, argIsBidir);
+			argModelDuration, argIsBidir, maxNumVoices);
 
 		// 3. Tablature + duration + voice features
 		// Gather all double[]s in a List
 		List<double[]> allAsList = new ArrayList<double[]>();
 		if (btp != null) {
 			// Voices with previous note on same course
-			allAsList.add(getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, direction, noteIndex));
+			allAsList.add(getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, direction, noteIndex, maxNumVoices));
 		}
 		// Pitch- and time proximities
 		List<double[][]> pitchAndTimeProximities = 
 			getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-			direction, argModelDuration, argIsBidir, decisionContextSize, false);
+			direction, argModelDuration, argIsBidir, decisionContextSize, false, maxNumVoices);
 		for (double[][] pAndTProx : pitchAndTimeProximities) {
 			for (double[] d : pAndTProx) {
 				allAsList.add(d);
@@ -1899,7 +1899,7 @@ public class FeatureGenerator {
 //		}
 		// Voices already occupied
 		allAsList.add(getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, 
-			bnp, voiceLabels, direction, noteIndex, argModelDuration, argIsBidir));
+			bnp, voiceLabels, direction, noteIndex, argModelDuration, argIsBidir, maxNumVoices));
 		// Concatenate the double[]s in the List
 		double[] tabDurVoiceFeatures = ToolBox.concatDoubleArrays(allAsList);
 
@@ -1916,7 +1916,7 @@ public class FeatureGenerator {
 	static List<Double> generateNoteFeatureVectorDISSFirst(Integer[][] btp, List<List<Double>> durationLabels, 
 		List<Integer[]> voicesCoDNotes, Integer[][] bnp, Transcription transcription, Note currentNote,
 		List<List<Double>> voiceLabels, List<Integer[]> meterInfo, int noteIndex, boolean argModelDuration,
-		boolean argModelBackward, int decisionContextSize) { 
+		boolean argModelBackward, int decisionContextSize, int maxNumVoices) { 
 		
 		Transcription.verifyCase(btp, bnp);
 		
@@ -1942,7 +1942,7 @@ public class FeatureGenerator {
 			// 2. Note-chord features
 			double[] posInChord = 
 				getPositionWithinChord(btp, durationLabels, bnp, direction, 
-				noteIndex, argModelDuration, argIsBidir);
+				noteIndex, argModelDuration, argIsBidir, maxNumVoices);
 			// indexInChord, distToNoteBelow, distToNoteAbove
 			for (int i = 1; i < 4; i++) {
 				fv.add(posInChord[i]);
@@ -1962,14 +1962,14 @@ public class FeatureGenerator {
 			
 			// 4. Polyphonic embedding features
 			// adjacentNoteOnSameCourse
-			double[] adj = getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, direction, noteIndex); 
+			double[] adj = getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, direction, noteIndex, maxNumVoices); 
 			for (double d : adj) {
 				fv.add(d);
 			}
 			// proximities
 			List<double[][]> prox = 
 				getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-				direction, argModelDuration, argIsBidir, decisionContextSize, false);
+				direction, argModelDuration, argIsBidir, decisionContextSize, false, maxNumVoices);
 			for (double[][] pAndTProx : prox) {
 				for (double[] p : pAndTProx) {
 					for (double d : p) {
@@ -1985,7 +1985,7 @@ public class FeatureGenerator {
 			// alreadyOcc
 			double[] alrOcc = 
 				getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, bnp,
-				voiceLabels, direction, noteIndex, argModelDuration, argIsBidir);
+				voiceLabels, direction, noteIndex, argModelDuration, argIsBidir, maxNumVoices);
 			for (double d : alrOcc) {
 				fv.add(d);
 			}	
@@ -2001,7 +2001,7 @@ public class FeatureGenerator {
 			// 2. Note-chord features
 			double[] posInChord = 
 				getPositionWithinChord(btp, durationLabels, bnp, direction, 
-				noteIndex, argModelDuration, argIsBidir);
+				noteIndex, argModelDuration, argIsBidir, maxNumVoices);
 			// indexInChord, distToNoteBelow, distToNoteAbove
 			for (int i = 1; i < 4; i++) {
 				fv.add(posInChord[i]);
@@ -2023,7 +2023,7 @@ public class FeatureGenerator {
 			// proximities
 			List<double[][]> prox = 
 				getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-				direction, argModelDuration, argIsBidir, decisionContextSize, false);
+				direction, argModelDuration, argIsBidir, decisionContextSize, false, maxNumVoices);
 			for (double[][] pAndTProx : prox) {
 				for (double[] p : pAndTProx) {
 					for (double d : p) {
@@ -2039,7 +2039,7 @@ public class FeatureGenerator {
 			// alreadyOcc
 			double[] alrOcc = 
 				getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, bnp,
-				voiceLabels, direction, noteIndex, argModelDuration, argIsBidir);
+				voiceLabels, direction, noteIndex, argModelDuration, argIsBidir, maxNumVoices);
 			for (double d : alrOcc) {
 				fv.add(d);
 			}	
@@ -2073,7 +2073,7 @@ public class FeatureGenerator {
 		Transcription transcription, Note currentNote, List<List<Double>> voiceLabels,
 		List<Integer[]> meterInfo, int noteIndex, boolean argModelDuration,
 		ProcessingMode procMode, FeatureVector featVec, int decisionContextSize,
-		boolean avgProx) {
+		boolean avgProx, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 		
@@ -2108,7 +2108,7 @@ public class FeatureGenerator {
 			// 2. Note-chord features
 			double[] posInChord = 
 				getPositionWithinChord(btp, durationLabels, bnp, direction, 
-				noteIndex, argModelDuration, isBidirectional);
+				noteIndex, argModelDuration, isBidirectional, maxNumVoices);
 			if (featVec.getIntRep() > Runner.FeatureVector.PHD_A.getIntRep()) {
 				// indexInChord, distToNoteBelow, distToNoteAbove
 				for (int i = 1; i < 4; i++) {
@@ -2137,14 +2137,14 @@ public class FeatureGenerator {
 				// adjacentNoteOnSameCourse
 				double[] adj = 
 					getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, direction, 
-					noteIndex); 
+					noteIndex, maxNumVoices); 
 				for (double d : adj) {
 					fv.add(d);
 				}
 				// proximities include movements if decisionContextSize > 1 or avgProx == true
 				List<double[][]> prox = 
 					getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-					direction, argModelDuration, isBidirectional, decisionContextSize, avgProx);
+					direction, argModelDuration, isBidirectional, decisionContextSize, avgProx, maxNumVoices);
 
 				for (double[][] pAndTProx : prox) {
 //					for (double[] p : pAndTProx) {
@@ -2180,7 +2180,7 @@ public class FeatureGenerator {
 				// alreadyOcc
 				double[] alrOcc = 
 					getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, 
-					bnp, voiceLabels, direction, noteIndex, argModelDuration, isBidirectional);
+					bnp, voiceLabels, direction, noteIndex, argModelDuration, isBidirectional, maxNumVoices);
 				for (double d : alrOcc) {
 					fv.add(d);
 				}	
@@ -2220,7 +2220,7 @@ public class FeatureGenerator {
 			// 2. Note-chord features
 			double[] posInChord = 
 				getPositionWithinChord(btp, durationLabels, bnp, direction, 
-				noteIndex, argModelDuration, isBidirectional);
+				noteIndex, argModelDuration, isBidirectional, maxNumVoices);
 			if (featVec.getIntRep() > Runner.FeatureVector.PHD_A.getIntRep()) {
 				// indexInChord, distToNoteBelow, distToNoteAbove
 				for (int i = 1; i < 4; i++) {
@@ -2247,7 +2247,7 @@ public class FeatureGenerator {
 				// proximities include movements if decisionContextSize > 1 or avgProx == true
 				List<double[][]> prox = 
 					getPitchAndTimeProximitiesToAllVoices(btp, transcription, currentNote, 
-					direction, argModelDuration, isBidirectional, decisionContextSize, avgProx);
+					direction, argModelDuration, isBidirectional, decisionContextSize, avgProx, maxNumVoices);
 
 				for (double[][] pAndTProx : prox) {
 //					for (double[] p : pAndTProx) {
@@ -2271,7 +2271,7 @@ public class FeatureGenerator {
 				// alreadyOcc
 				double[] alrOcc = 
 					getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, 
-					bnp, voiceLabels, direction, noteIndex, argModelDuration, isBidirectional);
+					bnp, voiceLabels, direction, noteIndex, argModelDuration, isBidirectional, maxNumVoices);
 				for (double d : alrOcc) {
 					fv.add(d);
 				}
@@ -2350,12 +2350,12 @@ public class FeatureGenerator {
 	 * @return
 	 */
 	public static double[] generateMelodyModelOutput(Integer[][] btp, Integer[][] bnp,	Transcription transcription, 
-		Note currentNote, int hiNumVoicesTraining, MelodyPredictor mp) { 
+		Note currentNote, int hiNumVoicesTraining, MelodyPredictor mp, int maxNumVoices) { 
 
 		Transcription.verifyCase(btp, bnp);
 
 		// For every possible voice: model the probability of currentNote belonging to voice
-		double[] voiceProbabilities = new double[Transcription.MAX_NUM_VOICES];
+		double[] voiceProbabilities = new double[maxNumVoices]; // Schmier
 		NotationSystem system = transcription.getScorePiece().getScore();
 		for (int voice = 0; voice < hiNumVoicesTraining; voice++) {
 //		for (int voice = 0; voice < Transcription.MAXIMUM_NUMBER_OF_VOICES; voice++) {
@@ -2377,7 +2377,7 @@ public class FeatureGenerator {
 			voiceProbabilities[voice] = 
 				mp.modelProbability(ToolBox.convertToListString(allMfv), voice);
 		}
-		for (int i = hiNumVoicesTraining; i < Transcription.MAX_NUM_VOICES; i++) {
+		for (int i = hiNumVoicesTraining; i < maxNumVoices; i++) { // Schmier
 			voiceProbabilities[i] = 0.0;
 		}
 
@@ -2480,24 +2480,24 @@ public class FeatureGenerator {
 
 	 * @return
 	 */
-	private List<Double> generateNoteFeatureVectorPlus(Integer[][] btp, List<List<Double>> durationLabels,
+	public static List<Double> generateNoteFeatureVectorPlus(Integer[][] btp, List<List<Double>> durationLabels,
 		List<Integer[]> voicesCoDNotes, Integer[][] bnp, Transcription transcription, Note currentNote, 
 		List<List<Double>> voiceLabels, List<Integer[]> meterInfo, int noteIndex, int highestNumberOfVoicesTraining,
 		boolean argModelDuration, ProcessingMode procMode, FeatureVector featVec, 
-		MelodyPredictor mp, int decisionContextSize, boolean avgProx) { 
+		MelodyPredictor mp, int decisionContextSize, boolean avgProx, int maxNumVoices) { 
 
 		Transcription.verifyCase(btp, bnp);
 
 		// 1. Get the note feature vector 
 		List<Double> nfvPlus = generateNoteFeatureVectorDISS(btp, durationLabels, voicesCoDNotes,
 			bnp, transcription, currentNote, voiceLabels, meterInfo, noteIndex, argModelDuration, 
-			procMode, featVec, decisionContextSize, avgProx);
+			procMode, featVec, decisionContextSize, avgProx, maxNumVoices);
 
 		// 2. For every possible voice: model the probability of currentNote belonging to voice
 //		MelodyFeatureGenerator melodyFeatureGenerator = new MelodyFeatureGenerator(this);
-		Double[] voiceProbabilities = new Double[Transcription.MAX_NUM_VOICES];
+		Double[] voiceProbabilities = new Double[maxNumVoices]; // Schmier
 		NotationSystem system = transcription.getScorePiece().getScore();
-		for (int voice = 0; voice < Transcription.MAX_NUM_VOICES; voice++) {
+		for (int voice = 0; voice < maxNumVoices; voice++) { // Schmier
 			List<List<Double>> allMfv = new ArrayList<List<Double>>();
 			// Determine numberOfVoices
 			int numberOfVoices = 0;
@@ -2555,7 +2555,7 @@ public class FeatureGenerator {
 	public static List<List<Double>> generateAllNoteFeatureVectors(Map<String, Double>
 		modelParameters, Integer[][] btp, List<Integer[]> voicesCoDNotes, Integer[][] bnp,
 		Transcription transcription, List<List<Double>> labels, List<Integer[]> meterInfo,
-		List<Integer> chordSizes) {
+		List<Integer> chordSizes, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 		
@@ -2581,10 +2581,10 @@ public class FeatureGenerator {
 			durationLabels = new ArrayList<List<Double>>();
 		}
 		for (List<Double> currentLabel : labels) {
-			voiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, Transcription.MAX_NUM_VOICES)));
+			voiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, maxNumVoices))); // Schmier
 			if (modelDuration) {
 //			if (!argIsBidirectional && argModelDuration || argIsBidirectional) {
-				durationLabels.add(new ArrayList<Double>(currentLabel.subList(Transcription.MAX_NUM_VOICES,
+				durationLabels.add(new ArrayList<Double>(currentLabel.subList(maxNumVoices, // Schmier
 					currentLabel.size())));
 			}
 		}
@@ -2618,7 +2618,7 @@ public class FeatureGenerator {
 //			if (mp == null) {
 			allNoteFeatureVectors.add(generateNoteFeatureVectorDISS(btp, durationLabels, voicesCoDNotes,
 				bnp, transcription, currentNote, voiceLabels, meterInfo, noteIndex, modelDuration, 
-				pm, featVec, decContSize, avgProx));
+				pm, featVec, decContSize, avgProx, maxNumVoices));
 //			}
 //			else {
 //				int highestNumberOfVoicesTraining = -1;
@@ -2652,7 +2652,7 @@ public class FeatureGenerator {
 	
 	public static List<double[]> generateAllMMOutputs(Map<String, Double> modelParameters,
 		Integer[][] btp, Integer[][] bnp, Transcription transcription, List<Integer> chordSizes, 
-		MelodyPredictor mp) {
+		MelodyPredictor mp, int maxNumVoices) {
 		
 		List<double[]> allMMOutputs = new ArrayList<double[]>();
 		
@@ -2695,7 +2695,7 @@ public class FeatureGenerator {
 			Note currentNote = notes.get(noteIndex);
 //			Note currentNote = noteSeq.getNoteAt(noteIndex);
 			allMMOutputs.add(generateMelodyModelOutput(btp, bnp, transcription, currentNote, 
-				highestNumberOfVoicesTraining, mp));
+				highestNumberOfVoicesTraining, mp, maxNumVoices)); // Schmier
 		}
 		return allMMOutputs;
 	}
@@ -2856,7 +2856,7 @@ public class FeatureGenerator {
 		List<List<Double>> predictedDurationLabels, List<Integer[]> predictedVoicesCoDNotes, 
 		Integer[][] bnp, Transcription predictedTranscription, Note currentNote, 
 		List<List<Double>> predictedVoiceLabels, List<Integer[]> meterInfo, int noteIndex,
-		boolean argModelDuration, int decisionContextSize, boolean avgProx) { 
+		boolean argModelDuration, int decisionContextSize, boolean avgProx, int maxNumVoices) { 
 
 		Transcription.verifyCase(btp, bnp);
 
@@ -2888,7 +2888,7 @@ public class FeatureGenerator {
 		List<Double> noteChord = new ArrayList<Double>();
 		double[] posInChord = 
 			getPositionWithinChord(btp, predictedDurationLabels, bnp, null, 
-			noteIndex, argModelDuration, isBidirectional);
+			noteIndex, argModelDuration, isBidirectional, maxNumVoices);
 		for (int i = 1; i < 4; i++) {
 			noteChord.add(posInChord[i]);
 		}
@@ -2919,13 +2919,13 @@ public class FeatureGenerator {
 		// Voices with previous note on same course
 		if (btp != null) {  
 			polyEmb.add(getVoicesWithAdjacentNoteOnSameCourse(btp, predictedTranscription, Direction.LEFT, 
-				noteIndex));
+				noteIndex, maxNumVoices));
 		}
 		// Pitch- and time proximities to previous notes
 		// proximities include movements if decisionContextSize > 1 or avgProx == true
 		List<double[][]> pitchAndTimeProximitiesToPrevious = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.LEFT, argModelDuration, isBidirectional, decisionContextSize, avgProx);
+			Direction.LEFT, argModelDuration, isBidirectional, decisionContextSize, avgProx, maxNumVoices);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToPrevious) {
 			for (double[] d : pAndTProx) {
 				polyEmb.add(d);
@@ -2938,13 +2938,13 @@ public class FeatureGenerator {
 		// Voices with next note on same course
 		if (btp != null) {  
 			polyEmb.add(getVoicesWithAdjacentNoteOnSameCourse(btp, predictedTranscription, Direction.RIGHT, 
-				noteIndex));
+				noteIndex, maxNumVoices));
 		}
 		// Pitch- and time proximities to next notes
 		// proximities include movements if decisionContextSize > 1 or avgProx == true
 		List<double[][]> pitchAndTimeProximitiesToNext = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.RIGHT, argModelDuration, isBidirectional, decisionContextSize, avgProx);
+			Direction.RIGHT, argModelDuration, isBidirectional, decisionContextSize, avgProx, maxNumVoices);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToNext) {
 			for (double[] d : pAndTProx) {
 				polyEmb.add(d);
@@ -2956,7 +2956,7 @@ public class FeatureGenerator {
 		// Voices already occupied
 		polyEmb.add(getVoicesAlreadyOccupied(btp, predictedDurationLabels, 
 			predictedVoicesCoDNotes, bnp, predictedVoiceLabels, null, 
-			noteIndex, argModelDuration, isBidirectional));
+			noteIndex, argModelDuration, isBidirectional, maxNumVoices));
 		// Concatenate the double[]s in the List
 		double[] polyphonicEmbedding = ToolBox.concatDoubleArrays(polyEmb);
 
@@ -2996,7 +2996,7 @@ public class FeatureGenerator {
 	public static List<Double> generateBidirectionalNoteFeatureVectorOLD(Integer[][] btp, List<List<Double>>
 		predictedDurationLabels, List<Integer[]> predictedVoicesCoDNotes, Integer[][] bnp, Transcription 
 		predictedTranscription, Note currentNote, List<List<Double>> predictedVoiceLabels, List<Integer[]> 
-		meterInfo, int noteIndex, int decisionContextSize, boolean avgProx) { //, boolean argModelBackward) { 
+		meterInfo, int noteIndex, int decisionContextSize, boolean avgProx, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 
@@ -3017,7 +3017,7 @@ public class FeatureGenerator {
 		// 2. Tablature + duration features
 		double[] tabDurFeatures = 
 			getPositionWithinChord(btp, predictedDurationLabels, bnp, null, 
-			noteIndex, modelDuration, argIsBidir);
+			noteIndex, modelDuration, argIsBidir, maxNumVoices);
 
 		// 3. Tablature + duration + voice features
 		List<double[]> tabDurVoice = new ArrayList<double[]>();
@@ -3025,12 +3025,12 @@ public class FeatureGenerator {
 		// Voices with previous note on same course
 		if (btp != null) {  
 			tabDurVoice.add(getVoicesWithAdjacentNoteOnSameCourse(btp, 
-				predictedTranscription, Direction.LEFT, noteIndex));
+				predictedTranscription, Direction.LEFT, noteIndex, maxNumVoices));
 		}
 		// Pitch- and time proximities to previous notes
 		List<double[][]> pitchAndTimeProximitiesToPrevious = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.LEFT, modelDuration, argIsBidir, decisionContextSize, avgProx);
+			Direction.LEFT, modelDuration, argIsBidir, decisionContextSize, avgProx, maxNumVoices);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToPrevious) {
 			for (double[] d : pAndTProx) {
 				tabDurVoice.add(d);
@@ -3043,12 +3043,12 @@ public class FeatureGenerator {
 		// Voices with next note on same course
 		if (btp != null) {  
 			tabDurVoice.add(getVoicesWithAdjacentNoteOnSameCourse(btp, predictedTranscription, Direction.RIGHT, 
-				noteIndex));
+				noteIndex, maxNumVoices));
 		}
 		// Pitch- and time proximities to next notes
 		List<double[][]> pitchAndTimeProximitiesToNext = 
 			getPitchAndTimeProximitiesToAllVoices(btp, predictedTranscription, currentNote, 
-			Direction.RIGHT, modelDuration, argIsBidir, decisionContextSize, avgProx);
+			Direction.RIGHT, modelDuration, argIsBidir, decisionContextSize, avgProx, maxNumVoices);
 		for (double[][] pAndTProx : pitchAndTimeProximitiesToNext) {
 			for (double[] d : pAndTProx) {
 				tabDurVoice.add(d);
@@ -3060,7 +3060,7 @@ public class FeatureGenerator {
 		// Voices already occupied
 		tabDurVoice.add(getVoicesAlreadyOccupied(btp, predictedDurationLabels, 
 			predictedVoicesCoDNotes, bnp, predictedVoiceLabels, null, 
-			noteIndex, modelDuration, argIsBidir));
+			noteIndex, modelDuration, argIsBidir, maxNumVoices));
 		// Concatenate the double[]s in the List
 		double[] tabDurVoiceFeatures = ToolBox.concatDoubleArrays(tabDurVoice);
 
@@ -3090,8 +3090,7 @@ public class FeatureGenerator {
 		Map<String, Double> modelParameters,
 		Integer[][] btp, List<Integer[]> predictedVoicesCoDNotes, Integer[][] bnp, 
 		Transcription predictedTranscription, List<List<Double>> predictedLabels, 
-		List<Integer[]> meterInfo, List<Integer> chordSizes/*, boolean argModelDuration,
-		int decisionContextSize*/) {
+		List<Integer[]> meterInfo, List<Integer> chordSizes, int maxNumVoices) {
 
 		Transcription.verifyCase(btp, bnp);
 		
@@ -3110,9 +3109,9 @@ public class FeatureGenerator {
 			predictedDurationLabels = new ArrayList<List<Double>>();
 		}
 		for (List<Double> currentLabel : predictedLabels) {
-			predictedVoiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, Transcription.MAX_NUM_VOICES)));
+			predictedVoiceLabels.add(new ArrayList<Double>(currentLabel.subList(0, maxNumVoices))); // Schmier
 			if (argModelDuration) {
-				predictedDurationLabels.add(new ArrayList<Double>(currentLabel.subList(Transcription.MAX_NUM_VOICES,
+				predictedDurationLabels.add(new ArrayList<Double>(currentLabel.subList(maxNumVoices, // Schmier
 					currentLabel.size())));
 			}
 		}
@@ -3147,7 +3146,7 @@ public class FeatureGenerator {
 			allBidirNoteFeatureVectors.add(generateBidirectionalNoteFeatureVector(btp, 
 				predictedDurationLabels, predictedVoicesCoDNotes, bnp, predictedTranscription,
 				currentNote, predictedVoiceLabels, meterInfo, noteIndex, argModelDuration,
-				decisionContextSize, avgProx));
+				decisionContextSize, avgProx, maxNumVoices));
 		}
 
 		return allBidirNoteFeatureVectors;
@@ -3158,27 +3157,31 @@ public class FeatureGenerator {
 	static List<Integer> indicesOfPitchMvmt = null;
 	static int indexOfPitchVoiceRel = -1;
 	public static void determineScalingSettings(ModellingApproach argModellingApproach, 
-		boolean argIsTablatureCase) { // TODO fix hardcoded indices
+		boolean argIsTablatureCase, int maxNumVoices) { // TODO fix hardcoded indices
 		
 		if (argModellingApproach == ModellingApproach.C2C) {
 			// a. In the tablature case
 			if (argIsTablatureCase) {
-				if (Transcription.MAX_NUM_VOICES == 5) {
+				if (maxNumVoices == 5) { // Schmier
+//				if (Transcription.MAX_NUM_VOICES == 5) { // Schmier
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{47, 48, 49, 50, 51});
 					indexOfPitchVoiceRel = 57;
 				}
-				else if (Transcription.MAX_NUM_VOICES == 4) {
+				else if (maxNumVoices == 4) { // Schmier
+//				else if (Transcription.MAX_NUM_VOICES == 4) { // Schmier
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{38, 39, 40, 41});
 					indexOfPitchVoiceRel = 46;
 				}
 			}
 			// b. In the non-tablature case
 			else {
-				if (Transcription.MAX_NUM_VOICES == 5) {
+				if (maxNumVoices == 5) { // Schmier
+//				if (Transcription.MAX_NUM_VOICES == 5) { // Schmier
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{36, 37, 38, 39, 40});
 					indexOfPitchVoiceRel = 46;
 				}
-				else if (Transcription.MAX_NUM_VOICES == 4) {
+				else if (maxNumVoices == 4) { // Schmier
+//				else if (Transcription.MAX_NUM_VOICES == 4) { // Schmier
 					indicesOfPitchMvmt = Arrays.asList(new Integer[]{29, 30, 31, 32});
 					indexOfPitchVoiceRel = 37;
 				}
@@ -3253,7 +3256,7 @@ public class FeatureGenerator {
 	 */
 	// TESTED
 	private static void scaleFeatureVectorEuroMAC(List<Double> featureVector, double[][] minAndMaxFeatureValues,
-		ModellingApproach argModellingApproach) {
+		ModellingApproach argModellingApproach, int maxNumVoices) {
 
 		// OLD VERSION: scale everything, also -1 default values
 //		for (int i = 0; i < featureVector.size(); i++) {
@@ -3307,7 +3310,7 @@ public class FeatureGenerator {
 				// 1. If f is an indexInMapping: scale by max index
 				if (indicesInMapping.contains(i)) {
 //					int maxIndex = Transcription.MAXIMUM_NUMBER_OF_VOICES - 1 - 1; // TODO
-					int maxIndex = Transcription.MAX_NUM_VOICES - 1; // TODO
+					int maxIndex = maxNumVoices - 1; // Schmier // TODO
 					if (f == -1) {
 						fScaled = f;
 					}
@@ -4096,12 +4099,12 @@ public class FeatureGenerator {
 	 * @return
 	 */
  // TESTED for both tablature- and non-tablature case
-	static double[][] getPitchAndTimeProximitiesToAllVoicesMUSCI(Integer[][] basicTabSymbolProperties, Transcription transcription,
-		Note currentNote) {			
-		double[][] pitchAndTimeProximities = new double[3][Transcription.MAX_NUM_VOICES];
+	static double[][] getPitchAndTimeProximitiesToAllVoicesMUSCI(Integer[][] basicTabSymbolProperties, 
+		Transcription transcription, Note currentNote, int maxNumVoices) {			
+		double[][] pitchAndTimeProximities = new double[3][maxNumVoices]; // Schmier
 		
 		// 1. Traverse all the theoretically possible voices 
-		for (int voiceNumber = 0; voiceNumber < Transcription.MAX_NUM_VOICES; voiceNumber++) {
+		for (int voiceNumber = 0; voiceNumber < maxNumVoices; voiceNumber++) { // Schmier
 		  // a. If the Transcription contains the voice with voiceNumber: calculate the proximities of currentNote
 			// to the previous note in that voice and set the appropriate element of pitchAndTimeProximities
 		  if (voiceNumber < transcription.getScorePiece().getScore().size()) {
@@ -4276,7 +4279,7 @@ public class FeatureGenerator {
 	 */
  // TESTED for both tablature- and non-tablature case
 	static List<Double> getVoicesAlreadyOccupiedMUSCI(Integer[][] basicTabSymbolProperties, Integer[][] basicNoteProperties,
-		int noteIndex, Transcription transcription) { // TODO change arg transcription into List<List<Double>> voiceLabels?
+		int noteIndex, Transcription transcription, int maxNumVoices) { // TODO change arg transcription into List<List<Double>> voiceLabels?
 		
 		// Verify that either basicTabSymbolProperties or basicNoteProperties == null
 		if ((basicTabSymbolProperties != null && basicNoteProperties != null) ||
@@ -4287,7 +4290,7 @@ public class FeatureGenerator {
 		
 	  // Initialise voicesAlreadyOccupied with only 0.0s
 		List<Double> voicesAlreadyOccupied = new ArrayList<Double>();	
-	  for (int i = 0; i < Transcription.MAX_NUM_VOICES; i++) {
+	  for (int i = 0; i < maxNumVoices; i++) { // Schmier
 			voicesAlreadyOccupied.add(0.0);
 		}
 	  
@@ -4353,7 +4356,7 @@ public class FeatureGenerator {
 	// TESTED through testing generateAllNoteFeatureVectors()
 	public static List<Double> generateNoteFeatureVectorMUSCI(Integer[][] basicTabSymbolProperties, 
 		Integer[][] basicNoteProperties, Transcription transcription, Note currentNote, int noteIndex, int featureSet,
-		boolean useTablatureInformation) { // TODO Activate argument useTablatureInformation 
+		boolean useTablatureInformation, int maxNumVoices) { // TODO Activate argument useTablatureInformation 
 		List<Double> noteFeatureVector = new ArrayList<Double>();
 		
 	  // Verify that either basicTabSymbolProperties or basicNoteProperties == null
@@ -4396,7 +4399,7 @@ public class FeatureGenerator {
 			// element in pitchProximities with index 0 represents the proximity to the top voice, the element with
 			// index 1 that to the second voice from the top, etc. 
 			double[] pitchProximities = 
-				getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote)[0];
+				getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote, maxNumVoices)[0];
 			for (int i = 0; i < pitchProximities.length; i++) {
 				noteFeatureVector.add(pitchProximities[i]);
 			}
@@ -4404,7 +4407,7 @@ public class FeatureGenerator {
 			// the element in interOnsetTimes with index 0 represents the proximity to the top voice, the element 
 			// with index 1 that to the second voice from the top, etc.  
 			double[] interOnsetTimeProximities = 
-				getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote)[1];
+				getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote, maxNumVoices)[1];
 			for (int i = 0; i < interOnsetTimeProximities.length; i++) {
 				noteFeatureVector.add(interOnsetTimeProximities[i]);
 			}
@@ -4412,7 +4415,7 @@ public class FeatureGenerator {
 			// the element in offsetOnsetTimes with index 0 represents the proximity to the top voice, the element 
 			// with index 1 that to the second voice from the top, etc.  
 			double[] offsetOnsetTimeProximities = 
-				getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote)[2];
+				getPitchAndTimeProximitiesToAllVoicesMUSCI(basicTabSymbolProperties, transcription, currentNote, maxNumVoices)[2];
 			for (int i = 0; i < offsetOnsetTimeProximities.length; i++) {
 				noteFeatureVector.add(offsetOnsetTimeProximities[i]);
 			}
@@ -4425,7 +4428,7 @@ public class FeatureGenerator {
 	    // voicesAlreadyOccupied with index 0 represents whether the top voice is already occupied, the element
 	    // with index 1 whether the second voice from the top is already occupied, etc. 
 	    List<Double> voicesAlreadyOccupied = getVoicesAlreadyOccupiedMUSCI(basicTabSymbolProperties, basicNoteProperties,
-	    	noteIndex, transcription);
+	    	noteIndex, transcription, maxNumVoices);
 	    noteFeatureVector.addAll(voicesAlreadyOccupied);
 		}			
 		return noteFeatureVector;
@@ -4442,7 +4445,8 @@ public class FeatureGenerator {
 	 */
 	// TESTED for both tablature- and non-tablature case (not with concrete numbers) 
 	static public List<List<Double>> generateAllNoteFeatureVectorsMUSCI(Integer[][] basicTabSymbolProperties,
-		Integer[][] basicNoteProperties, Transcription transcription, int featureSet, boolean useTablatureInformation) {
+		Integer[][] basicNoteProperties, Transcription transcription, int featureSet, boolean useTablatureInformation,
+		int maxNumVoices) {
 		List<List<Double>> allNoteFeatureVectors = new ArrayList<List<Double>>();  
 		
 	  // Verify that either basicTabSymbolProperties or basicNoteProperties == null
@@ -4474,7 +4478,7 @@ public class FeatureGenerator {
 			
      // Get the current feature vector
 			List<Double> currentNoteFeatureVector = generateNoteFeatureVectorMUSCI(basicTabSymbolProperties,
-				basicNoteProperties, transcription, currentNote, i, featureSet, useTablatureInformation);
+				basicNoteProperties, transcription, currentNote, i, featureSet, useTablatureInformation, maxNumVoices);
 			// Add currentNoteFeatureVector to allNoteFeatureVectors
      allNoteFeatureVectors.add(currentNoteFeatureVector);
 		}
@@ -4514,7 +4518,7 @@ public class FeatureGenerator {
 	// =================================== MISCELLANEOUS/OBSOLETE ===================================
 	
 	public static void scaleFeatureVectorDifferentTests(List<Double> featureVector, double[][] minAndMaxFeatureValues,
-		ModellingApproach argModellingApproach) {
+		ModellingApproach argModellingApproach, int maxNumVoices) {
 		
 		// OLD
 //		for (int i = 0; i < featureVector.size(); i++) {
@@ -4686,7 +4690,7 @@ public class FeatureGenerator {
 				// 1. If f is an indexInMapping: scale by max index
 				if (indicesInMapping.contains(i)) {
 //					int maxIndex = Transcription.MAXIMUM_NUMBER_OF_VOICES - 1 - 1; // TODO
-					int maxIndex = Transcription.MAX_NUM_VOICES - 1; // TODO
+					int maxIndex = maxNumVoices - 1; // Schmier // TODO
 					if (f == -1) {
 						fScaled = f;
 					}

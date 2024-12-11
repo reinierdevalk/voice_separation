@@ -15,10 +15,10 @@ import java.util.Map;
 import de.uos.fmt.musitech.data.structure.Note;
 import external.Tablature;
 import external.Transcription;
+import interfaces.CLInterface;
 import tbp.symbols.TabSymbol;
 import tools.ToolBox;
 import tools.labels.LabelTools;
-import tools.path.PathTools;
 
 public class FeatureGeneratorChordTest {
 
@@ -26,26 +26,36 @@ public class FeatureGeneratorChordTest {
 	private File midiTestpiece1;
 	private FeatureGeneratorChord featureGeneratorChord = new FeatureGeneratorChord();
 	
-	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
-	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
-	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
-	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
-	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
+	private List<Double> v0;
+	private List<Double> v1;
+	private List<Double> v2;
+	private List<Double> v3;
+	private List<Double> v4; 
 
 	private double delta;
+	private int mnv;
 	
 	@Before
 	public void setUp() throws Exception {
-		Map<String, String> paths = PathTools.getPaths(true);
+		delta = 1e-9;
+		mnv = Transcription.MAX_NUM_VOICES;
+
+		v0 = LabelTools.createVoiceLabel(new Integer[]{0}, mnv);
+		v1 = LabelTools.createVoiceLabel(new Integer[]{1}, mnv);
+		v2 = LabelTools.createVoiceLabel(new Integer[]{2}, mnv);
+		v3 = LabelTools.createVoiceLabel(new Integer[]{3}, mnv);
+		v4 = LabelTools.createVoiceLabel(new Integer[]{4}, mnv);
+		
+		Map<String, String> paths = CLInterface.getPaths(true);
 		encodingTestpiece1 = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
-			"test")) + "testpiece.tbp"
+			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test/5vv/")) + "testpiece.tbp"
 		);
 		midiTestpiece1 = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
-			"test")) + "testpiece.mid"
+			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test/5vv/")) + "testpiece.mid"
 		);
-		delta = 1e-9;
+
 	}
 
 	@After
@@ -316,7 +326,7 @@ public class FeatureGeneratorChordTest {
 		// For each element of expected: turn the elements in the proximities arrays from distances into proximities
 		for (int i = 0; i < expected.size(); i++) {
 			double[] currentExpected = expected.get(i);
-			for (int j = 0; j < currentExpected.length - Transcription.MAX_NUM_VOICES; j++) {
+			for (int j = 0; j < currentExpected.length - mnv; j++) {
 				double currentValue = currentExpected[j]; 
 				// Do only if currentValue is not -1.0, i.e., if the voice is active
 				if (currentValue != -1.0) {
@@ -331,7 +341,7 @@ public class FeatureGeneratorChordTest {
 		int lowestOnsetIndex = 0;
 		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(btp, null, transcription, 
-				lowestOnsetIndex, voiceAssignments.get(i)));
+				lowestOnsetIndex, voiceAssignments.get(i), mnv));
 			lowestOnsetIndex += tablature.getChords().get(i).size(); 	
 		}
 		
@@ -397,7 +407,7 @@ public class FeatureGeneratorChordTest {
 		// For each element of expected: turn the elements in the proximities arrays from distances into proximities
 		for (int i = 0; i < expected.size(); i++) {
 			double[] currentExpected = expected.get(i);
-			for (int j = 0; j < currentExpected.length - Transcription.MAX_NUM_VOICES; j++) {
+			for (int j = 0; j < currentExpected.length - mnv; j++) {
 				double currentValue = currentExpected[j]; 
 				// Do only if currentValue is not -1.0, i.e., if the voice is active
 				if (currentValue != -1.0) {
@@ -412,7 +422,7 @@ public class FeatureGeneratorChordTest {
 		int lowestOnsetIndex = 0;
 			for (int i = 0; i < transcription.getChords().size(); i++) {
 				actual.add(FeatureGeneratorChord.getProximitiesAndMovementsOfChord(null, bnp, transcription, 
-					lowestOnsetIndex, voiceAssignments.get(i)));
+					lowestOnsetIndex, voiceAssignments.get(i), mnv));
 				lowestOnsetIndex += transcription.getChords().get(i).size(); 	
 			}
 
@@ -489,7 +499,7 @@ public class FeatureGeneratorChordTest {
     	List<Integer> currentVoiceAssignment = 
     		LabelTools.getVoiceAssignment(currentChordVoiceLabels, highestNumberOfVoices);
     	actual.add(FeatureGeneratorChord.getPitchVoiceRelationInChord(basicTabSymbolProperties, null, null, 
-    		lowestNoteIndex, currentVoiceAssignment));
+    		lowestNoteIndex, currentVoiceAssignment, mnv));
     	lowestNoteIndex += currentChord.size();
     }
     
@@ -581,7 +591,7 @@ public class FeatureGeneratorChordTest {
     	List<Integer> currentVoiceAssignment = 
     		LabelTools.getVoiceAssignment(currentChordVoiceLabels, highestNumberOfVoices);
     	actual.add(FeatureGeneratorChord.getPitchVoiceRelationInChord(null, basicNoteProperties, allVoiceLabels,
-    		lowestNoteIndex, currentVoiceAssignment));
+    		lowestNoteIndex, currentVoiceAssignment, mnv));
     	lowestNoteIndex += currentChord.size();
     }
     
@@ -623,7 +633,7 @@ public class FeatureGeneratorChordTest {
 		expected0.add(exp05); expected0.add(exp06); expected0.add(exp07); expected0.add(exp08); expected0.add(exp09); 
 		expected0.add(exp010); expected0.add(exp011);
 		expected.addAll(expected0);
-		
+
 		// 1. For a chord of three notes where the maximum voice number is three (which gives 6 musically possible 
 		// voice assignments) 
 		int maxVoiceNumber1 = 3;
@@ -832,17 +842,22 @@ public class FeatureGeneratorChordTest {
 		// Calculate actual
 		List<List<Integer>> actual = new ArrayList <List<Integer>>();
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolPropertiesChord0, 
-			null, null, 0, maxVoiceNumber0)); 
+			null, null, 0, maxVoiceNumber0, mnv)); 
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolPropertiesChord1,
-			null, null, 0, maxVoiceNumber1)); 
+			null, null, 0, maxVoiceNumber1, mnv)); 
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolPropertiesChord2,
-			null, null, 0, maxVoiceNumber2)); 
+			null, null, 0, maxVoiceNumber2, mnv)); 
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolPropertiesChord3,
-			null, null, 0, maxVoiceNumber3)); 
+			null, null, 0, maxVoiceNumber3, mnv)); 
 
 		// Assert equality
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
+			System.out.println(i);
+			System.out.println("expected");
+			System.out.println(expected.get(i));
+			System.out.println("actual");
+			System.out.println(actual.get(i));
 			assertEquals(expected.get(i).size(), actual.get(i).size());
 			for (int j = 0; j < expected.get(i).size(); j++) {
 				assertEquals(expected.get(i).get(j), actual.get(i).get(j));
@@ -859,7 +874,6 @@ public class FeatureGeneratorChordTest {
 		// remaining musically possible are given below; their numbering is the numbering in the list of mathematical 
 		// possibilities
 
-		// Determine expected
 		List<List<Integer>> expected = new ArrayList<List<Integer>>();	
 		// 0. For a chord of three notes where the maximum voice number is three (which gives 6 musically possible 
 		// vas) and no sustained voices
@@ -960,8 +974,8 @@ public class FeatureGeneratorChordTest {
 		basicNoteProperties2[3] = basicNotePropertiesChord2[1];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels2 = new ArrayList<List<Double>>();
-		voiceLabels2.add(V_4);
-		voiceLabels2.add(V_2);	
+		voiceLabels2.add(v4);
+		voiceLabels2.add(v2);	
 		// Determine all musically possible voice assignments
 		List<List<Integer>> expected2 = new ArrayList<List<Integer>>();
 //		List<Integer> exp20 = Arrays.asList(new Integer[]{-1, -1, -1, 0, 1});
@@ -1022,8 +1036,8 @@ public class FeatureGeneratorChordTest {
 		basicNoteProperties3[3] = basicNotePropertiesChord3[1];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels3 = new ArrayList<List<Double>>();
-		voiceLabels3.add(V_1);
-		voiceLabels3.add(V_2);
+		voiceLabels3.add(v1);
+		voiceLabels3.add(v2);
 		// Determine the expected voice assignments and add them to expected3
 		List<List<Integer>> expected3 = new ArrayList<List<Integer>>();
 //		List<Integer> exp35 = Arrays.asList(new Integer[]{-1, -1, 0, 1});  
@@ -1068,9 +1082,9 @@ public class FeatureGeneratorChordTest {
 		basicNoteProperties4[3] = basicNotePropertiesChord4[0];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels4 = new ArrayList<List<Double>>();
-		voiceLabels4.add(V_2);
-		voiceLabels4.add(V_1);
-		voiceLabels4.add(V_0);
+		voiceLabels4.add(v2);
+		voiceLabels4.add(v1);
+		voiceLabels4.add(v0);
 		// Determine the expected voice assignments and add them to expected4
 		List<List<Integer>> expected4 = new ArrayList<List<Integer>>(); 
 		List<Integer> exp41 = Arrays.asList(new Integer[]{-1, -1, -1, 0 /**/, -1}); // leaves voices 2, 1, and 0 free
@@ -1104,8 +1118,8 @@ public class FeatureGeneratorChordTest {
 		basicNoteProperties5[3] = basicNotePropertiesChord5[1];
 		// Make the voice labels (only those for the previous note are necessary)
 		List<List<Double>> voiceLabels5 = new ArrayList<List<Double>>();
-		voiceLabels5.add(V_2);
-		voiceLabels5.add(V_3);
+		voiceLabels5.add(v2);
+		voiceLabels5.add(v3);
 		// Determine the expected voice assignments and add them to expected5
 		List<List<Integer>> expected5 = new ArrayList<List<Integer>>();
 //		List<Integer> exp55 = Arrays.asList(new Integer[]{-1, -1, 0, 1});  
@@ -1130,19 +1144,18 @@ public class FeatureGeneratorChordTest {
 		// Calculate actual
 		List<List<Integer>> actual = new ArrayList<List<Integer>>();
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties0,
-			voiceLabels0, lowestNoteIndex0, maxVoiceNumber0)); 
+			voiceLabels0, lowestNoteIndex0, maxVoiceNumber0, mnv)); 
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties1,
-			voiceLabels1, lowestNoteIndex1, maxVoiceNumber1)); 
+			voiceLabels1, lowestNoteIndex1, maxVoiceNumber1, mnv)); 
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties2,
-			voiceLabels2, lowestNoteIndex2, maxVoiceNumber2)); 
+			voiceLabels2, lowestNoteIndex2, maxVoiceNumber2, mnv)); 
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties3,
-			voiceLabels3, lowestNoteIndex3, maxVoiceNumber3));
+			voiceLabels3, lowestNoteIndex3, maxVoiceNumber3, mnv));
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties4,
-			voiceLabels4, lowestNoteIndex4, maxVoiceNumber4));
+			voiceLabels4, lowestNoteIndex4, maxVoiceNumber4, mnv));
 		actual.addAll(FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties5,
-			voiceLabels5, lowestNoteIndex5, maxVoiceNumber5));
+			voiceLabels5, lowestNoteIndex5, maxVoiceNumber5, mnv));
 
-		// Assert equality
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
 			assertEquals(expected.get(i).size(), actual.get(i).size());
@@ -1165,7 +1178,7 @@ public class FeatureGeneratorChordTest {
  	  int highestNumberOfVoices = transcription.getNumberOfVoices();
     List<List<Integer>> groundTruthVoiceAssignments = 
 //  		transcription.getVoiceAssignments(tablature, highestNumberOfVoices);
-      transcription.getVoiceAssignments(/*tablature,*/ Transcription.MAX_NUM_VOICES);
+      transcription.getVoiceAssignments(/*tablature,*/ mnv);
  	  Integer[][] btp = tablature.getBasicTabSymbolProperties();
   	int lowestNoteIndex = 0;
  	  for (int i = 0; i < groundTruthVoiceAssignments.size(); i++) {
@@ -1177,7 +1190,7 @@ public class FeatureGeneratorChordTest {
 //  		  featureGenerator.enumerateVoiceAssignmentPossibilitiesForChord(basicTabSymbolProperties, 
 //  		  null, allVoiceLabels, lowestNoteIndex, highestNumberOfVoices);
   	    FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(btp, null, allVoiceLabels,
-  	    lowestNoteIndex, highestNumberOfVoices);
+  	    lowestNoteIndex, highestNumberOfVoices, mnv);
   	  // Remove the ground truth voice assignment possibility
   		currentVoiceAssignmentPossibilities.remove(currentGroundTruthVoiceAssignment);
   	  // Create currentOrderedVoiceAssignmentPossibilities, add currentGroundTruthVoiceAssignment as its first
@@ -1194,7 +1207,7 @@ public class FeatureGeneratorChordTest {
   	
   	// Calculate actual
  	  List<List<List<Integer>>> actual = FeatureGeneratorChord.getOrderedVoiceAssignments(btp, null,
- 	  	allVoiceLabels, highestNumberOfVoices);
+ 	  	allVoiceLabels, highestNumberOfVoices, mnv);
   	
     // Assert equality
   	assertEquals(expected.size(), actual.size());
@@ -1231,7 +1244,7 @@ public class FeatureGeneratorChordTest {
 //  		  featureGenerator.enumerateVoiceAssignmentPossibilitiesForChord(null, basicNoteProperties, 
 //  		  allVoiceLabels, lowestNoteIndex, highestNumberOfVoices);
   		  FeatureGeneratorChord.enumerateVoiceAssignmentPossibilitiesForChord(null, bnp, 
-    		allVoiceLabels, lowestNoteIndex, highestNumberOfVoices);
+    		allVoiceLabels, lowestNoteIndex, highestNumberOfVoices, mnv);
   	  // Remove the ground truth voice assignment possibility
   		currentVoiceAssignmentPossibilities.remove(currentGroundTruthVoiceAssignment);
   	  // Create currentOrderedVoiceAssignmentPossibilities, add currentGroundTruthVoiceAssignment as its first
@@ -1248,7 +1261,7 @@ public class FeatureGeneratorChordTest {
   	
   	// For each chord: calculate the actual ordered voice assignment possibilities
   	List<List<List<Integer>>> actual = FeatureGeneratorChord.getOrderedVoiceAssignments(null, bnp, 
-  		allVoiceLabels, highestNumberOfVoices);
+  		allVoiceLabels, highestNumberOfVoices, mnv);
   	
     // Assert equality
   	assertEquals(expected.size(), actual.size());
@@ -1307,7 +1320,7 @@ public class FeatureGeneratorChordTest {
 //    List<Integer[]> voicesCoDNotes=  transcription.getVoicesCoDNotes();
     int lowestNoteIndex = 0;
     for (int i = 0; i < tablature.getChords().size(); i++) {
-   	  actual.add(featureGeneratorChord.getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, lowestNoteIndex)); 
+   	  actual.add(featureGeneratorChord.getVoicesWithAdjacentNoteOnSameCourse(btp, transcription, lowestNoteIndex, mnv)); 
    	  lowestNoteIndex += tablature.getChords().get(i).size();
     }
     
@@ -1381,7 +1394,7 @@ public class FeatureGeneratorChordTest {
 	  int lowestNoteIndex = 0;
 	  for (int i = 0; i < tablature.getChords().size(); i++) {
 		 	actual.add(FeatureGeneratorChord.getNoteSpecificFeaturesChord(btp, null, 
-		 		/*transcription,*/ meterInfo, lowestNoteIndex));
+		 		/*transcription,*/ meterInfo, lowestNoteIndex, mnv));
 		 	lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 	  		  
@@ -1454,7 +1467,7 @@ public class FeatureGeneratorChordTest {
 	  int lowestNoteIndex = 0;
 	  for (int i = 0; i < transcription.getChords().size(); i++) {
 		 	actual.add(FeatureGeneratorChord.getNoteSpecificFeaturesChord(null, bnp, 
-		 		/*transcription,*/ meterInfo, lowestNoteIndex));
+		 		/*transcription,*/ meterInfo, lowestNoteIndex, mnv));
 		 	lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 		  
@@ -1513,7 +1526,7 @@ public class FeatureGeneratorChordTest {
 		int lowestNoteIndex = 0;
 		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getChordLevelFeaturesChord(btp, null,
-				/*transcription,*/ meterInfo, lowestNoteIndex));
+				/*transcription,*/ meterInfo, lowestNoteIndex, mnv));
 			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
@@ -1570,7 +1583,7 @@ public class FeatureGeneratorChordTest {
 		int lowestNoteIndex = 0;
 		for (int i = 0; i < transcription.getChords().size(); i++) {
 			actual.add(FeatureGeneratorChord.getChordLevelFeaturesChord(null, bnp, 
-				/*transcription,*/ meterInfo, lowestNoteIndex));
+				/*transcription,*/ meterInfo, lowestNoteIndex, mnv));
 			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
@@ -1629,7 +1642,7 @@ public class FeatureGeneratorChordTest {
     int lowestNoteIndex = 0;
     for (int i = 0; i < tablature.getChords().size(); i++) {
  	    actual.add(FeatureGeneratorChord.getVoicesAlreadyOccupied(btp, durationLabels, voicesCoDNotes, null, 
- 	    	transcription, lowestNoteIndex)); 
+ 	    	transcription, lowestNoteIndex, mnv)); 
  	    lowestNoteIndex += tablature.getChords().get(i).size();  
     }
 		
@@ -1684,7 +1697,7 @@ public class FeatureGeneratorChordTest {
 		Integer[][] bnp = transcription.getBasicNoteProperties();
     int lowestNoteIndex = 0;
     for (int i = 0; i < transcription.getChords().size(); i++) {
- 	    actual.add(FeatureGeneratorChord.getVoicesAlreadyOccupied(null, null, null, bnp, transcription, lowestNoteIndex)); 
+ 	    actual.add(FeatureGeneratorChord.getVoicesAlreadyOccupied(null, null, null, bnp, transcription, lowestNoteIndex, mnv)); 
  	    lowestNoteIndex += transcription.getChords().get(i).size();  
     }
 		
@@ -1724,7 +1737,7 @@ public class FeatureGeneratorChordTest {
 			3.0, 4.0, 0.0, -5.0, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(btp, null, allVoiceLabels, 4, 
-				getVoiceAssignments().get(1)), // pitch-voice relation
+				getVoiceAssignments().get(1), mnv), // pitch-voice relation
 			0.0, 0.0, 0.0, // voice crossing info
 			2.0, 3.0, 1.0, 0.0, -1.0 // voice assignment vector
 		}));
@@ -1743,7 +1756,7 @@ public class FeatureGeneratorChordTest {
 			4.0, 0.0, -1.0, 0.0, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(btp, null, allVoiceLabels, 23, 
-				getVoiceAssignments().get(7)), // pitch-voice relation
+				getVoiceAssignments().get(7), mnv), // pitch-voice relation
 			0.0, 0.0, 0.0, // voice crossing info
 			1.0, -1.0, 0.0, -1.0, -1.0 // voice assignment vector
 		}));
@@ -1751,9 +1764,9 @@ public class FeatureGeneratorChordTest {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		List<Integer[]> meterInfo = tablature.getMeterInfo(); 
 		actual.add(featureGeneratorChord.generateChordFeatureVector(btp, null, transcription, meterInfo, 4,
-			getVoiceAssignments().get(1)));
+			getVoiceAssignments().get(1), mnv));
 		actual.add(featureGeneratorChord.generateChordFeatureVector(btp, null, transcription, meterInfo, 23,
-			getVoiceAssignments().get(7)));
+			getVoiceAssignments().get(7), mnv));
 
 		assertEquals(expected.size(), actual.size());
 		for (int i = 0; i < expected.size(); i++) {
@@ -1789,7 +1802,7 @@ public class FeatureGeneratorChordTest {
 			3.0, 4.0, 0.0, -5.0, 0.0, 
 			0.0, 0.0, 0.0, 0.0, 0.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(null, bnp, allVoiceLabels, 4, 
-				getVoiceAssignmentsNonTab().get(1)), // pitch-voice relation
+				getVoiceAssignmentsNonTab().get(1), mnv), // pitch-voice relation
 			0.0, 0.0, 0.0, // voice crossing info
 			3.0, 2.0, 1.0, 0.0, -1.0 // voice assignment vector
 		}));
@@ -1807,7 +1820,7 @@ public class FeatureGeneratorChordTest {
 			4.0, 0.0, -1.0, 0.0, 0.0, 
 			0.0, 1.0, 0.0, 1.0, 1.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(null, bnp, allVoiceLabels, 24, 
-				getVoiceAssignments().get(7)), // pitch-voice relation
+				getVoiceAssignments().get(7), mnv), // pitch-voice relation
 			1.0, 1.0, 1.0, // voice crossing info
 			1.0, -1.0, 0.0, -1.0, -1.0 // voice assignment vector
 		}));
@@ -1816,9 +1829,9 @@ public class FeatureGeneratorChordTest {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		List<Integer[]> meterInfo = transcription.getMeterInfo(); 
 		actual.add(featureGeneratorChord.generateChordFeatureVector(null, bnp, transcription, meterInfo, 4,
-			getVoiceAssignmentsNonTab().get(1)));
+			getVoiceAssignmentsNonTab().get(1), mnv));
 		actual.add(featureGeneratorChord.generateChordFeatureVector(null, bnp, transcription, meterInfo, 24,
-			getVoiceAssignmentsNonTab().get(7)));
+			getVoiceAssignmentsNonTab().get(7), mnv));
 		
 		// Assert equality
 		assertEquals(expected.size(), actual.size());
@@ -1857,7 +1870,7 @@ public class FeatureGeneratorChordTest {
 			3.0, 4.0, 0.0, -5.0, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(btp, null, allVoiceLabels, 4, 
-				getVoiceAssignments().get(1)), // pitch-voice relation
+				getVoiceAssignments().get(1), mnv), // pitch-voice relation
 			0.0, 0.0, 0.0, // voice crossing info
 			2.0, 3.0, 1.0, 0.0, -1.0 // voice assignment vector
 		}));
@@ -1876,7 +1889,7 @@ public class FeatureGeneratorChordTest {
 			4.0, 0.0, -1.0, 0.0, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(btp, null, allVoiceLabels, 23, 
-				getVoiceAssignments().get(7)), // pitch-voice relation
+				getVoiceAssignments().get(7), mnv), // pitch-voice relation
 			0.0, 0.0, 0.0, // voice crossing info
 			1.0, -1.0, 0.0, -1.0, -1.0 // voice assignment vector
 		}));
@@ -1886,9 +1899,9 @@ public class FeatureGeneratorChordTest {
 		List<Integer[]> meterInfo = tablature.getMeterInfo(); 
 //		List<Integer[]> meterInfo = tablature.getTimeline().getMeterInfoOBS(); 
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(btp, null, transcription, meterInfo, 4,
-			getVoiceAssignments().get(1)));
+			getVoiceAssignments().get(1), mnv));
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(btp, null, transcription, meterInfo, 23,
-			getVoiceAssignments().get(7)));
+			getVoiceAssignments().get(7), mnv));
 		
 		// Assert equality
 		assertEquals(expected.size(), actual.size());
@@ -1925,7 +1938,7 @@ public class FeatureGeneratorChordTest {
 			3.0, 4.0, 0.0, -5.0, 0.0, 
 			0.0, 0.0, 0.0, 0.0, 0.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(null, bnp, allVoiceLabels, 4, 
-				getVoiceAssignmentsNonTab().get(1)), // pitch-voice relation
+				getVoiceAssignmentsNonTab().get(1), mnv), // pitch-voice relation
 			0.0, 0.0, 0.0, // voice crossing info
 			3.0, 2.0, 1.0, 0.0, -1.0 // voice assignment vector
 		}));
@@ -1943,7 +1956,7 @@ public class FeatureGeneratorChordTest {
 			4.0, 0.0, -1.0, 0.0, 0.0, 
 			0.0, 1.0, 0.0, 1.0, 1.0, // voices already occupied
 			FeatureGeneratorChord.getPitchVoiceRelationInChord(null, bnp, allVoiceLabels, 24, 
-				getVoiceAssignments().get(7)), // pitch-voice relation
+				getVoiceAssignments().get(7), mnv), // pitch-voice relation
 			1.0, 1.0, 1.0, // voice crossing info
 			1.0, -1.0, 0.0, -1.0, -1.0 // voice assignment vector
 		}));
@@ -1952,9 +1965,9 @@ public class FeatureGeneratorChordTest {
 		List<List<Double>> actual = new ArrayList<List<Double>>();
 		List<Integer[]> meterInfo = transcription.getMeterInfo(); 
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(null, bnp, transcription, meterInfo, 4,
-			getVoiceAssignmentsNonTab().get(1)));
+			getVoiceAssignmentsNonTab().get(1), mnv));
 		actual.add(FeatureGeneratorChord.generateChordFeatureVectorDISS(null, bnp, transcription, meterInfo, 24,
-			getVoiceAssignmentsNonTab().get(7)));
+			getVoiceAssignmentsNonTab().get(7), mnv));
 		
 		// Assert equality
 		assertEquals(expected.size(), actual.size());
@@ -2499,7 +2512,7 @@ public class FeatureGeneratorChordTest {
 //		int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
 		for (int i = 0; i < expectedAsList.size(); i++) {
 			List<List<Double>> currentExpectedAsList = expectedAsList.get(i);
-			double[] currentExpected = new double[3 + Transcription.MAX_NUM_VOICES];
+			double[] currentExpected = new double[3 + mnv];
 //			double[] currentExpected = new double[3 + highestNumberOfVoicesTraining];
 			// Add the averages of the proximities to currentExpected
 			for (int j = 0; j < currentExpectedAsList.size() - 1; j++) {
@@ -2521,7 +2534,7 @@ public class FeatureGeneratorChordTest {
 		int lowestOnsetIndex = 0;
 		for (int i = 0; i < tablature.getChords().size(); i++) {
 			actual.add(featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(btp, null,
-				transcription, lowestOnsetIndex, voiceAssignments.get(i)));
+				transcription, lowestOnsetIndex, voiceAssignments.get(i), mnv));
 			lowestOnsetIndex += tablature.getChords().get(i).size(); 	
 		}
 
@@ -2664,7 +2677,7 @@ public class FeatureGeneratorChordTest {
 // 	  int highestNumberOfVoicesTraining = transcription.getNumberOfVoices();
  	  for (int i = 0; i < expectedAsList.size(); i++) {
   		List<List<Double>> currentExpectedAsList = expectedAsList.get(i);
-   		double[] currentExpected = new double[3 + Transcription.MAX_NUM_VOICES];
+   		double[] currentExpected = new double[3 + mnv];
 //   		double[] currentExpected = new double[3 + highestNumberOfVoicesTraining];
 	  	// Add the averages of the proximities to currentExpected
   		for (int j = 0; j < currentExpectedAsList.size() - 1; j++) {
@@ -2687,7 +2700,7 @@ public class FeatureGeneratorChordTest {
   	int lowestOnsetIndex = 0;
 		for (int i = 0; i < transcription.getChords().size(); i++) {
 	  	actual.add(featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(null, bnp, transcription, 
-	  		lowestOnsetIndex, voiceAssignments.get(i)));
+	  		lowestOnsetIndex, voiceAssignments.get(i), mnv));
 	  	lowestOnsetIndex += transcription.getChords().get(i).size(); 	
 		}
   		
@@ -3235,7 +3248,7 @@ public class FeatureGeneratorChordTest {
 			List<Integer> currentPitchesInChord = 
 				Tablature.getPitchesInChord(btp, lowestNoteIndex); 
 			List<List<Double>> currentVoiceLabelsChord = 
-				LabelTools.getChordVoiceLabels(currentVoiceAssignment); 	  			
+				LabelTools.getChordVoiceLabels(currentVoiceAssignment, mnv); 	  			
 			List<List<Integer>> currentVoicesInChord = 
 				LabelTools.getVoicesInChord(currentVoiceLabelsChord);
 
@@ -3243,13 +3256,13 @@ public class FeatureGeneratorChordTest {
 			// 1. Add proximities and movements
 			double[] currentAverageProximitiesAndMovements = 
 				featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(btp, null, transcription,
-				/*highestNumberOfVoices,*/ lowestNoteIndex, currentVoiceAssignment);
+				/*highestNumberOfVoices,*/ lowestNoteIndex, currentVoiceAssignment, mnv);
 			for (double d : currentAverageProximitiesAndMovements) {
 				currentExpected.add(d);
 			}
 			// 2. Add pitch-voice relation
 			double currentPitchVoiceRelation = FeatureGeneratorChord.getPitchVoiceRelationInChord(btp,
-				null, voiceLabels, lowestNoteIndex, currentVoiceAssignment);
+				null, voiceLabels, lowestNoteIndex, currentVoiceAssignment, mnv);
 			currentExpected.add(currentPitchVoiceRelation);
 			// 3. Add voice crossing information
 			List<List<Integer>> currentVoiceCrossingInformation = 
@@ -3280,7 +3293,7 @@ public class FeatureGeneratorChordTest {
 		for (int i = 0; i < tablature.getChords().size(); i++) {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			actual.add(featureGeneratorChord.generateVariableChordFeatureVector(btp, null, 
-				transcription, lowestNoteIndex, highestNumberOfVoices, currentVoiceAssignment));
+				transcription, lowestNoteIndex, highestNumberOfVoices, currentVoiceAssignment, mnv));
 			lowestNoteIndex += tablature.getChords().get(i).size();
 		}
 
@@ -3315,7 +3328,7 @@ public class FeatureGeneratorChordTest {
 			List<Integer> currentNewPitchesInChord = Transcription.getPitchesInChord(bnp, 
 				lowestNoteIndex); 
 			List<List<Double>> currentVoiceLabelsChord = 
-				LabelTools.getChordVoiceLabels(currentVoiceAssignment); 	  			
+				LabelTools.getChordVoiceLabels(currentVoiceAssignment, mnv); 	  			
 			List<List<Integer>> currentNewVoicesInChord = 
 				LabelTools.getVoicesInChord(currentVoiceLabelsChord);
 			List<List<Integer>> currentAllPitchesAndVoicesInChord = 
@@ -3334,13 +3347,13 @@ public class FeatureGeneratorChordTest {
 			// 1. Add proximities and movements
 			double[] currentAverageProximitiesAndMovements = 
 				featureGeneratorChord.getAverageProximitiesAndMovementsOfChord(null, bnp, transcription, 
-				/*highestNumberOfVoicesTraining,*/ lowestNoteIndex, currentVoiceAssignment);
+				/*highestNumberOfVoicesTraining,*/ lowestNoteIndex, currentVoiceAssignment, mnv);
 			for (double d : currentAverageProximitiesAndMovements) {
 				currentExpected.add(d);
 			}
 			// 2. Add pitch-voice relation
 			double currentPitchVoiceRelation = FeatureGeneratorChord.getPitchVoiceRelationInChord(null, bnp,
-				voiceLabels, lowestNoteIndex, currentVoiceAssignment);
+				voiceLabels, lowestNoteIndex, currentVoiceAssignment, mnv);
 			currentExpected.add(currentPitchVoiceRelation);
 			// 3. Add voice crossing information
 			List<List<Integer>> currentVoiceCrossingInformation = 
@@ -3371,7 +3384,7 @@ public class FeatureGeneratorChordTest {
 		for (int i = 0; i < transcription.getChords().size(); i++) {
 			List<Integer> currentVoiceAssignment = voiceAssignments.get(i);
 			actual.add(featureGeneratorChord.generateVariableChordFeatureVector(null, bnp, transcription,
-				lowestNoteIndex, highestNumberOfVoicesTraining,	currentVoiceAssignment));
+				lowestNoteIndex, highestNumberOfVoicesTraining,	currentVoiceAssignment, mnv));
 			lowestNoteIndex += transcription.getChords().get(i).size();
 		}
 
@@ -3396,7 +3409,7 @@ public class FeatureGeneratorChordTest {
   	List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
   	List<List<List<Integer>>> allOrderedVoiceAssignments = 
   		FeatureGeneratorChord.getOrderedVoiceAssignments(basicTabSymbolProperties, null, allVoiceLabels,
-  		highestNumberOfVoicesTraining);
+  		highestNumberOfVoicesTraining, mnv);
  	  
   	// Determine expected
  	  List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
@@ -3423,7 +3436,7 @@ public class FeatureGeneratorChordTest {
   			constantChordFeatureVector.addAll(sharedOnsetFeaturesChord);
   		  // 2. Determine the variable chord feature vector
   			List<Double> variableChordFeatureVector =	featureGeneratorChord.generateVariableChordFeatureVector(basicTabSymbolProperties,
-  				null, transcription, lowestNoteIndex, highestNumberOfVoicesTraining, currentVoiceAssignment);
+  				null, transcription, lowestNoteIndex, highestNumberOfVoicesTraining, currentVoiceAssignment, mnv);
   			// 3. Construct the complete chord feature vector and add it to currentExpectedChord
   			currentExpected.addAll(constantChordFeatureVector);
   			currentExpected.addAll(variableChordFeatureVector);			
@@ -3435,7 +3448,7 @@ public class FeatureGeneratorChordTest {
   	
   	// Calculate actual
  	  List<List<List<Double>>> actual = featureGeneratorChord.generateAllCompleteChordFeatureVectorsMUSCI(basicTabSymbolProperties, 
-  		null, transcription, largestChordSizeTraining, highestNumberOfVoicesTraining, true);
+  		null, transcription, largestChordSizeTraining, highestNumberOfVoicesTraining, true, mnv);
     
     // Assert equality
 	  assertEquals(expected.size(), actual.size());
@@ -3461,7 +3474,7 @@ public class FeatureGeneratorChordTest {
   	List<List<Double>> allVoiceLabels = transcription.getVoiceLabels();
   	List<List<List<Integer>>> allOrderedVoiceAssignments = 
  	  	FeatureGeneratorChord.getOrderedVoiceAssignments(null, basicNoteProperties, allVoiceLabels,
- 	  	highestNumberOfVoicesTraining);
+ 	  	highestNumberOfVoicesTraining, mnv);
  	  
   	// For each chord: determine the expected complete chord feature vectors and add them to expected
  	  List<List<List<Double>>> expected = new ArrayList<List<List<Double>>>();
@@ -3490,7 +3503,7 @@ public class FeatureGeneratorChordTest {
   		  // 2. Determine the variable chord feature vector
   			List<Double> variableChordFeatureVector =	featureGeneratorChord.generateVariableChordFeatureVector(null,
   				basicNoteProperties, transcription, lowestOnsetIndex, highestNumberOfVoicesTraining, 
-  				currentVoiceAssignment);
+  				currentVoiceAssignment, mnv);
   			// 3. Construct the complete chord feature vector and add it to currentExpectedChord
   			currentExpected.addAll(constantChordFeatureVector);
   			currentExpected.addAll(variableChordFeatureVector);			
@@ -3502,7 +3515,7 @@ public class FeatureGeneratorChordTest {
   	
   	// For each chord: calculate the actual complete chord feature vectors 
   	List<List<List<Double>>> actual = featureGeneratorChord.generateAllCompleteChordFeatureVectorsMUSCI(null, 
-  		basicNoteProperties, transcription, largestChordSizeTraining, highestNumberOfVoicesTraining, true);
+  		basicNoteProperties, transcription, largestChordSizeTraining, highestNumberOfVoicesTraining, true, mnv);
     
     // Assert equality
 	  assertEquals(expected.size(), actual.size());

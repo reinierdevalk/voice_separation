@@ -16,8 +16,9 @@ import java.util.Map;
 
 import external.Tablature;
 import external.Transcription;
+import interfaces.CLInterface;
 import machinelearning.RelativeTrainingExample;
-import tools.path.PathTools;
+import tools.labels.LabelTools;
 import ui.Runner;
 import ui.Runner.FeatureVector;
 import ui.Runner.ModellingApproach;
@@ -27,28 +28,38 @@ public class TrainingManagerTest {
 	private File midiTestpiece1;
 	private File encodingTestpiece1;
 	
-	private static final List<Double> V_0 = Transcription.createVoiceLabel(new Integer[]{0});
-	private static final List<Double> V_1 = Transcription.createVoiceLabel(new Integer[]{1});
-	private static final List<Double> V_2 = Transcription.createVoiceLabel(new Integer[]{2});
-	private static final List<Double> V_3 = Transcription.createVoiceLabel(new Integer[]{3});
-	private static final List<Double> V_4 = Transcription.createVoiceLabel(new Integer[]{4});
+	private List<Double> v0;
+	private List<Double> v1;
+	private List<Double> v2;
+	private List<Double> v3;
+	private List<Double> v4;
 
 	private double delta;
+	private int mnv;
 
 	TrainingManager tm = new TrainingManager();
 
 	@Before
 	public void setUp() throws Exception {
-		Map<String, String> paths = PathTools.getPaths(true);
+		delta = 1e-9;
+		mnv = Transcription.MAX_NUM_VOICES;
+
+		v0 = LabelTools.createVoiceLabel(new Integer[]{0}, mnv);
+		v1 = LabelTools.createVoiceLabel(new Integer[]{1}, mnv);
+		v2 = LabelTools.createVoiceLabel(new Integer[]{2}, mnv);
+		v3 = LabelTools.createVoiceLabel(new Integer[]{3}, mnv);
+		v4 = LabelTools.createVoiceLabel(new Integer[]{4}, mnv);
+
+		Map<String, String> paths = CLInterface.getPaths(true);
 		encodingTestpiece1 = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
-			"test")) + "testpiece.tbp"
+			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			"test/5vv/")) + "testpiece.tbp"
 		);
 		midiTestpiece1 = new File(
-			PathTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
-			"test")) + "testpiece.mid"
+			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			"test/5vv/")) + "testpiece.mid"
 		);
-		delta = 1e-9;
+
 	}
 
 	@After
@@ -96,11 +107,11 @@ public class TrainingManagerTest {
 		List<List<Double>> labels = new ArrayList<>();
 		List<Integer[]> eduInfo = new ArrayList<>();
 		for (int i = 0; i < 4; i++) {
-			labels.add(V_0);
-			labels.add(V_1);
-			labels.add(V_2);
-			labels.add(V_3);
-			labels.add(V_4);
+			labels.add(v0);
+			labels.add(v1);
+			labels.add(v2);
+			labels.add(v3);
+			labels.add(v4);
 			eduInfo.add(new Integer[]{0, 0});
 			eduInfo.add(new Integer[]{1, 1});
 			eduInfo.add(new Integer[]{2, 2});
