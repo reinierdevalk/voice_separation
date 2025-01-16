@@ -733,7 +733,7 @@ public class TestManager {
 					// The transposition interval is the interval needed to transpose from the given 
 					// tuning to the normalised tuning, so it must now be negated
 					int transInt = tablature.getTranspositionInterval();
-					// Transpose the predicted piece (needed for predictedTranscr)
+					// Transpose the predicted Piece (needed for predictedTranscr)
 					predictedPiece.transpose(-transInt);
 					// Transpose the Tablature (needed for MEIExport)
 					if (transInt != 0) {
