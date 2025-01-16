@@ -240,6 +240,9 @@ public class UI {
 			String[] opts = args[1].split(" ");
 			String[] defaultVals = args[2].split(" ");
 			String[] userOptsVals = !args[3].equals("") ? args[3].split(",") : new String[]{};
+			System.out.println(Arrays.asList(opts));
+			System.out.println(Arrays.asList(defaultVals));
+			System.out.println(Arrays.asList(userOptsVals));
 
 			List<Object> parsed = CLInterface.parseCLIArgs(
 				opts, defaultVals, userOptsVals, CLInterface.getPathString(
@@ -250,10 +253,11 @@ public class UI {
 
 			verbose = cliOptsVals.get(CLInterface.VERBOSE).equals("y") ? true : false;
 
-//			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
-//				System.out.println(entry.getKey() + " -- " + entry.getValue());
-//			}
+			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
+				System.out.println(entry.getKey() + " -- " + entry.getValue());
+			}
 //			pieces.forEach(s -> System.out.println(s));
+//			System.exit(0);
 			
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = CLInterface.getPathString(

@@ -699,7 +699,9 @@ public class TestManager {
 //						new SortedContainer<Marker>();
 				// TODO G-tuning is assumed as default
 				if (deployTrainedUserModel) {
-					// TODO access args 
+					// TODO access args
+					// key sig: calculated from (transposition-interval-adapted) btp and bnp; then set
+					// if specifically given, then calculations are overruled
 					int numAlt = Integer.valueOf(transcriptionParams.get(CLInterface.KEY));
 					int md = Integer.valueOf(transcriptionParams.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
@@ -725,11 +727,25 @@ public class TestManager {
 				ScorePiece predictedPiece = 
 					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
 					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
+				// Transpose the piece to comply with the tuning given
+				Tablature transposedTablature = null; // = new Tablature(tablature);
+				if (tablature != null) {
+					// The transposition interval is the interval needed to transpose from the given 
+					// tuning to the normalised tuning, so it must now be negated
+					int transInt = tablature.getTranspositionInterval();
+					// Transpose the predicted piece (needed for predictedTranscr)
+					predictedPiece.transpose(-transInt);
+					// Transpose the Tablature (needed for MEIExport)
+					if (transInt != 0) {
+						transposedTablature = new Tablature(encoding, false);
+					}
+				}
 //				Piece predictedPiece = // added 11.22
 //					Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
 //					allDurationLabels, highestNumVoicesTraining, mtl, ht, testPieceName);
-				Transcription predictedTranscr = 
-					new Transcription(predictedPiece, encoding,	allVoiceLabels, allDurationLabels);
+				Transcription predictedTranscr = new Transcription(
+					predictedPiece, encoding, allVoiceLabels, allDurationLabels
+				);
 //				Transcription predictedTranscr = 
 //					new Transcription(testPieceName,	
 ////					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
@@ -798,8 +814,9 @@ public class TestManager {
 				if (tablature != null) {
 					for (boolean grandStaff : new Boolean[]{true, false}) {
 						MEIExport.exportMEIFile(
-							t, 
-							tablature,
+							t,
+							transposedTablature,
+//							tablature,
 //							(!deployTrainedUserModel ? tablature : (transcriptionParams.get(CLInterface.TABLATURE).equals("y") ? tablature : null)),	
 //							(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
 //							t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
