@@ -705,10 +705,10 @@ public class TestManager {
 					int numAlt = Integer.valueOf(transcriptionParams.get(CLInterface.KEY));
 					int md = Integer.valueOf(transcriptionParams.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
-//l					System.out.println(numAlt);
-//l					System.out.println(md);
-//l					System.out.println(rra[0]);
-//l					System.out.println(rra[1]);
+//					System.out.println(numAlt);
+//					System.out.println(md);
+//					System.out.println(rra[0]);
+//					System.out.println(rra[1]);
 //					System.exit(0);
 					KeyMarker km = new KeyMarker(Rational.ZERO, (long) 0.0);
 					// F minor -- 4640_10_quand_mon_mari_lasso
@@ -718,31 +718,36 @@ public class TestManager {
 //					km.setAlterationNumAndMode(-2, KeyMarker.Mode.MODE_MAJOR); km.setRoot('B'); km.setRootAlteration(1);
 //					km.setAlterationNumAndMode(-3, KeyMarker.Mode.MODE_MAJOR); km.setRoot('E'); km.setRootAlteration(1);
 					km.setAlterationNumAndMode(numAlt, md == 0 ? KeyMarker.Mode.MODE_MAJOR : KeyMarker.Mode.MODE_MINOR); 
-					km.setRoot(rra[0].charAt(0)); 
+					km.setRoot(rra[0].charAt(0));
 					km.setRootAlteration(rra[1].equals("") ? 0 : Integer.parseInt(rra[1]));
 					ht.add(km);
 				}
 
 				Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
+				// predictedPiece is only needed for creating predictedTranscr
 				ScorePiece predictedPiece = 
 					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
 					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
-				// Transpose the piece to comply with the tuning given
-				Tablature transposedTablature = null; // = new Tablature(tablature);
+				// transposedTablature is only needed for MEIExport
+				Tablature transposedTablature = null;
+				// Transpose to comply with the tuning given
 				if (tablature != null) {
 					// The transposition interval is the interval needed to transpose from the given 
 					// tuning to the normalised tuning, so it must now be negated
 					int transInt = tablature.getTranspositionInterval();
-					// Transpose the predicted Piece (needed for predictedTranscr)
+					// Transpose the predicted Piece
 					predictedPiece.transpose(-transInt);
-					// Transpose the Tablature (needed for MEIExport)
-					if (transInt != 0) {
-						transposedTablature = new Tablature(encoding, false);
-					}
+//					// Transpose the Tablature
+//					if (transInt != 0) {
+					transposedTablature = new Tablature(encoding, false);
+//					}
 				}
 //				Piece predictedPiece = // added 11.22
 //					Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
 //					allDurationLabels, highestNumVoicesTraining, mtl, ht, testPieceName);
+				
+				// predictedTranscr is only needed for MEIExport (first exported as MIDI, and then 
+				// recreated as a Transcription with bnp, which MEIExport requires)
 				Transcription predictedTranscr = new Transcription(
 					predictedPiece, encoding, allVoiceLabels, allDurationLabels
 				);
@@ -800,20 +805,22 @@ public class TestManager {
 				if (!deployTrainedUserModel) {
 					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
 				}
-				
-//				Piece p = predictedTranscr.getPiece();
+
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getScorePiece(), instruments, meterInfo, 
 					predictedTranscr.getKeyInfo(), expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
 //					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
-				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
-				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
-//				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 
+				// for MEIExport to work, this must be a Transcription with bnp -- so it must be recreated from 
+				// the stored MIDI file
+				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
+//				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
+//				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 				if (tablature != null) {
 					for (boolean grandStaff : new Boolean[]{true, false}) {
 						MEIExport.exportMEIFile(
+//							predictedTranscr,
 							t,
 							transposedTablature,
 //							tablature,

@@ -74,6 +74,8 @@ public class UI {
 
 			System.exit(0);
 			
+			////////////////////////////////////////////////////////////
+			
 			// Choose mode and set variables
 			// a. MODEL-DEV case
 			mode = Mode.MODEL_DEV;
@@ -95,6 +97,8 @@ public class UI {
 			// mode = Mode.USER_MODEL_TRAINING;
 			// userModelDir = "N-bwd-thesis-int-4vv/";
 			// verbose = true;
+			
+			////////////////////////////////////////////////////////////
 
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = CLInterface.getPathString(
