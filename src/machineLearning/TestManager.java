@@ -728,6 +728,78 @@ public class TestManager {
 				ScorePiece predictedPiece = 
 					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
 					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
+				
+//				List<Integer> allMidiPitches = new ArrayList<>();
+//				List<Integer> pitchClassCounts = Arrays.asList(new Integer[12]);
+				List<Integer> pitchClassCounts = new ArrayList<>(Collections.nCopies(12, 0));
+				System.out.println(pitchClassCounts);
+//				Arrays.fill(pitchClassCounts, 0);
+				for (NotationStaff nst : predictedPiece.getScore()) {
+					for (NotationVoice nv : nst) {
+						for (NotationChord nc : nv) {
+							for (Note n : nc) {
+								int pc = n.getMidiPitch() % 12;
+//								allMidiPitches.add(pc);
+								pitchClassCounts.set(pc, pitchClassCounts.get(pc) +1);
+							}
+						}
+					}
+				}
+
+//				String[] keysFlat = new String[]{"F", "Bb", "Eb", "Ab", "Db"};
+//				List<String> accidFlat = Arrays.asList("b", "e", "a", "d", "g"); // ks at index i has accids up to and including i
+				
+//				String[] keysSharp = new String[]{"G", "D", "A", "E", "B"};
+//				List<String> accidSharp = Arrays.asList("f", "c", "g", "d", "a"); // ks at index i has accids up to and including i
+
+				List<String> flats = Arrays.asList("", "d", "", "e", "", "", "g", "", "a", "", "b", "");
+				List<String> sharps = Arrays.asList("", "c", "", "d", "", "", "f", "", "g", "", "a", "");
+				
+//				pitchClassCounts.set(flats.indexOf("e"), pitchClassCounts.get(flats.indexOf("e")) + 100);
+//				pitchClassCounts.set(flats.indexOf("a"), pitchClassCounts.get(flats.indexOf("a")) + 100);
+				pitchClassCounts.set(sharps.indexOf("f"), pitchClassCounts.get(sharps.indexOf("f")) + 100);
+				pitchClassCounts.set(sharps.indexOf("c"), pitchClassCounts.get(sharps.indexOf("c")) + 100);
+				
+				System.out.println(pitchClassCounts);
+				
+				String key = "C";
+				int numAlt = 0;
+				
+
+				for (int i = 0; i < PitchKeyTools.KEY_ACCID_PC_FLAT.size(); i++) {
+					String currAccid = PitchKeyTools.KEY_ACCID_PC_FLAT.get(i);
+					// The index in flats is the pitch class of the flat accid
+					int pcAccid = flats.indexOf(currAccid);
+					// If current flat is more frequent than its natural counterpart: update numAlt
+					if (pitchClassCounts.get(pcAccid) > pitchClassCounts.get(pcAccid+1)) {
+//						key = keysFlat[i];
+						numAlt = -(i+1);
+					}
+					else { 
+						break;
+					}
+				}
+
+
+				for (int i = 0; i < PitchKeyTools.KEY_ACCID_PC_SHARP.size(); i++) {
+					String currSharp = PitchKeyTools.KEY_ACCID_PC_SHARP.get(i);
+					// The index in sharps is the pitch class of the sharp accid
+					int pcAccid = sharps.indexOf(currSharp);
+					// If current sharp is more frequent than its natural counterpart: update numAlt
+					if (pitchClassCounts.get(pcAccid) > pitchClassCounts.get(pcAccid-1)) {
+//						key = keysSharp[i];
+						numAlt = i+1;
+					}
+					else {
+						break;
+					}
+				}
+				
+				System.out.println(key);
+				System.out.println(numAlt);
+				System.exit(0);
+				
+				
 				// transposedTablature is only needed for MEIExport
 				Tablature transposedTablature = null;
 				// Transpose to comply with the tuning given
