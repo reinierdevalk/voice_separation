@@ -697,12 +697,27 @@ public class TestManager {
 					!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getHarmonyTrack() :
 					new SortedContainer<Marker>(null, Marker.class, new MetricalComparator());
 //						new SortedContainer<Marker>();
-				// TODO G-tuning is assumed as default
+
+				// predictedPiece is only needed for creating predictedTranscr
+				ScorePiece predictedPiece = 
+					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
+					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);	
+
+					// TODO G-tuning is assumed as default
 				if (deployTrainedUserModel) {
 					// TODO access args
+					int numAlt;
 					// key sig: calculated from (transposition-interval-adapted) btp and bnp; then set
 					// if specifically given, then calculations are overruled
-					int numAlt = Integer.valueOf(transcriptionParams.get(CLInterface.KEY));
+					String keyOpt = transcriptionParams.get(CLInterface.KEY);
+					if (keyOpt.equals(CLInterface.INPUT)) {
+						List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
+						numAlt = PitchKeyTools.detectKey(pitchClassCounts);
+					}
+					else {
+						numAlt = Integer.valueOf(keyOpt);
+					}
+
 					int md = Integer.valueOf(transcriptionParams.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
 //					System.out.println(numAlt);
@@ -724,19 +739,15 @@ public class TestManager {
 				}
 
 				Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
-				// predictedPiece is only needed for creating predictedTranscr
-				ScorePiece predictedPiece = 
-					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
-					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
+//				// predictedPiece is only needed for creating predictedTranscr
+//				ScorePiece predictedPiece = 
+//					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
+//					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
 
-				List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
+//				System.out.println(predictedPiece.getHarmonyTrack());
+//				System.out.println(predictedPiece.getHarmonyTrack().get(0));
+//				System.exit(0);
 
-				int numAlt = PitchKeyTools.detectKey(pitchClassCounts);
-				
-
-
-				
-				
 				// transposedTablature is only needed for MEIExport
 				Tablature transposedTablature = null;
 				// Transpose to comply with the tuning given
