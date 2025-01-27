@@ -967,7 +967,7 @@ public class Runner {
 
 	public static void runExperiment(boolean trainUserModel, boolean skipTraining, 
 		boolean deployTrainedUserModel, boolean verbose, Map<String, String> paths, 
-		Map<String, String> runnerPaths, Map<String, String> transcriptionParams, 
+		Map<String, String> runnerPaths, Map<String, String> cliOptsVals, 
 		Map<String, Double> modelParams, Dataset[] datasets, int maxNumVoices) {
 
 		String startPreProc = ToolBox.getTimeStampPrecise();
@@ -1087,7 +1087,7 @@ public class Runner {
 
 			// 2. Test
 			String startTe = ToolBox.getTimeStamp();
-			new TestManager().prepareTesting(startTe, transcriptionParams, paths, runnerPaths);
+			new TestManager().prepareTesting(startTe, cliOptsVals, paths, runnerPaths);
 			String endEval = ToolBox.getTimeStamp();
 //			System.exit(0);
 			
@@ -1181,7 +1181,7 @@ public class Runner {
 			else {
 				System.out.println("\napplying the model.");
 			}
-			new TestManager().prepareTesting(startTe, transcriptionParams, paths, runnerPaths);
+			new TestManager().prepareTesting(startTe, cliOptsVals, paths, runnerPaths);
 
 //			String endEval = ToolBox.getTimeStamp();
 //			System.out.println("### 4. endEval = " + endEval);

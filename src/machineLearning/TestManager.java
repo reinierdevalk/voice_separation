@@ -127,7 +127,7 @@ public class TestManager {
 		
 	}
 	
-	public void prepareTesting(String start, Map<String, String> transcriptionParams, Map<String, String> paths,
+	public void prepareTesting(String start, Map<String, String> cliOptsVals, Map<String, String> paths,
 		Map<String, String> runnerPaths) {
 		Map<String, Double> modelParameters = Runner.getModelParams();
 		Dataset dataset = Runner.getDataset();
@@ -156,7 +156,7 @@ public class TestManager {
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.BIDIR) {
 //				if (!deployTrainedUserModel) {
 					new TestManager().startTestProcess(
-						k, Runner.TEST, transcriptionParams, paths, runnerPaths, 
+						k, Runner.TEST, cliOptsVals, paths, runnerPaths, 
 						new String[]{tePreProcTime, startFoldTe}
 					); // TODO new tm necessary to reset class vars
 				}
@@ -165,7 +165,7 @@ public class TestManager {
 				String startFoldAppl = ToolBox.getTimeStampPrecise();
 				if (!deployTrainedUserModel || deployTrainedUserModel && dc == DecisionContext.UNIDIR) {
 					new TestManager().startTestProcess(
-						k, Runner.APPL, transcriptionParams, paths, runnerPaths,  
+						k, Runner.APPL, cliOptsVals, paths, runnerPaths,  
 						new String[]{null, startFoldAppl}						
 					); // TODO new tm necessary to reset class vars
 				}
@@ -208,7 +208,7 @@ public class TestManager {
 				// calculation)
 				TestManager tm = new TestManager();	// necessary to reset class variables
 				tm.startTestProcess(
-					k, Runner.TEST, transcriptionParams, paths, runnerPathsCopy, 
+					k, Runner.TEST, cliOptsVals, paths, runnerPathsCopy, 
 					new String[]{tePreProcTime, startFoldTe}
 				);
 
@@ -219,7 +219,7 @@ public class TestManager {
 					tm = new TestManager(); // necessary to reset class variables
 					if (mt != ModelType.MM) {
 						tm.startTestProcess(
-							k, Runner.APPL, transcriptionParams, paths, runnerPathsCopy, 
+							k, Runner.APPL, cliOptsVals, paths, runnerPathsCopy, 
 							new String[]{null, startFoldAppl}
 						);
 					}
@@ -290,12 +290,12 @@ public class TestManager {
 	 * 
 	 * @param fold Fold number when using cross-validation; piece index when not.
 	 * @param mode
-	 * @param transcriptionParams
+	 * @param cliOptsVals
 	 * @param paths
 	 * @param runnerPaths
 	 * @param times
 	 */
-	private void startTestProcess(int fold, int mode, Map<String, String> transcriptionParams, 
+	private void startTestProcess(int fold, int mode, Map<String, String> cliOptsVals, 
 		Map<String, String> paths, Map<String, String> runnerPaths, String[] times) {
 		long tePreProcTime = 0;
 		if (mode == Runner.TEST) { 
@@ -709,7 +709,7 @@ public class TestManager {
 					int numAlt;
 					// key sig: calculated from (transposition-interval-adapted) btp and bnp; then set
 					// if specifically given, then calculations are overruled
-					String keyOpt = transcriptionParams.get(CLInterface.KEY);
+					String keyOpt = cliOptsVals.get(CLInterface.KEY);
 					if (keyOpt.equals(CLInterface.INPUT)) {
 						List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
 						numAlt = PitchKeyTools.detectKey(pitchClassCounts);
@@ -718,7 +718,7 @@ public class TestManager {
 						numAlt = Integer.valueOf(keyOpt);
 					}
 
-					int md = Integer.valueOf(transcriptionParams.get(CLInterface.MODE));
+					int md = Integer.valueOf(cliOptsVals.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
 //					System.out.println(numAlt);
 //					System.out.println(md);
@@ -844,7 +844,7 @@ public class TestManager {
 							t,
 							transposedTablature,
 //							tablature,
-//							(!deployTrainedUserModel ? tablature : (transcriptionParams.get(CLInterface.TABLATURE).equals("y") ? tablature : null)),	
+//							(!deployTrainedUserModel ? tablature : (cliOptsVals.get(CLInterface.TABLATURE).equals("y") ? tablature : null)),	
 //							(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
 //							t.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
 							colInd, 
@@ -852,9 +852,9 @@ public class TestManager {
 							false,
 							/*true,*/
 							paths,
-							transcriptionParams,
+							CLInterface.getTranscriptionParams(cliOptsVals),
 							new String[]{expPath, "abtab -- transcriber"}
-							);
+						);
 					}
 				}
 			}
