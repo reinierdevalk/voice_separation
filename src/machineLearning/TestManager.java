@@ -829,12 +829,12 @@ public class TestManager {
 				String expPath = dir + testPieceName;
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getScorePiece(), instruments, meterInfo, 
-					predictedTranscr.getKeyInfo(), expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
+					predictedTranscr.getKeyInfo(), expPath + MIDIImport.MID_EXT); // 05.12 added meterInfo and keyInfo
 //					keyInfo, expPath + MIDIImport.EXTENSION); // 05.12 added meterInfo and keyInfo
 
 				// for MEIExport to work, this must be a Transcription with bnp -- so it must be recreated from 
 				// the stored MIDI file
-				Transcription t = new Transcription(new File(expPath + MIDIImport.EXTENSION));
+				Transcription t = new Transcription(new File(expPath + MIDIImport.MID_EXT));
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getMeterInfo();
 //				List<Integer[]> mi = (tablature == null) ? t.getMeterInfo() : tablature.getTimeline().getMeterInfoOBS();
 				if (tablature != null) {

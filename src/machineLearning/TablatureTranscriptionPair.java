@@ -45,7 +45,7 @@ public class TablatureTranscriptionPair {
 	 * @param midiFilesFolder
 	 */
 	private TablatureTranscriptionPair(String pieceName, String tabEncodingsFolder, String midiFilesFolder) {
-		File encodingFile = new File(tabEncodingsFolder + pieceName + Encoding.EXTENSION);
+		File encodingFile = new File(tabEncodingsFolder + pieceName + Encoding.TBP_EXT);
 		File midiFile = new File(midiFilesFolder + pieceName);
 		tablature = new Tablature(encodingFile, true);
 		transcription = new Transcription(true, midiFile, encodingFile);
@@ -84,12 +84,12 @@ public class TablatureTranscriptionPair {
 		List<TablatureTranscriptionPair> allPairs = new ArrayList<TablatureTranscriptionPair>();
 		for (String pieceName : pieceNames) {    
 			File encodingFile = null;
-			File midiFile = new File(midiFilesFolder + pieceName + MIDIImport.EXTENSION);
+			File midiFile = new File(midiFilesFolder + pieceName + MIDIImport.MID_EXT);
 			Tablature tab = null;
 
 			// a. In the tablature case
 			if (isTablatureCase) {
-				encodingFile =	new File(tabEncodingsFolder + pieceName + Encoding.EXTENSION);
+				encodingFile =	new File(tabEncodingsFolder + pieceName + Encoding.TBP_EXT);
 //				new File(ExperimentRunner.pathPrefix + ExperimentRunner.encodingsPath + pieceName + ".txt");				
 //				new File(ExperimentRunner.pathPrefix + ExperimentRunner.tabMidiPath + pieceName);
 

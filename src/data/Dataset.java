@@ -193,16 +193,16 @@ public class Dataset implements Serializable {
 			Tablature currTablature = null;
 			Transcription currTranscription = null;
 			if (isTablatureCase) {
-				encodingFile = new File(argEncodingsPath + currPieceName + Encoding.EXTENSION);
+				encodingFile = new File(argEncodingsPath + currPieceName + Encoding.TBP_EXT);
 				if (!deployTrainedUserModel) {
-					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.EXTENSION);
+					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.MID_EXT);
 				}
 				currTablature = new Tablature(encodingFile, true);
 			}
 			else {
-				midiFile = new File(argMidiPath + currPieceName + MIDIImport.EXTENSION);
+				midiFile = new File(argMidiPath + currPieceName + MIDIImport.MID_EXT);
 				if (isTabAsNonTab) {
-					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.EXTENSION);
+					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.MID_EXT);
 				}
 			}
 			currTranscription = 

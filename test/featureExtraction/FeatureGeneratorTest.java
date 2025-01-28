@@ -85,7 +85,7 @@ public class FeatureGeneratorTest {
 		);
 		File encodingFile = new File(
 			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
-			"4vv")) + pieceName + Encoding.EXTENSION
+			"4vv")) + pieceName + Encoding.TBP_EXT
 		);
 
 		Tablature tab = new Tablature(encodingFile); 
