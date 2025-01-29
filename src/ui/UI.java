@@ -250,7 +250,7 @@ public class UI {
 
 			List<Object> parsed = CLInterface.parseCLIArgs(
 				opts, defaultVals, userOptsVals, CLInterface.getPathString(
-					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")) 
+					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"))
 			);
 			cliOptsVals = (Map<String, String>) parsed.get(0);
 			List<String> pieces = (List<String>) parsed.get(1);
@@ -261,7 +261,7 @@ public class UI {
 				System.out.println(entry.getKey() + " -- " + entry.getValue());
 			}
 //			pieces.forEach(s -> System.out.println(s));
-//			System.exit(0);
+			System.exit(0);
 			
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = CLInterface.getPathString(
