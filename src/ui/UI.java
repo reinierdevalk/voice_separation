@@ -241,16 +241,13 @@ public class UI {
 		//     dir in p and not the full path. See https://stackoverflow.com/questions/2107945/how-to-loop-over-directories-in-linux 
 		else {
 			// Parse CLI args and set variables
-			String[] opts = args[1].split(" ");
-			String[] defaultVals = args[2].split(" ");
-			String[] userOptsVals = !args[3].equals("") ? args[3].split(",") : new String[]{};
-			System.out.println(Arrays.asList(opts));
-			System.out.println(Arrays.asList(defaultVals));
-			System.out.println(Arrays.asList(userOptsVals));
-
+//			String[] opts = args[1].split(" ");
+//			String[] defaultVals = args[2].split(" ");
+//			String[] userOptsVals = !args[3].equals("") ? args[3].split(",") : new String[]{};
 			List<Object> parsed = CLInterface.parseCLIArgs(
-				opts, defaultVals, userOptsVals, CLInterface.getPathString(
-					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"))
+				args, CLInterface.getPathString(
+					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
+				)
 			);
 			cliOptsVals = (Map<String, String>) parsed.get(0);
 			List<String> pieces = (List<String>) parsed.get(1);
