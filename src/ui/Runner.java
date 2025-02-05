@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
+import external.Tablature;
+import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import interfaces.CLInterface;
 import machineLearning.EvaluationManager;
@@ -1006,6 +1008,20 @@ public class Runner {
 			}
 			else {
 				ds = ToolBox.getStoredObjectBinary(new Dataset(), datasetFile);
+				
+//				for (Transcription t : datasets[0].getAllTranscriptions()) {
+//					System.out.println(t.getName());
+//				}
+//				for (Tablature t : ds.getAllTablatures()) {
+//					System.out.println(t.getName());
+//					if (t.getName().equals("newsidler-1536_7-disant_adiu")) {
+//						Integer[][] b = t.getBasicTabSymbolProperties();
+//						System.out.println(Arrays.asList(b[0]));
+//						System.out.println(Arrays.asList(b[1]));
+//						System.out.println(Arrays.asList(b[2]));
+//					}
+//				}
+//				System.exit(0);
 			}
 //			System.out.println(ds.getDatasetID());
 //			System.out.println(ds.getName());

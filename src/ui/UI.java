@@ -81,7 +81,7 @@ public class UI {
 			mode = Mode.MODEL_DEV;
 			repeat = true;
 			gridSearch = false;
-			skipTraining = false;
+			skipTraining = true;
 //			modelDevDir = "thesis/exp_3.3.1/" + "thesis-int/3vv/" + "B/fwd/";
 			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
 			hyperparamsDir = "";
@@ -99,6 +99,14 @@ public class UI {
 			// verbose = true;
 			
 			////////////////////////////////////////////////////////////
+
+			// Set mock cliOptsVals needed for transParams
+			cliOptsVals = new LinkedHashMap<String, String>();
+			cliOptsVals.put(CLInterface.TUNING, CLInterface.INPUT);
+			cliOptsVals.put(CLInterface.STAFF, "d");
+			cliOptsVals.put(CLInterface.TABLATURE, "y");
+			cliOptsVals.put(CLInterface.TYPE, CLInterface.INPUT);
+			cliOptsVals.put(CLInterface.PLACEMENT, "b");
 
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = CLInterface.getPathString(
@@ -241,9 +249,6 @@ public class UI {
 		//     dir in p and not the full path. See https://stackoverflow.com/questions/2107945/how-to-loop-over-directories-in-linux 
 		else {
 			// Parse CLI args and set variables
-//			String[] opts = args[1].split(" ");
-//			String[] defaultVals = args[2].split(" ");
-//			String[] userOptsVals = !args[3].equals("") ? args[3].split(",") : new String[]{};
 			List<Object> parsed = CLInterface.parseCLIArgs(
 				args, CLInterface.getPathString(
 					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
@@ -254,11 +259,11 @@ public class UI {
 
 			verbose = cliOptsVals.get(CLInterface.VERBOSE).equals("y") ? true : false;
 
-			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
-				System.out.println(entry.getKey() + " -- " + entry.getValue());
-			}
+//			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
+//				System.out.println(entry.getKey() + " -- " + entry.getValue());
+//			}
+//			System.exit(0);
 //			pieces.forEach(s -> System.out.println(s));
-			System.exit(0);
 			
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = CLInterface.getPathString(

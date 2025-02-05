@@ -435,7 +435,7 @@ public class TestManagerTest {
 		piece.setName("");
 //		testManager.newTranscription = new Transcription();
 //		testManager.newTranscription.setPiece(new ScorePiece(piece));
-		testManager.newTranscription = new Transcription(new ScorePiece(piece), enc, null, null);
+		testManager.newTranscription = new Transcription(new ScorePiece(piece), enc, null, null, false);
 
 		// allNotes
 		List<List<Note>> allNotes = new ArrayList<List<Note>>();
@@ -1030,7 +1030,7 @@ public class TestManagerTest {
 		piece.setName("");
 //		testManager.newTranscription = new Transcription();
 //		testManager.newTranscription.setPiece(new ScorePiece(piece));
-		testManager.newTranscription = new Transcription(new ScorePiece(piece), enc, null, null);
+		testManager.newTranscription = new Transcription(new ScorePiece(piece), enc, null, null, false);
 
 		// allNotes (bwd)
 		List<List<Note>> allNotes = new ArrayList<List<Note>>();
@@ -1594,7 +1594,7 @@ public class TestManagerTest {
 		piece.setName("");
 //		testManager.newTranscription = new Transcription();
 //		testManager.newTranscription.setPiece(new ScorePiece(piece));
-		testManager.newTranscription = new Transcription(new ScorePiece(piece), null, null, null);
+		testManager.newTranscription = new Transcription(new ScorePiece(piece), null, null, null, false);
 
 		// allNotes
 		List<List<Note>> allNotes = new ArrayList<List<Note>>();
@@ -1945,7 +1945,7 @@ public class TestManagerTest {
 		piece.setName("");
 //		testManager.newTranscription = new Transcription();
 //		testManager.newTranscription.setPiece(new ScorePiece(piece));
-		testManager.newTranscription = new Transcription(new ScorePiece(piece), null, null, null);
+		testManager.newTranscription = new Transcription(new ScorePiece(piece), null, null, null, false);
 
 		// allNotes (bwd)
 		List<List<Note>> allNotes = new ArrayList<List<Note>>();

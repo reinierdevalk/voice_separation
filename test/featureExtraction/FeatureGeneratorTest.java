@@ -8165,7 +8165,7 @@ public class FeatureGeneratorTest {
 //			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
 //			midiTestpiece1.getName());
 		Transcription predTranscription = 
-			new Transcription(sp, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
+			new Transcription(sp, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels, true);
 //		Transcription predTranscription = 
 //			new Transcription(midiTestpiece1.getName(), new Encoding(encodingTestpiece1), btp, null, 5,
 //			predVoiceLabels, predDurationLabels, 
@@ -8332,7 +8332,7 @@ public class FeatureGeneratorTest {
 //		Piece p = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
 //			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
 //			midiTestpiece1.getName());
-		Transcription predictedTranscription = new Transcription(sp, null, predVoiceLabels, null);
+		Transcription predictedTranscription = new Transcription(sp, null, predVoiceLabels, null, false);
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null, 
 //			gtTranscription.getPiece().getMetricalTimeLine(), 
@@ -8441,7 +8441,7 @@ public class FeatureGeneratorTest {
 //			gtTranscription.getScorePiece().getMetricalTimeLine(), gtTranscription.getScorePiece().getHarmonyTrack(),
 //			midiTestpiece1.getName());
 		Transcription predictedTranscription = 
-			new Transcription(sp, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels);
+			new Transcription(sp, new Encoding(encodingTestpiece1), predVoiceLabels, predDurationLabels, true);
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), new Encoding(encodingTestpiece1), btp, null, 5, 
 //			predVoiceLabels, predDurationLabels,
@@ -8555,7 +8555,7 @@ public class FeatureGeneratorTest {
 //		Piece p  = Transcription.createPiece(null, bnp, predVoiceLabels, null, 5, 
 //			gtTranscription.getScorePiece().getMetricalTimeLine(), 
 //			gtTranscription.getScorePiece().getHarmonyTrack(), midiTestpiece1.getName());
-		Transcription predictedTranscription = new Transcription(sp, null, predVoiceLabels, null);		
+		Transcription predictedTranscription = new Transcription(sp, null, predVoiceLabels, null, false);		
 //		Transcription predictedTranscription = 
 //			new Transcription(midiTestpiece1.getName(), null, null, bnp, 5, predVoiceLabels, null,
 //			gtTranscription.getPiece().getMetricalTimeLine(), 
