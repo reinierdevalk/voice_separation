@@ -709,16 +709,18 @@ public class TestManager {
 				// Set the HarmonyTrack
 				// TODO set the MetricalTimeLine?
 				if (deployTrainedUserModel) {
-					// Tuning == INPUT, key == INPUT --> key calculated for tuning in file
-					// Tuning == provided, key == INPUT --> key calculated for provided tuning
-					// Tuning == INPUT, key == provided --> key provided for tuning in file
-					// Tuning == provided, key == provided --> key provided for provided tuning
 					List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
 					String keyOpt = cliOptsVals.get(CLInterface.KEY);
+					String tunOpt = cliOptsVals.get(CLInterface.TUNING);
 					int numAlt;											
 					// predictedPiece is normalised (to G tuning), and transposition is needed
 					if (isTablatureCase) {
-						Tuning tuning = Tuning.getTuning(cliOptsVals.get(CLInterface.TUNING));
+						// Options
+						// Tuning == INPUT, key == INPUT --> key calculated for tuning in file
+						// Tuning == provided, key == INPUT --> key calculated for provided tuning; tuning in encoding must be adapted
+						// Tuning == INPUT, key == provided --> key provided for tuning in file
+						// Tuning == provided, key == provided --> key provided for provided tuning; tuning in encoding must be adapted
+						Tuning tuning = Tuning.getTuning(tunOpt);
 						// Calculate transInt from the highest open course, which works for drop- and non-drop tunings
 						int pitchHighestCourse = tuning.getPitchLowestCourse() + ToolBox.sumListInteger(tuning.getIntervals());
 						int pitchHighestCourseG = Tuning.G.getPitchLowestCourse() + ToolBox.sumListInteger(Tuning.G.getIntervals());
@@ -729,10 +731,18 @@ public class TestManager {
 							if (transInt != 0) {
 								numAlt = PitchKeyTools.transposeKeySig(numAlt, transInt);
 							}
+							// If tuning is provided
+							if (!tunOpt.contentEquals(CLInterface.INPUT)) {
+								encoding.overwriteTuning(tunOpt);
+							}
 						}
 						// b. Set the key directly
 						else {
 							numAlt = Integer.valueOf(keyOpt);
+							// If tuning is provided
+							if (!tunOpt.contentEquals(CLInterface.INPUT)) {
+								encoding.overwriteTuning(tunOpt);
+							}
 						}
 						// Transpose the predicted Piece
 						predictedPiece.transpose(transInt);
@@ -748,24 +758,6 @@ public class TestManager {
 							numAlt = Integer.valueOf(keyOpt);
 						}
 					}
-//					// b. Set the key directly
-//					else {
-//						numAlt = Integer.valueOf(keyOpt);
-//						// In the Tablature case, predictedPiece is constructed based on normalised tuning (G), and 
-//						// transposition is needed. Transpose the initial key using the transposition interval 
-//						// obtained by comparing the provided tuning with G tuning.
-//						// (In the non-tablature case, predictedPiece is not normalised, and no transposition is needed)
-//						if (isTablatureCase) {
-//							Tuning tuning = Tuning.getTuning(cliOptsVals.get(CLInterface.TUNING));
-//							// The transposition interval is calculated from the highest open course; this works 
-//							// for both drop- and non-drop tuning
-//							int pitchHighestCourse = tuning.getPitchLowestCourse() + ToolBox.sumListInteger(tuning.getIntervals());
-//							int pitchHighestCourseG = Tuning.G.getPitchLowestCourse() + ToolBox.sumListInteger(Tuning.G.getIntervals());
-//							int transInt = pitchHighestCourse - pitchHighestCourseG;
-//							// Transpose the predicted Piece
-//							predictedPiece.transpose(transInt);
-//						}
-//					}
 
 					int md = Integer.valueOf(cliOptsVals.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
@@ -782,46 +774,10 @@ public class TestManager {
 					ht.add(km);
 					predictedPiece.setHarmonyTrack(ht);
 				}
-				
-//				// predictedPiece is only needed for creating predictedTranscr
-//				ScorePiece predictedPiece = 
-//					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
-//					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
-//				System.out.println(predictedPiece.getHarmonyTrack());
-//				System.out.println(predictedPiece.getHarmonyTrack().get(0));
-//				System.exit(0);
-
-//				// Transpose to undo normalised tuning
-//				// transposedTablature is only needed for MEIExport
-//				Tablature transposedTablature = null;
-//				if (deployTrainedUserModel) {
-//					if (tablature != null) {
-//						// The transposition interval is the interval needed to transpose from the given 
-//						// tuning to the normalised tuning, so it must now be negated
-//						int transInt = tablature.getTranspositionInterval();
-//						// Transpose the predicted Piece
-//						predictedPiece.transpose(-transInt);
-//						// Transpose the Tablature
-//						transposedTablature = new Tablature(encoding, false);
-//					}
-//				}
-
-//				Piece predictedPiece = // added 11.22
-//					Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
-//					allDurationLabels, highestNumVoicesTraining, mtl, ht, testPieceName);
 
 				Transcription predictedTranscr = new Transcription(
 					predictedPiece, encoding, allVoiceLabels, allDurationLabels, !deployTrainedUserModel ? true : false
 				);
-//				Transcription predictedTranscr = 
-//					new Transcription(testPieceName,	
-////					new Transcription(dataset.getAllMidiFiles().get(pieceIndex).getName(),	
-//					encodingFile, basicTabSymbolProperties, basicNoteProperties, highestNumVoicesTraining, 
-//					allVoiceLabels, allDurationLabels,
-//					mtl,
-////					groundTruthTranscription.getPiece().getMetricalTimeLine(),
-//					ht);
-//					groundTruthTranscription.getPiece().getHarmonyTrack());
 
 				// Set the colour indices for the predicted Transcription
 				List<List<Integer>> colInd = new ArrayList<>();
@@ -877,23 +833,10 @@ public class TestManager {
 				// from the stored MIDI file
 				Transcription tr = new Transcription(new File(expPath + MIDIImport.MID_EXT));
 				Tablature ta = !deployTrainedUserModel ? tablature : new Tablature(encoding, false); // non-transposed if deployTrainedUserModel
-//				if (isTablatureCase) {
-//					for (boolean grandStaff : new Boolean[]{true, false}) {
 				MEIExport.exportMEIFile(
-					tr,
-					ta,
-//					!deployTrainedUserModel ? tablature : transposedTablature,
-//					tablature,
-//					(!deployTrainedUserModel ? tablature : (cliOptsVals.get(CLInterface.TABLATURE).equals("y") ? tablature : null)),	
-//					(tablature != null) ? tablature.getBasicTabSymbolProperties() : null, mi, 
-//					tr.getKeyInfo(), (tablature != null) ? tablature.getTripletOnsetPairs() : null, 
-					colInd,
-					CLInterface.getTranscriptionParams(cliOptsVals),
-					paths,
-					new String[]{expPath, "abtab -- transcriber"}
+					tr, ta, colInd, CLInterface.getTranscriptionParams(cliOptsVals),
+					paths, new String[]{expPath, "abtab -- transcriber"}
 				);
-//					}
-//				}
 			}
 			if (!deployTrainedUserModel) {
 				System.out.println("... storing the test results ...");
