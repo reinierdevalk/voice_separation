@@ -709,7 +709,7 @@ public class TestManager {
 				// Set the HarmonyTrack
 				// TODO set the MetricalTimeLine?
 				if (deployTrainedUserModel) {
-					List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
+//					List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
 					String keyOpt = cliOptsVals.get(CLInterface.KEY);
 					String tunOpt = cliOptsVals.get(CLInterface.TUNING);
 					int numAlt;											
@@ -727,7 +727,8 @@ public class TestManager {
 						int transInt = pitchHighestCourse - pitchHighestCourseG;
 						// a. Calculate the key and transpose it
 						if (keyOpt.equals(CLInterface.INPUT)) {
-							numAlt = PitchKeyTools.detectKey(pitchClassCounts);
+							numAlt = PitchKeyTools.detectKey(predictedPiece);
+//							numAlt = PitchKeyTools.detectKey(pitchClassCounts);
 							if (transInt != 0) {
 								numAlt = PitchKeyTools.transposeKeySig(numAlt, transInt);
 							}
@@ -751,7 +752,8 @@ public class TestManager {
 					else {
 						// a. Calculate the key
 						if (keyOpt.equals(CLInterface.INPUT)) {
-							numAlt = PitchKeyTools.detectKey(pitchClassCounts);
+							numAlt = PitchKeyTools.detectKey(predictedPiece);
+//							numAlt = PitchKeyTools.detectKey(pitchClassCounts);
 						}
 						// b. Set the key directly
 						else {
