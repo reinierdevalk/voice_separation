@@ -13,6 +13,7 @@ import external.Tablature;
 import external.Transcription;
 import interfaces.CLInterface;
 import tools.ToolBox;
+import tools.text.StringTools;
 import ui.Runner;
 
 public class HMMManager {
@@ -77,11 +78,11 @@ public class HMMManager {
 		String folderName = 
 			"thesis/prl_2/" + ds.getName() + "/" + vv + "/" + "H/" + configuration; // TODO EB
 		
-		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
+		boolean dev = args.length == 0 ? true : args[CLInterface.DEV_IND].equals(String.valueOf(true));
 		Map<String, String> paths = CLInterface.getPaths(dev);
 
 		String ep = paths.get("EXPERIMENTS_PATH");
-		String experimentsPath = CLInterface.getPathString(Arrays.asList(ep));
+		String experimentsPath = StringTools.getPathString(Arrays.asList(ep));
 		
 //		String path = "F:/research/data" + HMMPath + folderName + "/data/";
 		String path = experimentsPath + folderName + "data/"; 

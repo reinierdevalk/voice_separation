@@ -19,6 +19,7 @@ import interfaces.CLInterface;
 import tbp.symbols.TabSymbol;
 import tools.ToolBox;
 import tools.labels.LabelTools;
+import tools.text.StringTools;
 
 public class FeatureGeneratorChordTest {
 
@@ -48,11 +49,11 @@ public class FeatureGeneratorChordTest {
 		
 		Map<String, String> paths = CLInterface.getPaths(true);
 		encodingTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test/5vv/")) + "testpiece.tbp"
 		);
 		midiTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test/5vv/")) + "testpiece.mid"
 		);
 

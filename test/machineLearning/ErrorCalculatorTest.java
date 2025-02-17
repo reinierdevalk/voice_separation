@@ -16,6 +16,7 @@ import java.util.Map;
 import machineLearning.ErrorCalculator;
 import tools.labels.LabelTools;
 import tools.labels.LabelToolsTest;
+import tools.text.StringTools;
 import de.uos.fmt.musitech.data.structure.Note;
 import de.uos.fmt.musitech.utility.math.Rational;
 import external.Transcription;
@@ -59,11 +60,11 @@ public class ErrorCalculatorTest {
 
 		Map<String, String> paths = CLInterface.getPaths(true);
 		midiTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test/5vv/")) + "testpiece.mid"
 		);
 		encodingTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test/5vv/")) + "testpiece.tbp"
 		);
 	}

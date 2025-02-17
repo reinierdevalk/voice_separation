@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import conversion.imports.MIDIImport;
+import conversion.imports.TabImport;
 import external.Tablature;
 import external.Transcription;
-import interfaces.CLInterface;
 import internal.core.Encoding;
+import internal.core.Encoding.Stage;
 import tools.ToolBox;
+import tools.text.StringTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 
@@ -149,6 +151,7 @@ public class Dataset implements Serializable {
 		if (argIsTablatureSet) {
 			allEncodingFiles = new ArrayList<>();
 			allTablatures = new ArrayList<>();
+			allStoreNames = new ArrayList<>();
 		}
 		allMidiFiles = new ArrayList<>();
 		allTranscriptions = new ArrayList<>();
@@ -165,49 +168,60 @@ public class Dataset implements Serializable {
 		if (!deployTrainedUserModel) {
 			String numVoices = getNumVoices() + Runner.voices + "/";
 			String name = getName();
-			argEncodingsPath = CLInterface.getPathString(
+			argEncodingsPath = StringTools.getPathString(
 				Arrays.asList(paths.get("ENCODINGS_PATH"), name, numVoices)
 			);
-			argMidiPath = CLInterface.getPathString(
+			argMidiPath = StringTools.getPathString(
 				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
 			);
-			argTabMidiPath = CLInterface.getPathString(
+			argTabMidiPath = StringTools.getPathString(
 				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
 			);
 		}
 		else {
-			argEncodingsPath = CLInterface.getPathString(
+			argEncodingsPath = StringTools.getPathString(
 				Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
 			);
-			argMidiPath = CLInterface.getPathString(
+			argMidiPath = StringTools.getPathString(
 				Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
 			);
 		}
 
 		// Set remaining class variables
-		for (String currPieceName : getPiecenames()) {
-			System.out.println("... creating " + currPieceName + " ...");
+		for (String currPiecename : getPiecenames()) {
+			System.out.println("... creating " + currPiecename + " ...");
 			// Get Tablature and Transcription
-			File encodingFile = null;
-			File midiFile = null;
+			String currPiecenameNoExt = ToolBox.splitExt(currPiecename)[0];
+			File currEncodingFile = null; // only used if !deployTrainedUserModel
+			File currMidiFile = null;
 			Tablature currTablature = null;
 			Transcription currTranscription = null;
 			if (isTablatureCase) {
-				encodingFile = new File(argEncodingsPath + currPieceName + Encoding.TBP_EXT);
+				// In the model dev case, currEncodingFile always exists as .tbp, and currTablature 
+				// can be created from it
 				if (!deployTrainedUserModel) {
-					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.MID_EXT);
+					currEncodingFile = new File(argEncodingsPath + currPiecename);
+					currTablature = new Tablature(currEncodingFile, true);
 				}
-				currTablature = new Tablature(encodingFile, true);
+				// In the real-world case, currEncodingFile may not exist as .tbp, and currTablature must
+				// be created from the raw encoding obtained from converting another format into .tbp 
+				else {
+					String rawEncoding = TabImport.convertToTbp(argEncodingsPath, currPiecename);
+					Encoding e = new Encoding(rawEncoding, currPiecenameNoExt, Stage.RULES_CHECKED);
+					currTablature = new Tablature(e, true);
+				}
+				if (!deployTrainedUserModel) {
+					currMidiFile = new File(argTabMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+				}
 			}
 			else {
-				midiFile = new File(argMidiPath + currPieceName + MIDIImport.MID_EXT);
+				currMidiFile = new File(argMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
 				if (isTabAsNonTab) {
-					midiFile = new File(argTabMidiPath + currPieceName + MIDIImport.MID_EXT);
+					currMidiFile = new File(argTabMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
 				}
 			}
 			currTranscription = 
-//				!deployTrainedUserModel ? new Transcription(midiFile, encodingFile) : null;
-				!deployTrainedUserModel ? new Transcription(true, midiFile, encodingFile) : null;
+				!deployTrainedUserModel ? new Transcription(true, currMidiFile, currEncodingFile) : null;
 
 //			if (isTabAsNonTab) {
 //				int currInterval = 0;
@@ -233,10 +247,10 @@ public class Dataset implements Serializable {
 
 			// Add to lists
 			if (isTablatureCase) {
-				allEncodingFiles.add(encodingFile);
+				allEncodingFiles.add(currEncodingFile);
 				allTablatures.add(currTablature);
 			}
-		 	allMidiFiles.add(midiFile);
+		 	allMidiFiles.add(currMidiFile);
 			allTranscriptions.add(currTranscription);
 			if (currLargestChordSize > largestChordSize) {
 				largestChordSize = currLargestChordSize;
@@ -325,7 +339,7 @@ public class Dataset implements Serializable {
 	public List<Tablature> getAllTablatures() {
 		return allTablatures; 
 	}
-
+	
 	public List<Transcription> getAllTranscriptions() {
 		return allTranscriptions; 
 	}
@@ -391,132 +405,132 @@ public class Dataset implements Serializable {
 
 	private static List<String> getThesisInt3vv() {
 		return Arrays.asList(new String[]{
-			"newsidler-1536_7-disant_adiu",
-			"newsidler-1536_7-mess_pensees",
-			"pisador-1552_7-pleni_de",
-			"judenkuenig-1523_2-elslein_liebes",
-			"newsidler-1544_2-nun_volget",
-			"phalese-1547_7-tant_que-3vv"
+			"newsidler-1536_7-disant_adiu.tbp",
+			"newsidler-1536_7-mess_pensees.tbp",
+			"pisador-1552_7-pleni_de.tbp",
+			"judenkuenig-1523_2-elslein_liebes.tbp",
+			"newsidler-1544_2-nun_volget.tbp",
+			"phalese-1547_7-tant_que-3vv.tbp"
 		});
 	}
 
 
 	private static List<String> getThesisInt4vv() { 
 		return Arrays.asList(new String[]{
-			"ochsenkun-1558_5-absolon_fili",
-			"ochsenkun-1558_5-in_exitu",
-			"ochsenkun-1558_5-qui_habitat",
-			"rotta-1546_15-bramo_morir",
-			"phalese-1547_7-tant_que-4vv",
-			"ochsenkun-1558_5-herr_gott",
-			"abondante-1548_1-mais_mamignone",
-			"phalese-1563_12-las_on",
-			"barbetta-1582_1-il_nest",
-//			"barbetta-1582_1-il_nest-corrected"
+			"ochsenkun-1558_5-absolon_fili.tbp",
+			"ochsenkun-1558_5-in_exitu.tbp",
+			"ochsenkun-1558_5-qui_habitat.tbp",
+			"rotta-1546_15-bramo_morir.tbp",
+			"phalese-1547_7-tant_que-4vv.tbp",
+			"ochsenkun-1558_5-herr_gott.tbp",
+			"abondante-1548_1-mais_mamignone.tbp",
+			"phalese-1563_12-las_on.tbp",
+			"barbetta-1582_1-il_nest.tbp",
+//			"barbetta-1582_1-il_nest-corrected.tbp"
 		});
 	}
 
 
 	private static List<String> getThesisInt5vv() { 
 		return Arrays.asList(new String[]{
-			"adriansen-1584_6-d_vn_si",
-			"ochsenkun-1558_5-inuiolata_integra"
+			"adriansen-1584_6-d_vn_si.tbp",
+			"ochsenkun-1558_5-inuiolata_integra.tbp"
 		});
 	}
 
 
 	private static List<String> getJosquinInt4vv() { 
 		return Arrays.asList(new String[]{
-			"5265_14_absalon_fili_me_desprez",
-			"5263_12_in_exitu_israel_de_egipto_desprez-1",
-			"5263_12_in_exitu_israel_de_egipto_desprez-2",
-//			"5263_12_in_exitu_israel_de_egipto_desprez-3", // m is too low (ternary section(s))
-			"4465_33-34_memor_esto-1",
-//			"4465_33-34_memor_esto-2", // m is too low (ternary section(s))
-			"1274_12_qui_habitat_in_adjutorio-1",
-			"1274_12_qui_habitat_in_adjutorio-2",
-			"5264_13_qui_habitat_in_adjutorio_desprez-1",
-			"5264_13_qui_habitat_in_adjutorio_desprez-2",
+			"5265_14_absalon_fili_me_desprez.tbp",
+			"5263_12_in_exitu_israel_de_egipto_desprez-1.tbp",
+			"5263_12_in_exitu_israel_de_egipto_desprez-2.tbp",
+//			"5263_12_in_exitu_israel_de_egipto_desprez-3.tbp", // m is too low (ternary section(s))
+			"4465_33-34_memor_esto-1.tbp",
+//			"4465_33-34_memor_esto-2.tbp", // m is too low (ternary section(s))
+			"1274_12_qui_habitat_in_adjutorio-1.tbp",
+			"1274_12_qui_habitat_in_adjutorio-2.tbp",
+			"5264_13_qui_habitat_in_adjutorio_desprez-1.tbp",
+			"5264_13_qui_habitat_in_adjutorio_desprez-2.tbp",
 			//
-			"4471_40_cum_sancto_spiritu",
-			"5266_15_cum_sancto_spiritu_desprez",
-			"5106_10_misa_de_faysan_regres_2_gloria",
-			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-1",
-			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-2",		
-			"5188_15_sanctus_and_hosanna_from_missa_hercules-1",
-			"5188_15_sanctus_and_hosanna_from_missa_hercules-2",
-			"5190_17_cum_spiritu_sanctu_from_missa_sine_nomine",
+			"4471_40_cum_sancto_spiritu.tbp",
+			"5266_15_cum_sancto_spiritu_desprez.tbp",
+			"5106_10_misa_de_faysan_regres_2_gloria.tbp",
+			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-1.tbp",
+			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-2.tbp",		
+			"5188_15_sanctus_and_hosanna_from_missa_hercules-1.tbp",
+			"5188_15_sanctus_and_hosanna_from_missa_hercules-2.tbp",
+			"5190_17_cum_spiritu_sanctu_from_missa_sine_nomine.tbp",
 			//
-			"4400_45_ach_unfall_was",
-			"4481_49_ach_unfal_wes_zeigst_du_mich",
-			"4406_51_adieu_mes_amours",
-			"4467_37_adieu_mes_amours", // m is too low
-			"1025_adieu_mes_amours",
-			"1030_coment_peult_avoir_joye",		
-			"5191_18_mille_regres",
-			"4482_50_mille_regrets_P",
-			"4469_39_plus_nulz_regrets_P", // Chord at bar 57 has 3* MIDI pitch 60 --> remove from Altus
-			"922_milano_098_que_voulez_vous_dire_de_moi"	
+			"4400_45_ach_unfall_was.tbp",
+			"4481_49_ach_unfal_wes_zeigst_du_mich.tbp",
+			"4406_51_adieu_mes_amours.tbp",
+			"4467_37_adieu_mes_amours.tbp", // m is too low
+			"1025_adieu_mes_amours.tbp",
+			"1030_coment_peult_avoir_joye.tbp",		
+			"5191_18_mille_regres.tbp",
+			"4482_50_mille_regrets_P.tbp",
+			"4469_39_plus_nulz_regrets_P.tbp", // Chord at bar 57 has 3* MIDI pitch 60 --> remove from Altus
+			"922_milano_098_que_voulez_vous_dire_de_moi.tbp"	
 				
-//			"ochsenkun-1558_5-absolon_fili",
-//			"ochsenkun-1558_5-in_exitu",
-//			"ochsenkun-1558_5-qui_habitat",
-//			"rotta-1546_15-bramo_morir",
-//			"phalese-1547_7-tant_que-4vv",
-//			"ochsenkun-1558_5-herr_gott",
-//			"abondante-1548_1-mais_mamignone",
-//			"phalese-1563_12-las_on",
-//			"barbetta-1582_1-il_nest",
+//			"ochsenkun-1558_5-absolon_fili.tbp",
+//			"ochsenkun-1558_5-in_exitu.tbp",
+//			"ochsenkun-1558_5-qui_habitat.tbp",
+//			"rotta-1546_15-bramo_morir.tbp",
+//			"phalese-1547_7-tant_que-4vv.tbp",
+//			"ochsenkun-1558_5-herr_gott.tbp",
+//			"abondante-1548_1-mais_mamignone.tbp",
+//			"phalese-1563_12-las_on.tbp",
+//			"barbetta-1582_1-il_nest.tbp",
 // 			//	
-//			"5265_14_absalon_fili_me_desprez-cropped",
-//			"5263_12_in_exitu_israel_de_egipto_desprez-1-cropped",
-//			"5263_12_in_exitu_israel_de_egipto_desprez-2-cropped",
-////			"5263_12_in_exitu_israel_de_egipto_desprez-3", // m is too low (ternary section(s))
-//			"4465_33-34_memor_esto-1-cropped",
-////			"4465_33-34_memor_esto-2", // m is too low (ternary section(s))
-//			"1274_12_qui_habitat_in_adjutorio-1-cropped",
-//			"1274_12_qui_habitat_in_adjutorio-2-cropped",
-//			"5264_13_qui_habitat_in_adjutorio_desprez-1-cropped",
-//			"5264_13_qui_habitat_in_adjutorio_desprez-2-cropped",
+//			"5265_14_absalon_fili_me_desprez-cropped.tbp",
+//			"5263_12_in_exitu_israel_de_egipto_desprez-1-cropped.tbp",
+//			"5263_12_in_exitu_israel_de_egipto_desprez-2-cropped.tbp",
+////			"5263_12_in_exitu_israel_de_egipto_desprez-3.tbp", // m is too low (ternary section(s))
+//			"4465_33-34_memor_esto-1-cropped.tbp",
+////			"4465_33-34_memor_esto-2.tbp", // m is too low (ternary section(s))
+//			"1274_12_qui_habitat_in_adjutorio-1-cropped.tbp",
+//			"1274_12_qui_habitat_in_adjutorio-2-cropped.tbp",
+//			"5264_13_qui_habitat_in_adjutorio_desprez-1-cropped.tbp",
+//			"5264_13_qui_habitat_in_adjutorio_desprez-2-cropped.tbp",
 //			//
-//			"4471_40_cum_sancto_spiritu-cropped",
-//			"5266_15_cum_sancto_spiritu_desprez-cropped",
-//			"5106_10_misa_de_faysan_regres_2_gloria-cropped",
-//			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-1-cropped",
-//			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-2-cropped",		
-//			"5188_15_sanctus_and_hosanna_from_missa_hercules-1-cropped",
-//			"5188_15_sanctus_and_hosanna_from_missa_hercules-2-cropped",
-//			"5190_17_cum_spiritu_sanctu_from_missa_sine_nomine-cropped",
+//			"4471_40_cum_sancto_spiritu-cropped.tbp",
+//			"5266_15_cum_sancto_spiritu_desprez-cropped.tbp",
+//			"5106_10_misa_de_faysan_regres_2_gloria-cropped.tbp",
+//			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-1-cropped.tbp",
+//			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-2-cropped.tbp",		
+//			"5188_15_sanctus_and_hosanna_from_missa_hercules-1-cropped.tbp",
+//			"5188_15_sanctus_and_hosanna_from_missa_hercules-2-cropped.tbp",
+//			"5190_17_cum_spiritu_sanctu_from_missa_sine_nomine-cropped.tbp",
 //			//
-//			"4400_45_ach_unfall_was-cropped",
-//			"4481_49_ach_unfal_wes_zeigst_du_mich-cropped",
-//			"4406_51_adieu_mes_amours-cropped",
-////			"4467_37_adieu_mes_amours", // m is too low
-//			"1025_adieu_mes_amours-cropped",
-//			"1030_coment_peult_avoir_joye-cropped",		
-//			"5191_18_mille_regres-cropped",
-//			"4482_50_mille_regrets_P-cropped",
-//			"4469_39_plus_nulz_regrets_P-cropped", // Chord at bar 57 contains three C4 (MIDIpitch 60): removed from Altus
-//			"922_milano_098_que_voulez_vous_dire_de_moi-cropped"
+//			"4400_45_ach_unfall_was-cropped.tbp",
+//			"4481_49_ach_unfal_wes_zeigst_du_mich-cropped.tbp",
+//			"4406_51_adieu_mes_amours-cropped.tbp",
+////			"4467_37_adieu_mes_amours.tbp", // m is too low
+//			"1025_adieu_mes_amours-cropped.tbp",
+//			"1030_coment_peult_avoir_joye-cropped.tbp",		
+//			"5191_18_mille_regres-cropped.tbp",
+//			"4482_50_mille_regrets_P-cropped.tbp",
+//			"4469_39_plus_nulz_regrets_P-cropped.tbp", // Chord at bar 57 contains three C4 (MIDIpitch 60): removed from Altus
+//			"922_milano_098_que_voulez_vous_dire_de_moi-cropped.tbp"
 		});
 	}
 
 
 	private static List<String> getByrdInt4vv() { 
 		return Arrays.asList(new String[]{
-			"ah_golden_hairs-NEW",
-			"an_aged_dame-II",
-			"as_caesar_wept-II",
-			"blame_i_confess-II",
-			"in_angels_weed-II",
-			"o_lord_bow_down-II",
-			"o_that_we_woeful_wretches-NEW",
-			"quis_me_statim-II",
-			"rejoyce_unto_the_lord-NEW",
-			"sith_death-NEW",
-			"the_lord_is_only_my_support-NEW",
-			"the_man_is_blest-NEW",
-			"while_phoebus-II"
+			"ah_golden_hairs-NEW.tbp",
+			"an_aged_dame-II.tbp",
+			"as_caesar_wept-II.tbp",
+			"blame_i_confess-II.tbp",
+			"in_angels_weed-II.tbp",
+			"o_lord_bow_down-II.tbp",
+			"o_that_we_woeful_wretches-NEW.tbp",
+			"quis_me_statim-II.tbp",
+			"rejoyce_unto_the_lord-NEW.tbp",
+			"sith_death-NEW.tbp",
+			"the_lord_is_only_my_support-NEW.tbp",
+			"the_man_is_blest-NEW.tbp",
+			"while_phoebus-II.tbp"
 		});
 	}
 

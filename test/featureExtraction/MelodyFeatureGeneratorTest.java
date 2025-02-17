@@ -16,6 +16,7 @@ import de.uos.fmt.musitech.utility.math.Rational;
 import external.Tablature;
 import external.Transcription;
 import interfaces.CLInterface;
+import tools.text.StringTools;
 
 public class MelodyFeatureGeneratorTest {
 
@@ -28,11 +29,11 @@ public class MelodyFeatureGeneratorTest {
 	public void setUp() throws Exception {
 		Map<String, String> paths = CLInterface.getPaths(true);
 		midiTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), "test")) + 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), "test")) + 
 			"testpiece.mid"
 		);
 		encodingTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), "test")) + 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), "test")) + 
 			"testpiece.tbp"
 		);
 	}

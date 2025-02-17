@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import conversion.imports.MIDIImport;
 import data.Dataset;
 import de.uos.fmt.musitech.data.score.NotationStaff;
 import de.uos.fmt.musitech.data.score.NotationVoice;
@@ -21,8 +22,8 @@ import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
-import interfaces.CLInterface;
 import interfaces.PythonInterface;
+import internal.core.Encoding;
 import machinelearning.NNManager;
 import machinelearning.RelativeTrainingExample;
 import machinelearning.NNManager.ActivationFunction;
@@ -30,6 +31,7 @@ import tbp.symbols.RhythmSymbol;
 import tbp.symbols.Symbol;
 import tools.ToolBox;
 import tools.labels.LabelTools;
+import tools.text.StringTools;
 import ui.Runner;
 import ui.UI;
 import ui.Runner.DecisionContext;
@@ -137,6 +139,7 @@ public class TrainingManager {
 		System.out.println(ToolBox.sumListInteger(pieceSizes));
 		for (int i = 0; i < datasetSize; i++) {
 			String currPieceName = pieceNames.get(i);
+			String currPieceNameNoExt = ToolBox.splitExt(currPieceName)[0];
 //			System.out.println(currPieceName);
 			Tablature currTab = 
 				dataset.isTablatureSet() ? dataset.getAllTablatures().get(i) : null;			
@@ -252,7 +255,7 @@ public class TrainingManager {
 							"fold_" + ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex));
 						predTranscr = ToolBox.getStoredObjectBinary(
 							new Transcription(), new File(pathPredTransFirstPass + Runner.OUTPUT_DIR + 
-							foldStr + "-" + currPieceName + ".ser")
+							foldStr + "-" + currPieceNameNoExt + ".ser")
 						);
 					}
 					else {
@@ -776,8 +779,8 @@ public class TrainingManager {
 				else {
 					pieceSizes.add(currTrans.getNumberOfNotes());
 				}
-				
-				int indexInAll = dataset.getPiecenames().indexOf(currTrans.getName());
+
+				int	indexInAll = dataset.getPiecenames().indexOf(currTrans.getName() + (isTablatureCase ? Encoding.TBP_EXT : MIDIImport.MID_EXT));
 				if (verbose) System.out.println("i = " + i);
 //				if (verbose) System.out.println("piece = " + currTab.getName());
 				if (verbose) System.out.println("piece = " + currTrans.getName());
@@ -1433,7 +1436,7 @@ public class TrainingManager {
 					String[] cmd;
 					boolean isScikit = false;
 					boolean smoothen = false;
-					String pp = CLInterface.getPathString(
+					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
 					// For scikit (ISMIR 2017)

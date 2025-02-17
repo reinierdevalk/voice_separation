@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import interfaces.CLInterface;
+import tools.text.StringTools;
 import ui.Runner.ModellingApproach;
 
 import java.io.File;
@@ -26,15 +27,15 @@ public class DatasetTest {
 	@Before
 	public void setUp() throws Exception {
 		paths = CLInterface.getPaths(true);
-		encodingsPath = CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
-		midiPath = CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
+		encodingsPath = StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+		midiPath = StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
 		
 		encodingTestpiece = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test/5vv/")) + "testpiece.tbp"
 		);
 		midiTestpiece = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test/5vv/")) + "testpiece.mid"
 		);
 	}

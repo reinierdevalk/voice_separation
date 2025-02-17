@@ -32,6 +32,7 @@ import internal.core.ScorePiece;
 import tools.ToolBox;
 import tools.labels.LabelTools;
 import tools.labels.LabelToolsTest;
+import tools.text.StringTools;
 import ui.Runner;
 import ui.Runner.Model;
 import ui.Runner.ProcessingMode;
@@ -77,23 +78,23 @@ public class TestManagerTest {
 
 		paths = CLInterface.getPaths(true);
 		encodingTestpiece = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test", "5vv")) + "testpiece.tbp"
 		);
 		midiTestpiece = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test", "5vv")) + "testpiece.mid"
 		);
 		encodingTestResolveConflicts = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test", "5vv")) + "test_resolve_conflicts.tbp"
 		);
 		midiTestResolveConflicts = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test", "5vv")) + "test_resolve_conflicts.mid"
 		);
 		midiTestResolveConflictsNonTab = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test", "5vv")) + "test_resolve_conflicts_non_tab.mid"
 		);
 

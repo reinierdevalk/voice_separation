@@ -50,6 +50,7 @@ import tools.ToolBox;
 import tools.labels.LabelTools;
 import tools.music.PitchKeyTools;
 import tools.music.TimeMeterTools;
+import tools.text.StringTools;
 import ui.Runner;
 import ui.UI;
 import ui.Runner.Configuration;
@@ -315,8 +316,9 @@ public class TestManager {
 
 		ModellingApproach ma = 
 			Runner.ALL_MODELLING_APPROACHES[modelParameters.get(Runner.MODELLING_APPROACH).intValue()];		
-		boolean modelDurationAgain = 
-			ToolBox.toBoolean(modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue());
+		boolean modelDurationAgain = ToolBox.toBoolean(
+			modelParameters.get(Runner.MODEL_DURATION_AGAIN).intValue()
+		);
 		boolean deployTrainedUserModel = Runner.getDeployTrainedUserModel();
 		int highestNumVoicesTraining = Runner.getHighestNumVoicesTraining(deployTrainedUserModel);
 //			ToolBox.toBoolean(modelParameters.get(Runner.DEPLOY_TRAINED_USER_MODEL).intValue());
@@ -325,12 +327,11 @@ public class TestManager {
 		ModelType mt = m.getModelType();
 		DecisionContext dc = m.getDecisionContext(); 
 		boolean modelDuration = m.getModelDuration();	
-		ProcessingMode pm = 
-			Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
+		ProcessingMode pm = Runner.ALL_PROC_MODES[modelParameters.get(Runner.PROC_MODE).intValue()];
 		boolean isTablatureCase = Runner.getDataset().isTablatureSet();
 		int mnv = Transcription.MAX_NUM_VOICES;
 		int mtsd = Transcription.MAX_TABSYMBOL_DUR;
-		
+
 //		FeatureVector featVec = 
 //			Runner.ALL_FEATURE_VECTORS[modelParameters.get(Runner.FEAT_VEC).intValue()];
 		List<Integer> sliceIndices = null;
@@ -343,21 +344,27 @@ public class TestManager {
 			ns = ToolBox.decodeListOfIntegers(modelParameters.get(Runner.NS_ENC_SINGLE_DIGIT).intValue(), 1);
 		}
 
+		// Make local copy of cliOptsVals so that INPUT values do not get overwritten when this 
+		// method is called in a loop
+		Map<String, String> cliOptsValsLocal = new LinkedHashMap<>(cliOptsVals);
+
 		String storePath = runnerPaths.get(UI.STORE_PATH);
-//		String storePath = argPaths[0];
 		String pathPredTransFirstPass = runnerPaths.get(UI.FIRST_PASS_PATH);
-//		String pathPredTransFirstPass = argPaths[1];
 		String pathTrainedUserModel = runnerPaths.get(UI.TRAINED_USER_MODEL_PATH);
-//		String pathTrainedUserModel = argPaths[2];
 		String pathStoredNN = runnerPaths.get(UI.STORED_NN_PATH);
-//		String pathStoredNN = argPaths[3];
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
-		String testPieceName = dataset.getPiecenames().get(pieceIndex);
+		List<String> pieceNames = dataset.getPiecenames();
+		List<String> pieceNamesNoExt = StringTools.removeExtensions(pieceNames);
+		String testPieceName = pieceNames.get(pieceIndex); // name of piece, w/ extension. needed for ExportMEIFile() (2nd arg)
+		String testPieceNameNoExt = ToolBox.splitExt(testPieceName)[0]; // name of piece, w/o extension. needed for ScorePiece (only setting name)
+		String storeName = // needed for all files that are stored (.mei, .mid, .ser); gets an extension 
+			Collections.frequency(pieceNamesNoExt, testPieceNameNoExt) > 1 ? testPieceName : testPieceNameNoExt;
+
 		prcRcl += "fold = " + fold + "; piece = " + testPieceName;
-		
+
 		System.out.println("... processing " + testPieceName + " ...");
-	
+
 		// 1. Set tablature and GT transcription as well as derived information
 		if (isTablatureCase) {
 			tablature = dataset.getAllTablatures().get(pieceIndex);
@@ -370,7 +377,6 @@ public class TestManager {
 		if (isTablatureCase) {
 			basicTabSymbolProperties = tablature.getBasicTabSymbolProperties();
 			meterInfo = tablature.getMeterInfo();
-//			meterInfo = tablature.getTimeline().getMeterInfoOBS();
 			Timeline tl = tablature.getEncoding().getTimeline();
 			for (int j = 0; j < basicTabSymbolProperties.length; j++) {
 				allMetricPositions.add(
@@ -389,13 +395,13 @@ public class TestManager {
 //			System.out.println("... creating ground truth transcription ...");
 			if (dataset.isTabAsNonTabSet()) {
 				int currInterval = 0;
-				if (testPieceName.equals("ochsenkun-1558-absolon_fili-shorter")) {
+				if (storeName.equals("ochsenkun-1558-absolon_fili-shorter")) {
 					currInterval = 7;
 				}
-				else if (testPieceName.equals("rotta-1546-bramo_morir")) {
+				else if (storeName.equals("rotta-1546-bramo_morir")) {
 					currInterval = -2;
 				}
-				else if (testPieceName.equals("phalese-1563-las_on")) {
+				else if (storeName.equals("phalese-1563-las_on")) {
 					currInterval = -2;
 				}
 				groundTruthTranscription.transposeNonTab(currInterval);
@@ -403,7 +409,7 @@ public class TestManager {
 			basicNoteProperties = groundTruthTranscription.getBasicNoteProperties();
 			meterInfo = groundTruthTranscription.getMeterInfo();
 //			keyInfo = groundTruthTranscription.getKeyInfo(); // added 05.12
-			MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
+//			MetricalTimeLine mtl = groundTruthTranscription.getScorePiece().getMetricalTimeLine();
 			ScoreMetricalTimeLine smtl = groundTruthTranscription.getScorePiece().getScoreMetricalTimeLine();
 			for (int j = 0; j < basicNoteProperties.length; j++) {
 				allMetricPositions.add(
@@ -504,18 +510,20 @@ public class TestManager {
 			if (m == Model.B_STAR || m == Model.B_PRIME_STAR) {
 				predictedTranscription = groundTruthTranscription;
 			}
-			else {		
+			else {
 				if (!deployTrainedUserModel) { // zondag
 					predictedTranscription =	
 						ToolBox.getStoredObjectBinary(new Transcription(), 
 						new File((new File(pathPredTransFirstPass)).getParent() + "/" + 
 						Runner.OUTPUT_DIR + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
-						"-" + testPieceName + ".ser"));
+						"-" + storeName + ".ser"));
+//						"-" + testPieceNameNoExt + ".ser"));
 				}
 				else {
 					predictedTranscription =	
-						ToolBox.getStoredObjectBinary(new Transcription(), 
-						new File(pathPredTransFirstPass + testPieceName + ".ser"));			
+						ToolBox.getStoredObjectBinary(new Transcription(),
+						new File(pathPredTransFirstPass + storeName + ".ser"));
+//						new File(pathPredTransFirstPass + testPieceNameNoExt + ".ser"));
 				}
 			}
 		}
@@ -682,7 +690,7 @@ public class TestManager {
 //					ToolBox.storeTextFile(strCE, new File(storePath + "overall_CE-appl-NEW.txt"));
 //				}
 //			}
-			
+
 			// Store the predicted Transcription	
 			if ((mode == Runner.TEST && m.getDecisionContext() == DecisionContext.BIDIR) ||
 				mode == Runner.TEST && ma == ModellingApproach.HMM || mode == Runner.APPL) {
@@ -692,26 +700,24 @@ public class TestManager {
 				SortedContainer<Marker> ht =
 					!deployTrainedUserModel ? groundTruthTranscription.getScorePiece().getHarmonyTrack() :
 					new SortedContainer<Marker>(null, Marker.class, new MetricalComparator());
-					
+
 				// encoding and predictedPiece are needed to make Transcription and Tablature given to MEIExport()
-				Encoding encoding =
-					isTablatureCase ? new Encoding(dataset.getAllEncodingFiles().get(pieceIndex)) : null;
+				Encoding encoding = isTablatureCase ? tablature.getEncoding() : null;
 				ScorePiece predictedPiece =
 					new ScorePiece(basicTabSymbolProperties, basicNoteProperties, allVoiceLabels, 
-					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceName);
+					allDurationLabels, mtl, ht, highestNumVoicesTraining, testPieceNameNoExt);
 
 				if (isTablatureCase) {
-					cliOptsVals = CLInterface.setPieceSpecificTransParams(
-						cliOptsVals, tablature, !deployTrainedUserModel ? "transcriber-dev" : "transcriber"
+					cliOptsValsLocal = CLInterface.setPieceSpecificTransParams(
+						cliOptsValsLocal, tablature, !deployTrainedUserModel ? "transcriber-dev" : "transcriber"
 					);
 				}
 
 				// Set the HarmonyTrack
 				// TODO set the MetricalTimeLine?
 				if (deployTrainedUserModel) {
-//					List<Integer> pitchClassCounts = PitchKeyTools.getPitchClassCount(predictedPiece);
-					String keyOpt = cliOptsVals.get(CLInterface.KEY);
-					String tunOpt = cliOptsVals.get(CLInterface.TUNING);
+					String keyOpt = cliOptsValsLocal.get(CLInterface.KEY);
+					String tunOpt = cliOptsValsLocal.get(CLInterface.TUNING);
 					int numAlt;											
 					// predictedPiece is normalised (to G tuning), and transposition is needed
 					if (isTablatureCase) {
@@ -727,8 +733,7 @@ public class TestManager {
 						int transInt = pitchHighestCourse - pitchHighestCourseG;
 						// a. Calculate the key and transpose it
 						if (keyOpt.equals(CLInterface.INPUT)) {
-							numAlt = PitchKeyTools.detectKey(predictedPiece);
-//							numAlt = PitchKeyTools.detectKey(pitchClassCounts);
+							numAlt = PitchKeyTools.detectKey(predictedPiece, null);
 							if (transInt != 0) {
 								numAlt = PitchKeyTools.transposeKeySig(numAlt, transInt);
 							}
@@ -752,8 +757,7 @@ public class TestManager {
 					else {
 						// a. Calculate the key
 						if (keyOpt.equals(CLInterface.INPUT)) {
-							numAlt = PitchKeyTools.detectKey(predictedPiece);
-//							numAlt = PitchKeyTools.detectKey(pitchClassCounts);
+							numAlt = PitchKeyTools.detectKey(predictedPiece, null);
 						}
 						// b. Set the key directly
 						else {
@@ -761,7 +765,7 @@ public class TestManager {
 						}
 					}
 
-					int md = Integer.valueOf(cliOptsVals.get(CLInterface.MODE));
+					int md = Integer.valueOf(cliOptsValsLocal.get(CLInterface.MODE));
 					String[] rra = PitchKeyTools.getRootAndRootAlteration(numAlt, md);
 					KeyMarker km = new KeyMarker(Rational.ZERO, (long) 0.0);
 					// F minor -- 4640_10_quand_mon_mari_lasso
@@ -823,21 +827,23 @@ public class TestManager {
 					dir = !deployTrainedUserModel ? storePath + Runner.OUTPUT_DIR : storePath;
 				}
 				if (!deployTrainedUserModel) {
-					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + testPieceName + ".ser"));
+					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + storeName + ".ser"));
 				}
 
-				String expPath = dir + testPieceName;
-				
 				List<Integer> instruments = Arrays.asList(new Integer[]{MIDIExport.TRUMPET});
 				MIDIExport.exportMidiFile(predictedTranscr.getScorePiece(), instruments, meterInfo, 
-					predictedTranscr.getKeyInfo(), expPath + MIDIImport.MID_EXT);
+					predictedTranscr.getKeyInfo(), dir + storeName + MIDIImport.MID_EXT);
 				// MEIExport requires a Transcription with bnp -- so this Transcription must be recreated  
 				// from the stored MIDI file
-				Transcription tr = new Transcription(new File(expPath + MIDIImport.MID_EXT));
+				Transcription tr = new Transcription(new File(dir + storeName + MIDIImport.MID_EXT));
 				Tablature ta = !deployTrainedUserModel ? tablature : new Tablature(encoding, false); // non-transposed if deployTrainedUserModel
 				MEIExport.exportMEIFile(
-					tr, ta, colInd, CLInterface.getTranscriptionParams(cliOptsVals),
-					paths, new String[]{expPath, "abtab -- transcriber"}
+					tr, ta, colInd, CLInterface.getTranscriptionParams(cliOptsValsLocal),
+					paths, new String[]{
+						dir + storeName + MEIExport.MEI_EXT, 
+						testPieceName, 
+						"abtab -- transcriber"
+					}
 				);
 			}
 			if (!deployTrainedUserModel) {
@@ -1167,7 +1173,7 @@ public class TestManager {
 		ToolBox.storeListOfListsAsCSVFile(observations, 
 			new File(path + Runner.observations + ".csv"));
 
-		String mp = CLInterface.getPathString(
+		String mp = StringTools.getPathString(
 			Arrays.asList(paths.get("VOICE_SEP_MATLAB_PATH"))
 		);
 		
@@ -1334,6 +1340,7 @@ public class TestManager {
 
 		int pieceIndex = useCV ? (dataset.getNumPieces() - fold) : fold;
 		String testPieceName = dataset.getPiecenames().get(pieceIndex);
+		String testPieceNameNoExt = ToolBox.splitExt(testPieceName)[0]; // name of piece, w/o extension. needed for ScorePiece (only setting name)
 		prcRcl += " -- tst" + "\r\n";
 
 		// 1.  Calculate features, get networkoutputs, determine predicted voices (and durations)
@@ -1378,14 +1385,15 @@ public class TestManager {
 						List<List<Double>> updatedVoiceLabels = null;
 						List<List<Double>> updatedDurationLabels = predictedTranscription.getDurationLabels();
 						// Recreate predictedTranscription
-						File encodingFile = 
-							isTablatureCase ? dataset.getAllEncodingFiles().get(pieceIndex) : null;
-						Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
+//						File encodingFile = 
+//							isTablatureCase ? dataset.getAllEncodingFiles().get(pieceIndex) : null;	
+//						Encoding encoding = encodingFile != null ? new Encoding(encodingFile) : null; // added 11.22
+						Encoding encoding = isTablatureCase ? tablature.getEncoding() : null;
 						ScorePiece predictedPiece = 
 							new ScorePiece(basicTabSymbolProperties, basicNoteProperties, updatedVoiceLabels, 
 							updatedDurationLabels, groundTruthTranscription.getScorePiece().getMetricalTimeLine(),
 							groundTruthTranscription.getScorePiece().getHarmonyTrack(), highestNumVoicesTraining, 
-							testPieceName);
+							testPieceNameNoExt);
 //						Piece predictedPiece = // added 11.22
 //							Transcription.createPiece(basicTabSymbolProperties, basicNoteProperties, 
 //							updatedVoiceLabels, updatedDurationLabels, highestNumVoicesTraining, 
@@ -1489,7 +1497,7 @@ public class TestManager {
 					// Apply the model
 					String[] cmd;
 					boolean isScikit = false;
-					String pp = CLInterface.getPathString(
+					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
 					// For scikit (ISMIR 2017)
@@ -3727,7 +3735,7 @@ public class TestManager {
 				// Create commands to pass to IPython
 				String cmds = "";
 				boolean isScikit = false;
-				String pp = CLInterface.getPathString(
+				String pp = StringTools.getPathString(
 					Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 				);
 				// For scikit (ISMIR 2017)

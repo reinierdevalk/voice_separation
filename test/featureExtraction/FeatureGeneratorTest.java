@@ -24,6 +24,7 @@ import internal.core.Encoding;
 import internal.core.ScorePiece;
 import tools.ToolBox;
 import tools.labels.LabelTools;
+import tools.text.StringTools;
 import ui.Runner;
 import ui.Runner.ModellingApproach;
 import ui.Runner.ProcessingMode;
@@ -62,11 +63,11 @@ public class FeatureGeneratorTest {
 
 		Map<String, String> paths = CLInterface.getPaths(true);
 		midiTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test/5vv/")) + "testpiece.mid"
 		);
 		encodingTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test/5vv/")) + "testpiece.tbp"
 		);
 	}
@@ -80,11 +81,11 @@ public class FeatureGeneratorTest {
 		String pieceName = "Barbetta 1582 - Il nest plaisir";
 		Map<String, String> paths = CLInterface.getPaths(true);
 		File midiFile = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"4vv")) + pieceName
 		);
 		File encodingFile = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"4vv")) + pieceName + Encoding.TBP_EXT
 		);
 

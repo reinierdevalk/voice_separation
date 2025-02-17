@@ -19,6 +19,7 @@ import external.Transcription;
 import interfaces.CLInterface;
 import machinelearning.RelativeTrainingExample;
 import tools.labels.LabelTools;
+import tools.text.StringTools;
 import ui.Runner;
 import ui.Runner.FeatureVector;
 import ui.Runner.ModellingApproach;
@@ -52,11 +53,11 @@ public class TrainingManagerTest {
 
 		Map<String, String> paths = CLInterface.getPaths(true);
 		encodingTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
 			"test/5vv/")) + "testpiece.tbp"
 		);
 		midiTestpiece1 = new File(
-			CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
+			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
 			"test/5vv/")) + "testpiece.mid"
 		);
 

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import n_grams.KylmModel;
 import tools.ToolBox;
+import tools.text.StringTools;
 import ui.Runner;
 import de.uos.fmt.musitech.data.score.NotationSystem;
 import de.uos.fmt.musitech.data.score.NotationVoice;
@@ -73,11 +74,11 @@ public class MelodyFeatureGenerator {
 //		List<String> pieceNames = Dataset.getBachFourVoiceFugues();
 //		String set = "fugues_4vv";
 		
-		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
+		boolean dev = args.length == 0 ? true : args[CLInterface.DEV_IND].equals(String.valueOf(true));
 		Map<String, String> paths = CLInterface.getPaths(dev);
 		
-		String ep = CLInterface.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
-		String mp = CLInterface.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
+		String ep = StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH")));
+		String mp = StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH")));
 		for (String s : pieceNames) {		
 			Integer[][] btp = null;
 			File encoding = null;

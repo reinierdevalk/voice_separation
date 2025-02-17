@@ -12,7 +12,6 @@ import data.Dataset;
 import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator;
-import interfaces.CLInterface;
 import machineLearning.EvaluationManager;
 import machineLearning.MelodyPredictor;
 import machineLearning.TestManager;
@@ -20,6 +19,7 @@ import machineLearning.TrainingManager;
 import machinelearning.NNManager;
 import n_grams.KylmModel;
 import tools.ToolBox;
+import tools.text.StringTools;
 
 public class Runner {
 
@@ -999,7 +999,7 @@ public class Runner {
 		System.out.println("\ncreating the dataset.");
 		Dataset ds = getDataset();
 		if (!deployTrainedUserModel) {
-			String dp = CLInterface.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
+			String dp = StringTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
 			File datasetFile = new File(dp + ds.getDatasetID() + ".ser");
 //			File datasetFile = new File(storedDatasetsPath + ds.getDatasetID() + ".ser");
 			if (!datasetFile.exists()) {

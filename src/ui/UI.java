@@ -47,7 +47,7 @@ public class UI {
 	public final static String STORED_MM_PATH = "STORED_MM_PATH";
 
 	public static void main(String[] args) throws IOException {
-		boolean dev = args.length == 0 ? true : args[0].equals(String.valueOf(true));
+		boolean dev = args.length == 0 ? true : args[CLInterface.DEV_IND].equals(String.valueOf(true));
 		Map<String, String> paths = CLInterface.getPaths(dev);
 		
 //		for (Map.Entry<String, String> entry : paths.entrySet()) {
@@ -82,8 +82,8 @@ public class UI {
 			repeat = true;
 			gridSearch = false;
 			skipTraining = true;
-//			modelDevDir = "thesis/exp_3.3.1/" + "thesis-int/3vv/" + "B/fwd/";
-			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
+			modelDevDir = "thesis/exp_3.3.1/thesis-int/3vv/B/fwd/";
+//			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
 			hyperparamsDir = "";
 //			hyperparamsDir = "HL=2/HLS=66/KP=0.875-no_heur/"; 
 //			hyperparamsDir = "cnf=" + config.getStringRep();
@@ -109,7 +109,7 @@ public class UI {
 			cliOptsVals.put(CLInterface.PLACEMENT, "b");
 
 			// Get paths, datasets, modelParams, and metrics
-			String jsonPath = CLInterface.getPathString(
+			String jsonPath = StringTools.getPathString(
 				mode == Mode.MODEL_DEV ? Arrays.asList(paths.get("EXPERIMENTS_PATH"), modelDevDir + hyperparamsDir) :
 				Arrays.asList(paths.get("MODELS_PATH"), userModelDir)
 			);
@@ -147,7 +147,7 @@ public class UI {
 					double keepProbability = combination.get(2);
 					modelParams.put(Runner.KEEP_PROB, keepProbability);
 
-					hyperparamsDir = CLInterface.getPathString(Arrays.asList(
+					hyperparamsDir = StringTools.getPathString(Arrays.asList(
 						"LR=" + alpha, 
 						"HL=" + hiddenLayers, 
 						"HLS=" + hiddenLayerSize, 
@@ -250,7 +250,7 @@ public class UI {
 		else {
 			// Parse CLI args and set variables
 			List<Object> parsed = CLInterface.parseCLIArgs(
-				args, CLInterface.getPathString(
+				args, StringTools.getPathString(
 					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
 				)
 			);
@@ -262,11 +262,11 @@ public class UI {
 //			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
 //				System.out.println(entry.getKey() + " -- " + entry.getValue());
 //			}
-//			System.exit(0);
 //			pieces.forEach(s -> System.out.println(s));
+//			System.exit(0);
 			
 			// Get paths, datasets, modelParams, and metrics
-			String jsonPath = CLInterface.getPathString(
+			String jsonPath = StringTools.getPathString(
 				Arrays.asList(paths.get("MODELS_PATH"), cliOptsVals.get(CLInterface.MODEL))		 
 			);
 			Map<String, Map<String, String>> paramsFromJson = StringTools.readJSONFile(
@@ -274,7 +274,7 @@ public class UI {
 			);
 			runnerPaths = getPaths(paramsFromJson, paths, jsonPath);
 			Dataset.setUserPiecenames(Dataset.USER, pieces);
-			datasets = getDatasets(paramsFromJson, paths);
+			datasets = getDatasets(paramsFromJson, paths);	
 			modelParams = getModelParameters(paramsFromJson, runnerPaths);
 			metricsUsed = getMetrics(paramsFromJson);
 		}
@@ -364,16 +364,16 @@ public class UI {
 			// pathFirstPass, pathStoredNN, pathStoredMM
 			if (mode == Mode.MODEL_DEV) {
 				if (m.getDecisionContext() == DecisionContext.BIDIR) {
-					pathFirstPass = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPass));
+					pathFirstPass = StringTools.getPathString(Arrays.asList(expPath, dirFirstPass));
 				}
 				if (m.getModelType() == ModelType.ENS) {
-					pathStoredNN = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPass));
-					pathStoredMM = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPassMM));
+					pathStoredNN = StringTools.getPathString(Arrays.asList(expPath, dirFirstPass));
+					pathStoredMM = StringTools.getPathString(Arrays.asList(expPath, dirFirstPassMM));
 				}
 			}
 			else {
 				if (m.getDecisionContext() == DecisionContext.BIDIR) {
-					pathFirstPass = CLInterface.getPathString(Arrays.asList(modelsPath, modelIDFirstPass));
+					pathFirstPass = StringTools.getPathString(Arrays.asList(modelsPath, modelIDFirstPass));
 //					pathFirstPass = CLInterface.getPathString(Arrays.asList(expPath, dirFirstPass));
 				}
 				if (m.getModelType() == ModelType.ENS) {
@@ -383,7 +383,7 @@ public class UI {
 			}
 		}
 		else {
-			String polyPath = CLInterface.getPathString(Arrays.asList(
+			String polyPath = StringTools.getPathString(Arrays.asList(
 				paths.get("POLYPHONIST_PATH"), Runner.OUTPUT_DIR
 			));
 //			String modelsPath = paths.get("MODELS_PATH");
@@ -391,12 +391,12 @@ public class UI {
 			String modelIDFirstPass = params.get("model_ID_first_pass");
 
 			// storePath
-			storePath = CLInterface.getPathString(Arrays.asList(polyPath, modelID)); // current model; ex. bidir case: .../transcriber/out/D_B-fwd-byrd-int-4vv/
+			storePath = StringTools.getPathString(Arrays.asList(polyPath, modelID)); // current model; ex. bidir case: .../transcriber/out/D_B-fwd-byrd-int-4vv/
 			
 			// pathFirstPass, pathTrainedUserModel 
 			if (m.getDecisionContext() == DecisionContext.BIDIR) {
 //				pathFirstPass = CLInterface.getPathString(Arrays.asList(modelsPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../models/D-bwd-byrd-int-4vv/
-				pathFirstPass = CLInterface.getPathString(Arrays.asList(polyPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../transcriber/out/D-bwd-byrd-int-4vv/
+				pathFirstPass = StringTools.getPathString(Arrays.asList(polyPath, modelIDFirstPass)); // first-pass model, ex. bidir case: .../transcriber/out/D-bwd-byrd-int-4vv/
 			}
 			pathTrainedUserModel = jsonPath; // trained model; ex. bidir case: .../models/D_B-fwd-byrd-int-4vv/
 
