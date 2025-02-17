@@ -151,7 +151,6 @@ public class Dataset implements Serializable {
 		if (argIsTablatureSet) {
 			allEncodingFiles = new ArrayList<>();
 			allTablatures = new ArrayList<>();
-			allStoreNames = new ArrayList<>();
 		}
 		allMidiFiles = new ArrayList<>();
 		allTranscriptions = new ArrayList<>();
