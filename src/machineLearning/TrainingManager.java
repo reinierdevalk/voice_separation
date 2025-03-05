@@ -1439,11 +1439,12 @@ public class TrainingManager {
 					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
+					String python = PythonInterface.python2Installed() ? "python3" : "python";
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						smoothen = true;
 						cmd = new String[]{
-							"python", pp + paths.get("SCIKIT_SCRIPT"), 
+							python, pp + paths.get("SCIKIT_SCRIPT"), 
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.train, 
@@ -1457,7 +1458,7 @@ public class TrainingManager {
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
 							allNoteFeatures.size(), storePath, null, mnv);
 						cmd = new String[]{
-							"python", pp + paths.get("TENSORFLOW_SCRIPT"),
+							python, pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.train, 
 							argStrings.get(0), 

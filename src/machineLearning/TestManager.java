@@ -1500,10 +1500,11 @@ public class TestManager {
 					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
+					String python = PythonInterface.python2Installed() ? "python3" : "python";
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						cmd = new String[]{
-							"python", pp + paths.get("SCIKIT_SCRIPT"),
+							python, pp + paths.get("SCIKIT_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
 							m.name(), 
 							Runner.test, 
@@ -1518,7 +1519,7 @@ public class TestManager {
 							storePath, pathTrainedUserModel, mnv
 						);
 						cmd = new String[]{
-							"python", pp + paths.get("TENSORFLOW_SCRIPT"),
+							python, pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
 							Runner.test,
 							argStrings.get(0),

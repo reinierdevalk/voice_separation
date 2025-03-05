@@ -264,7 +264,7 @@ public class UI {
 //			}
 //			pieces.forEach(s -> System.out.println(s));
 //			System.exit(0);
-			
+
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = StringTools.getPathString(
 				Arrays.asList(paths.get("MODELS_PATH"), cliOptsVals.get(CLInterface.MODEL))		 
