@@ -286,13 +286,13 @@ public class UI {
 		MelodyPredictor.setTermType(m.getKylmModelType());
 		EvaluationManager.setMetricsUsed(metricsUsed);
 		
-		System.out.println("dataset                 = " + datasets[0].getPiecenames());
-		System.out.println("datasetTrain            = " + (datasets[1] == null ? datasets[1] : datasets[1].getName()));
-		System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
-		System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
-		System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
-		System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
-		System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
+//		System.out.println("dataset                 = " + datasets[0].getPiecenames());
+//		System.out.println("datasetTrain            = " + (datasets[1] == null ? datasets[1] : datasets[1].getName()));
+//		System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
+//		System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
+//		System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
+//		System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
+//		System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
 //		System.exit(0);
 		
 		Runner.runExperiment(
