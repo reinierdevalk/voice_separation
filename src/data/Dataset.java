@@ -205,7 +205,7 @@ public class Dataset implements Serializable {
 				// In the real-world case, currEncodingFile may not exist as .tbp, and currTablature must
 				// be created from the raw encoding obtained from converting another format into .tbp 
 				else {
-					String rawEncoding = TabImport.convertToTbp(argEncodingsPath, currPiecename);
+					String rawEncoding = TabImport.convertToTbp(argEncodingsPath, currPiecename, paths);
 					Encoding e = new Encoding(rawEncoding, currPiecenameNoExt, Stage.RULES_CHECKED);
 					currTablature = new Tablature(e, true);
 				}
