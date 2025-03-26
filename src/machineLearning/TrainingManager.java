@@ -22,6 +22,7 @@ import external.Tablature;
 import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import featureExtraction.FeatureGeneratorChord;
+import interfaces.CLInterface;
 import interfaces.PythonInterface;
 import internal.core.Encoding;
 import machinelearning.NNManager;
@@ -1439,7 +1440,9 @@ public class TrainingManager {
 					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
-					String python = PythonInterface.python2Installed() ? "python3" : "python";
+					boolean isWin = CLInterface.isWin();
+					String python = PythonInterface.selectPython();
+//					String python = PythonInterface.python2Installed() ? "python3" : "python";
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						smoothen = true;
