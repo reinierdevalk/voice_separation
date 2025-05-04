@@ -50,9 +50,7 @@ public class UI {
 		boolean dev = args.length == 0 ? true : args[CLInterface.DEV_IND].equals(String.valueOf(true));
 		Map<String, String> paths = CLInterface.getPaths(dev);
 		
-//		for (Map.Entry<String, String> entry : paths.entrySet()) {
-//			System.out.println(entry.getKey() + " -- " + entry.getValue());
-//		}
+//		ToolBox.printMap(paths);
 //		System.exit(0);
 
 		if (args.length != 0) {
@@ -259,9 +257,7 @@ public class UI {
 
 			verbose = cliOptsVals.get(CLInterface.VERBOSE).equals("y") ? true : false;
 
-//			for (Map.Entry<String, String> entry : cliOptsVals.entrySet()) {
-//				System.out.println(entry.getKey() + " -- " + entry.getValue());
-//			}
+//			ToolBox.printMap(cliOptsVals);
 //			pieces.forEach(s -> System.out.println(s));
 //			System.exit(0);
 
@@ -830,10 +826,6 @@ public class UI {
 //			modelParams.put(Runner.CROSS_VAL, (double) ToolBox.toInt(false));
 //			modelParams.put(Runner.WEIGHTS_INIT, (double) WeightsInit.INIT_FROM_LIST.getIntRep());
 //		}
-//
-////		for (Entry<String, Double> e : modelParams.entrySet()) {
-////			System.out.println(e.getKey() + ": " + e.getValue());
-////		}
 //
 //		// 4. Set metrics
 //		List<Metric> metricsUsed = new ArrayList<Metric>();

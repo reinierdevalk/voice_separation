@@ -839,9 +839,9 @@ public class Runner {
 	}
 
 
-	public static void setPathsToCodeAndData(String argRootPath, boolean appliedToNewData) throws IOException {
+//	public static void setPathsToCodeAndData(String argRootPath, boolean appliedToNewData) throws IOException {
 //		Map<String, String> paths = PathTools.getPaths(true);
-
+//
 //		String rp = paths.get("ROOT_PATH");
 //		String cp = paths.get("CODE_PATH");
 //		String tp = paths.get("TEMPLATES_PATH");
@@ -852,22 +852,17 @@ public class Runner {
 //		pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
 //		matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
 //		storedDatasetsPath = PathTools.getPathString(Arrays.asList(paths.get("DATASETS_PATH")));
-		
-//		for (Map.Entry<String, String> entry : paths.entrySet()) {
-//l			System.out.println(entry.getKey() + " -- " + entry.getValue());
-//		}
-//		System.exit(0);
-		
-		if (!appliedToNewData) {
+//
+//		if (!appliedToNewData) {
 //			String codePath = PathTools.getPathString(Arrays.asList(cp));
 //			String codePath = PathTools.getPathString(Arrays.asList(rp, cp));
 //			String codePath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH});
 //			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
-
+//
 //			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
 //			matlabScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "m"));
 //			matlabScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/m/"});
-			//
+//			//
 //			String dataPath = PathTools.getPathString(Arrays.asList(dp));
 //			String dataPath = PathTools.getPathString(Arrays.asList(rp, dd));
 //			String dataPath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.DATA_DIR});
@@ -879,11 +874,11 @@ public class Runner {
 //			storedDatasetsPath = ToolBox.pathify(new String[]{dataPath, "datasets/"});
 //			modelsPath = PathTools.getPathString(Arrays.asList(paths.get("MODELS_PATH")));
 //			modelsPath = ToolBox.pathify(new String[]{dataPath, "models/"});
-			//
+//			//
 //			experimentsPath = PathTools.getPathString(Arrays.asList(ep));
 //			experimentsPath = PathTools.getPathString(Arrays.asList(rp, paths.get("EXPEERIMENTS_DIR")));
 //			experimentsPath = ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.EXPEERIMENTS_DIR});
-			//
+//			//
 //			MEIExport.setTemplatePath(tp);
 //				PathTools.getPathString(Arrays.asList(tp, ))		
 //				PathTools.getPathString(Arrays.asList(rp, dd, td))	
@@ -893,9 +888,9 @@ public class Runner {
 //				PathTools.getPathString(Arrays.asList(codePath, "utils", "py"))
 ////				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
 //			);
-		}
-		else {
-			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
+//		}
+//		else {
+//			// See https://stackoverflow.com/questions/36273771/how-can-i-go-about-getting-the-parent-directory-of-a-directory
 //			boolean isDeploymentDevCase = 
 //				argRootPath.equals(new File(paths.get("DEPLOYMENT_DEV_PATH")).getCanonicalFile().toString());	
 ////				argRootPath.equals(new File(Path.DEPLOYMENT_DEV_PATH).getCanonicalFile().toString());
@@ -905,9 +900,9 @@ public class Runner {
 ////				ToolBox.pathify(new String[]{Path.ROOT_PATH, Path.CODE_PATH}) :
 //				PathTools.getPathString(Arrays.asList(cp));
 ////				PathTools.getPathString(Arrays.asList(argRootPath, paths.get("CODE_DIR"))); // TODO paths.get("CODE_DIR") was "code/" 
-			
+//			
 //			String codePath = PathTools.getPathString(Arrays.asList(cp));
-				
+//				
 //			pythonScriptPath = PathTools.getPathString(Arrays.asList(codePath, "voice_separation", "py"));
 //			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
 //			String userPath = PathTools.getPathString(Arrays.asList(argRootPath, "user"));
@@ -922,7 +917,7 @@ public class Runner {
 //			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
 //			modelsPath = PathTools.getPathString(Arrays.asList(argRootPath, "models"));
 //			modelsPath = ToolBox.pathify(new String[]{argRootPath, "models/"});
-			//
+//			//
 //			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, tp));
 //			String templatePath = PathTools.getPathString(Arrays.asList(argRootPath, td));
 //			String templatePath = ToolBox.pathify(new String[]{argRootPath, Path.TEMPLATES_DIR}); 
@@ -936,8 +931,8 @@ public class Runner {
 ////				ToolBox.pathify(new String[]{codePath, "formats-representations/py/"})
 //			);
 //			MEIExport.setTemplatesPath(tp);
-		}
-	}
+//		}
+//	}
 
 
 	public static String getOtherParam(Map<String, Double> argModelParams) {
