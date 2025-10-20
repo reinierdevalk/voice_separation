@@ -121,6 +121,15 @@ public class UI {
 
 			// In case of grid search: set hyperparameter space (if no hyperparameter space is 
 			// specified, the full space is assumed). Values in modelParams are overwritten
+			//
+			// Q: I want to write a function that creates, given n lists of values for n hyperparameters, all possible 
+			// combinations of these hyperparameters. I know how to implement this if I know n beforehand (I just 
+			// nest n loops), but I want the method to work for any value of n.
+			// A: It’s definitely quite easy to do with recursion
+			// ```
+			// def combinations(lists): 
+			//     return [[x] + y for x in lists[0] for y in combinations(lists[1:])] if len(lists)>1 else [[x] for x in lists[0]]
+			// ```
 			if (gridSearch) {
 				List<List<Double>> hyperParamSpace = new ArrayList<List<Double>>();
 				if (hyperParamSpace.size() == 0) {
