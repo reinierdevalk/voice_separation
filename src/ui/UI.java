@@ -70,31 +70,33 @@ public class UI {
 			String hyperparamsDir = null; 
 			String userModelDir = null;
 
-			System.exit(0);
-			
 			////////////////////////////////////////////////////////////
 			
-			// Choose mode and set variables
+			// Choose mode and set variables; comment out the other mode
 			// a. MODEL-DEV case
-			mode = Mode.MODEL_DEV;
-			repeat = true;
-			gridSearch = false;
-			skipTraining = true;
-			modelDevDir = "thesis/exp_3.3.1/thesis-int/3vv/B/fwd/";
-//			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
-			hyperparamsDir = "";
-//			hyperparamsDir = "HL=2/HLS=66/KP=0.875-no_heur/"; 
-//			hyperparamsDir = "cnf=" + config.getStringRep();
-//			hyperparamsDir = "HLF=1.0/lmb=0.001/";
-//			hyperparamsDir = "eps=0.05/";
-//			hyperparamsDir = "LR=0.003/HL=1/HLS=66/KP=0.875/";
-//			hyperparamsDir = "final/";
-			verbose = true;
+//			mode = Mode.MODEL_DEV;
+//			repeat = true;
+//			gridSearch = false;
+//			skipTraining = false;
+////			modelDevDir = "thesis/exp_3.3.1/thesis-int/3vv/B/fwd/";
+////			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
+//			modelDevDir = "ISMIR-2018/bach-inv/2vv/D/fwd/";
+////			hyperparamsDir = "";
+//			hyperparamsDir = "HL=2/HLS=66/KP=0.875-no_heur/";
+////			hyperparamsDir = "cnf=" + config.getStringRep();
+////			hyperparamsDir = "HLF=1.0/lmb=0.001/";
+////			hyperparamsDir = "eps=0.05/";
+////			hyperparamsDir = "LR=0.003/HL=1/HLS=66/KP=0.875/";
+////			hyperparamsDir = "final/";
+//			verbose = true;
 
 			// b. USER_MODEL_TRAINING case
-			// mode = Mode.USER_MODEL_TRAINING;
-			// userModelDir = "N-bwd-thesis-int-4vv/";
-			// verbose = true;
+			// NB First place params.json file, containing the params of the best trained 
+			// model, in <ROOT_PATH>/<MODELS_PATH>/<userModelDir>/!
+			mode = Mode.USER_MODEL_TRAINING;
+			userModelDir = "D-bwd-thesis-int-4vv/";
+//			userModelDir = "N-bwd-thesis-int-4vv/";
+			verbose = true;
 			
 			////////////////////////////////////////////////////////////
 
@@ -293,11 +295,11 @@ public class UI {
 		
 //		System.out.println("dataset                 = " + datasets[0].getPiecenames());
 //		System.out.println("datasetTrain            = " + (datasets[1] == null ? datasets[1] : datasets[1].getName()));
-//		System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
-//		System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
-//		System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
-//		System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
-//		System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
+		System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
+		System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
+		System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
+		System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
+		System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
 //		System.exit(0);
 		
 		Runner.runExperiment(

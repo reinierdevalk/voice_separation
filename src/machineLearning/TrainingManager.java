@@ -1440,12 +1440,13 @@ public class TrainingManager {
 					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
-					boolean isWin = CLInterface.isWin();
-					String python = PythonInterface.selectPython();
+//					boolean isWin = CLInterface.isWin();
+//					String python = PythonInterface.selectPython();
 //					String python = PythonInterface.python2Installed() ? "python3" : "python";
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						smoothen = true;
+						String python = PythonInterface.selectPython(false);
 						cmd = new String[]{
 							python, pp + paths.get("SCIKIT_SCRIPT"), 
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
@@ -1460,6 +1461,7 @@ public class TrainingManager {
 						List<String> argStrings = 
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
 							allNoteFeatures.size(), storePath, null, mnv);
+						String python = PythonInterface.selectPython(true);
 						cmd = new String[]{
 							python, pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
@@ -1469,7 +1471,7 @@ public class TrainingManager {
 					}
 //					System.out.println("cmd = " + Arrays.toString(cmd));
 					// Run Python code as a script
-					PythonInterface.runPythonFileAsScript(cmd);
+					PythonInterface.runPythonFileAsScript(cmd, false);
 
 					// Set networkOutputs, predictedVoices, and assignmentErrors
 					String[][] outpCsv = 

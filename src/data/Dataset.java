@@ -170,6 +170,9 @@ public class Dataset implements Serializable {
 			argEncodingsPath = StringTools.getPathString(
 				Arrays.asList(paths.get("ENCODINGS_PATH"), name, numVoices)
 			);
+			if (name.equals("bach-inv") || name.equals("bach-WTC")) {
+				name += "/thesis";
+			}
 			argMidiPath = StringTools.getPathString(
 				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
 			);
@@ -536,21 +539,21 @@ public class Dataset implements Serializable {
 
 	private static List<String> getBachInv2vv() { 
 		return Arrays.asList(new String[]{
-			"bach-inv-inventio_1-BWV_772",
-			"bach-inv-inventio_2-BWV_773",
-			"bach-inv-inventio_3-BWV_774",
-			"bach-inv-inventio_4-BWV_775",
-			"bach-inv-inventio_5-BWV_776",
-			"bach-inv-inventio_6-BWV_777",
-			"bach-inv-inventio_7-BWV_778",
-			"bach-inv-inventio_8-BWV_779",
-			"bach-inv-inventio_9-BWV_780",
-			"bach-inv-inventio_10-BWV_781",
-			"bach-inv-inventio_11-BWV_782",
-			"bach-inv-inventio_12-BWV_783",
-			"bach-inv-inventio_13-BWV_784",
-			"bach-inv-inventio_14-BWV_785",
-			"bach-inv-inventio_15-BWV_786"
+			"bach-inv-inventio_1-BWV_772.mid",
+			"bach-inv-inventio_2-BWV_773.mid",
+			"bach-inv-inventio_3-BWV_774.mid",
+			"bach-inv-inventio_4-BWV_775.mid",
+			"bach-inv-inventio_5-BWV_776.mid",
+			"bach-inv-inventio_6-BWV_777.mid",
+			"bach-inv-inventio_7-BWV_778.mid",
+			"bach-inv-inventio_8-BWV_779.mid",
+			"bach-inv-inventio_9-BWV_780.mid",
+			"bach-inv-inventio_10-BWV_781.mid",
+			"bach-inv-inventio_11-BWV_782.mid",
+			"bach-inv-inventio_12-BWV_783.mid",
+			"bach-inv-inventio_13-BWV_784.mid",
+			"bach-inv-inventio_14-BWV_785.mid",
+			"bach-inv-inventio_15-BWV_786.mid"
 		});
 	}
 

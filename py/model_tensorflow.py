@@ -1,10 +1,12 @@
-import os
-from sys import argv
-import tensorflow as tf
-import numpy as np
-from numpy import genfromtxt
 import matplotlib.pyplot as plt
+import numpy as np
+import os
+import tensorflow as tf
+
 from functools import partial
+from numpy import genfromtxt
+from sys import argv
+
 
 trn = 0
 tst = 1
@@ -232,7 +234,8 @@ def run_neural_network(mode, arg_placeholders, arg_data, arg_hyperparams, arg_pa
 			# sm_trn_comb = ...
 			# sm_trn = sm_trn_comb 
 
-			print('epoch', str(epoch) + '/' + str(epochs), 'completed: loss =', epoch_loss, 'acc =', acc_trn)
+			if epoch % 50 == 0:
+				print('epoch', str(epoch) + '/' + str(epochs), 'completed: loss =', epoch_loss, 'acc =', acc_trn)
 
 			total_cost.append(epoch_loss)
 			accs_trn.append(acc_trn)

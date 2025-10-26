@@ -1500,10 +1500,11 @@ public class TestManager {
 					String pp = StringTools.getPathString(
 						Arrays.asList(paths.get("VOICE_SEP_PYTHON_PATH"))
 					);
-					String python = PythonInterface.selectPython();
+//					String python = PythonInterface.selectPython();
 //					String python = PythonInterface.python2Installed() ? "python3" : "python";
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
+						String python = PythonInterface.selectPython(false);
 						cmd = new String[]{
 							python, pp + paths.get("SCIKIT_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
@@ -1519,6 +1520,7 @@ public class TestManager {
 							Runner.TEST, modelParameters, noteFeatures.get(0).size(), -1, 
 							storePath, pathTrainedUserModel, mnv
 						);
+						String python = PythonInterface.selectPython(true);
 						cmd = new String[]{
 							python, pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
@@ -1528,7 +1530,7 @@ public class TestManager {
 					}
 //					System.out.println("cmd = " + Arrays.toString(cmd));
 					// Run Python code as a script
-					PythonInterface.runPythonFileAsScript(cmd);
+					PythonInterface.runPythonFileAsScript(cmd, false);
 
 					// Retrieve the model output
 					String[][] outpCsv = 
