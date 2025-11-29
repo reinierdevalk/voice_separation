@@ -13,6 +13,7 @@ import external.Transcription;
 import featureExtraction.MelodyFeatureGenerator;
 import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
 import interfaces.CLInterface;
+import interfaces.PythonInterface;
 import machineLearning.EvaluationManager;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.MelodyPredictor;
@@ -49,6 +50,7 @@ public class UI {
 	public static void main(String[] args) throws IOException {
 		boolean dev = args.length == 0 ? true : args[CLInterface.DEV_IND].equals(String.valueOf(true));
 		Map<String, String> paths = CLInterface.getPaths(dev);
+		PythonInterface.setPython(dev, paths.get("CODE_PATH"));
 		
 //		ToolBox.printMap(paths);
 //		System.exit(0);

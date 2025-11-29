@@ -1446,7 +1446,8 @@ public class TrainingManager {
 					// For scikit (ISMIR 2017)
 					if (isScikit) {
 						smoothen = true;
-						String python = PythonInterface.selectPython(false);
+						String python = PythonInterface.getPython();
+//						String python = PythonInterface.selectPython(false);
 						cmd = new String[]{
 							python, pp + paths.get("SCIKIT_SCRIPT"), 
 //							"python", Runner.pythonScriptPath + Runner.scriptScikit, 
@@ -1461,7 +1462,9 @@ public class TrainingManager {
 						List<String> argStrings = 
 							getArgumentStrings(Runner.TRAIN, modelParameters, numFeatures, 
 							allNoteFeatures.size(), storePath, null, mnv);
-						String python = PythonInterface.selectPython(true);
+						boolean dev = !paths.get("CODE_PATH").contains("lib/abtab/"); // TODO remove when PYTHON_TENSORFLOW is removed
+						String python = dev ? PythonInterface.getPythonTensorFlow() : PythonInterface.getPython();
+//						String python = PythonInterface.selectPython(true);
 						cmd = new String[]{
 							python, pp + paths.get("TENSORFLOW_SCRIPT"),
 //							"python", Runner.pythonScriptPath + Runner.scriptTensorFlow, 
