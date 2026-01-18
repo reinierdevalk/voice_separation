@@ -840,8 +840,9 @@ public class TestManager {
 				MEIExport.exportMEIFile(
 					tr, ta, colInd, CLInterface.getTranscriptionParams(cliOptsValsLocal),
 					paths, new String[]{
-						dir + storeName + MEIExport.MEI_EXT, 
-						testPieceName, 
+						dir + storeName + MEIExport.MEI_EXT,
+						testPieceName,
+						storeName + MEIExport.MEI_EXT,
 						"abtab -- transcriber"
 					}
 				);
