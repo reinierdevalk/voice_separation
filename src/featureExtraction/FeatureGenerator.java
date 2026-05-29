@@ -76,6 +76,10 @@ public class FeatureGenerator {
 //	}
 
 
+	public static void main(String[] args) {
+	}
+
+
 	// =================================== FEATURE EXTRACTION ===================================  
 	// tabFeatures
 	/**
@@ -146,7 +150,7 @@ public class FeatureGenerator {
 			}
 			// 6. The metric position of the note within the bar		  
 			Rational metricTime = new Rational(btp[noteIndex][Tablature.ONSET_TIME],
-				Tablature.SRV_DEN);	
+				Tablature.SRV_DEN);
 			Rational[] metricPosition = TimeMeterTools.getMetricPosition(metricTime, meterInfo);
 			basicNoteFeatures[POSITION_WITHIN_BAR] = 
 				(double) metricPosition[1].getNumer() / metricPosition[1].getDenom();
