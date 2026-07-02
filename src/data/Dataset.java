@@ -26,6 +26,7 @@ public class Dataset implements Serializable {
 	private String datasetID;
 	private String name;
 	private List<String> piecenames;
+	private List<String> subDatasetIDs;
 	private int numVoices;
 	private boolean isTablatureSet;
 	private boolean isTabAsNonTabSet;
@@ -37,23 +38,29 @@ public class Dataset implements Serializable {
 	private List<Transcription> allTranscriptions;
 
 	// Dataset naming
-	// Each Dataset has a name that consists of three elements, separated by dashes: <a>-<b>-<n>vv
+	// Each Dataset has a datasetID that consists of three elements, separated by dashes: <a>-<b>-<n>vv. 
 	// - tablature datasets have an element of COMPOSITIONS (surrounded by dashes, e.g., 
-	//   "-int-") or "-tab" in their name
-	// - tab-as-non-tab datasets have "_ANT" in their name
-	// - non-tablature datasets have neither in their name
-	// - the name must end with "-<n>vv"
+	//   "-int-") or "-tab" in their datasetID
+	// - tab-as-non-tab datasets have "_ANT" in their datasetID
+	// - non-tablature datasets have neither in their datasetID
+	// - the datasetID must end with "-<n>vv"
+	// The Dataset name is the datasetID without the "-<n>vv"
 	// a. Tablature datasets
 	public static final String THESIS_INT_3VV = "thesis-int-3vv"; // TODO thesis-int
 	public static final String THESIS_INT_4VV = "thesis-int-4vv";
 	public static final String THESIS_INT_5VV = "thesis-int-5vv";
+	public static final String JOSQUIN_INT_3VV = "josquin-int-3vv";
 	public static final String JOSQUIN_INT_4VV = "josquin-int-4vv";	
 	public static final String BYRD_INT_4VV = "byrd-int-4vv";
+	public static final String ADRIAENSSEN_INT_4VV = "adriaenssen-int-4vv";
+	public static final String D_MBS_1512_INT_3VV = "d_mbs_1512-int-3vv";
 	public static final String THESIS_INT_IMI_4VV = "thesis-int_imi-4vv";
 	public static final String THESIS_INT_IMI_SHORT_4VV = "thesis-int_imi_short-4vv";
 	public static final String THESIS_INT_SEMI_4VV = "thesis-int_semi-4vv";
 	public static final String THESIS_INT_FREE_4VV = "thesis-int_free-4vv";
 	public static final String THESIS_INT_FREE_MORE_4VV = "thesis-int_free_more-4vv";
+	public static final String ALL_INT_3VV = "all-int-3vv";
+	public static final String ALL_INT_4VV = "all-int-4vv";
 	public static final String USER_TAB = "user-tab";
 	// b. Tab-as-non-tab datasets
 	public static final String THESIS_INT_ANT_3VV = "thesis-int_ANT-3vv";
@@ -84,36 +91,41 @@ public class Dataset implements Serializable {
 	private static final List<String> COMPOSITIONS = Arrays.asList(new String[]{
 		"inv"}); // invention
 
-	private static final Map<String, List<String>> ALL_PIECENAMES = new LinkedHashMap<String, List<String>>();
+	private static final Map<String, List<List<String>>> ALL_PIECENAMES = new LinkedHashMap<String, List<List<String>>>();
 	static {		
-		ALL_PIECENAMES.put(THESIS_INT_3VV, getThesisInt3vv());
-		ALL_PIECENAMES.put(THESIS_INT_4VV, getThesisInt4vv());
-		ALL_PIECENAMES.put(THESIS_INT_5VV, getThesisInt5vv());
-		ALL_PIECENAMES.put(JOSQUIN_INT_4VV, getJosquinInt4vv());
-		ALL_PIECENAMES.put(BYRD_INT_4VV, getByrdInt4vv());
+		ALL_PIECENAMES.put(THESIS_INT_3VV, Arrays.asList(getThesisInt3vv(), null));
+		ALL_PIECENAMES.put(THESIS_INT_4VV, Arrays.asList(getThesisInt4vv(), null));
+		ALL_PIECENAMES.put(THESIS_INT_5VV, Arrays.asList(getThesisInt5vv(), null));
+		ALL_PIECENAMES.put(JOSQUIN_INT_3VV, Arrays.asList(getJosquinInt3vv(), null));
+		ALL_PIECENAMES.put(JOSQUIN_INT_4VV, Arrays.asList(getJosquinInt4vv(), null));
+		ALL_PIECENAMES.put(BYRD_INT_4VV, Arrays.asList(getByrdInt4vv(), null));
+		ALL_PIECENAMES.put(ADRIAENSSEN_INT_4VV, Arrays.asList(getAdriaenssenInt4vv(), null));
+		ALL_PIECENAMES.put(D_MBS_1512_INT_3VV, Arrays.asList(getDMbs1512Int3vv(), null));
 //		ALL_PIECENAMES.put(TEST_TAB, getTest());
-		ALL_PIECENAMES.put(THESIS_INT_ANT_3VV, getThesisInt3vv());
-		ALL_PIECENAMES.put(THESIS_INT_ANT_4VV, getThesisInt4vv());
-		ALL_PIECENAMES.put(THESIS_INT_ANT_5VV, getThesisInt5vv());
-		ALL_PIECENAMES.put(BYRD_INT_ANT_4VV, getByrdInt4vv());
-		ALL_PIECENAMES.put(BACH_WTC_2VV, getBachWTC2vv());
-		ALL_PIECENAMES.put(BACH_WTC_3VV, getBachWTC3vv());
-		ALL_PIECENAMES.put(BACH_WTC_4VV, getBachWTC4vv());
-		ALL_PIECENAMES.put(BACH_WTC_5VV, getBachWTC5vv());
-		ALL_PIECENAMES.put(BACH_INV_2VV, getBachInv2vv());
-		ALL_PIECENAMES.put(BACH_INV_3VV, getBachInv3vv());
-		ALL_PIECENAMES.put(TEST_MIDI, getTest());
-		ALL_PIECENAMES.put(USER_TAB, null);
-		ALL_PIECENAMES.put(USER_MIDI, null);
-		ALL_PIECENAMES.put(TEST_TAB, null);
+		ALL_PIECENAMES.put(THESIS_INT_ANT_3VV, Arrays.asList(getThesisInt3vv(), null));
+		ALL_PIECENAMES.put(THESIS_INT_ANT_4VV, Arrays.asList(getThesisInt4vv(), null));
+		ALL_PIECENAMES.put(THESIS_INT_ANT_5VV, Arrays.asList(getThesisInt5vv(), null));
+		ALL_PIECENAMES.put(BYRD_INT_ANT_4VV, Arrays.asList(getByrdInt4vv(), null));
+		ALL_PIECENAMES.put(ALL_INT_3VV, Arrays.asList(getAllInt3vv(), Arrays.asList(THESIS_INT_3VV, JOSQUIN_INT_3VV, D_MBS_1512_INT_3VV)));
+		ALL_PIECENAMES.put(ALL_INT_4VV, Arrays.asList(getAllInt4vv(), Arrays.asList(THESIS_INT_4VV, JOSQUIN_INT_4VV, BYRD_INT_4VV, ADRIAENSSEN_INT_4VV)));
+		ALL_PIECENAMES.put(BACH_WTC_2VV, Arrays.asList(getBachWTC2vv(), null));
+		ALL_PIECENAMES.put(BACH_WTC_3VV, Arrays.asList(getBachWTC3vv(), null));
+		ALL_PIECENAMES.put(BACH_WTC_4VV, Arrays.asList(getBachWTC4vv(), null));
+		ALL_PIECENAMES.put(BACH_WTC_5VV, Arrays.asList(getBachWTC5vv(), null));
+		ALL_PIECENAMES.put(BACH_INV_2VV, Arrays.asList(getBachInv2vv(), null));
+		ALL_PIECENAMES.put(BACH_INV_3VV, Arrays.asList(getBachInv3vv(), null));
+		ALL_PIECENAMES.put(TEST_MIDI, Arrays.asList(getTest(), null));
+		ALL_PIECENAMES.put(USER_TAB, Arrays.asList(null, null));
+		ALL_PIECENAMES.put(USER_MIDI, Arrays.asList(null, null));
+		ALL_PIECENAMES.put(TEST_TAB, Arrays.asList(null, null));
 	}
 
 
 	public static void setUserPiecenames(String key, List<String> argPiecenames) {
-		ALL_PIECENAMES.put(key, argPiecenames);
+		ALL_PIECENAMES.put(key, Arrays.asList(argPiecenames, null));
 	}
-	
-	
+
+
 	public static void main(String[] args) {
 	}
 
@@ -129,9 +141,11 @@ public class Dataset implements Serializable {
 		this.numVoices = Integer.parseInt(
 			id.substring(id.lastIndexOf("-") + 1, id.lastIndexOf("-") + 2)
 		);
-		this.piecenames = ALL_PIECENAMES.get(
+		List<List<String>> pieceNamesSubsets = ALL_PIECENAMES.get(
 			id.startsWith("user") || id.startsWith("test") ? name : id
 		);
+		this.piecenames = pieceNamesSubsets.get(0);
+		this.subDatasetIDs = pieceNamesSubsets.get(1);
 		if (argIsTablatureSet) {
 			this.isTablatureSet = true;
 			this.isTabAsNonTabSet = false;
@@ -161,104 +175,165 @@ public class Dataset implements Serializable {
 		boolean isTablatureCase = isTablatureSet();
 		boolean isTabAsNonTab = isTabAsNonTabSet();
 
-		// Set paths
-		String argEncodingsPath, argMidiPath;
-		String argTabMidiPath = null;
-		if (!deployTrainedUserModel) {
-			String numVoices = getNumVoices() + Runner.voices + "/";
-			String name = getName();
-			argEncodingsPath = StringTools.getPathString(
-				Arrays.asList(paths.get("ENCODINGS_PATH"), name, numVoices)
-			);
-			if (name.equals("bach-inv") || name.equals("bach-WTC")) {
-				name += "/thesis";
-			}
-			argMidiPath = StringTools.getPathString(
-				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
-			);
-			argTabMidiPath = StringTools.getPathString(
-				Arrays.asList(paths.get("MIDI_PATH"), name, numVoices)
-			);
+		List<String> subdatasetIDs = getSubDatasetIDs();
+		List<Dataset> subdatasets = new ArrayList<>(); // only the main Dataset if not a combined Dataset
+		if (subdatasetIDs == null) {
+			subdatasets.add(this);
 		}
 		else {
-			argEncodingsPath = StringTools.getPathString(
-				Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
-			);
-			argMidiPath = StringTools.getPathString(
-				Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
-			);
+			for (String id : subdatasetIDs) {
+				subdatasets.add(new Dataset(id, isTablatureCase));
+			}
 		}
 
-		// Set remaining class variables
-		for (String currPiecename : getPiecenames()) {
-			System.out.println("... creating " + currPiecename + " ...");
-			// Get Tablature and Transcription
-			String currPiecenameNoExt = ToolBox.splitExt(currPiecename)[0];
-			File currEncodingFile = null; // only used if !deployTrainedUserModel
-			File currMidiFile = null;
-			Tablature currTablature = null;
-			Transcription currTranscription = null;
-			if (isTablatureCase) {
-				// In the model dev case, currEncodingFile always exists as .tbp, and currTablature 
-				// can be created from it
-				if (!deployTrainedUserModel) {
-					currEncodingFile = new File(argEncodingsPath + currPiecename);
-					currTablature = new Tablature(currEncodingFile, true);
+		// Set paths
+		List<String> argEncodingsPaths = new ArrayList<>(); // only tablature case (if !deployTrainedUserModel and if deployTrainedUserModel)
+		List<String> argMidiPaths = new ArrayList<>(); // only non-tablature case (if !deployTrainedUserModel and if deployTrainedUserModel)
+		List<String> argTabMidiPaths = new ArrayList<>(); // tablature case; non-tablature case if isTabAsNonTab (if !deployTrainedUserModel; else ?)
+//		String argEncodingsPath = null; 
+//		String argMidiPath = null;
+//		String argTabMidiPath = null;
+		if (!deployTrainedUserModel) {
+			String numVoices = getNumVoices() + Runner.voices;
+			String ep = paths.get("ENCODINGS_PATH");
+			String mp = paths.get("MIDI_PATH");
+			for (Dataset sds : subdatasets) {
+				String n = sds.getName();
+				if (isTablatureCase) {
+					argEncodingsPaths.add(StringTools.getPathString(Arrays.asList(ep.replace("{dataset}", n), numVoices)));
+					argTabMidiPaths.add(StringTools.getPathString(Arrays.asList(mp.replace("{dataset}", n), numVoices)));
 				}
-				// In the real-world case, currEncodingFile may not exist as .tbp, and currTablature must
-				// be created from the raw encoding obtained from converting another format into .tbp 
 				else {
-					String rawEncoding = TabImport.convertToTbp(argEncodingsPath, currPiecename, paths);
-					Encoding e = new Encoding(rawEncoding, currPiecenameNoExt, Stage.RULES_CHECKED);
-					currTablature = new Tablature(e, true);
+					argMidiPaths.add(StringTools.getPathString(Arrays.asList(mp.replace("{dataset}", n), numVoices)));
+					if (isTabAsNonTab) {
+						argTabMidiPaths.add(StringTools.getPathString(Arrays.asList(mp.replace("{dataset}", n), numVoices)));
+					}
 				}
+			}
+//			argEncodingsPath = StringTools.getPathString(
+//				Arrays.asList(paths.get("ENCODINGS_PATH").replace("{dataset}", name), numVoices)
+//			);
+//			if (name.equals("bach-inv") || name.equals("bach-WTC")) {
+//				name += "/thesis";
+//			}
+//			argMidiPath = StringTools.getPathString(
+//				Arrays.asList(paths.get("MIDI_PATH").replace("{dataset}", name), numVoices)
+//			);
+//			argTabMidiPath = StringTools.getPathString(
+//				Arrays.asList(paths.get("MIDI_PATH").replace("{dataset}", name), numVoices)
+//			);
+		}
+		else {
+			argEncodingsPaths.add(StringTools.getPathString(
+				Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR"))
+			));
+			argMidiPaths.add(StringTools.getPathString(
+				Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR"))
+			));
+//			argEncodingsPath = StringTools.getPathString(
+//				Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR"))
+//			);
+//			argMidiPath = StringTools.getPathString(
+//				Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR"))
+//			);
+		}
+
+//		System.out.println(argEncodingsPaths);
+//		System.out.println(argTabMidiPaths);
+//		System.out.println(argMidiPaths);
+//		System.exit(0);
+
+		// Set remaining class variables
+		for (int i = 0; i < subdatasets.size(); i++) {
+			Dataset sds = subdatasets.get(i);
+			List<String> piecenames = sds.getPiecenames();
+			String argEncodingsPath = null;
+			String argMidiPath = null;
+			String argTabMidiPath = null;
+			if (isTablatureCase) {
+				argEncodingsPath = argEncodingsPaths.get(i);
 				if (!deployTrainedUserModel) {
-					currMidiFile = new File(argTabMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+					argTabMidiPath = argTabMidiPaths.get(i);
 				}
 			}
 			else {
-				currMidiFile = new File(argMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+				argMidiPath = argMidiPaths.get(i);
 				if (isTabAsNonTab) {
-					currMidiFile = new File(argTabMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+					argTabMidiPath = argTabMidiPaths.get(i);
 				}
 			}
-			currTranscription = 
-				!deployTrainedUserModel ? new Transcription(true, currMidiFile, currEncodingFile) : null;
 
-//			if (isTabAsNonTab) {
-//				int currInterval = 0;
-//				if (currentPieceName.equals("ochsenkun-1558-absolon_fili-shorter")) {
-//					currInterval = 7;
-//				}
-//				else if (currentPieceName.equals("rotta-1546-bramo_morir")) {
-//					currInterval = -2;
-//				}
-//				else if (currentPieceName.equals("phalese-1563-las_on")) {
-//					currInterval = -2;
-//				}
-//				currTranscription.transposeNonTab(currInterval);
-//			}
+			for (String currPiecename : piecenames) {
+//			for (String currPiecename : getPiecenames()) {
+				System.out.println("... creating " + currPiecename + " ...");
+				// Get Tablature and Transcription
+				String currPiecenameNoExt = ToolBox.splitExt(currPiecename)[0];
+				File currEncodingFile = null; // only used if !deployTrainedUserModel
+				File currMidiFile = null;
+				Tablature currTablature = null;
+				Transcription currTranscription = null;
+				if (isTablatureCase) {
+					// In the model dev case, currEncodingFile always exists as .tbp, and currTablature 
+					// can be created from it
+					if (!deployTrainedUserModel) {
+						currEncodingFile = new File(argEncodingsPath + currPiecename);
+						currTablature = new Tablature(currEncodingFile, true);
+					}
+					// In the real-world case, currEncodingFile may not exist as .tbp, and currTablature must
+					// be created from the raw encoding obtained from converting another format into .tbp 
+					else {
+						String rawEncoding = TabImport.convertToTbp(argEncodingsPath, currPiecename, paths);
+						Encoding e = new Encoding(rawEncoding, currPiecenameNoExt, Stage.RULES_CHECKED);
+						currTablature = new Tablature(e, true);
+					}
+					if (!deployTrainedUserModel) {
+						currMidiFile = new File(argTabMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+					}
+				}
+				else {
+					currMidiFile = new File(argMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+					if (isTabAsNonTab) {
+						currMidiFile = new File(argTabMidiPath + currPiecenameNoExt + MIDIImport.MID_EXT);
+					}
+				}
+				currTranscription = 
+					!deployTrainedUserModel ? new Transcription(true, currMidiFile, currEncodingFile) : null;
 
-			// Get largest chord size and number of voices
-			int currLargestChordSize =
-				isTablatureCase ? currTablature.getLargestTablatureChord() :
-				currTranscription.getLargestTranscriptionChord();
-			int currNumVoices =
-				!deployTrainedUserModel ? currTranscription.getNumberOfVoices() : 
-				currLargestChordSize; // TODO this assumption might not always hold true
-
-			// Add to lists
-			if (isTablatureCase) {
-				allEncodingFiles.add(currEncodingFile);
-				allTablatures.add(currTablature);
-			}
-		 	allMidiFiles.add(currMidiFile);
-			allTranscriptions.add(currTranscription);
-			if (currLargestChordSize > largestChordSize) {
-				largestChordSize = currLargestChordSize;
-			}
-			if (currNumVoices > highestNumVoices) {
-				highestNumVoices = currNumVoices;
+//				if (isTabAsNonTab) {
+//					int currInterval = 0;
+//					if (currentPieceName.equals("ochsenkun-1558-absolon_fili-shorter")) {
+//						currInterval = 7;
+//					}
+//					else if (currentPieceName.equals("rotta-1546-bramo_morir")) {
+//						currInterval = -2;
+//					}
+//					else if (currentPieceName.equals("phalese-1563-las_on")) {
+//						currInterval = -2;
+//					}
+//					currTranscription.transposeNonTab(currInterval);
+//				}
+	
+				// Get largest chord size and number of voices
+				int currLargestChordSize =
+					isTablatureCase ? currTablature.getLargestTablatureChord() :
+					currTranscription.getLargestTranscriptionChord();
+				int currNumVoices =
+					!deployTrainedUserModel ? currTranscription.getNumberOfVoices() : 
+					currLargestChordSize; // TODO this assumption might not always hold true
+	
+				// Add to lists
+				if (isTablatureCase) {
+					allEncodingFiles.add(currEncodingFile);
+					allTablatures.add(currTablature);
+				}
+			 	allMidiFiles.add(currMidiFile);
+				allTranscriptions.add(currTranscription);
+				if (currLargestChordSize > largestChordSize) {
+					largestChordSize = currLargestChordSize;
+				}
+				if (currNumVoices > highestNumVoices) {
+					highestNumVoices = currNumVoices;
+				}
 			}
 		}
 	}
@@ -279,6 +354,10 @@ public class Dataset implements Serializable {
 
 	public List<String> getPiecenames() {
 		return piecenames;
+	}
+
+	public List<String> getSubDatasetIDs() {
+		return subDatasetIDs;
 	}
 
 //	public void addPiecenames(List<String> l) {
@@ -404,51 +483,90 @@ public class Dataset implements Serializable {
 		return beginIndices;
 	}
 
-
-	private static List<String> getThesisInt3vv() {
+	
+	private static List<String> getAdriaenssenInt4vv() { // CHECKED
 		return Arrays.asList(new String[]{
-			"newsidler-1536_7-disant_adiu.tbp",
-			"newsidler-1536_7-mess_pensees.tbp",
-			"pisador-1552_7-pleni_de.tbp",
-			"judenkuenig-1523_2-elslein_liebes.tbp",
-			"newsidler-1544_2-nun_volget.tbp",
-			"phalese-1547_7-tant_que-3vv.tbp"
+			"abran-tant_vous_allez.tbp",
+			"berchem-o_s_io.tbp",
+			"costeley-la_terre_les.tbp",
+			"ferabosco-io_mi_son.tbp",
+			"lasso-appariran_per_me.tbp",
+			"lasso-avecque_vous.tbp",
+			"lasso-madonna_mia_pieta.tbp",
+			"lasso-poi_che_l.tbp",
+			"rore-anchor_che_col.tbp"
 		});
 	}
 
 
-	private static List<String> getThesisInt4vv() { 
+	private static List<String> getByrdInt4vv() { // CHECKED
 		return Arrays.asList(new String[]{
-			"ochsenkun-1558_5-absolon_fili.tbp",
-			"ochsenkun-1558_5-in_exitu.tbp",
-			"ochsenkun-1558_5-qui_habitat.tbp",
-			"rotta-1546_15-bramo_morir.tbp",
-			"phalese-1547_7-tant_que-4vv.tbp",
-			"ochsenkun-1558_5-herr_gott.tbp",
-			"abondante-1548_1-mais_mamignone.tbp",
-			"phalese-1563_12-las_on.tbp",
-			"barbetta-1582_1-il_nest.tbp",
-//			"barbetta-1582_1-il_nest-corrected.tbp"
+			"byrd-ah_golden_hairs.tbp",
+			"byrd-an_aged_dame.tbp",
+			"byrd-as_caesar_wept.tbp",
+			"byrd-blame_i_confess.tbp",
+//			"byrd-delight_is_dead.tbp", // skipped for some reason
+			"byrd-in_angels_weed.tbp",
+//			"byrd-in_tower_most.tbp", // inference piece
+			"byrd-o_lord_bow.tbp",
+			"byrd-o_that_we.tbp",
+			"byrd-quis_me_statim.tbp",
+			"byrd-rejoyce_unto_the.tbp",
+			"byrd-sith_death.tbp",
+			"byrd-the_lord_is.tbp",
+			"byrd-the_man_is.tbp",
+			"byrd-while_phoebus.tbp"
 		});
 	}
 
 
-	private static List<String> getThesisInt5vv() { 
+	private static List<String> getDMbs1512Int3vv() { // CHECKED
 		return Arrays.asList(new String[]{
-			"adriansen-1584_6-d_vn_si.tbp",
-			"ochsenkun-1558_5-inuiolata_integra.tbp"
+			"D-Mbs_Mus.ms._1512_17r.tbp",
+			"D-Mbs_Mus.ms._1512_18r.tbp",
+			"D-Mbs_Mus.ms._1512_20v.tbp",
+			"D-Mbs_Mus.ms._1512_21r.tbp",
+			"D-Mbs_Mus.ms._1512_21v-22r.tbp",
+			"D-Mbs_Mus.ms._1512_22v-23r.tbp",
+			"D-Mbs_Mus.ms._1512_24v-25r.tbp",
+			"D-Mbs_Mus.ms._1512_25v-26r.tbp",
+			"D-Mbs_Mus.ms._1512_26v.tbp",
+//			"D-Mbs_Mus.ms._1512_29r.tbp", // A kept in tab where it has duo w/ S; omitted elsewhere
+//			"D-Mbs_Mus.ms._1512_29v-30r.tbp", // A kept in tab where it has duo w/ S; omitted elsewhere
+			"D-Mbs_Mus.ms._1512_38v-39r.tbp",
+			"D-Mbs_Mus.ms._1512_39v-40r.tbp"
 		});
 	}
 
 
-	private static List<String> getJosquinInt4vv() { 
+	private static List<String> getJosquinInt2vv() { // CHECKED
+		return Arrays.asList(new String[]{
+			"3584_001_pleni_missa_hercules_josquin.tbp",
+			"3585_002_benedictus_de_missa_pange_lingua_josquin.tbp",
+			"3591_008_fecit_potentiam_josquin.tbp",
+			"4965_01b_per_illud_ave_josquin.tbp",
+			"5254_03_benedicta_es_coelorum_desprez-2.tbp",
+			"5702_benedicta-2.tbp"
+		});
+	}
+
+
+	private static List<String> getJosquinInt3vv() { // CHECKED
+		return Arrays.asList(new String[]{
+			"4438_07_la_plus_des_plus.tbp",
+			"5107_11_misa_de_faysan_regres_pleni.tbp",
+		});
+	}
+
+
+	private static List<String> getJosquinInt4vv() { // CHECKED
 		return Arrays.asList(new String[]{
 			"5265_14_absalon_fili_me_desprez.tbp",
 			"5263_12_in_exitu_israel_de_egipto_desprez-1.tbp",
 			"5263_12_in_exitu_israel_de_egipto_desprez-2.tbp",
-//			"5263_12_in_exitu_israel_de_egipto_desprez-3.tbp", // m is too low (ternary section(s))
+			"5263_12_in_exitu_israel_de_egipto_desprez-3.tbp", // NB: rounding problems if not using epsilon in Transcription.checkAlignment()!
 			"4465_33-34_memor_esto-1.tbp",
-//			"4465_33-34_memor_esto-2.tbp", // m is too low (ternary section(s))
+			"4465_33-34_memor_esto-2.tbp", // NB: rounding problems if not using epsilon in Transcription.checkAlignment()!
 			"1274_12_qui_habitat_in_adjutorio-1.tbp",
 			"1274_12_qui_habitat_in_adjutorio-2.tbp",
 			"5264_13_qui_habitat_in_adjutorio_desprez-1.tbp",
@@ -471,69 +589,102 @@ public class Dataset implements Serializable {
 			"1030_coment_peult_avoir_joye.tbp",		
 			"5191_18_mille_regres.tbp",
 			"4482_50_mille_regrets_P.tbp",
-			"4469_39_plus_nulz_regrets_P.tbp", // Chord at bar 57 has 3* MIDI pitch 60 --> remove from Altus
-			"922_milano_098_que_voulez_vous_dire_de_moi.tbp"	
-				
-//			"ochsenkun-1558_5-absolon_fili.tbp",
-//			"ochsenkun-1558_5-in_exitu.tbp",
-//			"ochsenkun-1558_5-qui_habitat.tbp",
-//			"rotta-1546_15-bramo_morir.tbp",
-//			"phalese-1547_7-tant_que-4vv.tbp",
-//			"ochsenkun-1558_5-herr_gott.tbp",
-//			"abondante-1548_1-mais_mamignone.tbp",
-//			"phalese-1563_12-las_on.tbp",
-//			"barbetta-1582_1-il_nest.tbp",
-// 			//	
-//			"5265_14_absalon_fili_me_desprez-cropped.tbp",
-//			"5263_12_in_exitu_israel_de_egipto_desprez-1-cropped.tbp",
-//			"5263_12_in_exitu_israel_de_egipto_desprez-2-cropped.tbp",
-////			"5263_12_in_exitu_israel_de_egipto_desprez-3.tbp", // m is too low (ternary section(s))
-//			"4465_33-34_memor_esto-1-cropped.tbp",
-////			"4465_33-34_memor_esto-2.tbp", // m is too low (ternary section(s))
-//			"1274_12_qui_habitat_in_adjutorio-1-cropped.tbp",
-//			"1274_12_qui_habitat_in_adjutorio-2-cropped.tbp",
-//			"5264_13_qui_habitat_in_adjutorio_desprez-1-cropped.tbp",
-//			"5264_13_qui_habitat_in_adjutorio_desprez-2-cropped.tbp",
-//			//
-//			"4471_40_cum_sancto_spiritu-cropped.tbp",
-//			"5266_15_cum_sancto_spiritu_desprez-cropped.tbp",
-//			"5106_10_misa_de_faysan_regres_2_gloria-cropped.tbp",
-//			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-1-cropped.tbp",
-//			"5189_16_sanctus_and_hosanna_from_missa_faisant_regrets-2-cropped.tbp",		
-//			"5188_15_sanctus_and_hosanna_from_missa_hercules-1-cropped.tbp",
-//			"5188_15_sanctus_and_hosanna_from_missa_hercules-2-cropped.tbp",
-//			"5190_17_cum_spiritu_sanctu_from_missa_sine_nomine-cropped.tbp",
-//			//
-//			"4400_45_ach_unfall_was-cropped.tbp",
-//			"4481_49_ach_unfal_wes_zeigst_du_mich-cropped.tbp",
-//			"4406_51_adieu_mes_amours-cropped.tbp",
-////			"4467_37_adieu_mes_amours.tbp", // m is too low
-//			"1025_adieu_mes_amours-cropped.tbp",
-//			"1030_coment_peult_avoir_joye-cropped.tbp",		
-//			"5191_18_mille_regres-cropped.tbp",
-//			"4482_50_mille_regrets_P-cropped.tbp",
-//			"4469_39_plus_nulz_regrets_P-cropped.tbp", // Chord at bar 57 contains three C4 (MIDIpitch 60): removed from Altus
-//			"922_milano_098_que_voulez_vous_dire_de_moi-cropped.tbp"
+//			"4469_39_plus_nulz_regrets_P.tbp", // EXCLUDED: chord at bar 57 has 3* MIDI pitch 60 --> remove from Altus
+//			"922_milano_098_que_voulez_vous_dire_de_moi.tbp" // EXCLUDED: m_a < 0.80
 		});
 	}
 
 
-	private static List<String> getByrdInt4vv() { 
+	private static List<String> getJosquinInt5vv() { // CHECKED
 		return Arrays.asList(new String[]{
-			"ah_golden_hairs-NEW.tbp",
-			"an_aged_dame-II.tbp",
-			"as_caesar_wept-II.tbp",
-			"blame_i_confess-II.tbp",
-			"in_angels_weed-II.tbp",
-			"o_lord_bow_down-II.tbp",
-			"o_that_we_woeful_wretches-NEW.tbp",
-			"quis_me_statim-II.tbp",
-			"rejoyce_unto_the_lord-NEW.tbp",
-			"sith_death-NEW.tbp",
-			"the_lord_is_only_my_support-NEW.tbp",
-			"the_man_is_blest-NEW.tbp",
-			"while_phoebus-II.tbp"
+			"933_milano_109_stabat_mater_dolorosa_josquin.tbp",
+			"1275_13_faulte_d_argent.tbp",
+			"3638_061_lauda_sion_gombert_T.tbp",
+			"3643_066_credo_de_beata_virgine_jospuin_T-1.tbp",
+			"3643_066_credo_de_beata_virgine_jospuin_T-2.tbp",
+			"5148_51_respice_in_me_deus._F#_lute_T.tbp",
+			"5255_04_stabat_mater_dolorosa_desprez-1.tbp",
+			"5255_04_stabat_mater_dolorosa_desprez-2.tbp",
+			"5256_05_inviolata_integra_desprez-1.tbp",
+			"5256_05_inviolata_integra_desprez-2.tbp",
+			"5256_05_inviolata_integra_desprez-3.tbp",
+			"5260_09_date_siceram_morentibus_sermisy.tbp"
 		});
+	}
+
+
+	private static List<String> getJosquinInt6vv() { // CHECKED
+		return Arrays.asList(new String[]{
+			"932_milano_108_pater_noster_josquin-1.tbp",
+			"932_milano_108_pater_noster_josquin-2.tbp",
+			"3647_070_benedicta_est_coelorum_josquin_T.tbp",
+			"3649_072_praeter_rerum_seriem_josquin_T.tbp",
+			"4964_01a_benedictum_es_coelorum_josquin.tbp",
+			"4966_01c_nunc_mater_josquin.tbp",
+			"5252_01_pater_noster_desprez-1.tbp",
+			"5252_01_pater_noster_desprez-2.tbp",
+			"5253_02_praeter_rerum_seriem_desprez-1.tbp",
+			"5253_02_praeter_rerum_seriem_desprez-2.tbp",
+			"5254_03_benedicta_es_coelorum_desprez-1.tbp",
+			"5254_03_benedicta_es_coelorum_desprez-3.tbp",
+			"5694_03_motet_praeter_rerum_seriem_josquin-1.tbp",
+			"5694_03_motet_praeter_rerum_seriem_josquin-2.tbp",
+			"5702_benedicta-1.tbp",
+			"5702_benedicta-3.tbp"
+		});
+	}
+
+
+	private static List<String> getThesisInt3vv() { // CHECKED
+		return Arrays.asList(new String[]{
+			"newsidler-1536_7-disant_adiu.tbp",
+			"newsidler-1536_7-mess_pensees.tbp",
+			"pisador-1552_7-pleni_de.tbp",
+			"judenkuenig-1523_2-elslein_liebes.tbp",
+			"newsidler-1544_2-nun_volget.tbp",
+			"phalese-1547_7-tant_que-3vv.tbp"
+		});
+	}
+
+
+	private static List<String> getThesisInt4vv() { // CHECKED
+		return Arrays.asList(new String[]{
+			"ochsenkun-1558_5-absolon_fili.tbp",
+			"ochsenkun-1558_5-in_exitu.tbp",
+			"ochsenkun-1558_5-qui_habitat.tbp",
+			"rotta-1546_15-bramo_morir.tbp",
+			"phalese-1547_7-tant_que-4vv.tbp",
+			"ochsenkun-1558_5-herr_gott.tbp",
+			"abondante-1548_1-mais_mamignone.tbp",
+			"phalese-1563_12-las_on.tbp",
+			"barbetta-1582_1-il_nest.tbp",
+//			"barbetta-1582_1-il_nest-corrected.tbp" // incorrect version used for thesis
+		});
+	}
+
+
+	private static List<String> getThesisInt5vv() { // CHECKED
+		return Arrays.asList(new String[]{
+			"adriansen-1584_6-d_vn_si.tbp",
+			"ochsenkun-1558_5-inuiolata_integra.tbp"
+		});
+	}
+
+
+	private static List<String> getAllInt3vv() {
+		List<String> comb = new ArrayList<String>(getThesisInt3vv());
+		comb.addAll(getJosquinInt3vv());
+		comb.addAll(getDMbs1512Int3vv());
+		return comb;
+	}
+
+
+	private static List<String> getAllInt4vv() {
+		List<String> comb = new ArrayList<String>(getThesisInt4vv());
+		comb.addAll(getJosquinInt4vv());
+		comb.addAll(getByrdInt4vv());
+		comb.addAll(getAdriaenssenInt4vv());
+		return comb;
 	}
 
 
@@ -852,11 +1003,15 @@ public class Dataset implements Serializable {
 		TAB_USER("tab-user", 24, true, false, null),
 		USER("user", 25, false, false, null),
 		
-		JOSQUIN_INT_4VV("josquin-int-4vv", 26, true, false, getJosquinInt4vv()),
+		JOSQUIN_INT_3VV("josquin-int-3vv", 26, true, false, getJosquinInt3vv()),
+		JOSQUIN_INT_4VV("josquin-int-4vv", 27, true, false, getJosquinInt4vv()),
 		
-		BYRD_INT_4VV("byrd-int-4vv", 27, true, false, getByrdInt4vv()),
-		BYRD_INT_ANT_4VV("byrd-int_ANT-4vv", 28, false, true, getByrdInt4vv());
+		BYRD_INT_4VV("byrd-int-4vv", 28, true, false, getByrdInt4vv()),
+		BYRD_INT_ANT_4VV("byrd-int_ANT-4vv", 29, false, true, getByrdInt4vv()),
 		
+		ALL_INT_3VV("all-int-3vv", 30, true, false, getAllInt3vv()),
+		ALL_INT_4VV("all-int-4vv", 31, true, false, getAllInt4vv());
+
 		private int intRep;
 		private String stringRep;
 		private boolean isTablatureSet;

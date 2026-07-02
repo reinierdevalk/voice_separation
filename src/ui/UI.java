@@ -8,12 +8,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import conversion.imports.TabImport;
 import data.Dataset;
+import external.Tablature;
 import external.Transcription;
 import featureExtraction.MelodyFeatureGenerator;
 import featureExtraction.MelodyFeatureGenerator.MelodyModelFeature;
 import interfaces.CLInterface;
 import interfaces.PythonInterface;
+import internal.core.Encoding;
+import internal.core.Encoding.Stage;
 import machineLearning.EvaluationManager;
 import machineLearning.EvaluationManager.Metric;
 import machineLearning.MelodyPredictor;
@@ -77,29 +81,37 @@ public class UI {
 			
 			// Choose mode and set variables; comment out the other mode
 			// a. MODEL-DEV case
-//			mode = Mode.MODEL_DEV;
-//			repeat = true;
-//			gridSearch = false;
-//			skipTraining = false;
-////			modelDevDir = "thesis/exp_3.3.1/thesis-int/3vv/B/fwd/";
-////			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
+			mode = Mode.MODEL_DEV;
+			repeat = true;
+			gridSearch = false;
+			skipTraining = false;
+//			modelDevDir = "thesis/exp_3.3.1/thesis-int/3vv/B/fwd/";
+//			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
 //			modelDevDir = "ISMIR-2018/bach-inv/2vv/D/fwd/";
-////			hyperparamsDir = "";
+//			modelDevDir = "thesis/exp_1/thesis-int/3vv/N/fwd/";
+			modelDevDir = "thesis/exp_4/bach-inv/2vv/N/fwd/";
+//			modelDevDir = "thesis/exp_3.1/thesis-int/4vv/N/bwd/";
+			hyperparamsDir = "";
 //			hyperparamsDir = "HL=2/HLS=66/KP=0.875-no_heur/";
-////			hyperparamsDir = "cnf=" + config.getStringRep();
-////			hyperparamsDir = "HLF=1.0/lmb=0.001/";
-////			hyperparamsDir = "eps=0.05/";
-////			hyperparamsDir = "LR=0.003/HL=1/HLS=66/KP=0.875/";
-////			hyperparamsDir = "final/";
-//			verbose = true;
+//			hyperparamsDir = "cnf=" + config.getStringRep();
+//			hyperparamsDir = "HLF=1.0/lmb=0.001/";
+//			hyperparamsDir = "eps=0.05/";
+//			hyperparamsDir = "LR=0.003/HL=1/HLS=66/KP=0.875/";
+//			hyperparamsDir = "final/";
+			verbose = true;
 
 			// b. USER_MODEL_TRAINING case
 			// NB First place params.json file, containing the params of the best trained 
 			// model, in <ROOT_PATH>/<MODELS_PATH>/<userModelDir>/!
-			mode = Mode.USER_MODEL_TRAINING;
-			userModelDir = "D-bwd-thesis-int-4vv/";
-//			userModelDir = "N-bwd-thesis-int-4vv/";
-			verbose = true;
+//			mode = Mode.USER_MODEL_TRAINING;
+////			userModelDir = "D-bwd-thesis-int-4vv/";
+////			userModelDir = "N-bwd-thesis-int-4vv/";
+////			userModelDir = "N-fwd-thesis-int-3vv/";
+////			userModelDir = "N-fwd-all-int-3vv/";
+////			userModelDir = "N-bwd-all-int-3vv/";
+////			userModelDir = "N-fwd-all-int-4vv/";
+//			userModelDir = "N-bwd-all-int-4vv/";
+//			verbose = true;
 			
 			////////////////////////////////////////////////////////////
 
@@ -123,6 +135,12 @@ public class UI {
 			datasets = getDatasets(paramsFromJson, paths);
 			modelParams = getModelParameters(paramsFromJson, runnerPaths);
 			metricsUsed = getMetrics(paramsFromJson);
+			
+//			for (Dataset d : datasets) {
+//				System.out.println(d.getDatasetID());
+//				System.out.println(d.getName());
+//			}
+//			System.exit(0);
 
 			// In case of grid search: set hyperparameter space (if no hyperparameter space is 
 			// specified, the full space is assumed). Values in modelParams are overwritten
@@ -263,21 +281,44 @@ public class UI {
 			// Parse CLI args and set variables
 			List<Object> parsed = CLInterface.parseCLIArgs(
 				args, StringTools.getPathString(
-					Arrays.asList(paths.get("POLYPHONIST_PATH"), "in")
+					Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR"))
 				)
 			);
 			cliOptsVals = (Map<String, String>) parsed.get(0);
 			List<String> pieces = (List<String>) parsed.get(1);
 
-			verbose = cliOptsVals.get(CLInterface.VERBOSE).equals("y") ? true : false;
-
 //			ToolBox.printMap(cliOptsVals);
 //			pieces.forEach(s -> System.out.println(s));
-//			System.exit(0);
+
+			verbose = cliOptsVals.get(CLInterface.VERBOSE).equals("y") ? true : false;
+			int numVoices;
+			if (!cliOptsVals.get(CLInterface.VOICES).equals(CLInterface.INPUT)) {
+				numVoices = Integer.parseInt(cliOptsVals.get(CLInterface.VOICES));
+			}
+			else {
+				numVoices = 0;
+				for (String p : pieces) {
+					// Tablature case
+					if (CLInterface.ALLOWED_FILE_FORMATS.contains(ToolBox.splitExt(pieces.get(0))[1])) {
+						String tbp = TabImport.convertToTbp(
+							StringTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR"))),		
+							p, paths
+						);
+						int currNumVoices = new Tablature(new Encoding(tbp, "", Stage.RULES_CHECKED), false).estimateNumberOfVoices();
+						if (currNumVoices > numVoices) {
+							numVoices = currNumVoices;
+						}
+					}
+					// Non-tablature case
+					else {
+						// TODO get from MIDI file
+					}
+				}
+			}
 
 			// Get paths, datasets, modelParams, and metrics
 			String jsonPath = StringTools.getPathString(
-				Arrays.asList(paths.get("MODELS_PATH"), cliOptsVals.get(CLInterface.MODEL))		 
+				Arrays.asList(paths.get("MODELS_PATH"), cliOptsVals.get(CLInterface.MODEL) + "-" + numVoices + "vv")
 			);
 			Map<String, Map<String, String>> paramsFromJson = StringTools.readJSONFile(
 				jsonPath + paths.get("MODEL_PARAMETERS")
@@ -296,14 +337,16 @@ public class UI {
 		MelodyPredictor.setTermType(m.getKylmModelType());
 		EvaluationManager.setMetricsUsed(metricsUsed);
 		
-//		System.out.println("dataset                 = " + datasets[0].getPiecenames());
-//		System.out.println("datasetTrain            = " + (datasets[1] == null ? datasets[1] : datasets[1].getName()));
-		System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
-		System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
-		System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
-		System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
-		System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
-//		System.exit(0);
+		if (dev) {
+//			System.out.println("dataset                 = " + datasets[0].getPiecenames());
+//			System.out.println("datasetTrain            = " + (datasets[1] == null ? datasets[1] : datasets[1].getName()));
+			System.out.println("STORE_PATH              = " + runnerPaths.get(STORE_PATH));
+			System.out.println("FIRST_PASS_PATH         = " + runnerPaths.get(FIRST_PASS_PATH));
+			System.out.println("TRAINED_USER_MODEL_PATH = " + runnerPaths.get(TRAINED_USER_MODEL_PATH));
+			System.out.println("STORED_NN_PATH          = " + runnerPaths.get(STORED_NN_PATH));
+			System.out.println("STORED_MM_PATH          = " + runnerPaths.get(STORED_MM_PATH));
+//			System.exit(0);
+		}
 		
 		Runner.runExperiment(
 			mode == Mode.USER_MODEL_TRAINING, 
@@ -315,7 +358,8 @@ public class UI {
 			cliOptsVals,
 			modelParams,
 			datasets,
-			Transcription.MAX_NUM_VOICES
+			Transcription.MAX_NUM_VOICES,
+			dev
 		);
 	}
 
@@ -394,7 +438,7 @@ public class UI {
 		}
 		else {
 			String polyPath = StringTools.getPathString(Arrays.asList(
-				paths.get("POLYPHONIST_PATH"), Runner.OUTPUT_DIR
+				paths.get("POLYPHONIST_PATH"), paths.get("OUT_DIR")
 			));
 //			String modelsPath = paths.get("MODELS_PATH");
 			String modelID = getModelID(paramsFromJson);
@@ -693,7 +737,7 @@ public class UI {
 //			ds.setNumVoices(dsTrain.getNumVoices());
 //			if (filename.equals("")) {
 //				ds.addPieceNames(ToolBox.getFileNamesWithExtension(new File(
-//					PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"))),
+//					PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR")))),
 //					ds.isTablatureSet() ? Encoding.EXTENSION : MIDIImport.EXTENSION)
 //				);
 //			}
@@ -760,7 +804,7 @@ public class UI {
 //		// b. If deploying a trained model
 //		else {
 //			String pp = PathTools.getPathString(
-//				Arrays.asList(paths.get("POLYPHONIST_PATH"), "out")
+//				Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("OUT_DIR"))
 //			);
 //			// storePath
 //			storePath = ToolBox.pathify(new String[]{pp, modelID}); // current model; ex. bidir case: .../transcriber/out/D_B-fwd-byrd-int-4vv/

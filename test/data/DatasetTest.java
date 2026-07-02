@@ -49,7 +49,7 @@ public class DatasetTest {
 	public void testGetNumDataExamples() {
 		List<Integer> expected = Arrays.asList(new Integer[]{3*39, 3*16, 3*40, 3*16});
 
-		String p = encodingTestpiece.getName().substring(0, encodingTestpiece.getName().lastIndexOf("."));
+		String p = encodingTestpiece.getName();//.substring(0, encodingTestpiece.getName().lastIndexOf("."));
 		Dataset.setUserPiecenames(Dataset.TEST, Arrays.asList(p, p, p));
 		Dataset ds = new Dataset(Dataset.TEST + "-5vv", true);
 		ds.populateDataset(paths, false);
@@ -81,7 +81,7 @@ public class DatasetTest {
 		// C2C non-tab
 		expected.add(Arrays.asList(16, 16, 16));
 
-		String p = encodingTestpiece.getName().substring(0, encodingTestpiece.getName().lastIndexOf("."));
+		String p = encodingTestpiece.getName();//.substring(0, encodingTestpiece.getName().lastIndexOf("."));
 		Dataset.setUserPiecenames(Dataset.TEST, Arrays.asList(p, p, p));
 		Dataset ds = new Dataset(Dataset.TEST + "-5vv", true);
 		ds.populateDataset(paths, false);

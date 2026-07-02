@@ -515,7 +515,7 @@ public class TestManager {
 					predictedTranscription =	
 						ToolBox.getStoredObjectBinary(new Transcription(), 
 						new File((new File(pathPredTransFirstPass)).getParent() + "/" + 
-						Runner.OUTPUT_DIR + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
+						paths.get("OUT_DIR") + "fold_" + ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + 
 						"-" + storeName + ".ser"));
 //						"-" + testPieceNameNoExt + ".ser"));
 				}
@@ -820,11 +820,11 @@ public class TestManager {
 
 				String dir;
 				if (useCV) {
-					dir = new File(storePath).getParent() + "/" + Runner.OUTPUT_DIR + "fold_" +	
+					dir = new File(storePath).getParent() + "/" + paths.get("OUT_DIR") + "fold_" +	
 						ToolBox.zerofy(fold, ToolBox.maxLen(fold)) + "-"; 
 				}
 				else {
-					dir = !deployTrainedUserModel ? storePath + Runner.OUTPUT_DIR : storePath;
+					dir = !deployTrainedUserModel ? storePath + paths.get("OUT_DIR") : storePath;
 				}
 				if (!deployTrainedUserModel) {
 					ToolBox.storeObjectBinary(predictedTranscr, new File(dir + storeName + ".ser"));

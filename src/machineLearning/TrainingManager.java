@@ -255,7 +255,7 @@ public class TrainingManager {
 						String foldStr = 
 							"fold_" + ToolBox.zerofy(testPieceIndex, ToolBox.maxLen(testPieceIndex));
 						predTranscr = ToolBox.getStoredObjectBinary(
-							new Transcription(), new File(pathPredTransFirstPass + Runner.OUTPUT_DIR + 
+							new Transcription(), new File(pathPredTransFirstPass + paths.get("OUT_DIR") + 
 							foldStr + "-" + currPieceNameNoExt + ".ser")
 						);
 					}

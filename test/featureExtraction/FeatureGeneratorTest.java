@@ -62,13 +62,14 @@ public class FeatureGeneratorTest {
 		quarter = LabelTools.createDurationLabel(new Integer[]{8*3}, mtsd);
 
 		Map<String, String> paths = CLInterface.getPaths(true);
+		String ep = paths.get("ENCODINGS_PATH").replace("{dataset}", "test");
+		String mp = paths.get("MIDI_PATH").replace("{dataset}", "test");
+		String vv = "5vv";
 		midiTestpiece1 = new File(
-			StringTools.getPathString(Arrays.asList(paths.get("MIDI_PATH"), 
-			"test/5vv/")) + "testpiece.mid"
+			StringTools.getPathString(Arrays.asList(mp, vv)) + "testpiece.mid"
 		);
 		encodingTestpiece1 = new File(
-			StringTools.getPathString(Arrays.asList(paths.get("ENCODINGS_PATH"), 
-			"test/5vv/")) + "testpiece.tbp"
+			StringTools.getPathString(Arrays.asList(ep, vv)) + "testpiece.tbp"
 		);
 	}
 

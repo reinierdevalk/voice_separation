@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import data.Dataset;
-import external.Tablature;
-import external.Transcription;
 import featureExtraction.FeatureGenerator;
 import machineLearning.EvaluationManager;
 import machineLearning.MelodyPredictor;
@@ -48,7 +46,7 @@ public class Runner {
 //	public static String experimentsPath;
 //	public static String storedDatasetsPath;
 	//
-	public static final String OUTPUT_DIR = "out/";
+	
 	//
 	//public static String scriptScikit = "model_scikit.py";
 	//public static String scriptTensorFlow = "model_tensorflow.py";
@@ -907,14 +905,14 @@ public class Runner {
 //			pythonScriptPath = ToolBox.pathify(new String[]{codePath, "voice_separation/py/"});
 //			String userPath = PathTools.getPathString(Arrays.asList(argRootPath, "user"));
 //			String userPath = ToolBox.pathify(new String[]{argRootPath, "user/"});
-//			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
-//			encodingsPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
-//			encodingsPath = ToolBox.pathify(new String[]{userPath, "in/"});
-//			midiPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "in"));
-//			midiPath = PathTools.getPathString(Arrays.asList(userPath, "in"));
-//			midiPath = ToolBox.pathify(new String[]{userPath, "in/"});
-//			outPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), "out"));
-//			outPath = ToolBox.pathify(new String[]{userPath, "out/"});
+//			encodingsPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR")));
+//			encodingsPath = PathTools.getPathString(Arrays.asList(userPath, paths.get("IN_DIR")));
+//			encodingsPath = ToolBox.pathify(new String[]{userPath, paths.get("IN_DIR")});
+//			midiPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("IN_DIR")));
+//			midiPath = PathTools.getPathString(Arrays.asList(userPath, paths.get("IN_DIR")));
+//			midiPath = ToolBox.pathify(new String[]{userPath, paths.get("IN_DIR")});
+//			outPath = PathTools.getPathString(Arrays.asList(paths.get("POLYPHONIST_PATH"), paths.get("OUT_DIR")));
+//			outPath = ToolBox.pathify(new String[]{userPath, paths.get("OUT_DIR")});
 //			modelsPath = PathTools.getPathString(Arrays.asList(argRootPath, "models"));
 //			modelsPath = ToolBox.pathify(new String[]{argRootPath, "models/"});
 //			//
@@ -965,7 +963,7 @@ public class Runner {
 	public static void runExperiment(boolean trainUserModel, boolean skipTraining, 
 		boolean deployTrainedUserModel, boolean verbose, Map<String, String> paths, 
 		Map<String, String> runnerPaths, Map<String, String> cliOptsVals, 
-		Map<String, Double> modelParams, Dataset[] datasets, int maxNumVoices) {
+		Map<String, Double> modelParams, Dataset[] datasets, int maxNumVoices, boolean dev) {
 
 		String startPreProc = ToolBox.getTimeStampPrecise();
 
@@ -1305,12 +1303,17 @@ public class Runner {
 			}
 			// Store info
 			else {
-				String s =
-					"model      = " + ALL_MODELS[argModelParams.get(MODEL).intValue()] + "\r\n" +
-					"proc_mode  = " + ALL_PROC_MODES[argModelParams.get(PROC_MODE).intValue()] + "\r\n" +
-					"train_data = " + getDatasetTrain().getDatasetID();
-				System.out.println(s);
-				System.out.println("\n" + ds.getNumPieces() + " files processed successfully.");
+				if (dev) {
+					String s =
+						"model      = " + ALL_MODELS[argModelParams.get(MODEL).intValue()] + "\r\n" +
+						"proc_mode  = " + ALL_PROC_MODES[argModelParams.get(PROC_MODE).intValue()] + "\r\n" +
+						"train_data = " + getDatasetTrain().getDatasetID();
+					System.out.println(s);
+				}
+				int numPieces = ds.getNumPieces();
+				System.out.println(
+					"\n" + numPieces + (numPieces == 1 ? " file " : " files ") + "processed successfully."
+				);
 //				ToolBox.storeTextFile(s, new File(path + info + ".txt"));
 			}
 		}
